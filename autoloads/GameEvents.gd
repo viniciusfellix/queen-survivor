@@ -10,10 +10,20 @@ signal player_damaged(raw_damage: int, final_damage: int, current_hp: int, max_h
 signal player_died(source_id: String)
 
 signal enemy_damaged(enemy_id: String, raw_damage: int, final_damage: int, current_hp: int, max_hp: int, source_id: String)
-signal enemy_died(enemy_id: String, source_id: String, xp_reward: int, global_position: Vector2)
+signal enemy_died(
+	enemy_id: String,
+	source_id: String,
+	xp_reward: int,
+	global_position: Vector2,
+	coin_drop_chance: float,
+	coin_drop_value: int
+)
 
 signal run_xp_changed(run_xp_gained: int, current_level: int, current_level_xp: int, xp_required_for_next_level: int)
 signal run_enemy_killed(enemy_id: String, enemies_killed: int)
+
+signal run_coin_collected(value: int, global_position: Vector2)
+signal run_coins_changed(run_coins_collected: int, run_coins_available: int)
 
 signal run_level_up_started(current_level: int, options: Array)
 signal run_level_up_option_selected(upgrade: UpgradeDefinition)

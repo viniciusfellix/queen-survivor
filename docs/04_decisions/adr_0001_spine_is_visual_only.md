@@ -6,34 +6,24 @@ Aceita.
 
 ## Contexto
 
-O projeto Queen Survivors usa Godot com integração Spine. A primeira personagem jogável é Gaia.
-
-O Spine é responsável por exibir animações e estados visuais, mas não deve controlar as regras de gameplay.
+O projeto usa Godot com integração Spine para Gaia, goblin e futuros ataques.
 
 ## Decisão
 
-A lógica de gameplay não acessa o SpineSprite diretamente.
+A lógica de gameplay não acessa `SpineSprite` diretamente.
 
-O fluxo correto é:
+Fluxo correto:
 
-InputManager
-→ PlayerController
-→ PlayerRuntimeState
-→ GaiaVisualController
-→ GaiaSpineAdapter
+```txt
+Gameplay
+→ VisualController
+→ SpineAdapter
 → SpineSprite
+```
 
 ## Consequências
 
-- O gameplay pode evoluir sem depender da API do Spine.
-- Mudanças futuras no plugin Spine devem afetar apenas os adapters visuais.
-- A animação representa o estado do jogo, mas não decide o estado do jogo.
-- Ataque, dano, morte, movimento e cooldown serão controlados por sistemas de gameplay, não por eventos obrigatórios de animação.
-
-## Aplicação no Módulo 1
-
-A cena PlayerGaia instancia GaiaVisual.
-
-GaiaVisual contém o SpineSprite e o GaiaSpineAdapter.
-
-PlayerController nunca chama SpineSprite diretamente.
+- Trocas no plugin Spine afetam apenas adapters.
+- A animação não decide dano.
+- A animação não decide morte.
+- A animação não decide cooldown.

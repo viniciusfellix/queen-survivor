@@ -45,13 +45,13 @@ func _process(_delta: float) -> void:
 			data = debug_data_variant
 
 		lines.append("--------------------")
-		lines.append("Queen: %s" % str(data.get("queen_id", "-")))
+		#lines.append("Queen: %s" % str(data.get("queen_id", "-")))
 		lines.append("HP: %s / %s" % [str(data.get("current_hp", "-")), str(data.get("max_hp", "-"))])
 		lines.append("Defense: %s%%" % str(data.get("defense_percent", "-")))
-		lines.append("Last Damage: %s" % str(data.get("last_damage_taken", 0)))
-		lines.append("Total Damage: %s" % str(data.get("total_damage_taken", 0)))
-		lines.append("Last Source: %s" % str(data.get("last_damage_source_id", "")))
-		lines.append("Death Cause: %s" % str(data.get("death_cause", "")))
+		#lines.append("Last Damage: %s" % str(data.get("last_damage_taken", 0)))
+		#lines.append("Total Damage: %s" % str(data.get("total_damage_taken", 0)))
+		#lines.append("Last Source: %s" % str(data.get("last_damage_source_id", "")))
+		#lines.append("Death Cause: %s" % str(data.get("death_cause", "")))
 		lines.append("State: %s" % str(data.get("current_gameplay_state", "-")))
 		lines.append("Visual State: %s" % str(data.get("current_visual_state", "-")))
 		lines.append("Moving: %s" % str(data.get("is_moving", false)))
@@ -79,6 +79,9 @@ func _process(_delta: float) -> void:
 			lines.append("Paused: %s" % str(run_data.get("is_paused", false)))
 			lines.append("LevelUp Active: %s" % str(run_data.get("is_level_up_active", false)))
 			lines.append("Pending LevelUps: %s" % str(run_data.get("pending_level_ups", 0)))
+			
+			lines.append("Run Coins: %s" % str(run_data.get("run_coins_collected", 0)))
+			lines.append("Coins Available: %s" % str(run_data.get("run_coins_available", 0)))
 	else:
 		lines.append("--------------------")
 		lines.append("Player: não encontrado")

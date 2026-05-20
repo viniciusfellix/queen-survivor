@@ -6,6 +6,8 @@
 [ext_resource type="Script" uid="uid://c3rxl1s078a" path="res://gameplay/camera/FollowCamera.gd" id="3_38slv"]
 [ext_resource type="PackedScene" uid="uid://dm5ecyvme3lym" path="res://gameplay/spawners/EnemySpawner.tscn" id="3_yn17g"]
 [ext_resource type="Script" uid="uid://dsma0hsw0e3n7" path="res://gameplay/run/RunController.gd" id="4_myjtf"]
+[ext_resource type="Script" uid="uid://nweupggxpuwl" path="res://gameplay/drops/DropController.gd" id="5_kj34v"]
+[ext_resource type="Resource" uid="uid://bcfegd6d7xccr" path="res://data/drops/coin_default.tres" id="6_eomju"]
 [ext_resource type="PackedScene" uid="uid://cct45mramyoo7" path="res://ui/level_up/LevelUpPanel.tscn" id="7_sioag"]
 
 [node name="TestGaiaScene" type="Node2D" unique_id=138255397]
@@ -31,6 +33,12 @@ enemy_root_path = NodePath("../../EnemyRoot")
 
 [node name="RunController" type="Node" parent="RuntimeRoot" unique_id=837018724]
 script = ExtResource("4_myjtf")
+
+[node name="DropController" type="Node" parent="RuntimeRoot" unique_id=1761609163]
+script = ExtResource("5_kj34v")
+coin_drop_scene_path = "uid://imubpqpdu5kc"
+coin_definition = ExtResource("6_eomju")
+drop_root_path = NodePath("../DropRoot")
 
 [node name="PlayerSpawnPoint" type="Marker2D" parent="." unique_id=1627265119]
 

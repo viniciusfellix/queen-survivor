@@ -23,6 +23,8 @@ var contact_damage_radius: float = 32.0
 var contact_damage_interval_seconds: float = 1.0
 var contact_damage_type: String = "physical"
 var xp_reward: int = 1
+var coin_drop_chance: float = 0.25
+var coin_drop_value: int = 1
 
 var contact_damage_timer: float = 0.0
 
@@ -186,21 +188,30 @@ func die(source_id: String = "") -> void:
 	is_dying = true
 	velocity = Vector2.ZERO
 
-	GameEvents.enemy_died.emit(enemy_id, source_id, xp_reward, global_position)
-	GameEvents.emit_debug("[EnemyBase] Inimigo morreu: enemy=%s fonte=%s xp=%s" % [
+	GameEvents.enemy_died.emit(
 		enemy_id,
 		source_id,
-		str(xp_reward)
+		xp_reward,
+		global_position,
+		coin_drop_chance,
+		coin_drop_value
+	)
+
+	GameEvents.emit_debug("[EnemyBase] Inimigo morreu: enemy=%s fonte=%s xp=%s coin_chance=%s coin_value=%s" % [
+		enemy_id,
+		source_id,
+		str(xp_reward),
+		str(coin_drop_chance),
+		str(coin_drop_value)
 	])
 
 	_update_visual_state()
 
-	# Remove do grupo enemy para o spawner poder contar corretamente os vivos.
 	remove_from_group("enemy")
 
 	var death_timer: SceneTreeTimer = get_tree().create_timer(remove_after_death_seconds)
 	death_timer.timeout.connect(_on_death_timer_timeout)
-
+	
 func _on_death_timer_timeout() -> void:
 	queue_free()
 
@@ -210,6 +221,9 @@ func _apply_definition() -> void:
 		max_hp = 10
 		current_hp = max_hp
 		move_speed = 90.0
+		
+		coin_drop_chance = 0.25
+		coin_drop_value = 1
 
 		contact_damage = 5
 		contact_damage_radius = 32.0
@@ -232,6 +246,8 @@ func _apply_definition() -> void:
 	contact_damage_type = enemy_definition.contact_damage_type
 	
 	xp_reward = enemy_definition.xp_reward
+	coin_drop_chance = enemy_definition.coin_drop_chance
+	coin_drop_value = enemy_definition.coin_drop_value
 		
 	debug_color = enemy_definition.debug_color
 	debug_radius = enemy_definition.debug_radius

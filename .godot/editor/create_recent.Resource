@@ -1,3 +1,4 @@
+CoinDropDefinition
 UpgradeDefinition
 DamageComponentDefinition
 Resource

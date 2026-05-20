@@ -15,7 +15,11 @@ var current_level: int = 1
 var current_level_xp: int = 0
 var xp_required_for_next_level: int = 10
 
+# Moeda da run.
+# Moeda precisa ser coletada fisicamente.
 var run_coins_collected: int = 0
+
+# Previsto para mercador futuro.
 var run_coins_spent: int = 0
 
 var enemies_killed: int = 0
@@ -31,6 +35,12 @@ func add_xp(amount: int) -> int:
 	var levels_gained: int = _process_level_progression()
 
 	return levels_gained
+
+func add_coins(amount: int) -> void:
+	if amount <= 0:
+		return
+
+	run_coins_collected += amount
 
 func add_enemy_kill() -> void:
 	enemies_killed += 1
@@ -57,8 +67,6 @@ func _process_level_progression() -> int:
 	return levels_gained
 
 func _get_xp_required_for_level(level: int) -> int:
-	# Fórmula provisória para protótipo.
-	# Depois pode virar curva data-driven.
 	return 10 + ((level - 1) * 5)
 
 func reset() -> void:
@@ -75,5 +83,6 @@ func reset() -> void:
 
 	run_coins_collected = 0
 	run_coins_spent = 0
+
 	enemies_killed = 0
 	level_reached = 1

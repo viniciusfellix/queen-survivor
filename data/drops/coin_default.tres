@@ -1,0 +1,7 @@
+[gd_resource type="Resource" script_class="CoinDropDefinition" format=3 uid="uid://bcfegd6d7xccr"]
+
+[ext_resource type="Script" uid="uid://c3wkco720q04g" path="res://definitions/CoinDropDefinition.gd" id="1_8lq7i"]
+
+[resource]
+script = ExtResource("1_8lq7i")
+metadata/_custom_type_script = "uid://c3wkco720q04g"

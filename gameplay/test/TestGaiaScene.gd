@@ -10,6 +10,7 @@ extends Node2D
 @onready var drop_root: Node2D = $RuntimeRoot/DropRoot
 @onready var spawner_root: Node2D = $RuntimeRoot/SpawnerRoot
 @onready var run_controller: Node = $RuntimeRoot/RunController
+@onready var drop_controller: Node = $RuntimeRoot/DropController
 
 @onready var player_spawn_point: Marker2D = $PlayerSpawnPoint
 @onready var camera_2d: Camera2D = $Camera2D
@@ -42,6 +43,9 @@ func get_spawner_root() -> Node2D:
 func get_run_controller() -> Node:
 	return run_controller
 
+func get_drop_controller() -> Node:
+	return drop_controller
+	
 func _spawn_player() -> void:
 	var packed_player: PackedScene = load(player_scene_path) as PackedScene
 
@@ -128,3 +132,6 @@ func _validate_scene_structure() -> void:
 	
 	if run_controller == null:
 		push_warning("[TestGaiaScene] RunController não encontrado.")
+		
+	if drop_controller == null:
+		push_warning("[TestGaiaScene] DropController não encontrado.")

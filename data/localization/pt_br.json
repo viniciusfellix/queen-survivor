@@ -4,6 +4,8 @@
 	"queen.gaia.name": "Gaia",
 	"queen.gaia.description": "A primeira Queen jogável do protótipo.",
 	
+	"drop.coin.default.name": "Moeda",
+	
 	"enemy.chaser_basic.name": "Perseguidor Básico",
 	"enemy.chaser_basic.description": "Um inimigo simples que persegue a Gaia.",
 

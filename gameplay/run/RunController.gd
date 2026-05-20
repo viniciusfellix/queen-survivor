@@ -63,8 +63,39 @@ func _connect_events() -> void:
 
 	if not GameEvents.run_level_up_option_selected.is_connected(_on_level_up_option_selected):
 		GameEvents.run_level_up_option_selected.connect(_on_level_up_option_selected)
+	
+	if not GameEvents.run_coin_collected.is_connected(_on_run_coin_collected):
+		GameEvents.run_coin_collected.connect(_on_run_coin_collected)
 
-func _on_enemy_died(enemy_id: String, source_id: String, xp_reward: int, enemy_global_position: Vector2) -> void:
+func _on_run_coin_collected(value: int, coin_global_position: Vector2) -> void:
+	if run_state == null:
+		return
+
+	if value <= 0:
+		return
+
+	run_state.add_coins(value)
+
+	GameEvents.run_coins_changed.emit(
+		run_state.run_coins_collected,
+		run_state.get_run_coins_available()
+	)
+
+	GameEvents.emit_debug("[RunController] Moeda coletada: value=%s pos=%s total=%s available=%s" % [
+		str(value),
+		str(coin_global_position),
+		str(run_state.run_coins_collected),
+		str(run_state.get_run_coins_available())
+	])
+
+func _on_enemy_died(
+	enemy_id: String,
+	source_id: String,
+	xp_reward: int,
+	enemy_global_position: Vector2,
+	_coin_drop_chance: float,
+	_coin_drop_value: int
+) -> void:
 	if run_state == null:
 		return
 

@@ -1,3 +1,5 @@
+res://gameplay/drops/
+res://data/drops/
 res://ui/level_up/
 res://data/upgrades/
 res://gameplay/run/
@@ -19,6 +21,4 @@ res://visual/characters/gaia/
 res://gameplay/player/
 res://gameplay/test/
 res://data/queens/
-res://scenes/
 C:/Users/acer/Documents/Godot/Projects/queen-survivor/data/localization/
-res://
