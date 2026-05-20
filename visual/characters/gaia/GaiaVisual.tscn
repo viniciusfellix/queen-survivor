@@ -1,0 +1,25 @@
+[gd_scene format=3 uid="uid://dxtnkjw5suqk"]
+
+[ext_resource type="Script" uid="uid://c1kiys2x1e6xp" path="res://visual/characters/gaia/GaiaVisualController.gd" id="1_r0svc"]
+[ext_resource type="Script" uid="uid://bw0auvchpds51" path="res://visual/characters/gaia/GaiaSpineAdapter.gd" id="2_0the6"]
+[ext_resource type="SpineAtlasResource" uid="uid://doiijalsq8hml" path="res://assets/spine/gaia/GaiaCharacter.atlas" id="2_orw6h"]
+[ext_resource type="SpineSkeletonFileResource" uid="uid://c65nty3n67bky" path="res://assets/spine/gaia/GaiaCharacter.skel" id="3_7e06i"]
+
+[sub_resource type="SpineSkeletonDataResource" id="SpineSkeletonDataResource_0the6"]
+atlas_res = ExtResource("2_orw6h")
+skeleton_file_res = ExtResource("3_7e06i")
+
+[node name="GaiaVisual" type="Node2D" unique_id=337840]
+script = ExtResource("1_r0svc")
+spine_adapter_path = NodePath("GaiaSpineAdapter")
+
+[node name="SpineSprite" type="SpineSprite" parent="." unique_id=131457128]
+skeleton_data_res = SubResource("SpineSkeletonDataResource_0the6")
+preview_skin = "default"
+preview_animation = "-- Empty --"
+preview_frame = false
+preview_time = 0.0
+
+[node name="GaiaSpineAdapter" type="Node" parent="." unique_id=1095998870]
+script = ExtResource("2_0the6")
+spine_sprite_path = NodePath("../SpineSprite")

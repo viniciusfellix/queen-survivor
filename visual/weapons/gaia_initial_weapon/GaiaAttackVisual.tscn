@@ -1,0 +1,19 @@
+[gd_scene format=3 uid="uid://dpikvdhhe37hy"]
+
+[ext_resource type="Script" uid="uid://c3n7ft1vrouss" path="res://visual/weapons/gaia_initial_weapon/GaiaAttackVisualController.gd" id="1_7hgci"]
+[ext_resource type="Texture2D" uid="uid://c51m8rojrfe4m" path="res://assets/placeholders/weapons/gaia_initial_weapon/gaia_attack_placeholder.png" id="2_xrpkd"]
+
+[node name="GaiaAttackVisual" type="Node2D" unique_id=175912674]
+script = ExtResource("1_7hgci")
+placeholder_root_path = NodePath("PlaceholderRoot")
+placeholder_sprite_path = NodePath("PlaceholderRoot/Sprite2D")
+spine_root_path = NodePath("SpineRoot")
+placeholder_texture = ExtResource("2_xrpkd")
+
+[node name="PlaceholderRoot" type="Node2D" parent="." unique_id=701966313]
+
+[node name="Sprite2D" type="Sprite2D" parent="PlaceholderRoot" unique_id=470947594]
+scale = Vector2(0.5, 0.5)
+texture = ExtResource("2_xrpkd")
+
+[node name="SpineRoot" type="Node2D" parent="." unique_id=1516492169]

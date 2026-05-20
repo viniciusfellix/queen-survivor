@@ -1,0 +1,23 @@
+[gd_scene format=3 uid="uid://dg1wr6dv8jxxi"]
+
+[ext_resource type="Script" uid="uid://ca4qagknswd3k" path="res://gameplay/enemies/EnemyBase.gd" id="1_ffmcr"]
+[ext_resource type="Resource" uid="uid://cdk2sbcwdtnd0" path="res://data/enemies/enemy_chaser_basic.tres" id="2_d5hmo"]
+[ext_resource type="PackedScene" uid="uid://bal0n2h0w1ovu" path="res://visual/enemies/goblin_warrior/GoblinWarriorVisual.tscn" id="3_d5hmo"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_m166k"]
+radius = 18.0
+
+[node name="EnemyBase" type="CharacterBody2D" unique_id=514613083]
+script = ExtResource("1_ffmcr")
+enemy_definition = ExtResource("2_d5hmo")
+visual_controller_path = NodePath("VisualRoot/GoblinWarriorVisual")
+draw_debug_target_line = true
+draw_contact_radius = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=686789010]
+shape = SubResource("CircleShape2D_m166k")
+debug_color = Color(1, 0.011462747, 0.054261394, 0.41960785)
+
+[node name="VisualRoot" type="Node2D" parent="." unique_id=604840823]
+
+[node name="GoblinWarriorVisual" parent="VisualRoot" unique_id=520093498 instance=ExtResource("3_d5hmo")]

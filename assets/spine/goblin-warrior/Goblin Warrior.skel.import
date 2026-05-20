@@ -1,0 +1,14 @@
+[remap]
+
+importer="spine.skel"
+type="SpineSkeletonFileResource"
+uid="uid://bhn62jsffqp0r"
+path="res://.godot/imported/Goblin Warrior.skel-c44d29f2634fe335480cc1dd7f065bcd.spskel"
+
+[deps]
+
+source_file="res://assets/spine/goblin-warrior/Goblin Warrior.skel"
+dest_files=["res://.godot/imported/Goblin Warrior.skel-c44d29f2634fe335480cc1dd7f065bcd.spskel"]
+
+[params]
+

@@ -1,0 +1,16 @@
+[remap]
+
+importer="spine.atlas"
+type="SpineAtlasResource"
+uid="uid://bkeuy0uj0ubwl"
+path="res://.godot/imported/Goblin Warrior.atlas-802215cae65dca0936c38164e1403e15.spatlas"
+
+[deps]
+
+source_file="res://assets/spine/goblin-warrior/Goblin Warrior.atlas"
+dest_files=["res://.godot/imported/Goblin Warrior.atlas-802215cae65dca0936c38164e1403e15.spatlas"]
+
+[params]
+
+normal_map_prefix="n"
+specular_map_prefix="s"

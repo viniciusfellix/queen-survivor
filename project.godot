@@ -1,0 +1,33 @@
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
+
+config_version=5
+
+[application]
+
+config/name="Queen Survivor"
+run/main_scene="uid://ddj7pde5hl8f6"
+config/features=PackedStringArray("4.6", "Mobile")
+config/icon="res://icon.svg"
+
+[autoload]
+
+App="*uid://dpk11lg5lf1do"
+GameEvents="*uid://xinybba3obyo"
+LocalizationManager="*uid://cgo3tuuksfwjp"
+SaveManager="*uid://cbymq1sv1y3bj"
+InputManager="*uid://de2j17ep6ta1e"
+
+[physics]
+
+3d/physics_engine="Jolt Physics"
+
+[rendering]
+
+rendering_device/driver.windows="d3d12"
+renderer/rendering_method="mobile"

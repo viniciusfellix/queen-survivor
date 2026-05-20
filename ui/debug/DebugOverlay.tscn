@@ -1,0 +1,19 @@
+[gd_scene format=3 uid="uid://bgefmxnkcihft"]
+
+[ext_resource type="Script" uid="uid://dtxnqp3rajhxw" path="res://ui/debug/DebugOverlay.gd" id="1_ybgx5"]
+
+[node name="DebugOverlay" type="CanvasLayer" unique_id=1878947059]
+script = ExtResource("1_ybgx5")
+
+[node name="Panel" type="Panel" parent="." unique_id=992620162]
+pivot_offset = Vector2(16, 16)
+pivot_offset_ratio = Vector2(420, 150)
+
+[node name="MarginContainer" type="MarginContainer" parent="Panel" unique_id=999843381]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="Label" type="Label" parent="Panel/MarginContainer" unique_id=2059281577]
+layout_mode = 2
+text = "Debug"

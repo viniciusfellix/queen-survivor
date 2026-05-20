@@ -1,0 +1,16 @@
+[remap]
+
+importer="spine.atlas"
+type="SpineAtlasResource"
+uid="uid://doiijalsq8hml"
+path="res://.godot/imported/GaiaCharacter.atlas-5270512dc9ffa80286d5d6052ebfdd03.spatlas"
+
+[deps]
+
+source_file="res://assets/spine/gaia/GaiaCharacter.atlas"
+dest_files=["res://.godot/imported/GaiaCharacter.atlas-5270512dc9ffa80286d5d6052ebfdd03.spatlas"]
+
+[params]
+
+normal_map_prefix="n"
+specular_map_prefix="s"

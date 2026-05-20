@@ -1,0 +1,48 @@
+[gd_scene format=3 uid="uid://cct45mramyoo7"]
+
+[ext_resource type="Script" uid="uid://bygpel4ny6qdc" path="res://ui/level_up/LevelUpPanel.gd" id="1_23m1c"]
+
+[node name="LevelUpPanel" type="CanvasLayer" unique_id=780617162]
+layer = 20
+script = ExtResource("1_23m1c")
+
+[node name="Panel" type="Panel" parent="." unique_id=1355218207]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -20.0
+offset_top = -20.0
+offset_right = 600.0
+offset_bottom = 400.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="Panel" unique_id=1055629738]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Panel/MarginContainer" unique_id=1682283072]
+layout_mode = 2
+
+[node name="TitleLabel" type="Label" parent="Panel/MarginContainer/VBoxContainer" unique_id=810998626]
+layout_mode = 2
+text = "Level Up"
+
+[node name="SubtitleLabel" type="Label" parent="Panel/MarginContainer/VBoxContainer" unique_id=833037129]
+layout_mode = 2
+text = "Escolha uma opção."
+
+[node name="OptionButton1" type="Button" parent="Panel/MarginContainer/VBoxContainer" unique_id=1951886102]
+layout_mode = 2
+text = "Opção 1"
+
+[node name="OptionButton2" type="Button" parent="Panel/MarginContainer/VBoxContainer" unique_id=811771050]
+layout_mode = 2
+text = "Opção 2"
+
+[node name="OptionButton3" type="Button" parent="Panel/MarginContainer/VBoxContainer" unique_id=1853488972]
+layout_mode = 2
+text = "Opção 3"

@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="DamageComponentDefinition" format=3 uid="uid://g88tg6a7i70u"]
+
+[ext_resource type="Script" uid="uid://eagwh5a4kuew" path="res://definitions/DamageComponentDefinition.gd" id="1_oe1dn"]
+
+[resource]
+script = ExtResource("1_oe1dn")
+amount = 3
+metadata/_custom_type_script = "uid://eagwh5a4kuew"

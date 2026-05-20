@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="UpgradeDefinition" format=3 uid="uid://c2g86y5hxsu3e"]
+
+[ext_resource type="Script" uid="uid://yjpi6mhnsb1a" path="res://definitions/UpgradeDefinition.gd" id="1_3c56w"]
+
+[resource]
+script = ExtResource("1_3c56w")
+id = "upgrade_player_max_hp_flat"
+display_name_key = "upgrade.player_max_hp_flat.name"
+description_key = "upgrade.player_max_hp_flat.description"
+upgrade_type = "player_max_hp_flat"
+value_int = 10
+metadata/_custom_type_script = "uid://yjpi6mhnsb1a"

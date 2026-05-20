@@ -1,0 +1,8 @@
+[gd_scene format=3 uid="uid://dm5ecyvme3lym"]
+
+[ext_resource type="Script" uid="uid://dli3224y1xq8y" path="res://gameplay/spawners/EnemySpawner.gd" id="1_n3oli"]
+[ext_resource type="Resource" uid="uid://cdk2sbcwdtnd0" path="res://data/enemies/enemy_chaser_basic.tres" id="2_2dsmo"]
+
+[node name="EnemySpawner" type="Node2D" unique_id=934849601]
+script = ExtResource("1_n3oli")
+enemy_definition = ExtResource("2_2dsmo")

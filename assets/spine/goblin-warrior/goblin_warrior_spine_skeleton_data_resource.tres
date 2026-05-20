@@ -1,0 +1,8 @@
+[gd_resource type="SpineSkeletonDataResource" format=3 uid="uid://ch73k34flbrwq"]
+
+[ext_resource type="SpineAtlasResource" uid="uid://bkeuy0uj0ubwl" path="res://assets/spine/goblin-warrior/Goblin Warrior.atlas" id="1_4587a"]
+[ext_resource type="SpineSkeletonFileResource" uid="uid://bhn62jsffqp0r" path="res://assets/spine/goblin-warrior/Goblin Warrior.skel" id="2_ja6gp"]
+
+[resource]
+atlas_res = ExtResource("1_4587a")
+skeleton_file_res = ExtResource("2_ja6gp")

@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="UpgradeDefinition" format=3 uid="uid://dc3upchkunql"]
+
+[ext_resource type="Script" uid="uid://yjpi6mhnsb1a" path="res://definitions/UpgradeDefinition.gd" id="1_60m1s"]
+
+[resource]
+script = ExtResource("1_60m1s")
+id = "upgrade_player_move_speed_percent"
+display_name_key = "upgrade.player_move_speed_percent.name"
+description_key = "upgrade.player_move_speed_percent.description"
+upgrade_type = "player_move_speed_percent"
+value_float = 10.0
+metadata/_custom_type_script = "uid://yjpi6mhnsb1a"

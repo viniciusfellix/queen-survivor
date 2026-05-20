@@ -1,0 +1,14 @@
+[remap]
+
+importer="spine.skel"
+type="SpineSkeletonFileResource"
+uid="uid://c65nty3n67bky"
+path="res://.godot/imported/GaiaCharacter.skel-151896c3a5cc91c535c95155cae7e653.spskel"
+
+[deps]
+
+source_file="res://assets/spine/gaia/GaiaCharacter.skel"
+dest_files=["res://.godot/imported/GaiaCharacter.skel-151896c3a5cc91c535c95155cae7e653.spskel"]
+
+[params]
+

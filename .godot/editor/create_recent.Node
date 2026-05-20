@@ -1,0 +1,14 @@
+Button
+Label
+VBoxContainer
+MarginContainer
+Panel
+CanvasLayer
+Node
+Node2D
+Sprite2D
+SpineSprite
+CollisionShape2D
+CharacterBody2D
+Camera2D
+Marker2D

@@ -1,0 +1,37 @@
+{
+	"game.title": "Queen Survivors",
+
+	"queen.gaia.name": "Gaia",
+	"queen.gaia.description": "A primeira Queen jogável do protótipo.",
+	
+	"enemy.chaser_basic.name": "Perseguidor Básico",
+	"enemy.chaser_basic.description": "Um inimigo simples que persegue a Gaia.",
+
+	"ui.debug.title": "Debug",
+	"ui.debug.move_direction": "Direção de movimento",
+	"ui.debug.aim_direction": "Direção de mira",
+	"ui.debug.state": "Estado",
+	"ui.debug.animation": "Animação",
+	"ui.debug.spine_ready": "Spine pronto",
+
+	"ui.test.gaia_scene.title": "Teste da Gaia",
+	
+	"ui.level_up.title": "Escolha uma melhoria",
+	"ui.level_up.subtitle": "A Gaia subiu de nível. Escolha uma opção para continuar.",
+	"ui.level_up.option_missing": "Opção indisponível",
+
+	"upgrade.weapon_damage_flat.name": "Dano da arma +1",
+	"upgrade.weapon_damage_flat.description": "Aumenta em +1 o dano de cada componente da arma atual.",
+
+	"upgrade.weapon_cooldown_percent.name": "Recarga mais rápida",
+	"upgrade.weapon_cooldown_percent.description": "Reduz o cooldown da arma atual em 10%.",
+
+	"upgrade.player_move_speed_percent.name": "Velocidade +10%",
+	"upgrade.player_move_speed_percent.description": "Aumenta a velocidade de movimento da Gaia em 10%.",
+
+	"upgrade.player_max_hp_flat.name": "Vida máxima +10",
+	"upgrade.player_max_hp_flat.description": "Aumenta a vida máxima da Gaia em 10 e recupera 10 de HP.",
+	
+	"weapon.gaia_initial.name": "Arma Inicial da Gaia",
+	"weapon.gaia_initial.description": "Ataque direcional híbrido da Gaia. Usa a direção da mira."
+}

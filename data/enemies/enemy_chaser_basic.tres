@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="EnemyDefinition" format=3 uid="uid://cdk2sbcwdtnd0"]
+
+[ext_resource type="Script" uid="uid://fr6wn7bdn5xk" path="res://definitions/EnemyDefinition.gd" id="1_kl2a7"]
+
+[resource]
+script = ExtResource("1_kl2a7")
+id = "enemy_chaser_basic"
+display_name_key = "enemy.chaser_basic.name"
+description_key = "enemy.chaser_basic.description"
+base_move_speed = 80.0
+contact_damage = 8
+contact_damage_radius = 64.0
+weak_damage_types = ["physical"]
+resistant_damage_types = ["magical"]
+xp_reward = 10
+spine_skeleton_data_resource_path = "uid://ch73k34flbrwq"
+metadata/_custom_type_script = "uid://fr6wn7bdn5xk"
