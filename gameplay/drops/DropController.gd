@@ -39,6 +39,9 @@ func _on_enemy_died(
 	coin_drop_chance: float,
 	coin_drop_value: int
 ) -> void:
+	if RunQuery.is_run_finished(get_tree()):
+		return
+		
 	if coin_drop_value <= 0:
 		return
 

@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="SpawnTimelineEntryDefinition" format=3 uid="uid://bj11xixdvv46k"]
+
+[ext_resource type="Resource" uid="uid://cdk2sbcwdtnd0" path="res://data/enemies/enemy_chaser_basic.tres" id="1_5gpm2"]
+[ext_resource type="Script" uid="uid://u04lr4kql6m5" path="res://definitions/SpawnTimelineEntryDefinition.gd" id="1_rl4an"]
+
+[resource]
+script = ExtResource("1_rl4an")
+id = "wave_02_pressure"
+start_time_seconds = 40.0
+enemy_scene_path = "uid://dg1wr6dv8jxxi"
+enemy_definition = ExtResource("1_5gpm2")
+spawn_interval_seconds = 1.8
+max_alive_enemies = 22
+spawn_min_distance = 430.0
+spawn_max_distance = 660.0
+metadata/_custom_type_script = "uid://u04lr4kql6m5"

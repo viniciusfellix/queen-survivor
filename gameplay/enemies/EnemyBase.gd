@@ -63,6 +63,13 @@ func _ready() -> void:
 	queue_redraw()
 
 func _physics_process(delta: float) -> void:
+	if RunQuery.is_gameplay_blocked(get_tree()):
+		velocity = Vector2.ZERO
+		move_and_slide()
+		_update_visual_state()
+		queue_redraw()
+		return
+		
 	if not is_alive:
 		velocity = Vector2.ZERO
 		move_and_slide()
@@ -268,7 +275,13 @@ func _update_contact_damage_timer(delta: float) -> void:
 		contact_damage_timer = max(0.0, contact_damage_timer - delta)
 
 func _try_apply_contact_damage() -> void:
+	if RunQuery.is_gameplay_blocked(get_tree()):
+		return
+
 	if target_node == null:
+		return
+
+	if not _is_target_alive():
 		return
 
 	if contact_damage_timer > 0.0:
@@ -294,13 +307,22 @@ func _try_apply_contact_damage() -> void:
 	)
 
 	var final_damage_variant: Variant = target_node.call("receive_damage", payload)
+	var final_damage: int = 0
+
+	if final_damage_variant is int:
+		final_damage = int(final_damage_variant)
+	elif final_damage_variant is float:
+		final_damage = int(final_damage_variant)
+
+	if final_damage <= 0:
+		return
 
 	contact_damage_timer = contact_damage_interval_seconds
 
 	GameEvents.emit_debug("[EnemyBase] Dano de contato aplicado. enemy=%s raw=%s final=%s" % [
 		enemy_id,
 		str(contact_damage),
-		str(final_damage_variant)
+		str(final_damage)
 	])
 
 func _update_visual_state() -> void:
@@ -425,3 +447,18 @@ func get_debug_data() -> Dictionary:
 		"last_damage_source_id": last_damage_source_id,
 		"xp_reward": xp_reward
 	}
+	
+func _is_target_alive() -> bool:
+	if target_node == null:
+		return false
+
+	if not target_node.has_method("get_runtime_state"):
+		return true
+
+	var runtime_state_variant: Variant = target_node.call("get_runtime_state")
+
+	if runtime_state_variant is PlayerRuntimeState:
+		var player_runtime_state: PlayerRuntimeState = runtime_state_variant as PlayerRuntimeState
+		return player_runtime_state.is_alive
+
+	return true

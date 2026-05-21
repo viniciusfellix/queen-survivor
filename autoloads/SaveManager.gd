@@ -1,92 +1,133 @@
 extends Node
 
-const SAVE_PATH: String = "user://save_data.json"
-const SAVE_VERSION: int = 1
+const SAVE_PATH: String = "user://queen_survivors_save.json"
 
-var save_data: Dictionary = {}
+var save_data: SaveData = null
 
 func _ready() -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS
+
 	load_or_create_save()
+	_connect_events()
+
+func get_save_data() -> SaveData:
+	if save_data == null:
+		load_or_create_save()
+
+	return save_data
 
 func load_or_create_save() -> void:
 	if FileAccess.file_exists(SAVE_PATH):
-		load_save()
-	else:
-		create_new_save()
+		var loaded_successfully: bool = _load_from_disk()
 
-func create_new_save() -> void:
-	save_data = _get_default_save_data()
-	save_save_data()
-	GameEvents.save_created.emit()
-	print("[SaveManager] Novo save criado.")
+		if loaded_successfully:
+			GameEvents.emit_debug("[SaveManager] Save carregado.")
+			GameEvents.save_loaded.emit()
+			return
 
-func load_save() -> void:
-	var file := FileAccess.open(SAVE_PATH, FileAccess.READ)
+	_create_new_save()
+
+func save_to_disk() -> void:
+	if save_data == null:
+		return
+
+	var json_string: String = JSON.stringify(save_data.to_dictionary(), "\t")
+
+	var file: FileAccess = FileAccess.open(SAVE_PATH, FileAccess.WRITE)
+
 	if file == null:
-		push_warning("[SaveManager] Falha ao abrir save. Criando novo save.")
-		create_new_save()
+		push_warning("[SaveManager] Não foi possível abrir arquivo para escrita: %s" % SAVE_PATH)
 		return
 
-	var content := file.get_as_text()
-	var parsed = JSON.parse_string(content)
+	file.store_string(json_string)
+	file.close()
 
-	if typeof(parsed) != TYPE_DICTIONARY:
-		push_warning("[SaveManager] Save inválido. Criando novo save.")
-		create_new_save()
-		return
-
-	save_data = parsed
-	_migrate_if_needed()
-	GameEvents.save_loaded.emit()
-	print("[SaveManager] Save carregado.")
-
-func save_save_data() -> void:
-	var file := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
-	if file == null:
-		push_warning("[SaveManager] Falha ao salvar em: %s" % SAVE_PATH)
-		return
-
-	file.store_string(JSON.stringify(save_data, "\t"))
+	GameEvents.emit_debug("[SaveManager] Save salvo em: %s" % SAVE_PATH)
 	GameEvents.save_saved.emit()
 
-func add_total_xp(amount: int) -> void:
-	if amount <= 0:
+func apply_run_result(result_payload: RunResultPayload) -> void:
+	if result_payload == null:
 		return
 
-	save_data["total_xp"] = int(save_data.get("total_xp", 0)) + amount
-	save_save_data()
+	if save_data == null:
+		load_or_create_save()
 
-func add_total_money(amount: int) -> void:
-	if amount <= 0:
+	if save_data == null:
 		return
 
-	save_data["total_money"] = int(save_data.get("total_money", 0)) + amount
-	save_save_data()
+	save_data.apply_run_result(result_payload)
+	save_to_disk()
 
-func set_last_run_summary(summary: Dictionary) -> void:
-	save_data["last_run_summary"] = summary
-	save_save_data()
+	GameEvents.save_updated.emit(save_data)
 
-func _get_default_save_data() -> Dictionary:
+	GameEvents.emit_debug("[SaveManager] Resultado aplicado ao save. total_xp=%s total_money=%s completed_maps=%s" % [
+		str(save_data.total_xp),
+		str(save_data.total_money),
+		str(save_data.completed_maps)
+	])
+
+func reset_progression_and_save() -> void:
+	if save_data == null:
+		load_or_create_save()
+
+	if save_data == null:
+		return
+
+	save_data.reset_progression()
+	save_to_disk()
+
+	GameEvents.save_updated.emit(save_data)
+	GameEvents.emit_debug("[SaveManager] Progressão resetada.")
+
+func get_debug_data() -> Dictionary:
+	if save_data == null:
+		return {
+			"has_save_data": false
+		}
+
 	return {
-		"version": SAVE_VERSION,
-		"total_xp": 0,
-		"total_money": 0,
-		"unlocked_queens": ["gaia"],
-		"completed_maps": [],
-		"settings": {
-			"language": "pt_br",
-			"sfw_enabled": true,
-			"sfw_first_prompt_answered": false
-		},
-		"basic_records": {},
-		"last_run_summary": null,
-		"purchased_upgrades": []
+		"has_save_data": true,
+		"save_path": SAVE_PATH,
+		"save_version": save_data.save_version,
+		"total_xp": save_data.total_xp,
+		"total_money": save_data.total_money,
+		"completed_maps": save_data.completed_maps,
+		"last_run_summary": save_data.last_run_summary,
+		"basic_records": save_data.basic_records,
+		"sfw_enabled": save_data.sfw_enabled,
+		"sfw_first_prompt_answered": save_data.sfw_first_prompt_answered
 	}
 
-func _migrate_if_needed() -> void:
-	var version := int(save_data.get("version", 0))
+func _connect_events() -> void:
+	if not GameEvents.run_finished.is_connected(_on_run_finished):
+		GameEvents.run_finished.connect(_on_run_finished)
 
-	if version < SAVE_VERSION:
-		save_data["version"] = SAVE_VERSION
-		save_save_data()
+func _on_run_finished(result_payload: RunResultPayload) -> void:
+	apply_run_result(result_payload)
+
+func _create_new_save() -> void:
+	save_data = SaveData.new()
+	save_to_disk()
+
+	GameEvents.emit_debug("[SaveManager] Novo save criado.")
+	GameEvents.save_created.emit()
+
+func _load_from_disk() -> bool:
+	var file: FileAccess = FileAccess.open(SAVE_PATH, FileAccess.READ)
+
+	if file == null:
+		return false
+
+	var json_string: String = file.get_as_text()
+	file.close()
+
+	var parsed: Variant = JSON.parse_string(json_string)
+
+	if not parsed is Dictionary:
+		push_warning("[SaveManager] Save inválido. Criando novo save.")
+		return false
+
+	save_data = SaveData.new()
+	save_data.load_from_dictionary(parsed as Dictionary)
+
+	return true

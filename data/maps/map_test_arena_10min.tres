@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="MapDefinition" format=3 uid="uid://bmqjfu8a5d81w"]
+
+[ext_resource type="Script" uid="uid://daa322dvnlnip" path="res://definitions/MapDefinition.gd" id="1_5hdo8"]
+[ext_resource type="Resource" uid="uid://di1w0avj1sdmj" path="res://data/spawn_timelines/test_arena_10min/spawn_timeline_test_arena_10min.tres" id="2_pyygo"]
+
+[resource]
+script = ExtResource("1_5hdo8")
+id = "map_test_arena_10min"
+display_name_key = "map.test_arena_10min.name"
+description_key = "map.test_arena_10min.description"
+duration_seconds = 90.0
+spawn_timeline = ExtResource("2_pyygo")
+metadata/_custom_type_script = "uid://daa322dvnlnip"

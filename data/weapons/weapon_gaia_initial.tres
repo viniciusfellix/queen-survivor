@@ -13,5 +13,6 @@ description_key = "weapon.gaia_initial.description"
 attack_visual_scene_path = "uid://dpikvdhhe37hy"
 attack_hitbox_offset = 160.0
 attack_hitbox_radius = 60.0
+attack_hitbox_lifetime = 0.18
 damage_components = Array[ExtResource("1_lob5k")]([ExtResource("2_dpeut"), ExtResource("3_dpeut")])
 metadata/_custom_type_script = "uid://qe50xi38krmo"

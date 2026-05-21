@@ -1,3 +1,6 @@
+SpawnTimelineDefinition
+SpawnTimelineEntryDefinition
+MapDefinition
 CoinDropDefinition
 UpgradeDefinition
 DamageComponentDefinition

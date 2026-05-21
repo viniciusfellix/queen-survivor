@@ -33,3 +33,14 @@
 | Magnetismo | `data/drops/coin_default.tres` | `magnet_radius` |
 | Coleta | `data/drops/coin_default.tres` | `collect_radius` |
 | Velocidade ímã | `data/drops/coin_default.tres` | `max_magnet_speed` |
+
+
+## Mapa e Resultado
+
+| O que editar | Arquivo | Campo |
+|---|---|---|
+| Duração do mapa | `data/maps/map_test_arena_10min.tres` | `duration_seconds` |
+| Multiplicador de vitória | `data/maps/map_test_arena_10min.tres` | `victory_multiplier` |
+| Bônus de vitória | `data/maps/map_test_arena_10min.tres` | `victory_bonus` |
+| Nome do mapa | `data/maps/map_test_arena_10min.tres` + `data/localization/pt_br.json` | `display_name_key` |
+| Descrição do mapa | `data/maps/map_test_arena_10min.tres` + `data/localization/pt_br.json` | `description_key` |

@@ -4,4 +4,8 @@
 
 [resource]
 script = ExtResource("1_8lq7i")
+magnet_radius = 165.0
+collect_radius = 28.0
+magnet_acceleration = 1000.0
+max_magnet_speed = 560.0
 metadata/_custom_type_script = "uid://c3wkco720q04g"

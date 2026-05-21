@@ -1,3 +1,12 @@
+res://data/spawn_timelines/test_arena_10min/
+res://ui/hud/
+C:/Users/acer/Documents/Godot/Projects/queen-survivor/docs/03_domains/maps/
+C:/Users/acer/Documents/Godot/Projects/queen-survivor/docs/05_game_design/
+C:/Users/acer/Documents/Godot/Projects/queen-survivor/docs/04_decisions/
+C:/Users/acer/Documents/Godot/Projects/queen-survivor/docs/02_lifecycles/
+C:/Users/acer/Documents/Godot/Projects/queen-survivor/docs/03_domains/results/
+res://ui/result/
+res://data/maps/
 res://gameplay/drops/
 res://data/drops/
 res://ui/level_up/
@@ -13,12 +22,7 @@ res://assets/spine/goblin-warrior/
 res://gameplay/spawners/
 res://data/enemies/
 res://gameplay/enemies/
-C:/Users/acer/Documents/Godot/Projects/queen-survivor/docs/04_decisions/
 res://ui/debug/
 res://gameplay/camera/
 res://gameplay/arena/
-res://visual/characters/gaia/
-res://gameplay/player/
-res://gameplay/test/
-res://data/queens/
 C:/Users/acer/Documents/Godot/Projects/queen-survivor/data/localization/

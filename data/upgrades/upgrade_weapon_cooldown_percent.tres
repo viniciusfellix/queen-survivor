@@ -8,5 +8,5 @@ id = "upgrade_weapon_cooldown_percent"
 display_name_key = "upgrade.weapon_cooldown_percent.name"
 description_key = "upgrade.weapon_cooldown_percent.description"
 upgrade_type = "weapon_cooldown_percent"
-value_float = 10.0
+value_float = 8.0
 metadata/_custom_type_script = "uid://yjpi6mhnsb1a"

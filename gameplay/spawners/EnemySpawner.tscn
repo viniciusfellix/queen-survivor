@@ -5,4 +5,7 @@
 
 [node name="EnemySpawner" type="Node2D" unique_id=934849601]
 script = ExtResource("1_n3oli")
+enemy_scene_path = "uid://dg1wr6dv8jxxi"
 enemy_definition = ExtResource("2_2dsmo")
+
+[node name="HintLabel" type="Label" parent="." unique_id=730562488]

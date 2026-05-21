@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="SpawnTimelineEntryDefinition" format=3 uid="uid://c20lh3t5jhw5x"]
+
+[ext_resource type="Script" uid="uid://u04lr4kql6m5" path="res://definitions/SpawnTimelineEntryDefinition.gd" id="1_fukqy"]
+[ext_resource type="Resource" uid="uid://cdk2sbcwdtnd0" path="res://data/enemies/enemy_chaser_basic.tres" id="1_lqqvx"]
+
+[resource]
+script = ExtResource("1_fukqy")
+id = "wave_00_intro"
+end_time_seconds = 20.0
+enemy_scene_path = "uid://dg1wr6dv8jxxi"
+enemy_definition = ExtResource("1_lqqvx")
+spawn_interval_seconds = 2.4
+max_alive_enemies = 8
+metadata/_custom_type_script = "uid://u04lr4kql6m5"

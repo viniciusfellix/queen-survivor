@@ -1,0 +1,49 @@
+[gd_scene format=3 uid="uid://bfu3srmi1h0cw"]
+
+[ext_resource type="Script" uid="uid://cuul5y34e1757" path="res://ui/result/ResultPanel.gd" id="1_ktpwl"]
+
+[node name="ResultPanel" type="CanvasLayer" unique_id=5256904]
+process_mode = 3
+layer = 30
+script = ExtResource("1_ktpwl")
+
+[node name="Panel" type="Panel" parent="." unique_id=1692780777]
+custom_minimum_size = Vector2(700, 520)
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -350.0
+offset_top = -260.0
+offset_right = 350.0
+offset_bottom = 260.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="Panel" unique_id=402896100]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Panel/MarginContainer" unique_id=1044731599]
+layout_mode = 2
+
+[node name="TitleLabel" type="Label" parent="Panel/MarginContainer/VBoxContainer" unique_id=954476255]
+layout_mode = 2
+
+[node name="ResultTypeLabel" type="Label" parent="Panel/MarginContainer/VBoxContainer" unique_id=2107004334]
+layout_mode = 2
+
+[node name="SummaryLabel" type="Label" parent="Panel/MarginContainer/VBoxContainer" unique_id=1451066565]
+layout_mode = 2
+
+[node name="SaveStatusLabel" type="Label" parent="Panel/MarginContainer/VBoxContainer" unique_id=943702520]
+layout_mode = 2
+
+[node name="HintLabel" type="Label" parent="Panel/MarginContainer/VBoxContainer" unique_id=443506092]
+layout_mode = 2
+
+[node name="RestartButton" type="Button" parent="Panel/MarginContainer/VBoxContainer" unique_id=786923528]
+layout_mode = 2
+text = "Testar Novamente"
