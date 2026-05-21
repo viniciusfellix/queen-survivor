@@ -6,9 +6,12 @@
 [ext_resource type="Script" uid="uid://c3rxl1s078a" path="res://gameplay/camera/FollowCamera.gd" id="3_38slv"]
 [ext_resource type="PackedScene" uid="uid://dm5ecyvme3lym" path="res://gameplay/spawners/EnemySpawner.tscn" id="3_yn17g"]
 [ext_resource type="Script" uid="uid://dsma0hsw0e3n7" path="res://gameplay/run/RunController.gd" id="4_myjtf"]
+[ext_resource type="Resource" uid="uid://bmqjfu8a5d81w" path="res://data/maps/map_test_arena_10min.tres" id="5_8e1wp"]
 [ext_resource type="Script" uid="uid://nweupggxpuwl" path="res://gameplay/drops/DropController.gd" id="5_kj34v"]
 [ext_resource type="Resource" uid="uid://bcfegd6d7xccr" path="res://data/drops/coin_default.tres" id="6_eomju"]
 [ext_resource type="PackedScene" uid="uid://cct45mramyoo7" path="res://ui/level_up/LevelUpPanel.tscn" id="7_sioag"]
+[ext_resource type="PackedScene" uid="uid://bfu3srmi1h0cw" path="res://ui/result/ResultPanel.tscn" id="11_8gfjp"]
+[ext_resource type="PackedScene" uid="uid://cm43ov31i3a3q" path="res://ui/hud/RunHud.tscn" id="12_mnrqd"]
 
 [node name="TestGaiaScene" type="Node2D" unique_id=138255397]
 script = ExtResource("1_e4g33")
@@ -33,6 +36,7 @@ enemy_root_path = NodePath("../../EnemyRoot")
 
 [node name="RunController" type="Node" parent="RuntimeRoot" unique_id=837018724]
 script = ExtResource("4_myjtf")
+map_definition = ExtResource("5_8e1wp")
 
 [node name="DropController" type="Node" parent="RuntimeRoot" unique_id=1761609163]
 script = ExtResource("5_kj34v")
@@ -45,6 +49,15 @@ drop_root_path = NodePath("../DropRoot")
 [node name="Camera2D" type="Camera2D" parent="." unique_id=304678277]
 script = ExtResource("3_38slv")
 
+[node name="RunHud" parent="." unique_id=1806750018 instance=ExtResource("12_mnrqd")]
+
 [node name="DebugOverlay2" parent="." unique_id=1878947059 instance=ExtResource("2_jgi7i")]
+debug_enabled = false
+show_animation_section = false
+show_player_core_section = false
+show_player_combat_section = false
+show_run_progression_section = false
 
 [node name="LevelUpPanel" parent="." unique_id=780617162 instance=ExtResource("7_sioag")]
+
+[node name="ResultPanel" parent="." unique_id=5256904 instance=ExtResource("11_8gfjp")]

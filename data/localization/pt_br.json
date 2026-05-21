@@ -8,6 +8,10 @@
 	
 	"enemy.chaser_basic.name": "Perseguidor Básico",
 	"enemy.chaser_basic.description": "Um inimigo simples que persegue a Gaia.",
+	
+	"map.test_arena_10min.name": "Arena de Teste",
+	"map.test_arena_10min.description": "Arena infinita simples de 10 minutos.",
+
 
 	"ui.debug.title": "Debug",
 	"ui.debug.move_direction": "Direção de movimento",
@@ -21,6 +25,32 @@
 	"ui.level_up.title": "Escolha uma melhoria",
 	"ui.level_up.subtitle": "A Gaia subiu de nível. Escolha uma opção para continuar.",
 	"ui.level_up.option_missing": "Opção indisponível",
+	
+	"ui.hud.hp": "HP",
+	"ui.hud.xp": "XP",
+	"ui.hud.level": "Nível",
+	"ui.hud.timer": "Tempo",
+	"ui.hud.coins": "Moedas",
+	"ui.hud.kills": "Abates",
+	"ui.hud.victory": "Vitória!",
+	"ui.hud.defeat": "Derrota",
+	"ui.hud.run_active": "Sobreviva até o fim da run",
+	
+	"ui.result.victory": "Vitória",
+	"ui.result.defeat": "Derrota",
+	"ui.result.title": "Resultado da Run",
+	"ui.result.map": "Mapa",
+	"ui.result.queen": "Queen",
+	"ui.result.time_survived": "Tempo sobrevivido",
+	"ui.result.coins_collected": "Moedas coletadas",
+	"ui.result.final_money": "Dinheiro final",
+	"ui.result.xp_gained": "XP obtida",
+	"ui.result.enemies_killed": "Inimigos derrotados",
+	"ui.result.level_reached": "Nível alcançado",
+	"ui.result.death_cause": "Causa da derrota",
+	"ui.result.close_hint": "Resultado básico do protótipo. Clique em Testar novamente para reiniciar a cena.",
+	"ui.result.restart": "Testar novamente",
+	"ui.result.save_applied": "Resultado salvo no progresso permanente.",
 
 	"upgrade.weapon_damage_flat.name": "Dano da arma +1",
 	"upgrade.weapon_damage_flat.description": "Aumenta em +1 o dano de cada componente da arma atual.",

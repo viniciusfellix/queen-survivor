@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="SpawnTimelineEntryDefinition" format=3 uid="uid://bjk0aqwvdl7h7"]
+
+[ext_resource type="Script" uid="uid://u04lr4kql6m5" path="res://definitions/SpawnTimelineEntryDefinition.gd" id="1_3tdwb"]
+[ext_resource type="Resource" uid="uid://cdk2sbcwdtnd0" path="res://data/enemies/enemy_chaser_basic.tres" id="1_ahaid"]
+
+[resource]
+script = ExtResource("1_3tdwb")
+id = "wave_01_build_up"
+start_time_seconds = 20.0
+end_time_seconds = 40.0
+enemy_scene_path = "uid://dg1wr6dv8jxxi"
+enemy_definition = ExtResource("1_ahaid")
+spawn_interval_seconds = 2.1
+max_alive_enemies = 14
+metadata/_custom_type_script = "uid://u04lr4kql6m5"

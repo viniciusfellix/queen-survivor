@@ -1,0 +1,83 @@
+[gd_scene format=3 uid="uid://cm43ov31i3a3q"]
+
+[ext_resource type="Script" uid="uid://bs4vm38wguqb3" path="res://ui/hud/RunHud.gd" id="1_kblqa"]
+
+[node name="RunHud" type="CanvasLayer" unique_id=1806750018]
+process_mode = 3
+layer = 5
+script = ExtResource("1_kblqa")
+hp_box_path = NodePath("MarginContainer/VBoxContainer/TopRow/HpBox")
+hp_label_path = NodePath("MarginContainer/VBoxContainer/TopRow/HpBox/HpLabel")
+hp_bar_path = NodePath("MarginContainer/VBoxContainer/TopRow/HpBox/HpBar")
+xp_box_path = NodePath("MarginContainer/VBoxContainer/TopRow/XpBox")
+xp_label_path = NodePath("MarginContainer/VBoxContainer/TopRow/XpBox/XpLabel")
+xp_bar_path = NodePath("MarginContainer/VBoxContainer/TopRow/XpBox/XpBar")
+timer_label_path = NodePath("MarginContainer/VBoxContainer/TopRow/TimerLabel")
+coins_label_path = NodePath("MarginContainer/VBoxContainer/TopRow/CoinsLabel")
+level_label_path = NodePath("MarginContainer/VBoxContainer/TopRow/LevelLabel")
+kills_label_path = NodePath("MarginContainer/VBoxContainer/TopRow/KillsLabel")
+message_label_path = NodePath("MarginContainer/VBoxContainer/MessageLabel")
+
+[node name="MarginContainer" type="MarginContainer" parent="." unique_id=717528673]
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 81.0
+grow_horizontal = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer" unique_id=771167569]
+layout_mode = 2
+
+[node name="TopRow" type="HBoxContainer" parent="MarginContainer/VBoxContainer" unique_id=292982369]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="HpBox" type="VBoxContainer" parent="MarginContainer/VBoxContainer/TopRow" unique_id=276347294]
+custom_minimum_size = Vector2(180, 42)
+layout_mode = 2
+
+[node name="HpLabel" type="Label" parent="MarginContainer/VBoxContainer/TopRow/HpBox" unique_id=333827180]
+layout_mode = 2
+text = "HP: 100 / 100"
+
+[node name="HpBar" type="ProgressBar" parent="MarginContainer/VBoxContainer/TopRow/HpBox" unique_id=1357973621]
+custom_minimum_size = Vector2(180, 12)
+layout_mode = 2
+value = 100.0
+
+[node name="XpBox" type="VBoxContainer" parent="MarginContainer/VBoxContainer/TopRow" unique_id=631751458]
+custom_minimum_size = Vector2(100, 42)
+layout_mode = 2
+
+[node name="XpLabel" type="Label" parent="MarginContainer/VBoxContainer/TopRow/XpBox" unique_id=1771794045]
+layout_mode = 2
+text = "XP: 0 / 10"
+
+[node name="XpBar" type="ProgressBar" parent="MarginContainer/VBoxContainer/TopRow/XpBox" unique_id=101693829]
+custom_minimum_size = Vector2(180, 12)
+layout_mode = 2
+max_value = 10.0
+show_percentage = false
+
+[node name="TimerLabel" type="Label" parent="MarginContainer/VBoxContainer/TopRow" unique_id=1959516806]
+custom_minimum_size = Vector2(100, 32)
+layout_mode = 2
+text = "Tempo: 10:00"
+
+[node name="CoinsLabel" type="Label" parent="MarginContainer/VBoxContainer/TopRow" unique_id=927566131]
+custom_minimum_size = Vector2(100, 32)
+layout_mode = 2
+text = "Moedas: 0"
+
+[node name="LevelLabel" type="Label" parent="MarginContainer/VBoxContainer/TopRow" unique_id=506808573]
+custom_minimum_size = Vector2(100, 32)
+layout_mode = 2
+text = "Nível: 1"
+
+[node name="KillsLabel" type="Label" parent="MarginContainer/VBoxContainer/TopRow" unique_id=1812162148]
+custom_minimum_size = Vector2(100, 32)
+layout_mode = 2
+text = "Abates: 0"
+
+[node name="MessageLabel" type="Label" parent="MarginContainer/VBoxContainer" unique_id=1174913704]
+layout_mode = 2
+text = "Sobreviva até o fim da run"

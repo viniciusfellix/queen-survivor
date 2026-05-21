@@ -27,8 +27,9 @@ Para game designers:
 2. `05_game_design/where_to_edit_balance.md`
 3. `05_game_design/edit_goblin.md`
 4. `05_game_design/edit_gaia_weapon.md`
-5. `05_game_design/create_new_enemy.md`
-6. `05_game_design/create_new_weapon_or_attack.md`
+5. `05_game_design/edit_map_and_rewards.md`
+6. `05_game_design/create_new_enemy.md`
+7. `05_game_design/create_new_weapon_or_attack.md`
 
 ## Estado atual do módulo
 
@@ -52,3 +53,9 @@ O projeto já possui:
 - XP direta por morte.
 - Level-up com 3 opções.
 - Moeda física com magnetismo e coleta.
+- Mapa com duração configurável.
+- Timer da run.
+- Vitória por tempo.
+- Derrota por morte.
+- Resultado básico com payload.
+- Cálculo de recompensa por vitória/derrota.

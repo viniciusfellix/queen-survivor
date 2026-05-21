@@ -106,3 +106,39 @@ Validado:
 - `run_coins_collected`.
 - `run_coins_available`.
 - XP e moeda estão separados corretamente.
+
+### QS-M1-009 — Timer da run, vitória, derrota e resultado básico
+
+Validado:
+
+- `MapDefinition` criado.
+- `map_test_arena_10min.tres` criado.
+- Mapa configurado com duração oficial de 10 minutos.
+- Duração do mapa configurável para testes.
+- `RunController` carregando `MapDefinition`.
+- Timer da run funcionando.
+- Tempo restante exibido no debug.
+- Vitória disparando ao fim do tempo do mapa.
+- Derrota disparando quando Gaia morre.
+- `RunResultPayload` criado.
+- `RewardResolver` criado.
+- Fórmula oficial de vitória validada.
+- Fórmula oficial de derrota validada.
+- Moeda não coletada não entra no resultado.
+- XP da run aparece no resultado.
+- Kills aparecem no resultado.
+- Nível alcançado aparece no resultado.
+- Dano causado e dano recebido aparecem no resultado.
+- Causa da morte aparece em derrota.
+- `ResultPanel` criado.
+- `ResultPanel` exibe payload recebido, sem recalcular resultado.
+- Gameplay pausa ao final da run.
+
+Regras validadas:
+
+```txt
+Vitória:
+dinheiro_final = (moedas_coletadas × victory_multiplier) + victory_bonus
+
+Derrota:
+dinheiro_final = moedas_coletadas

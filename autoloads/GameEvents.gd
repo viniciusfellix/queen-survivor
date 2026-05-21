@@ -29,12 +29,18 @@ signal run_level_up_started(current_level: int, options: Array)
 signal run_level_up_option_selected(upgrade: UpgradeDefinition)
 signal run_level_up_completed(current_level: int, selected_upgrade_id: String)
 
+signal run_timer_changed(elapsed_seconds: float, remaining_seconds: float, duration_seconds: float)
+signal run_finished(result_payload: RunResultPayload)
+
+signal run_restart_requested()
+
 signal spine_animation_requested(animation_name: String)
 signal spine_animation_changed(animation_name: String)
 
 signal save_loaded()
 signal save_created()
 signal save_saved()
+signal save_updated(save_data: SaveData)
 
 func emit_debug(message: String) -> void:
 	print("[Debug] %s" % message)

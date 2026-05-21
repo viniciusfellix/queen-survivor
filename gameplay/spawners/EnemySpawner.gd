@@ -1,48 +1,70 @@
-extends Node2D
+extends Node
 
+@export_group("Base")
 @export var spawner_enabled: bool = true
+@export var spawn_on_ready: bool = true
+@export var player_group_name: String = "player"
 
+@export_group("Enemy")
 @export_file("*.tscn") var enemy_scene_path: String = "res://gameplay/enemies/EnemyBase.tscn"
 @export var enemy_definition: EnemyDefinition
 
+@export_group("Scene Roots")
 @export var enemy_root_path: NodePath
-@export var player_group_name: String = "player"
-@export var enemy_group_name: String = "enemy"
 
-@export var spawn_interval_seconds: float = 1.5
-@export var spawn_distance_min: float = 420.0
-@export var spawn_distance_max: float = 620.0
+@export_group("Spawn Fallback")
+@export var spawn_interval_seconds: float = 2.2
+@export var max_alive_enemies: int = 18
+@export var spawn_min_distance: float = 420.0
+@export var spawn_max_distance: float = 620.0
 
-@export var max_alive_enemies: int = 20
-@export var spawn_on_ready: bool = false
+@export_group("Timeline")
+@export var use_map_spawn_timeline: bool = true
+@export var spawn_timeline_definition: SpawnTimelineDefinition
+@export var log_timeline_changes: bool = true
+
+var player_node: Node2D = null
+var enemy_root: Node2D = null
 
 var spawn_timer: float = 0.0
-
-var enemy_root: Node2D = null
-var player_node: Node2D = null
-var is_configured_by_scene: bool = false
+var active_entry_id: String = ""
 
 func _ready() -> void:
-	randomize()
-
 	enemy_root = _resolve_enemy_root()
 	player_node = _resolve_player()
+	_resolve_spawn_timeline_from_map()
 
-	if enemy_root == null:
-		GameEvents.emit_debug("[EnemySpawner] EnemyRoot não encontrado no _ready().")
-	else:
+	if enemy_root != null:
 		GameEvents.emit_debug("[EnemySpawner] EnemyRoot encontrado: %s" % enemy_root.name)
-
-	if player_node == null:
-		GameEvents.emit_debug("[EnemySpawner] Player não encontrado no _ready(). A cena pode configurar depois.")
 	else:
-		GameEvents.emit_debug("[EnemySpawner] Player encontrado no _ready(): %s" % player_node.name)
+		GameEvents.emit_debug("[EnemySpawner] EnemyRoot NÃO encontrado.")
+
+	if player_node != null:
+		GameEvents.emit_debug("[EnemySpawner] Player encontrado: %s" % player_node.name)
+	else:
+		GameEvents.emit_debug("[EnemySpawner] Player não encontrado no _ready(). A cena pode configurar depois.")
+
+	if spawn_timeline_definition != null:
+		GameEvents.emit_debug("[EnemySpawner] SpawnTimeline carregada: %s | %s" % [
+			spawn_timeline_definition.id,
+			spawn_timeline_definition.get_debug_summary()
+		])
+	else:
+		GameEvents.emit_debug("[EnemySpawner] Sem SpawnTimeline. Usando fallback do spawner.")
 
 	if spawn_on_ready:
-		force_spawn_enemy()
+		spawn_timer = 0.0
+	else:
+		spawn_timer = spawn_interval_seconds
+
+	if not GameEvents.run_finished.is_connected(_on_run_finished):
+		GameEvents.run_finished.connect(_on_run_finished)
 
 func _process(delta: float) -> void:
 	if not spawner_enabled:
+		return
+
+	if RunQuery.is_gameplay_blocked(get_tree()):
 		return
 
 	if player_node == null:
@@ -54,33 +76,32 @@ func _process(delta: float) -> void:
 	if player_node == null or enemy_root == null:
 		return
 
-	spawn_timer += delta
+	_update_timeline_values()
 
-	if spawn_timer >= spawn_interval_seconds:
-		spawn_timer = 0.0
+	spawn_timer -= delta
+
+	if spawn_timer <= 0.0:
 		force_spawn_enemy()
+		spawn_timer = spawn_interval_seconds
 
-func configure_spawner(new_player: Node2D, new_enemy_root: Node2D) -> void:
-	player_node = new_player
-	enemy_root = new_enemy_root
-	is_configured_by_scene = true
-	spawn_timer = 0.0
+func configure_player(player: Node2D) -> void:
+	player_node = player
 
 	if player_node != null:
 		GameEvents.emit_debug("[EnemySpawner] Player configurado pela cena: %s" % player_node.name)
-	else:
-		GameEvents.emit_debug("[EnemySpawner] Player configurado pela cena está null.")
+
+func configure_enemy_root(root: Node2D) -> void:
+	enemy_root = root
 
 	if enemy_root != null:
 		GameEvents.emit_debug("[EnemySpawner] EnemyRoot configurado pela cena: %s" % enemy_root.name)
-	else:
-		GameEvents.emit_debug("[EnemySpawner] EnemyRoot configurado pela cena está null.")
 
 func force_spawn_enemy() -> void:
-	GameEvents.emit_debug("[EnemySpawner] Tentando criar inimigo...")
+	if RunQuery.is_gameplay_blocked(get_tree()):
+		GameEvents.emit_debug("[EnemySpawner] Spawn cancelado: gameplay bloqueado.")
+		return
 
 	if not spawner_enabled:
-		GameEvents.emit_debug("[EnemySpawner] Spawn cancelado: spawner desativado.")
 		return
 
 	if player_node == null:
@@ -90,20 +111,20 @@ func force_spawn_enemy() -> void:
 		enemy_root = _resolve_enemy_root()
 
 	if player_node == null:
-		GameEvents.emit_debug("[EnemySpawner] Spawn cancelado: player_node null.")
+		GameEvents.emit_debug("[EnemySpawner] Spawn cancelado: player ausente.")
 		return
 
 	if enemy_root == null:
-		GameEvents.emit_debug("[EnemySpawner] Spawn cancelado: enemy_root null.")
+		GameEvents.emit_debug("[EnemySpawner] Spawn cancelado: enemy_root ausente.")
 		return
 
 	var alive_count: int = _get_alive_enemy_count()
 
 	if alive_count >= max_alive_enemies:
-		GameEvents.emit_debug("[EnemySpawner] Spawn cancelado: limite atingido. vivos=%s / max=%s" % [
-			str(alive_count),
-			str(max_alive_enemies)
-		])
+		return
+
+	if enemy_scene_path.strip_edges() == "":
+		push_warning("[EnemySpawner] enemy_scene_path vazio.")
 		return
 
 	var packed_enemy: PackedScene = load(enemy_scene_path) as PackedScene
@@ -126,28 +147,112 @@ func force_spawn_enemy() -> void:
 
 	if enemy_node.has_method("setup"):
 		enemy_node.call("setup", enemy_definition, player_node)
-	else:
-		GameEvents.emit_debug("[EnemySpawner] Enemy criado, mas não possui método setup().")
 
-	GameEvents.emit_debug("[EnemySpawner] Inimigo criado em: %s | vivos=%s" % [
+	GameEvents.emit_debug("[EnemySpawner] Inimigo criado em: %s | vivos=%s | wave=%s" % [
 		str(enemy_node.global_position),
-		str(alive_count + 1)
+		str(_get_alive_enemy_count()),
+		active_entry_id
 	])
 
-func _get_spawn_position_around_player() -> Vector2:
-	var angle: float = randf_range(0.0, TAU)
-	var distance: float = randf_range(spawn_distance_min, spawn_distance_max)
-	var offset: Vector2 = Vector2(cos(angle), sin(angle)) * distance
+func _update_timeline_values() -> void:
+	if spawn_timeline_definition == null:
+		_resolve_spawn_timeline_from_map()
 
-	return player_node.global_position + offset
+	if spawn_timeline_definition == null:
+		return
+
+	var run_state: RunState = RunQuery.get_run_state(get_tree())
+	var elapsed_seconds: float = 0.0
+
+	if run_state != null:
+		elapsed_seconds = run_state.elapsed_seconds
+
+	var active_entry: SpawnTimelineEntryDefinition = spawn_timeline_definition.get_active_entry(elapsed_seconds)
+
+	if active_entry == null:
+		return
+
+	if active_entry.id != active_entry_id:
+		_apply_timeline_entry(active_entry, true)
+	else:
+		_apply_timeline_entry(active_entry, false)
+
+func _apply_timeline_entry(entry: SpawnTimelineEntryDefinition, changed: bool) -> void:
+	if entry == null:
+		return
+
+	active_entry_id = entry.id
+
+	if entry.enemy_scene_path.strip_edges() != "":
+		enemy_scene_path = entry.enemy_scene_path
+
+	if entry.enemy_definition != null:
+		enemy_definition = entry.enemy_definition
+
+	spawn_interval_seconds = entry.spawn_interval_seconds
+	max_alive_enemies = entry.max_alive_enemies
+	spawn_min_distance = entry.spawn_min_distance
+	spawn_max_distance = entry.spawn_max_distance
+
+	if changed:
+		spawn_timer = min(spawn_timer, spawn_interval_seconds)
+
+		if log_timeline_changes:
+			GameEvents.emit_debug("[EnemySpawner] Wave ativa: %s | interval=%s max_alive=%s dist=%s-%s" % [
+				entry.id,
+				str(spawn_interval_seconds),
+				str(max_alive_enemies),
+				str(spawn_min_distance),
+				str(spawn_max_distance)
+			])
+
+		if entry.spawn_on_activate:
+			force_spawn_enemy()
+
+func _resolve_spawn_timeline_from_map() -> void:
+	if spawn_timeline_definition != null:
+		return
+
+	if not use_map_spawn_timeline:
+		return
+
+	var run_controller: Node = RunQuery.get_run_controller(get_tree())
+
+	if run_controller == null:
+		return
+
+	if not run_controller.has_method("get_map_definition"):
+		return
+
+	var map_definition_variant: Variant = run_controller.call("get_map_definition")
+
+	if map_definition_variant is MapDefinition:
+		var map_definition: MapDefinition = map_definition_variant as MapDefinition
+
+		if map_definition.spawn_timeline != null:
+			spawn_timeline_definition = map_definition.spawn_timeline
+
+func _get_spawn_position_around_player() -> Vector2:
+	var safe_min_distance: float = max(0.0, spawn_min_distance)
+	var safe_max_distance: float = max(safe_min_distance, spawn_max_distance)
+
+	var angle: float = randf_range(0.0, TAU)
+	var distance: float = randf_range(safe_min_distance, safe_max_distance)
+
+	return player_node.global_position + Vector2(cos(angle), sin(angle)) * distance
 
 func _get_alive_enemy_count() -> int:
-	var enemies: Array[Node] = get_tree().get_nodes_in_group(enemy_group_name)
+	var enemies: Array[Node] = get_tree().get_nodes_in_group("enemy")
 	var count: int = 0
 
 	for enemy: Node in enemies:
-		if enemy != null and is_instance_valid(enemy):
-			count += 1
+		if enemy == null:
+			continue
+
+		if not is_instance_valid(enemy):
+			continue
+
+		count += 1
 
 	return count
 
@@ -158,21 +263,18 @@ func _resolve_enemy_root() -> Node2D:
 		if configured_root is Node2D:
 			return configured_root as Node2D
 
+	var sibling_root: Node = get_node_or_null("../EnemyRoot")
+
+	if sibling_root is Node2D:
+		return sibling_root as Node2D
+
 	var parent_node: Node = get_parent()
 
 	if parent_node != null:
-		var sibling_root: Node = parent_node.get_node_or_null("EnemyRoot")
+		var found_root: Node = parent_node.get_node_or_null("EnemyRoot")
 
-		if sibling_root is Node2D:
-			return sibling_root as Node2D
-
-		var parent_parent: Node = parent_node.get_parent()
-
-		if parent_parent != null:
-			var uncle_root: Node = parent_parent.get_node_or_null("EnemyRoot")
-
-			if uncle_root is Node2D:
-				return uncle_root as Node2D
+		if found_root is Node2D:
+			return found_root as Node2D
 
 	return null
 
@@ -184,3 +286,7 @@ func _resolve_player() -> Node2D:
 			return node as Node2D
 
 	return null
+
+func _on_run_finished(_result_payload: RunResultPayload) -> void:
+	spawner_enabled = false
+	GameEvents.emit_debug("[EnemySpawner] Desativado após fim da run.")

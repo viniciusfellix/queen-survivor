@@ -24,17 +24,27 @@ var velocity: Vector2 = Vector2.ZERO
 var elapsed_seconds: float = 0.0
 var is_collected: bool = false
 var is_magnetized: bool = false
+var collection_enabled: bool = true
 
 func _ready() -> void:
 	_apply_definition()
 	player_node = _resolve_player()
 	queue_redraw()
+	
+	if not GameEvents.run_finished.is_connected(_on_run_finished):
+		GameEvents.run_finished.connect(_on_run_finished)
 
 func _physics_process(delta: float) -> void:
 	if is_collected:
 		return
 
 	elapsed_seconds += delta
+	
+	if not collection_enabled:
+		return
+
+	if RunQuery.is_run_finished(get_tree()):
+		return
 
 	if player_node == null:
 		player_node = _resolve_player()
@@ -106,6 +116,12 @@ func _update_magnet_movement(delta: float) -> void:
 	velocity = velocity.move_toward(desired_velocity, magnet_acceleration * delta)
 
 func _collect() -> void:
+	if not collection_enabled:
+		return
+
+	if RunQuery.is_run_finished(get_tree()):
+		return
+		
 	if is_collected:
 		return
 
@@ -127,3 +143,9 @@ func _resolve_player() -> Node2D:
 			return node as Node2D
 
 	return null
+
+func _on_run_finished(_result_payload: RunResultPayload) -> void:
+	collection_enabled = false
+	is_magnetized = false
+	velocity = Vector2.ZERO
+	queue_redraw()

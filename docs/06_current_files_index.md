@@ -17,6 +17,7 @@ definitions/WeaponDefinition.gd
 definitions/DamageComponentDefinition.gd
 definitions/UpgradeDefinition.gd
 definitions/CoinDropDefinition.gd
+definitions/MapDefinition.gd
 ```
 
 ## Runtime
@@ -37,6 +38,8 @@ gameplay/weapons/attacks/DirectionalAttackHitbox.gd
 gameplay/combat/DamagePayload.gd
 gameplay/combat/DamageResolver.gd
 gameplay/run/RunController.gd
+gameplay/run/RunResultPayload.gd
+gameplay/run/RewardResolver.gd
 gameplay/drops/DropController.gd
 gameplay/drops/CoinDrop.gd
 gameplay/test/TestGaiaScene.gd
@@ -50,6 +53,8 @@ gameplay/level_up/LevelUpOptionService.gd
 ```txt
 ui/debug/DebugOverlay.gd
 ui/level_up/LevelUpPanel.gd
+ui/result/ResultPanel.gd
+ui/result/ResultPanel.tscn
 ```
 
 ## Visual
@@ -72,4 +77,5 @@ data/weapons/components/gaia_initial_physical.tres
 data/weapons/components/gaia_initial_magical.tres
 data/drops/coin_default.tres
 data/upgrades/
+data/maps/map_test_arena_10min.tres
 ```

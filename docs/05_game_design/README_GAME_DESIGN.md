@@ -59,6 +59,109 @@ res://visual/characters/gaia/GaiaVisual.tscn
 res://visual/enemies/goblin_warrior/GoblinWarriorVisual.tscn
 ```
 
+### Mapa, duração e recompensa de vitória
+
+```txt
+res://data/maps/map_test_arena_10min.tres
+
+Resultado da run
+
+A tela está em:
+
+res://ui/result/ResultPanel.tscn
+
+Mas o game designer normalmente não precisa editar essa tela para balanceamento.
+
+
+Adicione também esta seção:
+
+```md
+## Resultado e recompensa
+
+O resultado usa as moedas realmente coletadas na run.
+
+Moedas que ficaram no chão não entram no resultado.
+
+A recompensa final segue:
+
+```txt
+Vitória:
+dinheiro_final = (moedas_coletadas × victory_multiplier) + victory_bonus
+
+Derrota:
+dinheiro_final = moedas_coletadas
+
+Para editar multiplicador e bônus de vitória, use:
+
+res://data/maps/map_test_arena_10min.tres
+
+---
+
+# 7. Atualizar `docs/05_game_design/where_to_edit_balance.md`
+
+Adicione esta seção:
+
+```md
+## Duração do mapa
+
+Arquivo:
+
+```txt
+res://data/maps/map_test_arena_10min.tres
+
+Campo:
+
+duration_seconds
+
+Valores úteis:
+
+30    # teste rápido
+60    # teste médio
+600   # valor oficial de 10 minutos
+Multiplicador de vitória
+
+Arquivo:
+
+res://data/maps/map_test_arena_10min.tres
+
+Campo:
+
+victory_multiplier
+
+Exemplo:
+
+2.0
+
+Se o jogador coletar 10 moedas e vencer:
+
+10 × 2.0 = 20
+Bônus de vitória
+
+Arquivo:
+
+res://data/maps/map_test_arena_10min.tres
+
+Campo:
+
+victory_bonus
+
+Exemplo:
+
+victory_bonus = 5
+
+Se o jogador coletar 10 moedas, multiplicador for 2 e bônus for 5:
+
+final_money_reward = (10 × 2) + 5
+final_money_reward = 25
+Recompensa na derrota
+
+Não existe multiplicador na derrota.
+
+final_money_reward = moedas_coletadas
+
+---
+
+
 ## Regra importante
 
 Se é número de balanceamento, quase sempre está em `res://data/`.

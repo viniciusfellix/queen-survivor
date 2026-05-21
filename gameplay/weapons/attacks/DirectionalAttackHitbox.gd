@@ -27,9 +27,18 @@ var already_hit_instance_ids: Dictionary = {}
 
 func _ready() -> void:
 	queue_redraw()
+
+	if RunQuery.is_gameplay_blocked(get_tree()):
+		queue_free()
+		return
+
 	_try_hit_enemies()
 
 func _physics_process(delta: float) -> void:
+	if RunQuery.is_gameplay_blocked(get_tree()):
+		queue_free()
+		return
+
 	elapsed_seconds += delta
 
 	_try_hit_enemies()
@@ -124,6 +133,9 @@ func _try_hit_enemies() -> void:
 			str(final_damage_variant),
 			str(_get_component_debug_string())
 		])
+
+		if RunQuery.is_gameplay_blocked(get_tree()):
+			return
 
 func _get_component_debug_string() -> String:
 	if damage_components.is_empty():
