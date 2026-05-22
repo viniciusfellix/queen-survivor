@@ -1,0 +1,65 @@
+[gd_scene format=3 uid="uid://dw8pji4737owl"]
+
+[ext_resource type="Script" uid="uid://dhpj5y4tcryam" path="res://ui/debug/tools/PrototypeToolsPanel.gd" id="1_nowny"]
+
+[node name="PrototypeToolsPanel" type="CanvasLayer" unique_id=531935299]
+process_mode = 3
+layer = 100
+script = ExtResource("1_nowny")
+
+[node name="Panel" type="Panel" parent="." unique_id=4475338]
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="MarginContainer" type="MarginContainer" parent="Panel" unique_id=1710956989]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Panel/MarginContainer" unique_id=429604848]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="TitleLabel" type="Label" parent="Panel/MarginContainer/VBoxContainer" unique_id=1830971737]
+layout_mode = 2
+
+[node name="HintLabel" type="Label" parent="Panel/MarginContainer/VBoxContainer" unique_id=183014180]
+layout_mode = 2
+
+[node name="SaveInfoLabel" type="Label" parent="Panel/MarginContainer/VBoxContainer" unique_id=694685991]
+layout_mode = 2
+
+[node name="CurrentRunLabel" type="Label" parent="Panel/MarginContainer/VBoxContainer" unique_id=1434673234]
+layout_mode = 2
+
+[node name="LastRunLabel" type="Label" parent="Panel/MarginContainer/VBoxContainer" unique_id=1577334736]
+layout_mode = 2
+
+[node name="WarningLabel" type="Label" parent="Panel/MarginContainer/VBoxContainer" unique_id=353345865]
+layout_mode = 2
+
+[node name="StatusLabel" type="Label" parent="Panel/MarginContainer/VBoxContainer" unique_id=1750742188]
+layout_mode = 2
+
+[node name="ActionsRow" type="HBoxContainer" parent="Panel/MarginContainer/VBoxContainer" unique_id=1869533133]
+visible = false
+custom_minimum_size = Vector2(560, 390)
+layout_mode = 2
+
+[node name="ForceVictoryButton" type="Button" parent="Panel/MarginContainer/VBoxContainer/ActionsRow" unique_id=381093445]
+layout_mode = 2
+
+[node name="ForceDefeatButton" type="Button" parent="Panel/MarginContainer/VBoxContainer/ActionsRow" unique_id=1242707817]
+layout_mode = 2
+
+[node name="ResetProgressButton" type="Button" parent="Panel/MarginContainer/VBoxContainer/ActionsRow" unique_id=1479589903]
+layout_mode = 2
+
+[node name="ConfirmationRow" type="HBoxContainer" parent="Panel/MarginContainer/VBoxContainer" unique_id=374890356]
+layout_mode = 2
+
+[node name="ConfirmResetButton" type="Button" parent="Panel/MarginContainer/VBoxContainer/ConfirmationRow" unique_id=1863218585]
+layout_mode = 2
+
+[node name="CancelResetButton" type="Button" parent="Panel/MarginContainer/VBoxContainer/ConfirmationRow" unique_id=1232760759]
+layout_mode = 2

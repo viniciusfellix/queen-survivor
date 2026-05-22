@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="UpgradeDefinition" format=3 uid="uid://c4mrr4ooqg7sb"]
+
+[ext_resource type="Script" uid="uid://yjpi6mhnsb1a" path="res://definitions/UpgradeDefinition.gd" id="1_nj60p"]
+[ext_resource type="Texture2D" uid="uid://campey5w8g4tn" path="res://assets/placeholders/upgrades/upgrade_range.png" id="1_vfxw7"]
+
+[resource]
+script = ExtResource("1_nj60p")
+id = "upgrade_coin_collect_radius_percent"
+display_name_key = "upgrade.coin_collect_radius_percent.name"
+description_key = "upgrade.coin_collect_radius_percent.description"
+icon = ExtResource("1_vfxw7")
+upgrade_type = "coin_collect_radius_percent"
+value_float = 15.0
+max_stack_in_run = 5
+metadata/_custom_type_script = "uid://yjpi6mhnsb1a"

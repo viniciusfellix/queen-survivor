@@ -29,6 +29,12 @@ extends CanvasLayer
 @export var kills_label_path: NodePath
 @export var message_label_path: NodePath
 
+@export var cooldown_box_path: NodePath
+@export var cooldown_label_path: NodePath
+@export var cooldown_bar_path: NodePath
+
+@export var show_cooldown: bool = true
+
 @onready var hp_box: Control = get_node_or_null(hp_box_path) as Control
 @onready var hp_label: Label = get_node_or_null(hp_label_path) as Label
 @onready var hp_bar: ProgressBar = get_node_or_null(hp_bar_path) as ProgressBar
@@ -36,6 +42,10 @@ extends CanvasLayer
 @onready var xp_box: Control = get_node_or_null(xp_box_path) as Control
 @onready var xp_label: Label = get_node_or_null(xp_label_path) as Label
 @onready var xp_bar: ProgressBar = get_node_or_null(xp_bar_path) as ProgressBar
+
+@onready var cooldown_box: Control = get_node_or_null(cooldown_box_path) as Control
+@onready var cooldown_label: Label = get_node_or_null(cooldown_label_path) as Label
+@onready var cooldown_bar: ProgressBar = get_node_or_null(cooldown_bar_path) as ProgressBar
 
 @onready var timer_label: Label = get_node_or_null(timer_label_path) as Label
 @onready var coins_label: Label = get_node_or_null(coins_label_path) as Label
@@ -45,6 +55,11 @@ extends CanvasLayer
 
 var refresh_timer: float = 0.0
 var latest_result_type: String = ""
+
+var latest_weapon_id: String = ""
+var latest_cooldown_timer: float = 0.0
+var latest_cooldown_seconds: float = 1.0
+var latest_cooldown_progress_ratio: float = 1.0
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -87,6 +102,9 @@ func _connect_events() -> void:
 
 	if not GameEvents.run_finished.is_connected(_on_run_finished):
 		GameEvents.run_finished.connect(_on_run_finished)
+	
+	if not GameEvents.weapon_cooldown_changed.is_connected(_on_weapon_cooldown_changed):
+		GameEvents.weapon_cooldown_changed.connect(_on_weapon_cooldown_changed)
 
 func _refresh_all() -> void:
 	_apply_visibility()
@@ -100,7 +118,31 @@ func _refresh_all() -> void:
 	_update_coins(run_data)
 	_update_level(run_data)
 	_update_kills(run_data)
+	_update_cooldown()
 	_update_message(run_data)
+
+func _update_cooldown() -> void:
+	if not show_cooldown:
+		return
+
+	var safe_cooldown_seconds: float = max(0.001, latest_cooldown_seconds)
+	var cooldown_percent: float = clamp(latest_cooldown_progress_ratio, 0.0, 1.0) * 100.0
+
+	if cooldown_label != null:
+		if latest_cooldown_timer <= 0.0:
+			cooldown_label.text = "%s: %s" % [
+				LocalizationManager.get_text("ui.hud.attack"),
+				LocalizationManager.get_text("ui.hud.attack_ready")
+			]
+		else:
+			cooldown_label.text = "%s: %.1fs" % [
+				LocalizationManager.get_text("ui.hud.attack"),
+				latest_cooldown_timer
+			]
+
+	if cooldown_bar != null:
+		cooldown_bar.max_value = 100.0
+		cooldown_bar.value = cooldown_percent
 
 func _update_hp(player_data: Dictionary) -> void:
 	if not show_hp:
@@ -235,6 +277,9 @@ func _apply_visibility() -> void:
 
 	if message_label != null:
 		message_label.visible = show_message
+	
+	if cooldown_box != null:
+		cooldown_box.visible = show_cooldown
 
 func _configure_bars() -> void:
 	if hp_bar != null:
@@ -248,6 +293,12 @@ func _configure_bars() -> void:
 		xp_bar.max_value = 10
 		xp_bar.value = 0
 		xp_bar.show_percentage = false
+	
+	if cooldown_bar != null:
+		cooldown_bar.min_value = 0
+		cooldown_bar.max_value = 100
+		cooldown_bar.value = 100
+		cooldown_bar.show_percentage = false
 
 func _resolve_missing_nodes() -> void:
 	if hp_box == null:
@@ -282,6 +333,15 @@ func _resolve_missing_nodes() -> void:
 
 	if message_label == null:
 		message_label = get_node_or_null("MarginContainer/VBoxContainer/MessageLabel") as Label
+	
+	if cooldown_box == null:
+		cooldown_box = get_node_or_null("MarginContainer/VBoxContainer/TopRow/CooldownBox") as Control
+
+	if cooldown_label == null:
+		cooldown_label = get_node_or_null("MarginContainer/VBoxContainer/TopRow/CooldownBox/CooldownLabel") as Label
+
+	if cooldown_bar == null:
+		cooldown_bar = get_node_or_null("MarginContainer/VBoxContainer/TopRow/CooldownBox/CooldownBar") as ProgressBar
 
 func _get_player_debug_data() -> Dictionary:
 	var players: Array[Node] = get_tree().get_nodes_in_group("player")
@@ -375,3 +435,16 @@ func _on_run_finished(result_payload: RunResultPayload) -> void:
 		visible = false
 	else:
 		_refresh_all()
+
+func _on_weapon_cooldown_changed(
+	weapon_id: String,
+	cooldown_timer: float,
+	cooldown_seconds: float,
+	progress_ratio: float
+) -> void:
+	latest_weapon_id = weapon_id
+	latest_cooldown_timer = cooldown_timer
+	latest_cooldown_seconds = cooldown_seconds
+	latest_cooldown_progress_ratio = progress_ratio
+
+	_update_cooldown()

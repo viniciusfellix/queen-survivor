@@ -18,6 +18,13 @@ extends Node
 @export var spawn_min_distance: float = 420.0
 @export var spawn_max_distance: float = 620.0
 
+@export_group("Spawn Safety")
+@export var initial_spawn_delay_seconds: float = 0.45
+@export var spawn_position_attempts: int = 16
+@export var minimum_safe_spawn_distance_from_player: float = 360.0
+@export var prevent_multiple_spawns_same_frame: bool = true
+@export var log_spawn_distance: bool = true
+
 @export_group("Timeline")
 @export var use_map_spawn_timeline: bool = true
 @export var spawn_timeline_definition: SpawnTimelineDefinition
@@ -28,6 +35,10 @@ var enemy_root: Node2D = null
 
 var spawn_timer: float = 0.0
 var active_entry_id: String = ""
+
+var elapsed_since_ready: float = 0.0
+var last_spawn_frame: int = -1
+var initial_spawn_delay_completed: bool = false
 
 func _ready() -> void:
 	enemy_root = _resolve_enemy_root()
@@ -50,10 +61,12 @@ func _ready() -> void:
 			spawn_timeline_definition.get_debug_summary()
 		])
 	else:
-		GameEvents.emit_debug("[EnemySpawner] Sem SpawnTimeline. Usando fallback do spawner.")
+		GameEvents.emit_debug("[EnemySpawner] Sem SpawnTimeline no _ready(). Tentará resolver em runtime.")
 
+	# Antes era comum deixar spawn_timer em 0.
+	# Agora mesmo com spawn_on_ready, aguardamos um pequeno delay para evitar spawn no primeiro frame.
 	if spawn_on_ready:
-		spawn_timer = 0.0
+		spawn_timer = max(0.0, initial_spawn_delay_seconds)
 	else:
 		spawn_timer = spawn_interval_seconds
 
@@ -67,6 +80,8 @@ func _process(delta: float) -> void:
 	if RunQuery.is_gameplay_blocked(get_tree()):
 		return
 
+	elapsed_since_ready += delta
+
 	if player_node == null:
 		player_node = _resolve_player()
 
@@ -78,11 +93,25 @@ func _process(delta: float) -> void:
 
 	_update_timeline_values()
 
+	if elapsed_since_ready < initial_spawn_delay_seconds:
+		return
+
+	if not initial_spawn_delay_completed:
+		initial_spawn_delay_completed = true
+		spawn_timer = min(spawn_timer, 0.05)
+		GameEvents.emit_debug("[EnemySpawner] Delay inicial concluído. Spawner liberado.")
+
 	spawn_timer -= delta
 
 	if spawn_timer <= 0.0:
-		force_spawn_enemy()
-		spawn_timer = spawn_interval_seconds
+		var spawned: bool = force_spawn_enemy()
+
+		if spawned:
+			spawn_timer = spawn_interval_seconds
+		else:
+			# Se não conseguiu spawnar por limite de vivos ou outro motivo,
+			# tenta novamente em breve, mas não no mesmo frame.
+			spawn_timer = min(0.5, spawn_interval_seconds)
 
 func configure_player(player: Node2D) -> void:
 	player_node = player
@@ -96,13 +125,20 @@ func configure_enemy_root(root: Node2D) -> void:
 	if enemy_root != null:
 		GameEvents.emit_debug("[EnemySpawner] EnemyRoot configurado pela cena: %s" % enemy_root.name)
 
-func force_spawn_enemy() -> void:
+func force_spawn_enemy() -> bool:
 	if RunQuery.is_gameplay_blocked(get_tree()):
 		GameEvents.emit_debug("[EnemySpawner] Spawn cancelado: gameplay bloqueado.")
-		return
+		return false
 
 	if not spawner_enabled:
-		return
+		return false
+
+	if prevent_multiple_spawns_same_frame:
+		var current_frame: int = Engine.get_process_frames()
+
+		if current_frame == last_spawn_frame:
+			GameEvents.emit_debug("[EnemySpawner] Spawn cancelado: já houve spawn neste frame.")
+			return false
 
 	if player_node == null:
 		player_node = _resolve_player()
@@ -112,47 +148,68 @@ func force_spawn_enemy() -> void:
 
 	if player_node == null:
 		GameEvents.emit_debug("[EnemySpawner] Spawn cancelado: player ausente.")
-		return
+		return false
 
 	if enemy_root == null:
 		GameEvents.emit_debug("[EnemySpawner] Spawn cancelado: enemy_root ausente.")
-		return
+		return false
 
 	var alive_count: int = _get_alive_enemy_count()
 
 	if alive_count >= max_alive_enemies:
-		return
+		return false
 
 	if enemy_scene_path.strip_edges() == "":
 		push_warning("[EnemySpawner] enemy_scene_path vazio.")
-		return
+		return false
 
 	var packed_enemy: PackedScene = load(enemy_scene_path) as PackedScene
 
 	if packed_enemy == null:
 		push_warning("[EnemySpawner] Não foi possível carregar enemy_scene_path: %s" % enemy_scene_path)
-		return
+		return false
 
 	var enemy_instance: Node = packed_enemy.instantiate()
 
 	if not enemy_instance is Node2D:
 		push_warning("[EnemySpawner] Enemy scene não é Node2D.")
 		enemy_instance.queue_free()
-		return
+		return false
 
 	var enemy_node: Node2D = enemy_instance as Node2D
+	var spawn_position: Vector2 = _get_safe_spawn_position_around_player()
+	var distance_to_player: float = spawn_position.distance_to(player_node.global_position)
+
+	# Importante:
+	# Definimos a posição local ANTES de adicionar o inimigo à árvore.
+	# Assim o _ready() do EnemyBase já nasce na posição correta.
+	enemy_node.position = enemy_root.to_local(spawn_position)
 
 	enemy_root.add_child(enemy_node)
-	enemy_node.global_position = _get_spawn_position_around_player()
 
 	if enemy_node.has_method("setup"):
 		enemy_node.call("setup", enemy_definition, player_node)
 
-	GameEvents.emit_debug("[EnemySpawner] Inimigo criado em: %s | vivos=%s | wave=%s" % [
-		str(enemy_node.global_position),
-		str(_get_alive_enemy_count()),
-		active_entry_id
-	])
+	last_spawn_frame = Engine.get_process_frames()
+
+	# Recalcula depois de entrar na árvore, apenas para log/validação.
+	distance_to_player = enemy_node.global_position.distance_to(player_node.global_position)
+
+	if log_spawn_distance:
+		GameEvents.emit_debug("[EnemySpawner] Inimigo criado em: %s | dist_player=%s | vivos=%s | wave=%s" % [
+			str(enemy_node.global_position),
+			str(distance_to_player),
+			str(_get_alive_enemy_count()),
+			active_entry_id
+		])
+	else:
+		GameEvents.emit_debug("[EnemySpawner] Inimigo criado em: %s | vivos=%s | wave=%s" % [
+			str(enemy_node.global_position),
+			str(_get_alive_enemy_count()),
+			active_entry_id
+		])
+
+	return true
 
 func _update_timeline_values() -> void:
 	if spawn_timeline_definition == null:
@@ -194,20 +251,33 @@ func _apply_timeline_entry(entry: SpawnTimelineEntryDefinition, changed: bool) -
 	spawn_min_distance = entry.spawn_min_distance
 	spawn_max_distance = entry.spawn_max_distance
 
-	if changed:
-		spawn_timer = min(spawn_timer, spawn_interval_seconds)
+	if not changed:
+		return
 
-		if log_timeline_changes:
-			GameEvents.emit_debug("[EnemySpawner] Wave ativa: %s | interval=%s max_alive=%s dist=%s-%s" % [
-				entry.id,
-				str(spawn_interval_seconds),
-				str(max_alive_enemies),
-				str(spawn_min_distance),
-				str(spawn_max_distance)
-			])
+	spawn_timer = min(spawn_timer, spawn_interval_seconds)
 
-		if entry.spawn_on_activate:
-			force_spawn_enemy()
+	if log_timeline_changes:
+		GameEvents.emit_debug("[EnemySpawner] Wave ativa: %s | interval=%s max_alive=%s dist=%s-%s" % [
+			entry.id,
+			str(spawn_interval_seconds),
+			str(max_alive_enemies),
+			str(spawn_min_distance),
+			str(spawn_max_distance)
+		])
+
+	if not entry.spawn_on_activate:
+		return
+
+	# A wave inicial não deve forçar spawn antes do delay inicial.
+	if not initial_spawn_delay_completed:
+		spawn_timer = min(spawn_timer, max(0.05, initial_spawn_delay_seconds - elapsed_since_ready))
+		return
+
+	var spawned: bool = force_spawn_enemy()
+
+	if spawned:
+		# Impede spawn duplo no mesmo frame após troca de wave.
+		spawn_timer = spawn_interval_seconds
 
 func _resolve_spawn_timeline_from_map() -> void:
 	if spawn_timeline_definition != null:
@@ -231,10 +301,31 @@ func _resolve_spawn_timeline_from_map() -> void:
 
 		if map_definition.spawn_timeline != null:
 			spawn_timeline_definition = map_definition.spawn_timeline
+			GameEvents.emit_debug("[EnemySpawner] SpawnTimeline resolvida em runtime: %s" % spawn_timeline_definition.id)
 
-func _get_spawn_position_around_player() -> Vector2:
-	var safe_min_distance: float = max(0.0, spawn_min_distance)
-	var safe_max_distance: float = max(safe_min_distance, spawn_max_distance)
+func _get_safe_spawn_position_around_player() -> Vector2:
+	var safe_min_distance: float = max(minimum_safe_spawn_distance_from_player, spawn_min_distance)
+	var safe_max_distance: float = max(safe_min_distance + 1.0, spawn_max_distance)
+
+	var best_position: Vector2 = player_node.global_position + Vector2.RIGHT * safe_min_distance
+	var best_distance: float = 0.0
+
+	for attempt: int in range(max(1, spawn_position_attempts)):
+		var candidate_position: Vector2 = _get_spawn_position_around_player(safe_min_distance, safe_max_distance)
+		var distance_to_player: float = candidate_position.distance_to(player_node.global_position)
+
+		if distance_to_player >= safe_min_distance:
+			return candidate_position
+
+		if distance_to_player > best_distance:
+			best_distance = distance_to_player
+			best_position = candidate_position
+
+	return best_position
+
+func _get_spawn_position_around_player(min_distance: float, max_distance: float) -> Vector2:
+	var safe_min_distance: float = max(0.0, min_distance)
+	var safe_max_distance: float = max(safe_min_distance, max_distance)
 
 	var angle: float = randf_range(0.0, TAU)
 	var distance: float = randf_range(safe_min_distance, safe_max_distance)
@@ -263,18 +354,20 @@ func _resolve_enemy_root() -> Node2D:
 		if configured_root is Node2D:
 			return configured_root as Node2D
 
-	var sibling_root: Node = get_node_or_null("../EnemyRoot")
+	var direct_sibling: Node = get_node_or_null("../EnemyRoot")
 
-	if sibling_root is Node2D:
-		return sibling_root as Node2D
+	if direct_sibling is Node2D:
+		return direct_sibling as Node2D
 
 	var parent_node: Node = get_parent()
 
-	if parent_node != null:
+	while parent_node != null:
 		var found_root: Node = parent_node.get_node_or_null("EnemyRoot")
 
 		if found_root is Node2D:
 			return found_root as Node2D
+
+		parent_node = parent_node.get_parent()
 
 	return null
 

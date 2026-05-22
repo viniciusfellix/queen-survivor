@@ -1,12 +1,15 @@
 [gd_resource type="Resource" script_class="UpgradeDefinition" format=3 uid="uid://bjbpjv2g6i8s1"]
 
 [ext_resource type="Script" uid="uid://yjpi6mhnsb1a" path="res://definitions/UpgradeDefinition.gd" id="1_2qlop"]
+[ext_resource type="Texture2D" uid="uid://corb1hopadixf" path="res://assets/placeholders/upgrades/upgrade_damage.png" id="1_wuvvf"]
 
 [resource]
 script = ExtResource("1_2qlop")
 id = "upgrade_weapon_damage_flat"
 display_name_key = "upgrade.weapon_damage_flat.name"
 description_key = "upgrade.weapon_damage_flat.description"
+icon = ExtResource("1_wuvvf")
 upgrade_type = "weapon_damage_flat"
 value_int = 1
+max_stack_in_run = 10
 metadata/_custom_type_script = "uid://yjpi6mhnsb1a"

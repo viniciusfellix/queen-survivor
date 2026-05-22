@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="UpgradeDefinition" format=3 uid="uid://c1ie5fola0thn"]
+
+[ext_resource type="Texture2D" uid="uid://bvcrtgpob4spb" path="res://assets/placeholders/upgrades/upgrade_health.png" id="1_13hin"]
+[ext_resource type="Script" uid="uid://yjpi6mhnsb1a" path="res://definitions/UpgradeDefinition.gd" id="1_b1cka"]
+
+[resource]
+script = ExtResource("1_b1cka")
+id = "upgrade_player_heal_flat"
+display_name_key = "upgrade.player_heal_flat.name"
+description_key = "upgrade.player_heal_flat.description"
+icon = ExtResource("1_13hin")
+upgrade_type = "player_heal_flat"
+value_int = 20
+metadata/_custom_type_script = "uid://yjpi6mhnsb1a"

@@ -1,0 +1,10 @@
+[gd_scene format=3 uid="uid://coeswsds3t2ef"]
+
+[ext_resource type="Script" uid="uid://dwft5wjio7hf" path="res://ui/world_feedback/FloatingCombatText.gd" id="1_u44ia"]
+
+[node name="FloatingCombatText" type="Label" unique_id=552981175]
+custom_minimum_size = Vector2(200, 90)
+text = "-6"
+horizontal_alignment = 1
+vertical_alignment = 1
+script = ExtResource("1_u44ia")

@@ -6,7 +6,8 @@
 [resource]
 script = ExtResource("1_rl4an")
 id = "wave_02_pressure"
-start_time_seconds = 40.0
+start_time_seconds = 300.0
+end_time_seconds = 480.0
 enemy_scene_path = "uid://dg1wr6dv8jxxi"
 enemy_definition = ExtResource("1_5gpm2")
 spawn_interval_seconds = 1.8

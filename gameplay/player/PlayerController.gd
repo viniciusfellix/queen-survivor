@@ -12,6 +12,11 @@ extends CharacterBody2D
 
 @onready var visual_controller: Node = _resolve_visual_controller()
 
+@export_group("Damage Feedback")
+@export var enable_hit_invincibility: bool = true
+@export var invincibility_duration_after_hit: float = 0.5
+@export var play_visual_damage_flash: bool = true
+
 func _ready() -> void:
 	add_to_group("player")
 
@@ -35,6 +40,8 @@ func _ready() -> void:
 	queue_redraw()
 
 func _physics_process(_delta: float) -> void:
+	_update_invincibility(_delta)
+	
 	if runtime_state == null:
 		return
 
@@ -89,15 +96,22 @@ func receive_damage(payload: DamagePayload) -> int:
 
 	if not runtime_state.is_alive:
 		return 0
+		
+	if enable_hit_invincibility and runtime_state.is_invincible:
+		return 0
 
 	var final_damage: int = DamageResolver.calculate_received_damage(
 		payload.raw_damage,
 		runtime_state.defense_percent,
 		payload.can_be_reduced_by_defense
 	)
-
+	
 	runtime_state.apply_damage(final_damage, payload.source_id)
-
+	
+	if final_damage > 0:
+		_start_hit_invincibility()
+		_play_damage_feedback()
+		
 	GameEvents.player_damaged.emit(
 		payload.raw_damage,
 		final_damage,
@@ -113,7 +127,7 @@ func receive_damage(payload: DamagePayload) -> int:
 		str(runtime_state.max_hp),
 		payload.source_id
 	])
-
+	
 	if not runtime_state.is_alive:
 		GameEvents.player_died.emit(payload.source_id)
 		GameEvents.emit_debug("[PlayerController] Gaia morreu. Causa: %s" % payload.source_id)
@@ -179,8 +193,8 @@ func apply_run_upgrade(upgrade: UpgradeDefinition) -> void:
 
 	match upgrade.upgrade_type:
 		UpgradeTypes.PLAYER_MOVE_SPEED_PERCENT:
-			var multiplier: float = 1.0 + (upgrade.value_float * 0.01)
-			runtime_state.move_speed *= multiplier
+			var move_multiplier: float = 1.0 + (upgrade.value_float * 0.01)
+			runtime_state.move_speed *= move_multiplier
 
 			GameEvents.emit_debug("[PlayerController] Upgrade aplicado: velocidade +%s%% | move_speed=%s" % [
 				str(upgrade.value_float),
@@ -197,6 +211,43 @@ func apply_run_upgrade(upgrade: UpgradeDefinition) -> void:
 				str(hp_gain),
 				str(runtime_state.current_hp),
 				str(runtime_state.max_hp)
+			])
+
+		UpgradeTypes.PLAYER_DEFENSE_PERCENT:
+			var defense_gain: float = max(0.0, upgrade.value_float)
+			runtime_state.defense_percent = clamp(runtime_state.defense_percent + defense_gain, 0.0, 95.0)
+
+			GameEvents.emit_debug("[PlayerController] Upgrade aplicado: defesa +%s%% | defense=%s%%" % [
+				str(defense_gain),
+				str(runtime_state.defense_percent)
+			])
+
+		UpgradeTypes.PLAYER_HEAL_FLAT:
+			var heal_amount: int = max(0, upgrade.value_int)
+			runtime_state.current_hp = min(runtime_state.max_hp, runtime_state.current_hp + heal_amount)
+
+			GameEvents.emit_debug("[PlayerController] Upgrade aplicado: cura +%s | HP=%s/%s" % [
+				str(heal_amount),
+				str(runtime_state.current_hp),
+				str(runtime_state.max_hp)
+			])
+
+		UpgradeTypes.COIN_MAGNET_RADIUS_PERCENT:
+			var magnet_bonus: float = max(0.0, upgrade.value_float)
+			runtime_state.coin_magnet_radius_multiplier += magnet_bonus * 0.01
+
+			GameEvents.emit_debug("[PlayerController] Upgrade aplicado: magnetismo de moeda +%s%% | multiplier=%s" % [
+				str(magnet_bonus),
+				str(runtime_state.coin_magnet_radius_multiplier)
+			])
+
+		UpgradeTypes.COIN_COLLECT_RADIUS_PERCENT:
+			var collect_bonus: float = max(0.0, upgrade.value_float)
+			runtime_state.coin_collect_radius_multiplier += collect_bonus * 0.01
+
+			GameEvents.emit_debug("[PlayerController] Upgrade aplicado: raio de coleta +%s%% | multiplier=%s" % [
+				str(collect_bonus),
+				str(runtime_state.coin_collect_radius_multiplier)
 			])
 
 		_:
@@ -250,3 +301,48 @@ func get_debug_data() -> Dictionary:
 		"last_damage_source_id": runtime_state.last_damage_source_id,
 		"death_cause": runtime_state.death_cause
 	}
+
+func get_drop_collection_modifiers() -> Dictionary:
+	if runtime_state == null:
+		return {
+			"coin_magnet_radius_multiplier": 1.0,
+			"coin_collect_radius_multiplier": 1.0
+		}
+
+	return {
+		"coin_magnet_radius_multiplier": runtime_state.coin_magnet_radius_multiplier,
+		"coin_collect_radius_multiplier": runtime_state.coin_collect_radius_multiplier
+	}
+
+func _update_invincibility(delta: float) -> void:
+	if runtime_state == null:
+		return
+
+	if not runtime_state.is_invincible:
+		return
+
+	runtime_state.invincibility_timer -= delta
+
+	if runtime_state.invincibility_timer <= 0.0:
+		runtime_state.invincibility_timer = 0.0
+		runtime_state.is_invincible = false
+
+func _start_hit_invincibility() -> void:
+	if runtime_state == null:
+		return
+
+	if not enable_hit_invincibility:
+		return
+
+	runtime_state.is_invincible = true
+	runtime_state.invincibility_timer = max(0.0, invincibility_duration_after_hit)
+
+func _play_damage_feedback() -> void:
+	if not play_visual_damage_flash:
+		return
+
+	if visual_controller == null:
+		return
+
+	if visual_controller.has_method("play_damage_flash"):
+		visual_controller.call("play_damage_flash")

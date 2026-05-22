@@ -9,7 +9,16 @@ extends Node
 @export var attack_hitbox_root_path: NodePath
 
 @export var weapon_enabled: bool = true
-@export var attack_on_ready: bool = true
+
+# Se true, a arma dispara assim que a cena começa.
+# Para gameplay normal, manter false.
+@export var attack_on_ready: bool = false
+
+# Se attack_on_ready estiver false, este valor define o delay inicial.
+# Se for <= 0, usa cooldown_seconds.
+@export var initial_attack_delay_seconds: float = -1.0
+
+@export var emit_cooldown_updates: bool = true
 
 @export var cooldown_seconds: float = 2.0
 
@@ -29,6 +38,10 @@ extends Node
 @export var damage_components: Array[DamageComponentDefinition] = []
 
 @export var weapon_source_id: String = "gaia_initial_weapon"
+
+@export_group("Damage Interrupt")
+@export var reset_cooldown_when_player_damaged: bool = true
+@export var damage_reset_cooldown_ratio: float = 1.0
 
 var cooldown_timer: float = 0.0
 
@@ -63,7 +76,12 @@ func _ready() -> void:
 	if attack_on_ready:
 		cooldown_timer = 0.0
 	else:
-		cooldown_timer = cooldown_seconds
+		cooldown_timer = _get_initial_attack_delay()
+	
+	if not GameEvents.player_damaged.is_connected(_on_player_damaged):
+		GameEvents.player_damaged.connect(_on_player_damaged)
+
+	_emit_cooldown_update()
 
 func _process(delta: float) -> void:
 	if not weapon_enabled:
@@ -90,6 +108,9 @@ func _process(delta: float) -> void:
 		return
 
 	cooldown_timer -= delta
+	
+	cooldown_timer = max(0.0, cooldown_timer)
+	_emit_cooldown_update()
 
 	if cooldown_timer <= 0.0:
 		_fire_attack(runtime_state)
@@ -329,6 +350,18 @@ func apply_run_upgrade(upgrade: UpgradeDefinition) -> void:
 		UpgradeTypes.WEAPON_COOLDOWN_PERCENT:
 			_apply_cooldown_percent_upgrade(upgrade.value_float)
 
+		UpgradeTypes.WEAPON_PHYSICAL_DAMAGE_FLAT:
+			_apply_component_damage_flat_upgrade(DamageTypes.PHYSICAL, upgrade.value_int)
+
+		UpgradeTypes.WEAPON_MAGICAL_DAMAGE_FLAT:
+			_apply_component_damage_flat_upgrade(DamageTypes.MAGICAL, upgrade.value_int)
+
+		UpgradeTypes.WEAPON_HITBOX_RADIUS_FLAT:
+			_apply_hitbox_radius_flat_upgrade(upgrade.value_int)
+
+		UpgradeTypes.WEAPON_HITBOX_LIFETIME_PERCENT:
+			_apply_hitbox_lifetime_percent_upgrade(upgrade.value_float)
+
 		_:
 			GameEvents.emit_debug("[GaiaInitialWeaponController] Upgrade ignorado pela arma: %s" % upgrade.id)
 
@@ -367,3 +400,95 @@ func _apply_cooldown_percent_upgrade(percent: float) -> void:
 		str(percent),
 		str(cooldown_seconds)
 	])
+
+func _apply_component_damage_flat_upgrade(damage_type_to_match: String, amount: int) -> void:
+	if amount <= 0:
+		return
+
+	if damage_components.is_empty():
+		GameEvents.emit_debug("[GaiaInitialWeaponController] Sem componentes para aplicar dano específico: %s" % damage_type_to_match)
+		return
+
+	var applied_count: int = 0
+
+	for component: DamageComponentDefinition in damage_components:
+		if component == null:
+			continue
+
+		if component.damage_type != damage_type_to_match:
+			continue
+
+		component.amount += amount
+		applied_count += 1
+
+	GameEvents.emit_debug("[GaiaInitialWeaponController] Upgrade dano %s aplicado: +%s | applied=%s | components=%s" % [
+		damage_type_to_match,
+		str(amount),
+		str(applied_count),
+		_get_component_debug_string()
+	])
+
+func _apply_hitbox_radius_flat_upgrade(amount: int) -> void:
+	if amount <= 0:
+		return
+
+	attack_hitbox_radius += float(amount)
+
+	GameEvents.emit_debug("[GaiaInitialWeaponController] Upgrade raio da hitbox aplicado: +%s | radius=%s" % [
+		str(amount),
+		str(attack_hitbox_radius)
+	])
+
+func _apply_hitbox_lifetime_percent_upgrade(percent: float) -> void:
+	if percent <= 0.0:
+		return
+
+	var multiplier: float = 1.0 + (percent * 0.01)
+	attack_hitbox_lifetime = min(0.60, attack_hitbox_lifetime * multiplier)
+
+	GameEvents.emit_debug("[GaiaInitialWeaponController] Upgrade duração da hitbox aplicado: +%s%% | lifetime=%s" % [
+		str(percent),
+		str(attack_hitbox_lifetime)
+	])
+
+func _get_initial_attack_delay() -> float:
+	if initial_attack_delay_seconds > 0.0:
+		return initial_attack_delay_seconds
+
+	return cooldown_seconds
+
+func _emit_cooldown_update() -> void:
+	if not emit_cooldown_updates:
+		return
+
+	var progress_ratio: float = 1.0
+
+	if cooldown_seconds > 0.0:
+		progress_ratio = 1.0 - clamp(cooldown_timer / cooldown_seconds, 0.0, 1.0)
+
+	GameEvents.weapon_cooldown_changed.emit(
+		weapon_source_id,
+		cooldown_timer,
+		cooldown_seconds,
+		progress_ratio
+	)
+
+func _on_player_damaged(
+	_raw_damage: int,
+	final_damage: int,
+	_current_hp: int,
+	_max_hp: int,
+	_source_id: String
+) -> void:
+	if not reset_cooldown_when_player_damaged:
+		return
+
+	if final_damage <= 0:
+		return
+
+	var ratio: float = clamp(damage_reset_cooldown_ratio, 0.0, 1.0)
+	cooldown_timer = cooldown_seconds * ratio
+
+	_emit_cooldown_update()
+
+	GameEvents.emit_debug("[GaiaInitialWeaponController] Cooldown resetado por dano recebido. cooldown_timer=%s" % str(cooldown_timer))

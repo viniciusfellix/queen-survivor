@@ -9,12 +9,21 @@ extends Node2D
 @export var death_animation_name: String = "Die_Pose1"
 @export var ultimate_animation_name: String = "Ultimate1_Pose1"
 
+@export_group("Damage Flash")
+@export var damage_flash_color: Color = Color(1.0, 0.25, 0.25, 1.0)
+@export var damage_flash_duration: float = 0.12
+
+var damage_flash_tween: Tween = null
+var default_modulate: Color = Color.WHITE
+
 @onready var spine_adapter: Node = _resolve_spine_adapter()
 
 var current_animation_name: String = ""
 var last_applied_gameplay_state: String = ""
 
 func _ready() -> void:
+	default_modulate = modulate
+	
 	if spine_adapter == null:
 		GameEvents.emit_debug("[GaiaVisualController] Spine adapter NÃO encontrado.")
 	else:
@@ -120,3 +129,17 @@ func _find_node_with_method(root: Node, method_name: String) -> Node:
 			return found
 
 	return null
+
+func play_damage_flash() -> void:
+	if damage_flash_tween != null:
+		damage_flash_tween.kill()
+		damage_flash_tween = null
+
+	modulate = damage_flash_color
+
+	damage_flash_tween = create_tween()
+	damage_flash_tween.tween_property(self, "modulate", default_modulate, damage_flash_duration)
+
+	damage_flash_tween.finished.connect(func() -> void:
+		damage_flash_tween = null
+	)

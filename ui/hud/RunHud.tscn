@@ -17,6 +17,9 @@ coins_label_path = NodePath("MarginContainer/VBoxContainer/TopRow/CoinsLabel")
 level_label_path = NodePath("MarginContainer/VBoxContainer/TopRow/LevelLabel")
 kills_label_path = NodePath("MarginContainer/VBoxContainer/TopRow/KillsLabel")
 message_label_path = NodePath("MarginContainer/VBoxContainer/MessageLabel")
+cooldown_box_path = NodePath("MarginContainer/VBoxContainer/TopRow/CooldownBox")
+cooldown_label_path = NodePath("MarginContainer/VBoxContainer/TopRow/CooldownBox/CooldownLabel")
+cooldown_bar_path = NodePath("MarginContainer/VBoxContainer/TopRow/CooldownBox/CooldownBar")
 
 [node name="MarginContainer" type="MarginContainer" parent="." unique_id=717528673]
 anchors_preset = 10
@@ -57,6 +60,19 @@ custom_minimum_size = Vector2(180, 12)
 layout_mode = 2
 max_value = 10.0
 show_percentage = false
+
+[node name="CooldownBox" type="VBoxContainer" parent="MarginContainer/VBoxContainer/TopRow" unique_id=1714335499]
+custom_minimum_size = Vector2(150, 42)
+layout_mode = 2
+
+[node name="CooldownLabel" type="Label" parent="MarginContainer/VBoxContainer/TopRow/CooldownBox" unique_id=1758931174]
+layout_mode = 2
+text = "Ataque: pronto"
+
+[node name="CooldownBar" type="ProgressBar" parent="MarginContainer/VBoxContainer/TopRow/CooldownBox" unique_id=921537826]
+custom_minimum_size = Vector2(150, 12)
+layout_mode = 2
+value = 100.0
 
 [node name="TimerLabel" type="Label" parent="MarginContainer/VBoxContainer/TopRow" unique_id=1959516806]
 custom_minimum_size = Vector2(100, 32)

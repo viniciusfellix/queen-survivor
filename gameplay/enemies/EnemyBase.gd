@@ -12,6 +12,9 @@ extends CharacterBody2D
 @export var draw_debug_target_line: bool = false
 @export var draw_contact_radius: bool = true
 
+@export_group("Spawn Safety")
+@export var contact_damage_start_delay_seconds: float = 0.75
+@export var debug_contact_distance: bool = false
 @export var remove_after_death_seconds: float = 0.45
 
 var max_hp: int = 10
@@ -41,6 +44,8 @@ var total_damage_taken: int = 0
 var last_damage_taken: int = 0
 var last_damage_source_id: String = ""
 
+var alive_seconds: float = 0.0
+
 func _ready() -> void:
 	add_to_group("enemy")
 
@@ -63,6 +68,8 @@ func _ready() -> void:
 	queue_redraw()
 
 func _physics_process(delta: float) -> void:
+	alive_seconds += delta
+	
 	if RunQuery.is_gameplay_blocked(get_tree()):
 		velocity = Vector2.ZERO
 		move_and_slide()
@@ -277,6 +284,9 @@ func _update_contact_damage_timer(delta: float) -> void:
 func _try_apply_contact_damage() -> void:
 	if RunQuery.is_gameplay_blocked(get_tree()):
 		return
+	
+	if alive_seconds < contact_damage_start_delay_seconds:
+		return
 
 	if target_node == null:
 		return
@@ -291,6 +301,16 @@ func _try_apply_contact_damage() -> void:
 		return
 
 	var distance_to_target: float = global_position.distance_to(target_node.global_position)
+	
+	if debug_contact_distance:
+		GameEvents.emit_debug("[EnemyBase] Contact check: enemy=%s distance=%s radius=%s enemy_pos=%s target_pos=%s alive_seconds=%s" % [
+			enemy_id,
+			str(distance_to_target),
+			str(contact_damage_radius),
+			str(global_position),
+			str(target_node.global_position),
+			str(alive_seconds)
+		])
 
 	if distance_to_target > contact_damage_radius:
 		return

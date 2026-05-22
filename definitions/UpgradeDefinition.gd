@@ -5,6 +5,8 @@ class_name UpgradeDefinition
 @export var display_name_key: String = ""
 @export var description_key: String = ""
 
+@export var icon: Texture2D
+
 @export var upgrade_type: String = ""
 
 # Valor inteiro, usado para HP flat, dano flat etc.
@@ -13,8 +15,12 @@ class_name UpgradeDefinition
 # Valor decimal/percentual, usado para velocidade %, cooldown % etc.
 @export var value_float: float = 0.0
 
-# Futuro: para limitar stack por run.
+# Limite de vezes que esse upgrade pode ser escolhido na run.
 @export var max_stack_in_run: int = 999
+
+# Futuro: alguns upgrades podem ser consumíveis e não "níveis".
+# Por enquanto todos podem exibir Nv. X.
+@export var show_level_badge: bool = true
 
 func is_valid_definition() -> bool:
 	return (

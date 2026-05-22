@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="UpgradeDefinition" format=3 uid="uid://cxm8sm5ucreg3"]
+
+[ext_resource type="Texture2D" uid="uid://dtfob7o5lmavr" path="res://assets/placeholders/upgrades/upgrade_magic.png" id="1_8sjl6"]
+[ext_resource type="Script" uid="uid://yjpi6mhnsb1a" path="res://definitions/UpgradeDefinition.gd" id="1_gun6i"]
+
+[resource]
+script = ExtResource("1_gun6i")
+id = "upgrade_weapon_magical_damage_flat"
+display_name_key = "upgrade.weapon_magical_damage_flat.name"
+description_key = "upgrade.weapon_magical_damage_flat.description"
+icon = ExtResource("1_8sjl6")
+upgrade_type = "weapon_magical_damage_flat"
+value_int = 1
+max_stack_in_run = 10
+metadata/_custom_type_script = "uid://yjpi6mhnsb1a"

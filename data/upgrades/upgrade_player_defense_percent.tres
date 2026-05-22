@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="UpgradeDefinition" format=3 uid="uid://d3h4m4yj2jfcm"]
+
+[ext_resource type="Texture2D" uid="uid://b6rbk20jegtmu" path="res://assets/placeholders/upgrades/upgrade_defense.png" id="1_5ky3l"]
+[ext_resource type="Script" uid="uid://yjpi6mhnsb1a" path="res://definitions/UpgradeDefinition.gd" id="1_b428q"]
+
+[resource]
+script = ExtResource("1_b428q")
+id = "upgrade_player_defense_percent"
+display_name_key = "upgrade.player_defense_percent.name"
+description_key = "upgrade.player_defense_percent.description"
+icon = ExtResource("1_5ky3l")
+upgrade_type = "player_defense_percent"
+value_float = 5.0
+max_stack_in_run = 1
+metadata/_custom_type_script = "uid://yjpi6mhnsb1a"
