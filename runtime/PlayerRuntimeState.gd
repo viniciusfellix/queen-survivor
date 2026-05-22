@@ -32,6 +32,12 @@ var last_damage_taken: int = 0
 var last_damage_source_id: String = ""
 var death_cause: String = ""
 
+var coin_magnet_radius_multiplier: float = 1.0
+var coin_collect_radius_multiplier: float = 1.0
+
+var is_invincible: bool = false
+var invincibility_timer: float = 0.0
+
 func setup_from_queen_definition(definition: QueenDefinition) -> void:
 	queen_id = definition.id
 	max_hp = definition.base_max_hp

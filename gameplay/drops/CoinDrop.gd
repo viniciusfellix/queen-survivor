@@ -53,15 +53,17 @@ func _physics_process(delta: float) -> void:
 		return
 
 	var distance_to_player: float = global_position.distance_to(player_node.global_position)
+	var effective_collect_radius: float = _get_effective_collect_radius()
+	var effective_magnet_radius: float = _get_effective_magnet_radius()
 
-	if distance_to_player <= collect_radius:
+	if distance_to_player <= effective_collect_radius:
 		_collect()
 		return
 
 	if elapsed_seconds < initial_idle_seconds:
 		return
 
-	if distance_to_player <= magnet_radius:
+	if distance_to_player <= effective_magnet_radius:
 		is_magnetized = true
 		_update_magnet_movement(delta)
 	else:
@@ -79,7 +81,7 @@ func _draw() -> void:
 	draw_arc(Vector2.ZERO, debug_radius + 2.0, 0.0, TAU, 24, debug_outline_color, 2.0)
 
 	if is_magnetized:
-		draw_arc(Vector2.ZERO, magnet_radius, 0.0, TAU, 48, Color(1.0, 0.9, 0.2, 0.18), 1.0)
+		draw_arc(Vector2.ZERO, _get_effective_magnet_radius(), 0.0, TAU, 48, Color(1.0, 0.9, 0.2, 0.18), 1.0)
 
 func setup(p_definition: CoinDropDefinition, p_value: int = 1, p_player: Node2D = null) -> void:
 	coin_definition = p_definition
@@ -149,3 +151,28 @@ func _on_run_finished(_result_payload: RunResultPayload) -> void:
 	is_magnetized = false
 	velocity = Vector2.ZERO
 	queue_redraw()
+
+func _get_effective_magnet_radius() -> float:
+	var multiplier: float = _get_player_collection_multiplier("coin_magnet_radius_multiplier")
+	return magnet_radius * multiplier
+
+func _get_effective_collect_radius() -> float:
+	var multiplier: float = _get_player_collection_multiplier("coin_collect_radius_multiplier")
+	return collect_radius * multiplier
+
+func _get_player_collection_multiplier(key: String) -> float:
+	if player_node == null:
+		return 1.0
+
+	if not player_node.has_method("get_drop_collection_modifiers"):
+		return 1.0
+
+	var modifiers_variant: Variant = player_node.call("get_drop_collection_modifiers")
+
+	if not (modifiers_variant is Dictionary):
+		return 1.0
+
+	var modifiers: Dictionary = modifiers_variant as Dictionary
+	var multiplier: float = float(modifiers.get(key, 1.0))
+
+	return max(0.10, multiplier)

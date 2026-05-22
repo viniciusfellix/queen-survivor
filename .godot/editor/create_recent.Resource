@@ -1,8 +1,9 @@
+UpgradeDefinition
+UpgradePoolDefinition
 SpawnTimelineDefinition
 SpawnTimelineEntryDefinition
 MapDefinition
 CoinDropDefinition
-UpgradeDefinition
 DamageComponentDefinition
 Resource
 WeaponDefinition

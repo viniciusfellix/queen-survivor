@@ -13,6 +13,9 @@ radius = 24.0
 script = ExtResource("1_64352")
 queen_definition = ExtResource("2_b2oau")
 visual_controller_path = NodePath("VisualRoot/GaiaVisual")
+draw_debug_aim = null
+debug_aim_line_length = null
+base_defense_percent = null
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=158647657]
 shape = SubResource("CircleShape2D_cbat8")

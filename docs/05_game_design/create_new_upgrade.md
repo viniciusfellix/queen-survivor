@@ -11,7 +11,7 @@ res://data/upgrades/
 Tipo:
 
 ```txt
-UpgradeDefinition
+	
 ```
 
 ## 2. Configurar campos

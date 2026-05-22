@@ -14,9 +14,10 @@ script = ExtResource("1_r0svc")
 spine_adapter_path = NodePath("GaiaSpineAdapter")
 
 [node name="SpineSprite" type="SpineSprite" parent="." unique_id=131457128]
+position = Vector2(0, 94)
 skeleton_data_res = SubResource("SpineSkeletonDataResource_0the6")
 preview_skin = "default"
-preview_animation = "-- Empty --"
+preview_animation = "-Test-Pose1"
 preview_frame = false
 preview_time = 0.0
 

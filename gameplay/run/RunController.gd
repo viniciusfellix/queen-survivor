@@ -4,15 +4,30 @@ extends Node
 @export var map_definition: MapDefinition
 
 @export var level_up_option_count: int = 3
+
+# Pool nova data-driven.
+# Se estiver vazia, o RunController tenta carregar pelo MapDefinition.
+@export var upgrade_pool_definition: UpgradePoolDefinition
+
+# Legado/fallback temporário.
+# Mantido para não quebrar testes antigos, mas a pool oficial agora vem de UpgradePoolDefinition.
 @export var upgrade_pool: Array[UpgradeDefinition] = []
 
 @export var finish_run_pauses_tree: bool = true
 @export var defeat_result_delay_seconds: float = 0.75
 
+@export_group("Debug Tools")
+@export var allow_debug_force_finish: bool = false
+
+const DEFAULT_UPGRADE_POOL_PATH: String = "res://data/upgrade_pools/upgrade_pool_gaia_default.tres"
+
 var pending_level_ups: int = 0
 var current_level_up_options: Array[UpgradeDefinition] = []
 var is_level_up_active: bool = false
 var result_payload: RunResultPayload = null
+
+var selected_upgrade_counts: Dictionary = {}
+var previous_upgrade_option_ids: Array[String] = []
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -24,6 +39,7 @@ func _ready() -> void:
 	if map_definition != null:
 		run_state.setup_from_map(map_definition)
 
+	_resolve_upgrade_pool()
 	_load_default_upgrade_pool_if_empty()
 	_connect_events()
 
@@ -59,6 +75,9 @@ func get_run_state() -> RunState:
 func get_map_definition() -> MapDefinition:
 	return map_definition
 
+func get_upgrade_pool_definition() -> UpgradePoolDefinition:
+	return upgrade_pool_definition
+
 func get_result_payload() -> RunResultPayload:
 	return result_payload
 
@@ -89,6 +108,9 @@ func get_debug_data() -> Dictionary:
 		"is_paused": run_state.is_paused,
 		"is_level_up_active": is_level_up_active,
 		"pending_level_ups": pending_level_ups,
+		"upgrade_pool_id": _get_upgrade_pool_id(),
+		"selected_upgrade_counts": selected_upgrade_counts,
+		"previous_upgrade_option_ids": previous_upgrade_option_ids,
 		"is_finished": run_state.is_finished,
 		"is_victory": run_state.is_victory,
 		"is_defeat": run_state.is_defeat,
@@ -326,11 +348,20 @@ func _start_next_level_up() -> void:
 	run_state.is_paused = true
 	get_tree().paused = true
 
-	current_level_up_options = LevelUpOptionService.generate_options(upgrade_pool, level_up_option_count)
+	current_level_up_options = _generate_level_up_options()
 
-	GameEvents.emit_debug("[RunController] Level-up iniciado. level=%s options=%s" % [
+	if current_level_up_options.is_empty():
+		GameEvents.emit_debug("[RunController] Level-up sem opções válidas. Consumindo level-up pendente.")
+		_complete_level_up_without_option()
+		return
+
+	previous_upgrade_option_ids = _get_option_id_array(current_level_up_options)
+
+	GameEvents.emit_debug("[RunController] Level-up iniciado. level=%s pool=%s options=%s selected_counts=%s" % [
 		str(run_state.current_level),
-		str(_get_option_ids(current_level_up_options))
+		_get_upgrade_pool_id(),
+		str(_get_option_ids(current_level_up_options)),
+		str(selected_upgrade_counts)
 	])
 
 	GameEvents.run_level_up_started.emit(run_state.current_level, current_level_up_options)
@@ -347,6 +378,7 @@ func _on_level_up_option_selected(upgrade: UpgradeDefinition) -> void:
 		return
 
 	_apply_upgrade(upgrade)
+	_register_selected_upgrade(upgrade)
 
 	pending_level_ups = max(0, pending_level_ups - 1)
 
@@ -385,26 +417,23 @@ func _get_player() -> Node:
 	return players[0]
 
 func _load_default_upgrade_pool_if_empty() -> void:
-	if not upgrade_pool.is_empty():
+	if upgrade_pool_definition != null:
+		GameEvents.emit_debug("[RunController] UpgradePool ativa: %s" % upgrade_pool_definition.get_debug_summary())
 		return
 
-	var default_paths: Array[String] = [
-		"res://data/upgrades/upgrade_weapon_damage_flat.tres",
-		"res://data/upgrades/upgrade_weapon_cooldown_percent.tres",
-		"res://data/upgrades/upgrade_player_move_speed_percent.tres",
-		"res://data/upgrades/upgrade_player_max_hp_flat.tres"
-	]
+	if not upgrade_pool.is_empty():
+		GameEvents.emit_debug("[RunController] Upgrade pool legada carregada: %s opções." % str(upgrade_pool.size()))
+		return
 
-	for path: String in default_paths:
-		if not ResourceLoader.exists(path):
-			continue
+	if ResourceLoader.exists(DEFAULT_UPGRADE_POOL_PATH):
+		var pool_resource: Resource = load(DEFAULT_UPGRADE_POOL_PATH)
 
-		var resource: Resource = load(path)
+		if pool_resource is UpgradePoolDefinition:
+			upgrade_pool_definition = pool_resource as UpgradePoolDefinition
+			GameEvents.emit_debug("[RunController] UpgradePool fallback carregada: %s" % upgrade_pool_definition.get_debug_summary())
+			return
 
-		if resource is UpgradeDefinition:
-			upgrade_pool.append(resource as UpgradeDefinition)
-
-	GameEvents.emit_debug("[RunController] Upgrade pool carregada: %s opções." % str(upgrade_pool.size()))
+	GameEvents.emit_debug("[RunController] Nenhuma UpgradePool configurada.")
 
 func _get_option_ids(options: Array[UpgradeDefinition]) -> String:
 	var ids: Array[String] = []
@@ -416,3 +445,117 @@ func _get_option_ids(options: Array[UpgradeDefinition]) -> String:
 		ids.append(option.id)
 
 	return ", ".join(ids)
+
+func _resolve_upgrade_pool() -> void:
+	if upgrade_pool_definition != null:
+		return
+
+	if map_definition != null and map_definition.upgrade_pool != null:
+		upgrade_pool_definition = map_definition.upgrade_pool
+		GameEvents.emit_debug("[RunController] UpgradePool carregada pelo MapDefinition: %s" % upgrade_pool_definition.id)
+		return
+
+	GameEvents.emit_debug("[RunController] MapDefinition sem UpgradePool. Tentará fallback.")
+
+func _generate_level_up_options() -> Array[UpgradeDefinition]:
+	if upgrade_pool_definition != null:
+		return LevelUpOptionService.generate_from_pool(
+			upgrade_pool_definition,
+			selected_upgrade_counts,
+			previous_upgrade_option_ids
+		)
+
+	return LevelUpOptionService.generate_options(
+		upgrade_pool,
+		level_up_option_count,
+		selected_upgrade_counts,
+		previous_upgrade_option_ids
+	)
+
+func _register_selected_upgrade(upgrade: UpgradeDefinition) -> void:
+	if upgrade == null:
+		return
+
+	var current_count: int = int(selected_upgrade_counts.get(upgrade.id, 0))
+	selected_upgrade_counts[upgrade.id] = current_count + 1
+
+	GameEvents.emit_debug("[RunController] Upgrade registrado na run: %s count=%s" % [
+		upgrade.id,
+		str(selected_upgrade_counts[upgrade.id])
+	])
+
+func _complete_level_up_without_option() -> void:
+	pending_level_ups = max(0, pending_level_ups - 1)
+
+	if pending_level_ups > 0:
+		_start_next_level_up()
+		return
+
+	is_level_up_active = false
+	current_level_up_options.clear()
+
+	if run_state != null:
+		run_state.is_paused = false
+
+	get_tree().paused = false
+
+func _get_upgrade_pool_id() -> String:
+	if upgrade_pool_definition != null:
+		return upgrade_pool_definition.id
+
+	if not upgrade_pool.is_empty():
+		return "legacy_upgrade_pool"
+
+	return "none"
+
+func _get_option_id_array(options: Array[UpgradeDefinition]) -> Array[String]:
+	var ids: Array[String] = []
+
+	for option: UpgradeDefinition in options:
+		if option == null:
+			continue
+
+		ids.append(option.id)
+
+	return ids
+
+func get_selected_upgrade_count(upgrade_id: String) -> int:
+	if upgrade_id.strip_edges() == "":
+		return 0
+
+	return int(selected_upgrade_counts.get(upgrade_id, 0))
+
+func get_next_upgrade_level(upgrade_id: String) -> int:
+	return get_selected_upgrade_count(upgrade_id) + 1
+
+func debug_force_victory() -> bool:
+	if not allow_debug_force_finish:
+		GameEvents.emit_debug("[RunController] DEBUG: tentativa de forçar vitória ignorada. Ação desabilitada.")
+		return false
+
+	if run_state == null:
+		return false
+
+	if run_state.is_finished:
+		return false
+
+	GameEvents.emit_debug("[RunController] DEBUG: vitória forçada pelo painel de teste.")
+	_finish_victory()
+
+	return true
+
+func debug_force_defeat() -> bool:
+	if not allow_debug_force_finish:
+		GameEvents.emit_debug("[RunController] DEBUG: tentativa de forçar derrota ignorada. Ação desabilitada.")
+		return false
+
+	if run_state == null:
+		return false
+
+	if run_state.is_finished:
+		return false
+
+	GameEvents.emit_debug("[RunController] DEBUG: derrota forçada pelo painel de teste.")
+	_finish_defeat("debug_force_defeat")
+
+	return true

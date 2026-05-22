@@ -16,5 +16,10 @@ class_name MapDefinition
 # Timeline de spawn do mapa.
 @export var spawn_timeline: SpawnTimelineDefinition
 
+# Pool de upgrades da run.
+# Por enquanto o mapa define a pool.
+# Futuramente poderemos combinar mapa + Queen + progressão global.
+@export var upgrade_pool: UpgradePoolDefinition
+
 func is_valid_definition() -> bool:
 	return id.strip_edges() != "" and duration_seconds > 0.0

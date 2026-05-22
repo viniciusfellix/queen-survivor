@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="UpgradePoolDefinition" format=3 uid="uid://f75wbuacmvaf"]
+
+[ext_resource type="Script" uid="uid://c5u8cngq24p45" path="res://definitions/UpgradePoolDefinition.gd" id="1_46ysw"]
+[ext_resource type="Script" uid="uid://yjpi6mhnsb1a" path="res://definitions/UpgradeDefinition.gd" id="2_mow1k"]
+[ext_resource type="Resource" uid="uid://c2g86y5hxsu3e" path="res://data/upgrades/upgrade_player_max_hp_flat.tres" id="3_8esuc"]
+[ext_resource type="Resource" uid="uid://bjbpjv2g6i8s1" path="res://data/upgrades/upgrade_weapon_damage_flat.tres" id="4_8pqx2"]
+[ext_resource type="Resource" uid="uid://c5gegm545d0a6" path="res://data/upgrades/upgrade_weapon_cooldown_percent.tres" id="5_6xxye"]
+[ext_resource type="Resource" uid="uid://dc3upchkunql" path="res://data/upgrades/upgrade_player_move_speed_percent.tres" id="6_n14md"]
+[ext_resource type="Resource" uid="uid://c1ie5fola0thn" path="res://data/upgrades/upgrade_player_heal_flat.tres" id="7_bmt2n"]
+[ext_resource type="Resource" uid="uid://d3h4m4yj2jfcm" path="res://data/upgrades/upgrade_player_defense_percent.tres" id="8_14ehc"]
+[ext_resource type="Resource" uid="uid://d0ifo0e0amkvd" path="res://data/upgrades/upgrade_weapon_hitbox_radius_flat.tres" id="9_ttrvq"]
+[ext_resource type="Resource" uid="uid://do4b0dmxudj3h" path="res://data/upgrades/upgrade_coin_magnet_radius_percent.tres" id="10_ubbg0"]
+[ext_resource type="Resource" uid="uid://cxm8sm5ucreg3" path="res://data/upgrades/upgrade_weapon_magical_damage_flat.tres" id="11_7c2do"]
+[ext_resource type="Resource" uid="uid://c4mrr4ooqg7sb" path="res://data/upgrades/upgrade_coin_collect_radius_percent.tres" id="12_4rf2s"]
+[ext_resource type="Resource" uid="uid://gb6aicnp33do" path="res://data/upgrades/upgrade_weapon_physical_damage_flat.tres" id="13_y7ulx"]
+[ext_resource type="Resource" uid="uid://dtjby6a7r1eiw" path="res://data/upgrades/upgrade_weapon_hitbox_lifetime_percent.tres" id="14_p7wfv"]
+
+[resource]
+script = ExtResource("1_46ysw")
+id = "upgrade_pool_gaia_default"
+display_name_key = "upgrade_pool.gaia_default.name"
+upgrades = Array[ExtResource("2_mow1k")]([ExtResource("6_n14md"), ExtResource("3_8esuc"), ExtResource("4_8pqx2"), ExtResource("7_bmt2n"), ExtResource("8_14ehc"), ExtResource("9_ttrvq"), ExtResource("11_7c2do"), ExtResource("12_4rf2s"), ExtResource("13_y7ulx"), ExtResource("14_p7wfv"), ExtResource("5_6xxye"), ExtResource("10_ubbg0")])
+metadata/_custom_type_script = "uid://c5u8cngq24p45"

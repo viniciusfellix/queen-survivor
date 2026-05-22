@@ -1,0 +1,15 @@
+[gd_scene format=3 uid="uid://dfurqs5avj58y"]
+
+[ext_resource type="Script" uid="uid://db45c8mvq86jn" path="res://ui/world_feedback/WorldFeedbackController.gd" id="1_6ddgn"]
+
+[node name="WorldFeedbackLayer" type="CanvasLayer" unique_id=1299703750]
+process_mode = 3
+layer = 18
+script = ExtResource("1_6ddgn")
+
+[node name="FeedbackRoot" type="Control" parent="." unique_id=1087978013]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+mouse_filter = 2

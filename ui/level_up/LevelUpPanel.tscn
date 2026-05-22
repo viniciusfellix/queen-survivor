@@ -1,10 +1,14 @@
 [gd_scene format=3 uid="uid://cct45mramyoo7"]
 
 [ext_resource type="Script" uid="uid://bygpel4ny6qdc" path="res://ui/level_up/LevelUpPanel.gd" id="1_23m1c"]
+[ext_resource type="Texture2D" uid="uid://corb1hopadixf" path="res://assets/placeholders/upgrades/upgrade_damage.png" id="2_rtyjb"]
 
 [node name="LevelUpPanel" type="CanvasLayer" unique_id=780617162]
 layer = 20
 script = ExtResource("1_23m1c")
+panel_top_offset = -80.0
+default_icon = ExtResource("2_rtyjb")
+hide_icon_when_missing = true
 
 [node name="Panel" type="Panel" parent="." unique_id=1355218207]
 anchors_preset = 8
@@ -35,14 +39,98 @@ text = "Level Up"
 layout_mode = 2
 text = "Escolha uma opção."
 
-[node name="OptionButton1" type="Button" parent="Panel/MarginContainer/VBoxContainer" unique_id=1951886102]
+[node name="OptionsContainer" type="HBoxContainer" parent="Panel/MarginContainer/VBoxContainer" unique_id=415135825]
 layout_mode = 2
-text = "Opção 1"
 
-[node name="OptionButton2" type="Button" parent="Panel/MarginContainer/VBoxContainer" unique_id=811771050]
+[node name="OptionCard1" type="Button" parent="Panel/MarginContainer/VBoxContainer/OptionsContainer" unique_id=63107886]
+custom_minimum_size = Vector2(280, 150)
 layout_mode = 2
-text = "Opção 2"
 
-[node name="OptionButton3" type="Button" parent="Panel/MarginContainer/VBoxContainer" unique_id=1853488972]
+[node name="MarginContainer" type="MarginContainer" parent="Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard1" unique_id=663391957]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard1/MarginContainer" unique_id=404217548]
 layout_mode = 2
-text = "Opção 3"
+
+[node name="IconTexture" type="TextureRect" parent="Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard1/MarginContainer/HBoxContainer" unique_id=452688539]
+custom_minimum_size = Vector2(48, 48)
+layout_mode = 2
+stretch_mode = 5
+
+[node name="TextBox" type="VBoxContainer" parent="Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard1/MarginContainer/HBoxContainer" unique_id=1664404033]
+layout_mode = 2
+
+[node name="NameLabel" type="Label" parent="Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard1/MarginContainer/HBoxContainer/TextBox" unique_id=369643622]
+layout_mode = 2
+
+[node name="DescriptionLabel" type="Label" parent="Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard1/MarginContainer/HBoxContainer/TextBox" unique_id=462486075]
+custom_minimum_size = Vector2(48, 48)
+layout_mode = 2
+autowrap_mode = 3
+
+[node name="BadgeLabel" type="Label" parent="Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard1/MarginContainer/HBoxContainer/TextBox" unique_id=421391755]
+layout_mode = 2
+
+[node name="OptionCard2" type="Button" parent="Panel/MarginContainer/VBoxContainer/OptionsContainer" unique_id=1027868411]
+custom_minimum_size = Vector2(280, 150)
+layout_mode = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard2" unique_id=851716921]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard2/MarginContainer" unique_id=153032701]
+layout_mode = 2
+
+[node name="IconTexture" type="TextureRect" parent="Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard2/MarginContainer/HBoxContainer" unique_id=222299232]
+custom_minimum_size = Vector2(48, 48)
+layout_mode = 2
+stretch_mode = 5
+
+[node name="TextBox" type="VBoxContainer" parent="Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard2/MarginContainer/HBoxContainer" unique_id=2082002049]
+layout_mode = 2
+
+[node name="NameLabel" type="Label" parent="Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard2/MarginContainer/HBoxContainer/TextBox" unique_id=2044200492]
+layout_mode = 2
+
+[node name="DescriptionLabel" type="Label" parent="Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard2/MarginContainer/HBoxContainer/TextBox" unique_id=1771981857]
+custom_minimum_size = Vector2(48, 48)
+layout_mode = 2
+autowrap_mode = 3
+
+[node name="BadgeLabel" type="Label" parent="Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard2/MarginContainer/HBoxContainer/TextBox" unique_id=873716213]
+layout_mode = 2
+
+[node name="OptionCard3" type="Button" parent="Panel/MarginContainer/VBoxContainer/OptionsContainer" unique_id=1420458616]
+custom_minimum_size = Vector2(280, 150)
+layout_mode = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard3" unique_id=1963909303]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard3/MarginContainer" unique_id=179137008]
+layout_mode = 2
+
+[node name="IconTexture" type="TextureRect" parent="Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard3/MarginContainer/HBoxContainer" unique_id=1249024729]
+custom_minimum_size = Vector2(48, 48)
+layout_mode = 2
+stretch_mode = 5
+
+[node name="TextBox" type="VBoxContainer" parent="Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard3/MarginContainer/HBoxContainer" unique_id=1006078223]
+layout_mode = 2
+
+[node name="NameLabel" type="Label" parent="Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard3/MarginContainer/HBoxContainer/TextBox" unique_id=694310121]
+layout_mode = 2
+
+[node name="DescriptionLabel" type="Label" parent="Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard3/MarginContainer/HBoxContainer/TextBox" unique_id=1653740346]
+custom_minimum_size = Vector2(48, 48)
+layout_mode = 2
+autowrap_mode = 3
+
+[node name="BadgeLabel" type="Label" parent="Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard3/MarginContainer/HBoxContainer/TextBox" unique_id=1699477093]
+layout_mode = 2

@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="UpgradeDefinition" format=3 uid="uid://do4b0dmxudj3h"]
+
+[ext_resource type="Texture2D" uid="uid://11blbpsy8yj1" path="res://assets/placeholders/upgrades/upgrade_coin_magnet.png" id="1_dfmcc"]
+[ext_resource type="Script" uid="uid://yjpi6mhnsb1a" path="res://definitions/UpgradeDefinition.gd" id="1_k3q55"]
+
+[resource]
+script = ExtResource("1_k3q55")
+id = "upgrade_coin_magnet_radius_percent"
+display_name_key = "upgrade.coin_magnet_radius_percent.name"
+description_key = "upgrade.coin_magnet_radius_percent.description"
+icon = ExtResource("1_dfmcc")
+upgrade_type = "coin_magnet_radius_percent"
+value_float = 20.0
+max_stack_in_run = 5
+metadata/_custom_type_script = "uid://yjpi6mhnsb1a"

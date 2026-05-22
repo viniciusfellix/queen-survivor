@@ -12,7 +12,6 @@
 	"map.test_arena_10min.name": "Arena de Teste",
 	"map.test_arena_10min.description": "Arena infinita simples de 10 minutos.",
 
-
 	"ui.debug.title": "Debug",
 	"ui.debug.move_direction": "Direção de movimento",
 	"ui.debug.aim_direction": "Direção de mira",
@@ -36,6 +35,18 @@
 	"ui.hud.defeat": "Derrota",
 	"ui.hud.run_active": "Sobreviva até o fim da run",
 	
+	"ui.hud.attack": "Ataque",
+	"ui.hud.attack_ready": "pronto",
+	"ui.feedback.damage_taken": "Dano recebido",
+	"ui.feedback.coin_collected": "Moeda coletada",
+	"ui.feedback.level_up": "Level Up!",
+	"ui.feedback.victory": "Vitória!",
+	"ui.feedback.defeat": "Derrota",
+	
+	"ui.level_up.badge_level": "Nv.",
+	"ui.level_up.badge_use": "Uso",
+	"ui.level_up.no_icon": "?",
+	
 	"ui.result.victory": "Vitória",
 	"ui.result.defeat": "Derrota",
 	"ui.result.title": "Resultado da Run",
@@ -51,6 +62,30 @@
 	"ui.result.close_hint": "Resultado básico do protótipo. Clique em Testar novamente para reiniciar a cena.",
 	"ui.result.restart": "Testar novamente",
 	"ui.result.save_applied": "Resultado salvo no progresso permanente.",
+	
+	"ui.debug_tools.title": "Ferramentas do Protótipo",
+	"ui.debug_tools.toggle_hint": "F3: mostrar ou ocultar",
+	"ui.debug_tools.total_xp": "XP Total",
+	"ui.debug_tools.total_money": "Dinheiro Total",
+	"ui.debug_tools.completed_maps": "Mapas concluídos",
+	"ui.debug_tools.last_run": "Última Run",
+	"ui.debug_tools.current_run": "Run Atual",
+	"ui.debug_tools.none": "Nenhum",
+	"ui.debug_tools.no_last_run": "Nenhuma run registrada",
+	"ui.debug_tools.active": "Ativa",
+	"ui.debug_tools.finished": "Finalizada",
+	"ui.debug_tools.reset_progression": "Resetar progressão",
+	"ui.debug_tools.force_victory": "Forçar vitória",
+	"ui.debug_tools.force_defeat": "Forçar derrota",
+	"ui.debug_tools.confirm_reset": "Confirmar reset",
+	"ui.debug_tools.cancel": "Cancelar",
+	"ui.debug_tools.reset_warning": "O reset zerará XP, dinheiro, mapas concluídos e recordes permanentes.",
+	"ui.debug_tools.reset_done": "Progressão permanente resetada. A run atual continua normalmente.",
+	"ui.debug_tools.reset_cancelled": "Reset cancelado.",
+	"ui.debug_tools.force_result_warning": "Vitórias ou derrotas forçadas também serão aplicadas ao save.",
+	"ui.debug_tools.force_victory_done": "Vitória forçada para teste.",
+	"ui.debug_tools.force_defeat_done": "Derrota forçada para teste.",
+	"ui.debug_tools.force_disabled": "Ação de debug desabilitada no RunController.",
 
 	"upgrade.weapon_damage_flat.name": "Dano da arma +1",
 	"upgrade.weapon_damage_flat.description": "Aumenta em +1 o dano de cada componente da arma atual.",
@@ -63,6 +98,32 @@
 
 	"upgrade.player_max_hp_flat.name": "Vida máxima +10",
 	"upgrade.player_max_hp_flat.description": "Aumenta a vida máxima da Gaia em 10 e recupera 10 de HP.",
+	
+	"upgrade_pool.gaia_default.name": "Pool padrão da Gaia",
+	
+	"upgrade.weapon_physical_damage_flat.name": "Dano físico +1",
+	"upgrade.weapon_physical_damage_flat.description": "Aumenta em +1 o dano físico da arma atual.",
+
+	"upgrade.weapon_magical_damage_flat.name": "Dano mágico +1",
+	"upgrade.weapon_magical_damage_flat.description": "Aumenta em +1 o dano mágico da arma atual.",
+
+	"upgrade.weapon_hitbox_radius_flat.name": "Alcance do ataque +10",
+	"upgrade.weapon_hitbox_radius_flat.description": "Aumenta o raio da área de acerto da arma atual.",
+
+	"upgrade.weapon_hitbox_lifetime_percent.name": "Golpe mais duradouro",
+	"upgrade.weapon_hitbox_lifetime_percent.description": "Aumenta em 10% o tempo ativo da hitbox do ataque.",
+
+	"upgrade.player_defense_percent.name": "Defesa +5%",
+	"upgrade.player_defense_percent.description": "Reduz o dano recebido pela Gaia em mais 5%.",
+
+	"upgrade.player_heal_flat.name": "Cura +20",
+	"upgrade.player_heal_flat.description": "Recupera 20 pontos de HP imediatamente.",
+
+	"upgrade.coin_magnet_radius_percent.name": "Magnetismo +20%",
+	"upgrade.coin_magnet_radius_percent.description": "Aumenta em 20% a distância em que moedas são atraídas.",
+
+	"upgrade.coin_collect_radius_percent.name": "Coleta +15%",
+	"upgrade.coin_collect_radius_percent.description": "Aumenta em 15% o raio de coleta das moedas.",
 	
 	"weapon.gaia_initial.name": "Arma Inicial da Gaia",
 	"weapon.gaia_initial.description": "Ataque direcional híbrido da Gaia. Usa a direção da mira."

@@ -1,0 +1,17 @@
+[gd_scene format=3 uid="uid://b3han2v54mmov"]
+
+[ext_resource type="Script" uid="uid://ce7lelxgxqu1a" path="res://ui/feedback/RunFeedbackLayer.gd" id="1_pdfnm"]
+
+[node name="RunFeedbackLayer" type="CanvasLayer" unique_id=538188133]
+process_mode = 3
+layer = 15
+script = ExtResource("1_pdfnm")
+
+[node name="MarginContainer" type="MarginContainer" parent="." unique_id=471158874]
+anchors_preset = 10
+anchor_right = 1.0
+grow_horizontal = 2
+
+[node name="MessageContainer" type="VBoxContainer" parent="MarginContainer" unique_id=868841780]
+layout_mode = 2
+alignment = 1
