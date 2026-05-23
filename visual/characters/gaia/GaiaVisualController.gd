@@ -85,8 +85,6 @@ func _play_animation_if_changed(animation_name: String, loop: bool) -> void:
 	else:
 		GameEvents.emit_debug("[GaiaVisualController] Não foi possível tocar animação. Adapter ausente: %s" % animation_name)
 
-	GameEvents.spine_animation_changed.emit(animation_name)
-
 func _update_facing(facing_direction: Vector2) -> void:
 	if abs(facing_direction.x) <= 0.001:
 		return

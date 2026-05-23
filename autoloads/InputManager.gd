@@ -14,22 +14,13 @@ func _ready() -> void:
 	print("[InputManager] Ready.")
 
 func update_input_for_player(player_global_position: Vector2) -> void:
-	var previous_move: Vector2 = move_direction
-	var previous_aim: Vector2 = aim_direction
-
 	move_direction = _get_move_direction()
 	aim_direction = _get_aim_direction(player_global_position)
 
 	if aim_direction.length() > 0.01:
 		last_valid_aim_direction = aim_direction.normalized()
 	else:
-		aim_direction = last_valid_aim_direction
-
-	if previous_move != move_direction:
-		GameEvents.player_move_direction_changed.emit(move_direction)
-
-	if previous_aim != aim_direction:
-		GameEvents.player_aim_direction_changed.emit(aim_direction)
+		aim_direction = last_valid_aim_direction		
 
 func get_move_direction() -> Vector2:
 	return move_direction

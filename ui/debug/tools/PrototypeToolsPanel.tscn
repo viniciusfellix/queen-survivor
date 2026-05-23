@@ -26,6 +26,34 @@ layout_mode = 2
 [node name="HintLabel" type="Label" parent="Panel/MarginContainer/VBoxContainer" unique_id=183014180]
 layout_mode = 2
 
+[node name="ActionsRow" type="HBoxContainer" parent="Panel/MarginContainer/VBoxContainer" unique_id=1869533133]
+custom_minimum_size = Vector2(560, 390)
+layout_mode = 2
+
+[node name="ForceVictoryButton" type="Button" parent="Panel/MarginContainer/VBoxContainer/ActionsRow" unique_id=381093445]
+custom_minimum_size = Vector2(80, 40)
+layout_mode = 2
+
+[node name="ForceDefeatButton" type="Button" parent="Panel/MarginContainer/VBoxContainer/ActionsRow" unique_id=1242707817]
+custom_minimum_size = Vector2(80, 40)
+layout_mode = 2
+
+[node name="ResetProgressButton" type="Button" parent="Panel/MarginContainer/VBoxContainer/ActionsRow" unique_id=1479589903]
+custom_minimum_size = Vector2(80, 40)
+layout_mode = 2
+
+[node name="ConfirmationRow" type="HBoxContainer" parent="Panel/MarginContainer/VBoxContainer" unique_id=374890356]
+visible = false
+layout_mode = 2
+
+[node name="ConfirmResetButton" type="Button" parent="Panel/MarginContainer/VBoxContainer/ConfirmationRow" unique_id=1863218585]
+custom_minimum_size = Vector2(170, 42)
+layout_mode = 2
+
+[node name="CancelResetButton" type="Button" parent="Panel/MarginContainer/VBoxContainer/ConfirmationRow" unique_id=1232760759]
+custom_minimum_size = Vector2(120, 42)
+layout_mode = 2
+
 [node name="SaveInfoLabel" type="Label" parent="Panel/MarginContainer/VBoxContainer" unique_id=694685991]
 layout_mode = 2
 
@@ -39,27 +67,4 @@ layout_mode = 2
 layout_mode = 2
 
 [node name="StatusLabel" type="Label" parent="Panel/MarginContainer/VBoxContainer" unique_id=1750742188]
-layout_mode = 2
-
-[node name="ActionsRow" type="HBoxContainer" parent="Panel/MarginContainer/VBoxContainer" unique_id=1869533133]
-visible = false
-custom_minimum_size = Vector2(560, 390)
-layout_mode = 2
-
-[node name="ForceVictoryButton" type="Button" parent="Panel/MarginContainer/VBoxContainer/ActionsRow" unique_id=381093445]
-layout_mode = 2
-
-[node name="ForceDefeatButton" type="Button" parent="Panel/MarginContainer/VBoxContainer/ActionsRow" unique_id=1242707817]
-layout_mode = 2
-
-[node name="ResetProgressButton" type="Button" parent="Panel/MarginContainer/VBoxContainer/ActionsRow" unique_id=1479589903]
-layout_mode = 2
-
-[node name="ConfirmationRow" type="HBoxContainer" parent="Panel/MarginContainer/VBoxContainer" unique_id=374890356]
-layout_mode = 2
-
-[node name="ConfirmResetButton" type="Button" parent="Panel/MarginContainer/VBoxContainer/ConfirmationRow" unique_id=1863218585]
-layout_mode = 2
-
-[node name="CancelResetButton" type="Button" parent="Panel/MarginContainer/VBoxContainer/ConfirmationRow" unique_id=1232760759]
 layout_mode = 2

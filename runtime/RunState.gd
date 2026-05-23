@@ -8,6 +8,12 @@ var elapsed_seconds: float = 0.0
 var map_duration_seconds: float = 600.0
 
 var is_paused: bool = false
+
+# Estado intermediário:
+# true quando a run já encerrou gameplay, mas ainda aguarda animação/delay
+# antes da exibição do resultado final.
+var is_ending: bool = false
+
 var is_victory: bool = false
 var is_defeat: bool = false
 var is_finished: bool = false
@@ -46,7 +52,7 @@ func setup_from_map(map_definition: MapDefinition) -> void:
 	map_duration_seconds = map_definition.duration_seconds
 
 func add_xp(amount: int) -> int:
-	if amount <= 0 or is_finished:
+	if amount <= 0 or is_finished or is_ending:
 		return 0
 
 	run_xp_gained += amount
@@ -57,25 +63,25 @@ func add_xp(amount: int) -> int:
 	return levels_gained
 
 func add_coins(amount: int) -> void:
-	if amount <= 0 or is_finished:
+	if amount <= 0 or is_finished or is_ending:
 		return
 
 	run_coins_collected += amount
 
 func add_enemy_kill() -> void:
-	if is_finished:
+	if is_finished or is_ending:
 		return
 
 	enemies_killed += 1
 
 func add_damage_dealt(amount: int) -> void:
-	if amount <= 0:
+	if amount <= 0 or is_finished or is_ending:
 		return
 
 	damage_dealt += amount
 
 func add_damage_taken(amount: int) -> void:
-	if amount <= 0:
+	if amount <= 0 or is_finished or is_ending:
 		return
 
 	damage_taken += amount
@@ -98,10 +104,20 @@ func get_time_progress_ratio() -> float:
 
 	return clamp(elapsed_seconds / map_duration_seconds, 0.0, 1.0)
 
+func begin_ending(p_death_cause: String = "") -> bool:
+	if is_finished or is_ending:
+		return false
+
+	is_ending = true
+	death_cause = p_death_cause
+
+	return true
+
 func mark_victory() -> void:
 	if is_finished:
 		return
 
+	is_ending = false
 	is_finished = true
 	is_victory = true
 	is_defeat = false
@@ -111,11 +127,14 @@ func mark_defeat(p_death_cause: String = "") -> void:
 	if is_finished:
 		return
 
+	is_ending = false
 	is_finished = true
 	is_victory = false
 	is_defeat = true
 	result_type = "defeat"
-	death_cause = p_death_cause
+
+	if p_death_cause.strip_edges() != "":
+		death_cause = p_death_cause
 
 func _process_level_progression() -> int:
 	var levels_gained: int = 0
@@ -140,9 +159,11 @@ func reset() -> void:
 	map_duration_seconds = 600.0
 
 	is_paused = false
+	is_ending = false
 	is_victory = false
 	is_defeat = false
 	is_finished = false
+	
 	result_type = ""
 
 	run_xp_gained = 0

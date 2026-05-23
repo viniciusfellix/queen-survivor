@@ -5,7 +5,7 @@ extends CharacterBody2D
 
 @export var visual_controller_path: NodePath
 
-@export var draw_debug_aim: bool = true
+@export var draw_debug_aim: bool = false
 @export var debug_aim_line_length: float = 96.0
 
 @export var base_defense_percent: float = 0.0

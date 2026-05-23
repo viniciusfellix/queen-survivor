@@ -124,8 +124,7 @@ func _refresh_all() -> void:
 func _update_cooldown() -> void:
 	if not show_cooldown:
 		return
-
-	var safe_cooldown_seconds: float = max(0.001, latest_cooldown_seconds)
+		
 	var cooldown_percent: float = clamp(latest_cooldown_progress_ratio, 0.0, 1.0) * 100.0
 
 	if cooldown_label != null:
@@ -387,7 +386,7 @@ func _get_run_debug_data() -> Dictionary:
 
 func _format_seconds(seconds: float) -> String:
 	var total_seconds: int = int(floor(max(0.0, seconds)))
-	var minutes: int = total_seconds / 60
+	var minutes: int = int(floor(float(total_seconds) / 60.0))
 	var remaining_seconds: int = total_seconds % 60
 
 	return "%02d:%02d" % [minutes, remaining_seconds]

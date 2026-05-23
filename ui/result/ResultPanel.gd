@@ -9,6 +9,8 @@ extends CanvasLayer
 @onready var restart_button: Button = $Panel/MarginContainer/VBoxContainer/RestartButton
 
 var latest_result_payload: RunResultPayload = null
+var persisted_result_payload: RunResultPayload = null
+var persisted_result_succeeded: bool = false
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -23,8 +25,8 @@ func _ready() -> void:
 	if not GameEvents.run_finished.is_connected(_on_run_finished):
 		GameEvents.run_finished.connect(_on_run_finished)
 
-	if not GameEvents.save_updated.is_connected(_on_save_updated):
-		GameEvents.save_updated.connect(_on_save_updated)
+	if not GameEvents.run_result_persisted.is_connected(_on_run_result_persisted):
+		GameEvents.run_result_persisted.connect(_on_run_result_persisted)
 
 func _on_run_finished(result_payload: RunResultPayload) -> void:
 	if result_payload == null:
@@ -43,8 +45,7 @@ func _on_run_finished(result_payload: RunResultPayload) -> void:
 
 	summary_label.text = _build_summary_text(result_payload)
 
-	if save_status_label != null:
-		save_status_label.text = "Salvando resultado..."
+	_update_save_status_label()
 
 	hint_label.text = LocalizationManager.get_text("ui.result.close_hint")
 
@@ -54,17 +55,36 @@ func _on_run_finished(result_payload: RunResultPayload) -> void:
 
 	GameEvents.emit_debug("[ResultPanel] Resultado exibido: %s" % result_payload.result_type)
 
-func _on_save_updated(_save_data: SaveData) -> void:
-	if not visible:
+func _on_run_result_persisted(
+	result_payload: RunResultPayload,
+	_save_data: SaveData,
+	succeeded: bool
+) -> void:
+	persisted_result_payload = result_payload
+	persisted_result_succeeded = succeeded
+
+	if latest_result_payload == result_payload:
+		_update_save_status_label()
+
+func _update_save_status_label() -> void:
+	if save_status_label == null:
 		return
 
-	if save_status_label != null:
+	if latest_result_payload == null:
+		save_status_label.text = ""
+		return
+
+	if persisted_result_payload != latest_result_payload:
+		save_status_label.text = "Salvando resultado..."
+		return
+
+	if persisted_result_succeeded:
 		save_status_label.text = LocalizationManager.get_text("ui.result.save_applied")
+	else:
+		save_status_label.text = LocalizationManager.get_text("ui.result.save_failed")
 
 func _on_restart_button_pressed() -> void:
 	GameEvents.emit_debug("[ResultPanel] Reinício solicitado pelo jogador.")
-
-	GameEvents.run_restart_requested.emit()
 
 	get_tree().paused = false
 	get_tree().reload_current_scene()
@@ -129,7 +149,7 @@ func _build_summary_text(payload: RunResultPayload) -> String:
 
 func _format_seconds(seconds: float) -> String:
 	var total_seconds: int = int(floor(seconds))
-	var minutes: int = total_seconds / 60
+	var minutes: int = int(floor(float(total_seconds) / 60.0))
 	var remaining_seconds: int = total_seconds % 60
 
 	return "%02d:%02d" % [minutes, remaining_seconds]

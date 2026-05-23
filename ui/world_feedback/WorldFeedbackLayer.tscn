@@ -1,15 +1,24 @@
-[gd_scene format=3 uid="uid://dfurqs5avj58y"]
+[gd_scene load_steps=3 format=3]
 
-[ext_resource type="Script" uid="uid://db45c8mvq86jn" path="res://ui/world_feedback/WorldFeedbackController.gd" id="1_6ddgn"]
+[ext_resource type="Script" path="res://ui/world_feedback/WorldFeedbackLayer.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://ui/world_feedback/FloatingCombatText.tscn" id="2_floating_text"]
 
-[node name="WorldFeedbackLayer" type="CanvasLayer" unique_id=1299703750]
+[node name="WorldFeedbackLayer" type="CanvasLayer"]
 process_mode = 3
 layer = 18
-script = ExtResource("1_6ddgn")
+script = ExtResource("1_script")
+floating_combat_text_scene = ExtResource("2_floating_text")
+player_group_name = "player"
+player_damage_world_offset = Vector2(0, -60)
+damage_color = Color(1, 0.04, 0.04, 1)
+debug_feedback = false
+show_test_text_on_ready = false
 
-[node name="FeedbackRoot" type="Control" parent="." unique_id=1087978013]
+[node name="FeedbackRoot" type="Control" parent="."]
 layout_mode = 3
-anchors_preset = 0
-offset_right = 40.0
-offset_bottom = 40.0
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 mouse_filter = 2

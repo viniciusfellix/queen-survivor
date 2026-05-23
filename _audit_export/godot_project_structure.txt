@@ -1,0 +1,5827 @@
+GODOT PROJECT STRUCTURE EXPORT
+==============================================================================================================
+Gerado em: 2026-05-23 15:36:21
+Projeto: C:/Users/acer/Documents/Godot/Projects/queen-survivor/
+Total de cenas encontradas: 20
+Inclui conteúdo dos scripts: true
+
+OBSERVAÇÃO:
+Cada cena é analisada individualmente a partir do conteúdo salvo no arquivo da cena.
+Cenas instanciadas aparecem como referência na cena-pai e também possuem seu próprio bloco detalhado.
+
+==============================================================================================================
+
+
+CENA: res://gameplay/arena/TestArena.tscn
+--------------------------------------------------------------------------------------------------------------
+- TestArena <Node2D> [path: .] | script: res://gameplay/arena/TestArena.gd
+
+CENA: res://gameplay/drops/CoinDrop.tscn
+--------------------------------------------------------------------------------------------------------------
+- CoinDrop <Node2D> [path: .] | script: res://gameplay/drops/CoinDrop.gd
+
+CENA: res://gameplay/enemies/EnemyBase.tscn
+--------------------------------------------------------------------------------------------------------------
+- EnemyBase <CharacterBody2D> [path: .] | script: res://gameplay/enemies/EnemyBase.gd
+	- CollisionShape2D <CollisionShape2D> [path: ./CollisionShape2D]
+	- VisualRoot <Node2D> [path: ./VisualRoot]
+	  - GoblinWarriorVisual <Node2D [instanced root]> [path: ./VisualRoot/GoblinWarriorVisual] | instance: res://visual/enemies/goblin_warrior/GoblinWarriorVisual.tscn
+
+CENA: res://gameplay/player/PlayerGaia.tscn
+--------------------------------------------------------------------------------------------------------------
+- PlayerGaia <CharacterBody2D> [path: .] | script: res://gameplay/player/PlayerController.gd
+	- CollisionShape2D <CollisionShape2D> [path: ./CollisionShape2D]
+	- VisualRoot <Node2D> [path: ./VisualRoot]
+	  - GaiaVisual <Node2D [instanced root]> [path: ./VisualRoot/GaiaVisual] | instance: res://visual/characters/gaia/GaiaVisual.tscn
+	- WeaponRoot <Node2D> [path: ./WeaponRoot]
+	  - AttackVisualRoot <Node2D> [path: ./WeaponRoot/AttackVisualRoot]
+	  - AttackHitboxRoot <Node2D> [path: ./WeaponRoot/AttackHitboxRoot]
+	  - GaiaInitialWeaponController <Node> [path: ./WeaponRoot/GaiaInitialWeaponController] | script: res://gameplay/weapons/gaia/GaiaInitialWeaponController.gd
+
+CENA: res://gameplay/spawners/EnemySpawner.tscn
+--------------------------------------------------------------------------------------------------------------
+- EnemySpawner <Node2D> [path: .] | script: res://gameplay/spawners/EnemySpawner.gd
+	- HintLabel <Label> [path: ./HintLabel]
+
+CENA: res://gameplay/test/TestGaiaScene.tscn
+--------------------------------------------------------------------------------------------------------------
+- TestGaiaScene <Node2D> [path: .] | script: res://gameplay/test/TestGaiaScene.gd
+	- ArenaRoot <Node2D> [path: ./ArenaRoot]
+	  - TestArena <Node2D [instanced root]> [path: ./ArenaRoot/TestArena] | instance: res://gameplay/arena/TestArena.tscn
+	- RuntimeRoot <Node2D> [path: ./RuntimeRoot]
+	  - PlayerRoot <Node2D> [path: ./RuntimeRoot/PlayerRoot]
+	  - EnemyRoot <Node2D> [path: ./RuntimeRoot/EnemyRoot]
+	  - DropRoot <Node2D> [path: ./RuntimeRoot/DropRoot]
+	  - SpawnerRoot <Node2D> [path: ./RuntimeRoot/SpawnerRoot]
+		- EnemySpawner <Node2D [instanced root]> [path: ./RuntimeRoot/SpawnerRoot/EnemySpawner] | instance: res://gameplay/spawners/EnemySpawner.tscn
+	  - RunController <Node> [path: ./RuntimeRoot/RunController] | script: res://gameplay/run/RunController.gd
+	  - DropController <Node> [path: ./RuntimeRoot/DropController] | script: res://gameplay/drops/DropController.gd
+	- PlayerSpawnPoint <Marker2D> [path: ./PlayerSpawnPoint]
+	- Camera2D <Camera2D> [path: ./Camera2D] | script: res://gameplay/camera/FollowCamera.gd
+	- RunHud <CanvasLayer [instanced root]> [path: ./RunHud] | instance: res://ui/hud/RunHud.tscn
+	- RunFeedbackLayer <CanvasLayer [instanced root]> [path: ./RunFeedbackLayer] | instance: res://ui/feedback/RunFeedbackLayer.tscn
+	- WorldFeedbackLayer <CanvasLayer [instanced root]> [path: ./WorldFeedbackLayer] | instance: res://ui/world_feedback/WorldFeedbackLayer.tscn
+	- DebugOverlay <CanvasLayer [instanced root]> [path: ./DebugOverlay] | instance: res://ui/debug/DebugOverlay.tscn
+	- PrototypeToolsPanel <CanvasLayer [instanced root]> [path: ./PrototypeToolsPanel] | instance: res://ui/debug/tools/PrototypeToolsPanel.tscn
+	- LevelUpPanel <CanvasLayer [instanced root]> [path: ./LevelUpPanel] | instance: res://ui/level_up/LevelUpPanel.tscn
+	- ResultPanel <CanvasLayer [instanced root]> [path: ./ResultPanel] | instance: res://ui/result/ResultPanel.tscn
+
+CENA: res://gameplay/weapons/attacks/DirectionalAttackHitbox.tscn
+--------------------------------------------------------------------------------------------------------------
+- DirectionalAttackHitbox <Node2D> [path: .] | script: res://gameplay/weapons/attacks/DirectionalAttackHitbox.gd
+
+CENA: res://node_2d.tscn
+--------------------------------------------------------------------------------------------------------------
+- Node2D <Node2D> [path: .]
+	- SpineSprite <SpineSprite> [path: ./SpineSprite]
+
+CENA: res://scenes/Main.tscn
+--------------------------------------------------------------------------------------------------------------
+- Main <Node> [path: .] | script: res://scenes/Main.gd
+	- CurrentSceneRoot <Node> [path: ./CurrentSceneRoot]
+
+CENA: res://ui/debug/DebugOverlay.tscn
+--------------------------------------------------------------------------------------------------------------
+- DebugOverlay <CanvasLayer> [path: .] | script: res://ui/debug/DebugOverlay.gd
+	- Panel <Panel> [path: ./Panel]
+	  - MarginContainer <MarginContainer> [path: ./Panel/MarginContainer]
+		- Label <Label> [path: ./Panel/MarginContainer/Label]
+
+CENA: res://ui/debug/tools/PrototypeToolsPanel.tscn
+--------------------------------------------------------------------------------------------------------------
+- PrototypeToolsPanel <CanvasLayer> [path: .] | script: res://ui/debug/tools/PrototypeToolsPanel.gd
+	- Panel <Panel> [path: ./Panel]
+	  - MarginContainer <MarginContainer> [path: ./Panel/MarginContainer]
+		- VBoxContainer <VBoxContainer> [path: ./Panel/MarginContainer/VBoxContainer]
+		  - TitleLabel <Label> [path: ./Panel/MarginContainer/VBoxContainer/TitleLabel]
+		  - HintLabel <Label> [path: ./Panel/MarginContainer/VBoxContainer/HintLabel]
+		  - ActionsRow <HBoxContainer> [path: ./Panel/MarginContainer/VBoxContainer/ActionsRow]
+			- ForceVictoryButton <Button> [path: ./Panel/MarginContainer/VBoxContainer/ActionsRow/ForceVictoryButton]
+			- ForceDefeatButton <Button> [path: ./Panel/MarginContainer/VBoxContainer/ActionsRow/ForceDefeatButton]
+			- ResetProgressButton <Button> [path: ./Panel/MarginContainer/VBoxContainer/ActionsRow/ResetProgressButton]
+		  - SaveInfoLabel <Label> [path: ./Panel/MarginContainer/VBoxContainer/SaveInfoLabel]
+		  - CurrentRunLabel <Label> [path: ./Panel/MarginContainer/VBoxContainer/CurrentRunLabel]
+		  - LastRunLabel <Label> [path: ./Panel/MarginContainer/VBoxContainer/LastRunLabel]
+		  - WarningLabel <Label> [path: ./Panel/MarginContainer/VBoxContainer/WarningLabel]
+		  - StatusLabel <Label> [path: ./Panel/MarginContainer/VBoxContainer/StatusLabel]
+		  - ConfirmationRow <HBoxContainer> [path: ./Panel/MarginContainer/VBoxContainer/ConfirmationRow]
+			- ConfirmResetButton <Button> [path: ./Panel/MarginContainer/VBoxContainer/ConfirmationRow/ConfirmResetButton]
+			- CancelResetButton <Button> [path: ./Panel/MarginContainer/VBoxContainer/ConfirmationRow/CancelResetButton]
+
+CENA: res://ui/feedback/RunFeedbackLayer.tscn
+--------------------------------------------------------------------------------------------------------------
+- RunFeedbackLayer <CanvasLayer> [path: .] | script: res://ui/feedback/RunFeedbackLayer.gd
+	- MarginContainer <MarginContainer> [path: ./MarginContainer]
+	  - MessageContainer <VBoxContainer> [path: ./MarginContainer/MessageContainer]
+
+CENA: res://ui/hud/RunHud.tscn
+--------------------------------------------------------------------------------------------------------------
+- RunHud <CanvasLayer> [path: .] | script: res://ui/hud/RunHud.gd
+	- MarginContainer <MarginContainer> [path: ./MarginContainer]
+	  - VBoxContainer <VBoxContainer> [path: ./MarginContainer/VBoxContainer]
+		- TopRow <HBoxContainer> [path: ./MarginContainer/VBoxContainer/TopRow]
+		  - HpBox <VBoxContainer> [path: ./MarginContainer/VBoxContainer/TopRow/HpBox]
+			- HpLabel <Label> [path: ./MarginContainer/VBoxContainer/TopRow/HpBox/HpLabel]
+			- HpBar <ProgressBar> [path: ./MarginContainer/VBoxContainer/TopRow/HpBox/HpBar]
+		  - XpBox <VBoxContainer> [path: ./MarginContainer/VBoxContainer/TopRow/XpBox]
+			- XpLabel <Label> [path: ./MarginContainer/VBoxContainer/TopRow/XpBox/XpLabel]
+			- XpBar <ProgressBar> [path: ./MarginContainer/VBoxContainer/TopRow/XpBox/XpBar]
+		  - CooldownBox <VBoxContainer> [path: ./MarginContainer/VBoxContainer/TopRow/CooldownBox]
+			- CooldownLabel <Label> [path: ./MarginContainer/VBoxContainer/TopRow/CooldownBox/CooldownLabel]
+			- CooldownBar <ProgressBar> [path: ./MarginContainer/VBoxContainer/TopRow/CooldownBox/CooldownBar]
+		  - TimerLabel <Label> [path: ./MarginContainer/VBoxContainer/TopRow/TimerLabel]
+		  - CoinsLabel <Label> [path: ./MarginContainer/VBoxContainer/TopRow/CoinsLabel]
+		  - LevelLabel <Label> [path: ./MarginContainer/VBoxContainer/TopRow/LevelLabel]
+		  - KillsLabel <Label> [path: ./MarginContainer/VBoxContainer/TopRow/KillsLabel]
+		- MessageLabel <Label> [path: ./MarginContainer/VBoxContainer/MessageLabel]
+
+CENA: res://ui/level_up/LevelUpPanel.tscn
+--------------------------------------------------------------------------------------------------------------
+- LevelUpPanel <CanvasLayer> [path: .] | script: res://ui/level_up/LevelUpPanel.gd
+	- Panel <Panel> [path: ./Panel]
+	  - MarginContainer <MarginContainer> [path: ./Panel/MarginContainer]
+		- VBoxContainer <VBoxContainer> [path: ./Panel/MarginContainer/VBoxContainer]
+		  - TitleLabel <Label> [path: ./Panel/MarginContainer/VBoxContainer/TitleLabel]
+		  - SubtitleLabel <Label> [path: ./Panel/MarginContainer/VBoxContainer/SubtitleLabel]
+		  - OptionsContainer <HBoxContainer> [path: ./Panel/MarginContainer/VBoxContainer/OptionsContainer]
+			- OptionCard1 <Button> [path: ./Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard1]
+			  - MarginContainer <MarginContainer> [path: ./Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard1/MarginContainer]
+				- HBoxContainer <HBoxContainer> [path: ./Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard1/MarginContainer/HBoxContainer]
+				  - IconTexture <TextureRect> [path: ./Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard1/MarginContainer/HBoxContainer/IconTexture]
+				  - TextBox <VBoxContainer> [path: ./Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard1/MarginContainer/HBoxContainer/TextBox]
+					- NameLabel <Label> [path: ./Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard1/MarginContainer/HBoxContainer/TextBox/NameLabel]
+					- DescriptionLabel <Label> [path: ./Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard1/MarginContainer/HBoxContainer/TextBox/DescriptionLabel]
+					- BadgeLabel <Label> [path: ./Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard1/MarginContainer/HBoxContainer/TextBox/BadgeLabel]
+			- OptionCard2 <Button> [path: ./Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard2]
+			  - MarginContainer <MarginContainer> [path: ./Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard2/MarginContainer]
+				- HBoxContainer <HBoxContainer> [path: ./Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard2/MarginContainer/HBoxContainer]
+				  - IconTexture <TextureRect> [path: ./Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard2/MarginContainer/HBoxContainer/IconTexture]
+				  - TextBox <VBoxContainer> [path: ./Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard2/MarginContainer/HBoxContainer/TextBox]
+					- NameLabel <Label> [path: ./Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard2/MarginContainer/HBoxContainer/TextBox/NameLabel]
+					- DescriptionLabel <Label> [path: ./Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard2/MarginContainer/HBoxContainer/TextBox/DescriptionLabel]
+					- BadgeLabel <Label> [path: ./Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard2/MarginContainer/HBoxContainer/TextBox/BadgeLabel]
+			- OptionCard3 <Button> [path: ./Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard3]
+			  - MarginContainer <MarginContainer> [path: ./Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard3/MarginContainer]
+				- HBoxContainer <HBoxContainer> [path: ./Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard3/MarginContainer/HBoxContainer]
+				  - IconTexture <TextureRect> [path: ./Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard3/MarginContainer/HBoxContainer/IconTexture]
+				  - TextBox <VBoxContainer> [path: ./Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard3/MarginContainer/HBoxContainer/TextBox]
+					- NameLabel <Label> [path: ./Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard3/MarginContainer/HBoxContainer/TextBox/NameLabel]
+					- DescriptionLabel <Label> [path: ./Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard3/MarginContainer/HBoxContainer/TextBox/DescriptionLabel]
+					- BadgeLabel <Label> [path: ./Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard3/MarginContainer/HBoxContainer/TextBox/BadgeLabel]
+
+CENA: res://ui/result/ResultPanel.tscn
+--------------------------------------------------------------------------------------------------------------
+- ResultPanel <CanvasLayer> [path: .] | script: res://ui/result/ResultPanel.gd
+	- Panel <Panel> [path: ./Panel]
+	  - MarginContainer <MarginContainer> [path: ./Panel/MarginContainer]
+		- VBoxContainer <VBoxContainer> [path: ./Panel/MarginContainer/VBoxContainer]
+		  - TitleLabel <Label> [path: ./Panel/MarginContainer/VBoxContainer/TitleLabel]
+		  - ResultTypeLabel <Label> [path: ./Panel/MarginContainer/VBoxContainer/ResultTypeLabel]
+		  - SummaryLabel <Label> [path: ./Panel/MarginContainer/VBoxContainer/SummaryLabel]
+		  - SaveStatusLabel <Label> [path: ./Panel/MarginContainer/VBoxContainer/SaveStatusLabel]
+		  - HintLabel <Label> [path: ./Panel/MarginContainer/VBoxContainer/HintLabel]
+		  - RestartButton <Button> [path: ./Panel/MarginContainer/VBoxContainer/RestartButton]
+
+CENA: res://ui/world_feedback/FloatingCombatText.tscn
+--------------------------------------------------------------------------------------------------------------
+- FloatingCombatText <Label> [path: .] | script: res://ui/world_feedback/FloatingCombatText.gd
+
+CENA: res://ui/world_feedback/WorldFeedbackLayer.tscn
+--------------------------------------------------------------------------------------------------------------
+- WorldFeedbackLayer <CanvasLayer> [path: .] | script: res://ui/world_feedback/WorldFeedbackController.gd
+	- FeedbackRoot <Control> [path: ./FeedbackRoot]
+
+CENA: res://visual/characters/gaia/GaiaVisual.tscn
+--------------------------------------------------------------------------------------------------------------
+- GaiaVisual <Node2D> [path: .] | script: res://visual/characters/gaia/GaiaVisualController.gd
+	- SpineSprite <SpineSprite> [path: ./SpineSprite]
+	- GaiaSpineAdapter <Node> [path: ./GaiaSpineAdapter] | script: res://visual/characters/gaia/GaiaSpineAdapter.gd
+
+CENA: res://visual/enemies/goblin_warrior/GoblinWarriorVisual.tscn
+--------------------------------------------------------------------------------------------------------------
+- GoblinWarriorVisual <Node2D> [path: .] | script: res://visual/enemies/goblin_warrior/GoblinWarriorVisualController.gd
+	- SpineSprite <SpineSprite> [path: ./SpineSprite]
+	- GoblinWarriorSpineAdapter <Node> [path: ./GoblinWarriorSpineAdapter] | script: res://visual/enemies/goblin_warrior/GoblinWarriorSpineAdapter.gd
+
+CENA: res://visual/weapons/gaia_initial_weapon/GaiaAttackVisual.tscn
+--------------------------------------------------------------------------------------------------------------
+- GaiaAttackVisual <Node2D> [path: .] | script: res://visual/weapons/gaia_initial_weapon/GaiaAttackVisualController.gd
+	- PlaceholderRoot <Node2D> [path: ./PlaceholderRoot]
+	  - Sprite2D <Sprite2D> [path: ./PlaceholderRoot/Sprite2D]
+	- SpineRoot <Node2D> [path: ./SpineRoot]
+
+
+SCRIPTS ANEXADOS AOS NÓS
+==============================================================================================================
+Total de scripts únicos encontrados: 25
+
+SCRIPT: res://gameplay/arena/TestArena.gd
+--------------------------------------------------------------------------------------------------------------
+extends Node2D
+
+@export var draw_debug_grid: bool = true
+@export var grid_size: int = 128
+@export var grid_extent: int = 4096
+
+@export var draw_origin_marker: bool = true
+@export var origin_marker_radius: float = 10.0
+
+func _ready() -> void:
+	queue_redraw()
+
+func _draw() -> void:
+	if not draw_debug_grid:
+		return
+
+	_draw_grid()
+
+	if draw_origin_marker:
+		_draw_origin_marker()
+
+func _draw_grid() -> void:
+	var minor_color: Color = Color(0.18, 0.18, 0.18, 1.0)
+	var major_color: Color = Color(0.32, 0.32, 0.32, 1.0)
+	var origin_x_color: Color = Color(0.35, 0.15, 0.15, 1.0)
+	var origin_y_color: Color = Color(0.15, 0.35, 0.15, 1.0)
+
+	var start_position: int = -grid_extent
+	var end_position: int = grid_extent
+	var major_grid_size: int = grid_size * 4
+
+	for x: int in range(start_position, end_position + grid_size, grid_size):
+		var vertical_color: Color = major_color
+
+		if major_grid_size != 0 and x % major_grid_size != 0:
+			vertical_color = minor_color
+
+		draw_line(
+			Vector2(float(x), float(start_position)),
+			Vector2(float(x), float(end_position)),
+			vertical_color,
+			1.0
+		)
+
+	for y: int in range(start_position, end_position + grid_size, grid_size):
+		var horizontal_color: Color = major_color
+
+		if major_grid_size != 0 and y % major_grid_size != 0:
+			horizontal_color = minor_color
+
+		draw_line(
+			Vector2(float(start_position), float(y)),
+			Vector2(float(end_position), float(y)),
+			horizontal_color,
+			1.0
+		)
+
+	draw_line(
+		Vector2(float(start_position), 0.0),
+		Vector2(float(end_position), 0.0),
+		origin_y_color,
+		3.0
+	)
+
+	draw_line(
+		Vector2(0.0, float(start_position)),
+		Vector2(0.0, float(end_position)),
+		origin_x_color,
+		3.0
+	)
+
+func _draw_origin_marker() -> void:
+	draw_circle(Vector2.ZERO, origin_marker_radius, Color.WHITE)
+
+
+SCRIPT: res://gameplay/camera/FollowCamera.gd
+--------------------------------------------------------------------------------------------------------------
+extends Camera2D
+
+@export var follow_enabled: bool = true
+@export var target_path: NodePath
+@export var target_group_name: String = "player"
+
+@export var follow_smoothing: float = 12.0
+@export var position_offset: Vector2 = Vector2.ZERO
+
+@export var snap_to_target_on_ready: bool = true
+
+var target_node: Node2D = null
+
+func _ready() -> void:
+	enabled = true
+	make_current()
+
+	target_node = _resolve_target()
+
+	if target_node != null:
+		GameEvents.emit_debug("[FollowCamera] Target encontrado: %s" % target_node.name)
+
+		if snap_to_target_on_ready:
+			global_position = target_node.global_position + position_offset
+	else:
+		GameEvents.emit_debug("[FollowCamera] Nenhum target encontrado no _ready(). Tentará novamente em runtime.")
+
+func _process(delta: float) -> void:
+	if not follow_enabled:
+		return
+
+	if target_node == null:
+		target_node = _resolve_target()
+
+		if target_node == null:
+			return
+
+	_update_follow(delta)
+
+func set_target(new_target: Node2D) -> void:
+	target_node = new_target
+
+	if target_node != null:
+		GameEvents.emit_debug("[FollowCamera] Target definido manualmente: %s" % target_node.name)
+
+		if snap_to_target_on_ready:
+			global_position = target_node.global_position + position_offset
+
+func clear_target() -> void:
+	target_node = null
+
+func _update_follow(delta: float) -> void:
+	if target_node == null:
+		return
+
+	var desired_position: Vector2 = target_node.global_position + position_offset
+
+	if follow_smoothing <= 0.0:
+		global_position = desired_position
+		return
+
+	var weight: float = clamp(delta * follow_smoothing, 0.0, 1.0)
+	global_position = global_position.lerp(desired_position, weight)
+
+func _resolve_target() -> Node2D:
+	if target_path != NodePath():
+		var configured_target: Node = get_node_or_null(target_path)
+
+		if configured_target is Node2D:
+			return configured_target as Node2D
+
+	var group_target: Node2D = _find_first_node2d_in_group(target_group_name)
+
+	if group_target != null:
+		return group_target
+
+	return null
+
+func _find_first_node2d_in_group(group_name: String) -> Node2D:
+	if group_name.strip_edges() == "":
+		return null
+
+	var nodes: Array[Node] = get_tree().get_nodes_in_group(group_name)
+
+	for node: Node in nodes:
+		if node is Node2D:
+			return node as Node2D
+
+	return null
+
+
+SCRIPT: res://gameplay/drops/CoinDrop.gd
+--------------------------------------------------------------------------------------------------------------
+extends Node2D
+class_name CoinDrop
+
+@export var coin_definition: CoinDropDefinition
+
+@export var value: int = 1
+
+@export var player_group_name: String = "player"
+
+@export var magnet_radius: float = 150.0
+@export var collect_radius: float = 24.0
+@export var initial_idle_seconds: float = 0.15
+
+@export var magnet_acceleration: float = 900.0
+@export var max_magnet_speed: float = 520.0
+
+@export var draw_debug_visual: bool = true
+@export var debug_radius: float = 8.0
+@export var debug_color: Color = Color(1.0, 0.78, 0.18, 1.0)
+@export var debug_outline_color: Color = Color(1.0, 1.0, 1.0, 0.95)
+
+var player_node: Node2D = null
+var velocity: Vector2 = Vector2.ZERO
+var elapsed_seconds: float = 0.0
+var is_collected: bool = false
+var is_magnetized: bool = false
+var collection_enabled: bool = true
+
+func _ready() -> void:
+	_apply_definition()
+	player_node = _resolve_player()
+	queue_redraw()
+	
+	if not GameEvents.run_finished.is_connected(_on_run_finished):
+		GameEvents.run_finished.connect(_on_run_finished)
+
+func _physics_process(delta: float) -> void:
+	if is_collected:
+		return
+
+	elapsed_seconds += delta
+	
+	if not collection_enabled:
+		return
+
+	if RunQuery.is_run_finished(get_tree()):
+		return
+
+	if player_node == null:
+		player_node = _resolve_player()
+
+	if player_node == null:
+		return
+
+	var distance_to_player: float = global_position.distance_to(player_node.global_position)
+	var effective_collect_radius: float = _get_effective_collect_radius()
+	var effective_magnet_radius: float = _get_effective_magnet_radius()
+
+	if distance_to_player <= effective_collect_radius:
+		_collect()
+		return
+
+	if elapsed_seconds < initial_idle_seconds:
+		return
+
+	if distance_to_player <= effective_magnet_radius:
+		is_magnetized = true
+		_update_magnet_movement(delta)
+	else:
+		is_magnetized = false
+		velocity = velocity.move_toward(Vector2.ZERO, magnet_acceleration * delta)
+
+	global_position += velocity * delta
+	queue_redraw()
+
+func _draw() -> void:
+	if not draw_debug_visual:
+		return
+
+	draw_circle(Vector2.ZERO, debug_radius, debug_color)
+	draw_arc(Vector2.ZERO, debug_radius + 2.0, 0.0, TAU, 24, debug_outline_color, 2.0)
+
+	if is_magnetized:
+		draw_arc(Vector2.ZERO, _get_effective_magnet_radius(), 0.0, TAU, 48, Color(1.0, 0.9, 0.2, 0.18), 1.0)
+
+func setup(p_definition: CoinDropDefinition, p_value: int = 1, p_player: Node2D = null) -> void:
+	coin_definition = p_definition
+	value = max(1, p_value)
+
+	if p_player != null:
+		player_node = p_player
+
+	_apply_definition()
+	queue_redraw()
+
+func _apply_definition() -> void:
+	if coin_definition == null:
+		return
+
+	value = max(1, value)
+
+	magnet_radius = coin_definition.magnet_radius
+	collect_radius = coin_definition.collect_radius
+	initial_idle_seconds = coin_definition.initial_idle_seconds
+	magnet_acceleration = coin_definition.magnet_acceleration
+	max_magnet_speed = coin_definition.max_magnet_speed
+	debug_radius = coin_definition.debug_radius
+	debug_color = coin_definition.debug_color
+	debug_outline_color = coin_definition.debug_outline_color
+
+func _update_magnet_movement(delta: float) -> void:
+	var to_player: Vector2 = player_node.global_position - global_position
+
+	if to_player.length() <= 0.001:
+		return
+
+	var desired_velocity: Vector2 = to_player.normalized() * max_magnet_speed
+	velocity = velocity.move_toward(desired_velocity, magnet_acceleration * delta)
+
+func _collect() -> void:
+	if not collection_enabled:
+		return
+
+	if RunQuery.is_run_finished(get_tree()):
+		return
+		
+	if is_collected:
+		return
+
+	is_collected = true
+
+	GameEvents.run_coin_collected.emit(value, global_position)
+	GameEvents.emit_debug("[CoinDrop] Moeda coletada: value=%s pos=%s" % [
+		str(value),
+		str(global_position)
+	])
+
+	queue_free()
+
+func _resolve_player() -> Node2D:
+	var players: Array[Node] = get_tree().get_nodes_in_group(player_group_name)
+
+	for node: Node in players:
+		if node is Node2D:
+			return node as Node2D
+
+	return null
+
+func _on_run_finished(_result_payload: RunResultPayload) -> void:
+	collection_enabled = false
+	is_magnetized = false
+	velocity = Vector2.ZERO
+	queue_redraw()
+
+func _get_effective_magnet_radius() -> float:
+	var multiplier: float = _get_player_collection_multiplier("coin_magnet_radius_multiplier")
+	return magnet_radius * multiplier
+
+func _get_effective_collect_radius() -> float:
+	var multiplier: float = _get_player_collection_multiplier("coin_collect_radius_multiplier")
+	return collect_radius * multiplier
+
+func _get_player_collection_multiplier(key: String) -> float:
+	if player_node == null:
+		return 1.0
+
+	if not player_node.has_method("get_drop_collection_modifiers"):
+		return 1.0
+
+	var modifiers_variant: Variant = player_node.call("get_drop_collection_modifiers")
+
+	if not (modifiers_variant is Dictionary):
+		return 1.0
+
+	var modifiers: Dictionary = modifiers_variant as Dictionary
+	var multiplier: float = float(modifiers.get(key, 1.0))
+
+	return max(0.10, multiplier)
+
+
+SCRIPT: res://gameplay/drops/DropController.gd
+--------------------------------------------------------------------------------------------------------------
+extends Node
+
+@export_file("*.tscn") var coin_drop_scene_path: String = "res://gameplay/drops/CoinDrop.tscn"
+@export var coin_definition: CoinDropDefinition
+
+@export var drop_root_path: NodePath
+@export var player_group_name: String = "player"
+
+@export var random_position_jitter: float = 18.0
+
+var drop_root: Node2D = null
+var player_node: Node2D = null
+
+func _ready() -> void:
+	drop_root = _resolve_drop_root()
+	player_node = _resolve_player()
+
+	_connect_events()
+
+	if drop_root != null:
+		GameEvents.emit_debug("[DropController] DropRoot encontrado: %s" % drop_root.name)
+	else:
+		GameEvents.emit_debug("[DropController] DropRoot NÃO encontrado.")
+
+	if coin_definition != null:
+		GameEvents.emit_debug("[DropController] CoinDefinition configurada: %s" % coin_definition.id)
+	else:
+		GameEvents.emit_debug("[DropController] CoinDefinition NÃO configurada.")
+
+func _connect_events() -> void:
+	if not GameEvents.enemy_died.is_connected(_on_enemy_died):
+		GameEvents.enemy_died.connect(_on_enemy_died)
+
+func _on_enemy_died(
+	enemy_id: String,
+	source_id: String,
+	_xp_reward: int,
+	enemy_global_position: Vector2,
+	coin_drop_chance: float,
+	coin_drop_value: int
+) -> void:
+	if RunQuery.is_run_finished(get_tree()):
+		return
+		
+	if coin_drop_value <= 0:
+		return
+
+	if coin_drop_chance <= 0.0:
+		return
+
+	var roll: float = randf()
+
+	if roll > coin_drop_chance:
+		GameEvents.emit_debug("[DropController] Moeda não dropou. enemy=%s roll=%s chance=%s" % [
+			enemy_id,
+			str(roll),
+			str(coin_drop_chance)
+		])
+		return
+
+	_spawn_coin(enemy_global_position, coin_drop_value, enemy_id, source_id)
+
+func _spawn_coin(spawn_position: Vector2, value: int, enemy_id: String, source_id: String) -> void:
+	if drop_root == null:
+		drop_root = _resolve_drop_root()
+
+	if player_node == null:
+		player_node = _resolve_player()
+
+	if drop_root == null:
+		GameEvents.emit_debug("[DropController] Não foi possível criar moeda: DropRoot null.")
+		return
+
+	var packed_coin: PackedScene = load(coin_drop_scene_path) as PackedScene
+
+	if packed_coin == null:
+		push_warning("[DropController] Não foi possível carregar CoinDrop: %s" % coin_drop_scene_path)
+		return
+
+	var coin_instance: Node = packed_coin.instantiate()
+
+	if not coin_instance is Node2D:
+		push_warning("[DropController] CoinDrop não é Node2D.")
+		coin_instance.queue_free()
+		return
+
+	var coin_node: Node2D = coin_instance as Node2D
+
+	drop_root.add_child(coin_node)
+	coin_node.global_position = spawn_position + _get_random_jitter()
+
+	if coin_node.has_method("setup"):
+		coin_node.call("setup", coin_definition, value, player_node)
+
+	GameEvents.emit_debug("[DropController] Moeda criada. enemy=%s source=%s value=%s pos=%s" % [
+		enemy_id,
+		source_id,
+		str(value),
+		str(coin_node.global_position)
+	])
+
+func _get_random_jitter() -> Vector2:
+	if random_position_jitter <= 0.0:
+		return Vector2.ZERO
+
+	var angle: float = randf_range(0.0, TAU)
+	var distance: float = randf_range(0.0, random_position_jitter)
+
+	return Vector2(cos(angle), sin(angle)) * distance
+
+func _resolve_drop_root() -> Node2D:
+	if drop_root_path != NodePath():
+		var configured_root: Node = get_node_or_null(drop_root_path)
+
+		if configured_root is Node2D:
+			return configured_root as Node2D
+
+	var parent_node: Node = get_parent()
+
+	if parent_node != null:
+		var sibling_root: Node = parent_node.get_node_or_null("DropRoot")
+
+		if sibling_root is Node2D:
+			return sibling_root as Node2D
+
+		var parent_parent: Node = parent_node.get_parent()
+
+		if parent_parent != null:
+			var uncle_root: Node = parent_parent.get_node_or_null("DropRoot")
+
+			if uncle_root is Node2D:
+				return uncle_root as Node2D
+
+	return null
+
+func _resolve_player() -> Node2D:
+	var players: Array[Node] = get_tree().get_nodes_in_group(player_group_name)
+
+	for node: Node in players:
+		if node is Node2D:
+			return node as Node2D
+
+	return null
+
+
+SCRIPT: res://gameplay/enemies/EnemyBase.gd
+--------------------------------------------------------------------------------------------------------------
+extends CharacterBody2D
+
+@export var enemy_definition: EnemyDefinition
+
+@export var target_path: NodePath
+@export var target_group_name: String = "player"
+
+@export var visual_controller_path: NodePath
+
+@export var stopping_distance: float = 8.0
+@export var draw_debug_visual: bool = true
+@export var draw_debug_target_line: bool = false
+@export var draw_contact_radius: bool = true
+
+@export_group("Spawn Safety")
+@export var contact_damage_start_delay_seconds: float = 0.75
+@export var debug_contact_distance: bool = false
+@export var remove_after_death_seconds: float = 0.45
+
+var max_hp: int = 10
+var current_hp: int = 10
+var move_speed: float = 90.0
+
+var contact_damage: int = 5
+var contact_damage_radius: float = 32.0
+var contact_damage_interval_seconds: float = 1.0
+var contact_damage_type: String = "physical"
+var xp_reward: int = 1
+var coin_drop_chance: float = 0.25
+var coin_drop_value: int = 1
+
+var contact_damage_timer: float = 0.0
+
+var target_node: Node2D = null
+var visual_controller: Node = null
+
+var enemy_id: String = ""
+var debug_color: Color = Color(0.9, 0.15, 0.15, 1.0)
+var debug_radius: float = 18.0
+
+var is_alive: bool = true
+var is_dying: bool = false
+var total_damage_taken: int = 0
+var last_damage_taken: int = 0
+var last_damage_source_id: String = ""
+
+var alive_seconds: float = 0.0
+
+func _ready() -> void:
+	add_to_group("enemy")
+
+	visual_controller = _resolve_visual_controller()
+
+	_apply_definition()
+	target_node = _resolve_target()
+
+	if target_node != null:
+		GameEvents.emit_debug("[EnemyBase] Target encontrado: %s" % target_node.name)
+	else:
+		GameEvents.emit_debug("[EnemyBase] Nenhum target encontrado no _ready().")
+
+	if visual_controller != null:
+		GameEvents.emit_debug("[EnemyBase] Visual controller encontrado: %s" % visual_controller.name)
+	else:
+		GameEvents.emit_debug("[EnemyBase] Visual controller não encontrado.")
+
+	_update_visual_state()
+	queue_redraw()
+
+func _physics_process(delta: float) -> void:
+	alive_seconds += delta
+	
+	if RunQuery.is_gameplay_blocked(get_tree()):
+		velocity = Vector2.ZERO
+		move_and_slide()
+		_update_visual_state()
+		queue_redraw()
+		return
+		
+	if not is_alive:
+		velocity = Vector2.ZERO
+		move_and_slide()
+		_update_visual_state()
+		queue_redraw()
+		return
+
+	_update_contact_damage_timer(delta)
+
+	if target_node == null:
+		target_node = _resolve_target()
+
+	if target_node == null:
+		velocity = Vector2.ZERO
+		move_and_slide()
+		_update_visual_state()
+		queue_redraw()
+		return
+
+	_follow_target()
+	move_and_slide()
+
+	_try_apply_contact_damage()
+
+	_update_visual_state()
+	queue_redraw()
+
+func _draw() -> void:
+	if not draw_debug_visual:
+		return
+
+	var body_color: Color = debug_color
+
+	if not is_alive:
+		body_color = Color(0.25, 0.25, 0.25, 0.7)
+
+	draw_circle(Vector2.ZERO, debug_radius, body_color)
+	draw_arc(Vector2.ZERO, debug_radius + 2.0, 0.0, TAU, 24, Color.WHITE, 2.0)
+
+	if draw_contact_radius and is_alive:
+		draw_arc(Vector2.ZERO, contact_damage_radius, 0.0, TAU, 32, Color(1.0, 0.5, 0.1, 0.85), 1.0)
+
+	var forward_direction: Vector2 = Vector2.RIGHT
+
+	if velocity.length() > 0.001:
+		forward_direction = velocity.normalized()
+
+	var nose_position: Vector2 = forward_direction * (debug_radius + 8.0)
+	draw_circle(nose_position, 4.0, Color.WHITE)
+
+	if draw_debug_target_line and target_node != null:
+		var local_target_position: Vector2 = to_local(target_node.global_position)
+		draw_line(Vector2.ZERO, local_target_position, Color.YELLOW, 1.0)
+
+func setup(definition: EnemyDefinition, target: Node2D = null) -> void:
+	enemy_definition = definition
+
+	if target != null:
+		target_node = target
+
+	_apply_definition()
+
+	if visual_controller == null:
+		visual_controller = _resolve_visual_controller()
+
+	_update_visual_state()
+	queue_redraw()
+
+func receive_damage(payload: DamagePayload) -> int:
+	if payload == null:
+		return 0
+
+	if not payload.is_valid_payload():
+		return 0
+
+	if not is_alive:
+		return 0
+
+	var damage_result: Dictionary = DamageResolver.calculate_enemy_damage(payload, enemy_definition)
+	var final_damage: int = int(damage_result.get("final_total", 0))
+	var raw_total: int = int(damage_result.get("raw_total", payload.get_total_raw_damage()))
+
+	if final_damage <= 0:
+		return 0
+
+	current_hp = max(0, current_hp - final_damage)
+	total_damage_taken += final_damage
+	last_damage_taken = final_damage
+	last_damage_source_id = payload.source_id
+
+	GameEvents.enemy_damaged.emit(
+		enemy_id,
+		raw_total,
+		final_damage,
+		current_hp,
+		max_hp,
+		payload.source_id
+	)
+
+	GameEvents.emit_debug("[EnemyBase] Dano recebido: enemy=%s raw_total=%s final=%s HP=%s/%s fonte=%s breakdown=%s" % [
+		enemy_id,
+		str(raw_total),
+		str(final_damage),
+		str(current_hp),
+		str(max_hp),
+		payload.source_id,
+		_format_damage_breakdown(damage_result)
+	])
+
+	if current_hp <= 0:
+		die(payload.source_id)
+
+	_update_visual_state()
+	queue_redraw()
+
+	return final_damage
+	
+func die(source_id: String = "") -> void:
+	if not is_alive:
+		return
+
+	is_alive = false
+	is_dying = true
+	velocity = Vector2.ZERO
+
+	GameEvents.enemy_died.emit(
+		enemy_id,
+		source_id,
+		xp_reward,
+		global_position,
+		coin_drop_chance,
+		coin_drop_value
+	)
+
+	GameEvents.emit_debug("[EnemyBase] Inimigo morreu: enemy=%s fonte=%s xp=%s coin_chance=%s coin_value=%s" % [
+		enemy_id,
+		source_id,
+		str(xp_reward),
+		str(coin_drop_chance),
+		str(coin_drop_value)
+	])
+
+	_update_visual_state()
+
+	remove_from_group("enemy")
+
+	var death_timer: SceneTreeTimer = get_tree().create_timer(remove_after_death_seconds)
+	death_timer.timeout.connect(_on_death_timer_timeout)
+	
+func _on_death_timer_timeout() -> void:
+	queue_free()
+
+func _apply_definition() -> void:
+	if enemy_definition == null:
+		enemy_id = "enemy_undefined"
+		max_hp = 10
+		current_hp = max_hp
+		move_speed = 90.0
+		
+		coin_drop_chance = 0.25
+		coin_drop_value = 1
+
+		contact_damage = 5
+		contact_damage_radius = 32.0
+		contact_damage_interval_seconds = 1.0
+		contact_damage_type = "physical"
+		xp_reward = 1
+
+		debug_color = Color(0.9, 0.15, 0.15, 1.0)
+		debug_radius = 18.0
+		return
+
+	enemy_id = enemy_definition.id
+	max_hp = enemy_definition.base_max_hp
+	current_hp = max_hp
+	move_speed = enemy_definition.base_move_speed
+
+	contact_damage = enemy_definition.contact_damage
+	contact_damage_radius = enemy_definition.contact_damage_radius
+	contact_damage_interval_seconds = enemy_definition.contact_damage_interval_seconds
+	contact_damage_type = enemy_definition.contact_damage_type
+	
+	xp_reward = enemy_definition.xp_reward
+	coin_drop_chance = enemy_definition.coin_drop_chance
+	coin_drop_value = enemy_definition.coin_drop_value
+		
+	debug_color = enemy_definition.debug_color
+	debug_radius = enemy_definition.debug_radius
+
+func _follow_target() -> void:
+	var to_target: Vector2 = target_node.global_position - global_position
+	var distance_to_target: float = to_target.length()
+
+	if distance_to_target <= stopping_distance:
+		velocity = Vector2.ZERO
+		return
+
+	var direction: Vector2 = to_target.normalized()
+	velocity = direction * move_speed
+
+func _update_contact_damage_timer(delta: float) -> void:
+	if contact_damage_timer > 0.0:
+		contact_damage_timer = max(0.0, contact_damage_timer - delta)
+
+func _try_apply_contact_damage() -> void:
+	if RunQuery.is_gameplay_blocked(get_tree()):
+		return
+	
+	if alive_seconds < contact_damage_start_delay_seconds:
+		return
+
+	if target_node == null:
+		return
+
+	if not _is_target_alive():
+		return
+
+	if contact_damage_timer > 0.0:
+		return
+
+	if contact_damage <= 0:
+		return
+
+	var distance_to_target: float = global_position.distance_to(target_node.global_position)
+	
+	if debug_contact_distance:
+		GameEvents.emit_debug("[EnemyBase] Contact check: enemy=%s distance=%s radius=%s enemy_pos=%s target_pos=%s alive_seconds=%s" % [
+			enemy_id,
+			str(distance_to_target),
+			str(contact_damage_radius),
+			str(global_position),
+			str(target_node.global_position),
+			str(alive_seconds)
+		])
+
+	if distance_to_target > contact_damage_radius:
+		return
+
+	if not target_node.has_method("receive_damage"):
+		return
+
+	var payload: DamagePayload = DamagePayload.new(
+		contact_damage,
+		contact_damage_type,
+		self,
+		enemy_id,
+		enemy_id
+	)
+
+	var final_damage_variant: Variant = target_node.call("receive_damage", payload)
+	var final_damage: int = 0
+
+	if final_damage_variant is int:
+		final_damage = int(final_damage_variant)
+	elif final_damage_variant is float:
+		final_damage = int(final_damage_variant)
+
+	if final_damage <= 0:
+		return
+
+	contact_damage_timer = contact_damage_interval_seconds
+
+	GameEvents.emit_debug("[EnemyBase] Dano de contato aplicado. enemy=%s raw=%s final=%s" % [
+		enemy_id,
+		str(contact_damage),
+		str(final_damage)
+	])
+
+func _update_visual_state() -> void:
+	if visual_controller == null:
+		visual_controller = _resolve_visual_controller()
+
+	if visual_controller == null:
+		return
+
+	var is_moving: bool = is_alive and velocity.length() > 0.001
+	var movement_direction: Vector2 = Vector2.ZERO
+
+	if is_moving:
+		movement_direction = velocity.normalized()
+
+	if visual_controller.has_method("apply_enemy_runtime_state"):
+		visual_controller.call("apply_enemy_runtime_state", is_moving, movement_direction, is_alive)
+
+func _resolve_visual_controller() -> Node:
+	if visual_controller_path != NodePath():
+		var configured_visual: Node = get_node_or_null(visual_controller_path)
+
+		if configured_visual != null:
+			return configured_visual
+
+	var direct_visual: Node = get_node_or_null("VisualRoot/GoblinWarriorVisual")
+
+	if direct_visual != null:
+		return direct_visual
+
+	var visual_root: Node = get_node_or_null("VisualRoot")
+
+	if visual_root != null:
+		var found_visual: Node = _find_node_with_method(visual_root, "apply_enemy_runtime_state")
+
+		if found_visual != null:
+			return found_visual
+
+	return null
+
+func _find_node_with_method(root: Node, method_name: String) -> Node:
+	if root == null:
+		return null
+
+	if root.has_method(method_name):
+		return root
+
+	for child: Node in root.get_children():
+		var found: Node = _find_node_with_method(child, method_name)
+
+		if found != null:
+			return found
+
+	return null
+
+func _resolve_target() -> Node2D:
+	if target_path != NodePath():
+		var configured_target: Node = get_node_or_null(target_path)
+
+		if configured_target is Node2D:
+			return configured_target as Node2D
+
+	var group_target: Node2D = _find_first_node2d_in_group(target_group_name)
+
+	if group_target != null:
+		return group_target
+
+	return null
+
+func _find_first_node2d_in_group(group_name: String) -> Node2D:
+	if group_name.strip_edges() == "":
+		return null
+
+	var nodes: Array[Node] = get_tree().get_nodes_in_group(group_name)
+
+	for node: Node in nodes:
+		if node is Node2D:
+			return node as Node2D
+
+	return null
+
+func _format_damage_breakdown(damage_result: Dictionary) -> String:
+	var breakdown_variant: Variant = damage_result.get("breakdown", [])
+
+	if not breakdown_variant is Array:
+		return ""
+
+	var breakdown: Array = breakdown_variant
+	var parts: Array[String] = []
+
+	for entry_variant: Variant in breakdown:
+		if not entry_variant is Dictionary:
+			continue
+
+		var entry: Dictionary = entry_variant
+
+		parts.append("%s raw=%s final=%s weak=%s resist=%s mult=%s" % [
+			str(entry.get("damage_type", "")),
+			str(entry.get("raw_damage", 0)),
+			str(entry.get("final_damage", 0)),
+			str(entry.get("is_weak", false)),
+			str(entry.get("is_resistant", false)),
+			str(entry.get("multiplier", 1.0))
+		])
+
+	return " | ".join(parts)
+
+func get_debug_data() -> Dictionary:
+	return {
+		"enemy_id": enemy_id,
+		"current_hp": current_hp,
+		"max_hp": max_hp,
+		"move_speed": move_speed,
+		"contact_damage": contact_damage,
+		"contact_damage_radius": contact_damage_radius,
+		"global_position": global_position,
+		"has_target": target_node != null,
+		"has_visual": visual_controller != null,
+		"is_alive": is_alive,
+		"total_damage_taken": total_damage_taken,
+		"last_damage_taken": last_damage_taken,
+		"last_damage_source_id": last_damage_source_id,
+		"xp_reward": xp_reward
+	}
+	
+func _is_target_alive() -> bool:
+	if target_node == null:
+		return false
+
+	if not target_node.has_method("get_runtime_state"):
+		return true
+
+	var runtime_state_variant: Variant = target_node.call("get_runtime_state")
+
+	if runtime_state_variant is PlayerRuntimeState:
+		var player_runtime_state: PlayerRuntimeState = runtime_state_variant as PlayerRuntimeState
+		return player_runtime_state.is_alive
+
+	return true
+
+
+SCRIPT: res://gameplay/player/PlayerController.gd
+--------------------------------------------------------------------------------------------------------------
+extends CharacterBody2D
+
+@export var queen_definition: QueenDefinition
+@export var runtime_state: PlayerRuntimeState
+
+@export var visual_controller_path: NodePath
+
+@export var draw_debug_aim: bool = true
+@export var debug_aim_line_length: float = 96.0
+
+@export var base_defense_percent: float = 0.0
+
+@onready var visual_controller: Node = _resolve_visual_controller()
+
+@export_group("Damage Feedback")
+@export var enable_hit_invincibility: bool = true
+@export var invincibility_duration_after_hit: float = 0.5
+@export var play_visual_damage_flash: bool = true
+
+func _ready() -> void:
+	add_to_group("player")
+
+	if runtime_state == null:
+		runtime_state = PlayerRuntimeState.new()
+
+	if queen_definition != null:
+		runtime_state.setup_from_queen_definition(queen_definition)
+	else:
+		push_warning("[PlayerController] queen_definition não configurada.")
+
+	runtime_state.defense_percent = base_defense_percent
+
+	if visual_controller == null:
+		push_warning("[PlayerController] visual_controller não encontrado. Verifique visual_controller_path.")
+		GameEvents.emit_debug("[PlayerController] Visual controller NÃO encontrado.")
+	else:
+		GameEvents.emit_debug("[PlayerController] Visual controller encontrado: %s" % visual_controller.name)
+
+	_update_visual_state()
+	queue_redraw()
+
+func _physics_process(_delta: float) -> void:
+	_update_invincibility(_delta)
+	
+	if runtime_state == null:
+		return
+
+	InputManager.update_input_for_player(global_position)
+
+	var move_direction: Vector2 = InputManager.get_move_direction()
+	var aim_direction: Vector2 = InputManager.get_aim_direction()
+
+	if not runtime_state.is_alive:
+		runtime_state.apply_input(Vector2.ZERO, aim_direction)
+		velocity = Vector2.ZERO
+		move_and_slide()
+		_update_visual_state()
+		queue_redraw()
+		return
+
+	runtime_state.apply_input(move_direction, aim_direction)
+
+	velocity = runtime_state.move_direction * runtime_state.move_speed
+	move_and_slide()
+
+	_update_visual_state()
+	queue_redraw()
+
+func _draw() -> void:
+	if not draw_debug_aim:
+		return
+
+	if runtime_state == null:
+		return
+
+	var aim: Vector2 = runtime_state.aim_direction
+
+	if aim.length() <= 0.001:
+		aim = Vector2.RIGHT
+
+	var end_position: Vector2 = aim.normalized() * debug_aim_line_length
+
+	draw_line(Vector2.ZERO, end_position, Color.YELLOW, 3.0)
+	draw_circle(Vector2.ZERO, 5.0, Color.WHITE)
+	draw_circle(end_position, 5.0, Color.ORANGE)
+
+func receive_damage(payload: DamagePayload) -> int:
+	if runtime_state == null:
+		return 0
+
+	if payload == null:
+		return 0
+
+	if not payload.is_valid_payload():
+		return 0
+
+	if not runtime_state.is_alive:
+		return 0
+		
+	if enable_hit_invincibility and runtime_state.is_invincible:
+		return 0
+
+	var final_damage: int = DamageResolver.calculate_received_damage(
+		payload.raw_damage,
+		runtime_state.defense_percent,
+		payload.can_be_reduced_by_defense
+	)
+	
+	runtime_state.apply_damage(final_damage, payload.source_id)
+	
+	if final_damage > 0:
+		_start_hit_invincibility()
+		_play_damage_feedback()
+		
+	GameEvents.player_damaged.emit(
+		payload.raw_damage,
+		final_damage,
+		runtime_state.current_hp,
+		runtime_state.max_hp,
+		payload.source_id
+	)
+
+	GameEvents.emit_debug("[PlayerController] Dano recebido: raw=%s final=%s HP=%s/%s fonte=%s" % [
+		str(payload.raw_damage),
+		str(final_damage),
+		str(runtime_state.current_hp),
+		str(runtime_state.max_hp),
+		payload.source_id
+	])
+	
+	if not runtime_state.is_alive:
+		GameEvents.player_died.emit(payload.source_id)
+		GameEvents.emit_debug("[PlayerController] Gaia morreu. Causa: %s" % payload.source_id)
+
+	_update_visual_state()
+	queue_redraw()
+
+	return final_damage
+
+func _update_visual_state() -> void:
+	if visual_controller == null:
+		visual_controller = _resolve_visual_controller()
+
+	if visual_controller == null:
+		return
+
+	if visual_controller.has_method("apply_runtime_state"):
+		visual_controller.call("apply_runtime_state", runtime_state)
+
+func _resolve_visual_controller() -> Node:
+	if visual_controller_path != NodePath():
+		var configured_visual: Node = get_node_or_null(visual_controller_path)
+
+		if configured_visual != null:
+			return configured_visual
+
+	var direct_visual: Node = get_node_or_null("VisualRoot/GaiaVisual")
+
+	if direct_visual != null:
+		return direct_visual
+
+	var visual_root: Node = get_node_or_null("VisualRoot")
+
+	if visual_root != null:
+		var found_visual: Node = _find_node_with_method(visual_root, "apply_runtime_state")
+
+		if found_visual != null:
+			return found_visual
+
+	return null
+
+func _find_node_with_method(root: Node, method_name: String) -> Node:
+	if root == null:
+		return null
+
+	if root.has_method(method_name):
+		return root
+
+	for child: Node in root.get_children():
+		var found: Node = _find_node_with_method(child, method_name)
+
+		if found != null:
+			return found
+
+	return null
+
+func apply_run_upgrade(upgrade: UpgradeDefinition) -> void:
+	if upgrade == null:
+		return
+
+	if runtime_state == null:
+		return
+
+	match upgrade.upgrade_type:
+		UpgradeTypes.PLAYER_MOVE_SPEED_PERCENT:
+			var move_multiplier: float = 1.0 + (upgrade.value_float * 0.01)
+			runtime_state.move_speed *= move_multiplier
+
+			GameEvents.emit_debug("[PlayerController] Upgrade aplicado: velocidade +%s%% | move_speed=%s" % [
+				str(upgrade.value_float),
+				str(runtime_state.move_speed)
+			])
+
+		UpgradeTypes.PLAYER_MAX_HP_FLAT:
+			var hp_gain: int = max(0, upgrade.value_int)
+
+			runtime_state.max_hp += hp_gain
+			runtime_state.current_hp = min(runtime_state.max_hp, runtime_state.current_hp + hp_gain)
+
+			GameEvents.emit_debug("[PlayerController] Upgrade aplicado: HP máximo +%s | HP=%s/%s" % [
+				str(hp_gain),
+				str(runtime_state.current_hp),
+				str(runtime_state.max_hp)
+			])
+
+		UpgradeTypes.PLAYER_DEFENSE_PERCENT:
+			var defense_gain: float = max(0.0, upgrade.value_float)
+			runtime_state.defense_percent = clamp(runtime_state.defense_percent + defense_gain, 0.0, 95.0)
+
+			GameEvents.emit_debug("[PlayerController] Upgrade aplicado: defesa +%s%% | defense=%s%%" % [
+				str(defense_gain),
+				str(runtime_state.defense_percent)
+			])
+
+		UpgradeTypes.PLAYER_HEAL_FLAT:
+			var heal_amount: int = max(0, upgrade.value_int)
+			runtime_state.current_hp = min(runtime_state.max_hp, runtime_state.current_hp + heal_amount)
+
+			GameEvents.emit_debug("[PlayerController] Upgrade aplicado: cura +%s | HP=%s/%s" % [
+				str(heal_amount),
+				str(runtime_state.current_hp),
+				str(runtime_state.max_hp)
+			])
+
+		UpgradeTypes.COIN_MAGNET_RADIUS_PERCENT:
+			var magnet_bonus: float = max(0.0, upgrade.value_float)
+			runtime_state.coin_magnet_radius_multiplier += magnet_bonus * 0.01
+
+			GameEvents.emit_debug("[PlayerController] Upgrade aplicado: magnetismo de moeda +%s%% | multiplier=%s" % [
+				str(magnet_bonus),
+				str(runtime_state.coin_magnet_radius_multiplier)
+			])
+
+		UpgradeTypes.COIN_COLLECT_RADIUS_PERCENT:
+			var collect_bonus: float = max(0.0, upgrade.value_float)
+			runtime_state.coin_collect_radius_multiplier += collect_bonus * 0.01
+
+			GameEvents.emit_debug("[PlayerController] Upgrade aplicado: raio de coleta +%s%% | multiplier=%s" % [
+				str(collect_bonus),
+				str(runtime_state.coin_collect_radius_multiplier)
+			])
+
+		_:
+			_forward_upgrade_to_weapons(upgrade)
+
+	_update_visual_state()
+	queue_redraw()
+
+func _forward_upgrade_to_weapons(upgrade: UpgradeDefinition) -> void:
+	var weapon_nodes: Array[Node] = get_tree().get_nodes_in_group("player_weapon")
+
+	var applied_count: int = 0
+
+	for weapon_node: Node in weapon_nodes:
+		if weapon_node.has_method("apply_run_upgrade"):
+			weapon_node.call("apply_run_upgrade", upgrade)
+			applied_count += 1
+
+	GameEvents.emit_debug("[PlayerController] Upgrade encaminhado para armas: %s | count=%s" % [
+		upgrade.id,
+		str(applied_count)
+	])
+
+func get_runtime_state() -> PlayerRuntimeState:
+	return runtime_state
+
+func get_debug_data() -> Dictionary:
+	if runtime_state == null:
+		return {
+			"has_runtime_state": false
+		}
+
+	return {
+		"has_runtime_state": true,
+		"queen_id": runtime_state.queen_id,
+		"current_hp": runtime_state.current_hp,
+		"max_hp": runtime_state.max_hp,
+		"defense_percent": runtime_state.defense_percent,
+		"move_speed": runtime_state.move_speed,
+		"move_direction": runtime_state.move_direction,
+		"aim_direction": runtime_state.aim_direction,
+		"last_valid_aim_direction": runtime_state.last_valid_aim_direction,
+		"facing_direction": runtime_state.facing_direction,
+		"is_moving": runtime_state.is_moving,
+		"is_alive": runtime_state.is_alive,
+		"current_gameplay_state": runtime_state.current_gameplay_state,
+		"current_visual_state": runtime_state.current_visual_state,
+		"global_position": global_position,
+		"total_damage_taken": runtime_state.total_damage_taken,
+		"last_damage_taken": runtime_state.last_damage_taken,
+		"last_damage_source_id": runtime_state.last_damage_source_id,
+		"death_cause": runtime_state.death_cause
+	}
+
+func get_drop_collection_modifiers() -> Dictionary:
+	if runtime_state == null:
+		return {
+			"coin_magnet_radius_multiplier": 1.0,
+			"coin_collect_radius_multiplier": 1.0
+		}
+
+	return {
+		"coin_magnet_radius_multiplier": runtime_state.coin_magnet_radius_multiplier,
+		"coin_collect_radius_multiplier": runtime_state.coin_collect_radius_multiplier
+	}
+
+func _update_invincibility(delta: float) -> void:
+	if runtime_state == null:
+		return
+
+	if not runtime_state.is_invincible:
+		return
+
+	runtime_state.invincibility_timer -= delta
+
+	if runtime_state.invincibility_timer <= 0.0:
+		runtime_state.invincibility_timer = 0.0
+		runtime_state.is_invincible = false
+
+func _start_hit_invincibility() -> void:
+	if runtime_state == null:
+		return
+
+	if not enable_hit_invincibility:
+		return
+
+	runtime_state.is_invincible = true
+	runtime_state.invincibility_timer = max(0.0, invincibility_duration_after_hit)
+
+func _play_damage_feedback() -> void:
+	if not play_visual_damage_flash:
+		return
+
+	if visual_controller == null:
+		return
+
+	if visual_controller.has_method("play_damage_flash"):
+		visual_controller.call("play_damage_flash")
+
+
+SCRIPT: res://gameplay/run/RunController.gd
+--------------------------------------------------------------------------------------------------------------
+extends Node
+
+@export var run_state: RunState
+@export var map_definition: MapDefinition
+
+@export var level_up_option_count: int = 3
+
+# Pool nova data-driven.
+# Se estiver vazia, o RunController tenta carregar pelo MapDefinition.
+@export var upgrade_pool_definition: UpgradePoolDefinition
+
+# Legado/fallback temporário.
+# Mantido para não quebrar testes antigos, mas a pool oficial agora vem de UpgradePoolDefinition.
+@export var upgrade_pool: Array[UpgradeDefinition] = []
+
+@export var finish_run_pauses_tree: bool = true
+@export var defeat_result_delay_seconds: float = 0.75
+
+@export_group("Debug Tools")
+@export var allow_debug_force_finish: bool = false
+
+const DEFAULT_UPGRADE_POOL_PATH: String = "res://data/upgrade_pools/upgrade_pool_gaia_default.tres"
+
+var pending_level_ups: int = 0
+var current_level_up_options: Array[UpgradeDefinition] = []
+var is_level_up_active: bool = false
+var result_payload: RunResultPayload = null
+
+var selected_upgrade_counts: Dictionary = {}
+var previous_upgrade_option_ids: Array[String] = []
+
+func _ready() -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS
+	add_to_group("run_controller")
+
+	if run_state == null:
+		run_state = RunState.new()
+
+	if map_definition != null:
+		run_state.setup_from_map(map_definition)
+
+	_resolve_upgrade_pool()
+	_load_default_upgrade_pool_if_empty()
+	_connect_events()
+
+	GameEvents.emit_debug("[RunController] Run iniciada. map=%s duration=%s" % [
+		run_state.map_id,
+		str(run_state.map_duration_seconds)
+	])
+
+func _process(delta: float) -> void:
+	if run_state == null:
+		return
+
+	if run_state.is_finished:
+		return
+
+	if run_state.is_paused or run_state.is_victory or run_state.is_defeat:
+		return
+
+	run_state.elapsed_seconds += delta
+
+	GameEvents.run_timer_changed.emit(
+		run_state.elapsed_seconds,
+		run_state.get_remaining_seconds(),
+		run_state.map_duration_seconds
+	)
+
+	if run_state.elapsed_seconds >= run_state.map_duration_seconds:
+		_finish_victory()
+
+func get_run_state() -> RunState:
+	return run_state
+
+func get_map_definition() -> MapDefinition:
+	return map_definition
+
+func get_upgrade_pool_definition() -> UpgradePoolDefinition:
+	return upgrade_pool_definition
+
+func get_result_payload() -> RunResultPayload:
+	return result_payload
+
+func get_debug_data() -> Dictionary:
+	if run_state == null:
+		return {
+			"has_run_state": false
+		}
+
+	return {
+		"has_run_state": true,
+		"map_id": run_state.map_id,
+		"queen_id": run_state.queen_id,
+		"elapsed_seconds": run_state.elapsed_seconds,
+		"remaining_seconds": run_state.get_remaining_seconds(),
+		"map_duration_seconds": run_state.map_duration_seconds,
+		"time_progress_ratio": run_state.get_time_progress_ratio(),
+		"run_xp_gained": run_state.run_xp_gained,
+		"current_level": run_state.current_level,
+		"current_level_xp": run_state.current_level_xp,
+		"xp_required_for_next_level": run_state.xp_required_for_next_level,
+		"xp_progress_ratio": run_state.get_xp_progress_ratio(),
+		"enemies_killed": run_state.enemies_killed,
+		"level_reached": run_state.level_reached,
+		"run_coins_collected": run_state.run_coins_collected,
+		"run_coins_spent": run_state.run_coins_spent,
+		"run_coins_available": run_state.get_run_coins_available(),
+		"is_paused": run_state.is_paused,
+		"is_level_up_active": is_level_up_active,
+		"pending_level_ups": pending_level_ups,
+		"upgrade_pool_id": _get_upgrade_pool_id(),
+		"selected_upgrade_counts": selected_upgrade_counts,
+		"previous_upgrade_option_ids": previous_upgrade_option_ids,
+		"is_finished": run_state.is_finished,
+		"is_victory": run_state.is_victory,
+		"is_defeat": run_state.is_defeat,
+		"result_type": run_state.result_type,
+		"final_money_reward": run_state.final_money_reward,
+		"death_cause": run_state.death_cause
+	}
+
+func _connect_events() -> void:
+	if not GameEvents.enemy_died.is_connected(_on_enemy_died):
+		GameEvents.enemy_died.connect(_on_enemy_died)
+
+	if not GameEvents.run_level_up_option_selected.is_connected(_on_level_up_option_selected):
+		GameEvents.run_level_up_option_selected.connect(_on_level_up_option_selected)
+
+	if not GameEvents.run_coin_collected.is_connected(_on_run_coin_collected):
+		GameEvents.run_coin_collected.connect(_on_run_coin_collected)
+
+	if not GameEvents.player_died.is_connected(_on_player_died):
+		GameEvents.player_died.connect(_on_player_died)
+
+	if not GameEvents.player_damaged.is_connected(_on_player_damaged):
+		GameEvents.player_damaged.connect(_on_player_damaged)
+
+	if not GameEvents.enemy_damaged.is_connected(_on_enemy_damaged):
+		GameEvents.enemy_damaged.connect(_on_enemy_damaged)
+
+func _on_enemy_died(
+	enemy_id: String,
+	source_id: String,
+	xp_reward: int,
+	enemy_global_position: Vector2,
+	_coin_drop_chance: float,
+	_coin_drop_value: int
+) -> void:
+	if run_state == null:
+		return
+
+	if run_state.is_finished or run_state.is_victory or run_state.is_defeat:
+		return
+
+	run_state.add_enemy_kill()
+	var levels_gained: int = run_state.add_xp(xp_reward)
+
+	if levels_gained > 0:
+		pending_level_ups += levels_gained
+
+	GameEvents.run_enemy_killed.emit(enemy_id, run_state.enemies_killed)
+
+	GameEvents.run_xp_changed.emit(
+		run_state.run_xp_gained,
+		run_state.current_level,
+		run_state.current_level_xp,
+		run_state.xp_required_for_next_level
+	)
+
+	GameEvents.emit_debug("[RunController] Inimigo morto: %s fonte=%s xp=%s pos=%s total_kills=%s run_xp=%s level=%s xp=%s/%s levels_gained=%s" % [
+		enemy_id,
+		source_id,
+		str(xp_reward),
+		str(enemy_global_position),
+		str(run_state.enemies_killed),
+		str(run_state.run_xp_gained),
+		str(run_state.current_level),
+		str(run_state.current_level_xp),
+		str(run_state.xp_required_for_next_level),
+		str(levels_gained)
+	])
+
+	if pending_level_ups > 0 and not is_level_up_active:
+		_start_next_level_up()
+
+func _on_run_coin_collected(value: int, coin_global_position: Vector2) -> void:
+	if run_state == null:
+		return
+
+	if run_state.is_finished:
+		return
+
+	if value <= 0:
+		return
+
+	run_state.add_coins(value)
+
+	GameEvents.run_coins_changed.emit(
+		run_state.run_coins_collected,
+		run_state.get_run_coins_available()
+	)
+
+	GameEvents.emit_debug("[RunController] Moeda coletada: value=%s pos=%s total=%s available=%s" % [
+		str(value),
+		str(coin_global_position),
+		str(run_state.run_coins_collected),
+		str(run_state.get_run_coins_available())
+	])
+
+func _on_player_damaged(_raw_damage: int, final_damage: int, _current_hp: int, _max_hp: int, _source_id: String) -> void:
+	if run_state == null:
+		return
+
+	run_state.add_damage_taken(final_damage)
+
+func _on_enemy_damaged(_enemy_id: String, _raw_damage: int, final_damage: int, _current_hp: int, _max_hp: int, _source_id: String) -> void:
+	if run_state == null:
+		return
+
+	run_state.add_damage_dealt(final_damage)
+
+func _on_player_died(source_id: String) -> void:
+	if run_state == null:
+		return
+
+	if run_state.is_finished:
+		return
+
+	GameEvents.emit_debug("[RunController] Derrota agendada. source=%s delay=%s" % [
+		source_id,
+		str(defeat_result_delay_seconds)
+	])
+
+	if defeat_result_delay_seconds <= 0.0:
+		_finish_defeat(source_id)
+		return
+
+	var defeat_timer: SceneTreeTimer = get_tree().create_timer(defeat_result_delay_seconds)
+	defeat_timer.timeout.connect(func() -> void:
+		_finish_defeat(source_id)
+	)
+
+func _finish_victory() -> void:
+	if run_state == null:
+		return
+
+	if run_state.is_finished:
+		return
+
+	run_state.elapsed_seconds = run_state.map_duration_seconds
+	run_state.mark_victory()
+
+	_finish_run()
+
+func _finish_defeat(source_id: String = "") -> void:
+	if run_state == null:
+		return
+
+	if run_state.is_finished:
+		return
+
+	run_state.mark_defeat(source_id)
+
+	_finish_run()
+
+func _finish_run() -> void:
+	if run_state == null:
+		return
+
+	if is_level_up_active:
+		is_level_up_active = false
+		current_level_up_options.clear()
+		pending_level_ups = 0
+
+	run_state.is_paused = true
+
+	result_payload = _build_result_payload()
+
+	run_state.final_money_reward = result_payload.final_money_reward
+
+	GameEvents.emit_debug("[RunController] Run finalizada. result=%s coins=%s final_money=%s xp=%s kills=%s level=%s" % [
+		result_payload.result_type,
+		str(result_payload.run_coins_collected),
+		str(result_payload.final_money_reward),
+		str(result_payload.run_xp_gained),
+		str(result_payload.enemies_killed),
+		str(result_payload.level_reached)
+	])
+
+	GameEvents.run_finished.emit(result_payload)
+
+	if finish_run_pauses_tree:
+		get_tree().paused = true
+
+func _build_result_payload() -> RunResultPayload:
+	var payload: RunResultPayload = RunResultPayload.new()
+
+	var victory_multiplier: float = 1.0
+	var victory_bonus: int = 0
+
+	if map_definition != null:
+		victory_multiplier = map_definition.victory_multiplier
+		victory_bonus = map_definition.victory_bonus
+
+	payload.result_type = run_state.result_type
+	payload.victory = run_state.is_victory
+	payload.defeat = run_state.is_defeat
+
+	payload.queen_id = run_state.queen_id
+	payload.map_id = run_state.map_id
+
+	payload.elapsed_seconds = run_state.elapsed_seconds
+	payload.survived_seconds = min(run_state.elapsed_seconds, run_state.map_duration_seconds)
+	payload.map_duration_seconds = run_state.map_duration_seconds
+
+	payload.run_coins_collected = run_state.run_coins_collected
+	payload.victory_multiplier = victory_multiplier
+	payload.victory_bonus = victory_bonus
+
+	payload.final_money_reward = RewardResolver.calculate_final_money_reward(
+		run_state.is_victory,
+		run_state.run_coins_collected,
+		victory_multiplier,
+		victory_bonus
+	)
+
+	payload.run_xp_gained = run_state.run_xp_gained
+	payload.enemies_killed = run_state.enemies_killed
+	payload.level_reached = run_state.level_reached
+
+	payload.damage_dealt = run_state.damage_dealt
+	payload.damage_taken = run_state.damage_taken
+	payload.death_cause = run_state.death_cause
+
+	return payload
+
+func _start_next_level_up() -> void:
+	if run_state == null:
+		return
+
+	if run_state.is_finished:
+		return
+
+	if pending_level_ups <= 0:
+		return
+
+	is_level_up_active = true
+	run_state.is_paused = true
+	get_tree().paused = true
+
+	current_level_up_options = _generate_level_up_options()
+
+	if current_level_up_options.is_empty():
+		GameEvents.emit_debug("[RunController] Level-up sem opções válidas. Consumindo level-up pendente.")
+		_complete_level_up_without_option()
+		return
+
+	previous_upgrade_option_ids = _get_option_id_array(current_level_up_options)
+
+	GameEvents.emit_debug("[RunController] Level-up iniciado. level=%s pool=%s options=%s selected_counts=%s" % [
+		str(run_state.current_level),
+		_get_upgrade_pool_id(),
+		str(_get_option_ids(current_level_up_options)),
+		str(selected_upgrade_counts)
+	])
+
+	GameEvents.run_level_up_started.emit(run_state.current_level, current_level_up_options)
+
+func _on_level_up_option_selected(upgrade: UpgradeDefinition) -> void:
+	if not is_level_up_active:
+		return
+
+	if run_state != null and run_state.is_finished:
+		return
+
+	if upgrade == null or not upgrade.is_valid_definition():
+		GameEvents.emit_debug("[RunController] Upgrade inválido selecionado.")
+		return
+
+	_apply_upgrade(upgrade)
+	_register_selected_upgrade(upgrade)
+
+	pending_level_ups = max(0, pending_level_ups - 1)
+
+	GameEvents.run_level_up_completed.emit(run_state.current_level, upgrade.id)
+
+	GameEvents.emit_debug("[RunController] Level-up concluído. upgrade=%s pending=%s" % [
+		upgrade.id,
+		str(pending_level_ups)
+	])
+
+	if pending_level_ups > 0:
+		_start_next_level_up()
+	else:
+		is_level_up_active = false
+		current_level_up_options.clear()
+
+		if run_state != null:
+			run_state.is_paused = false
+
+		get_tree().paused = false
+
+func _apply_upgrade(upgrade: UpgradeDefinition) -> void:
+	var player: Node = _get_player()
+
+	if player != null and player.has_method("apply_run_upgrade"):
+		player.call("apply_run_upgrade", upgrade)
+	else:
+		GameEvents.emit_debug("[RunController] Player não encontrado ou sem apply_run_upgrade.")
+
+func _get_player() -> Node:
+	var players: Array[Node] = get_tree().get_nodes_in_group("player")
+
+	if players.is_empty():
+		return null
+
+	return players[0]
+
+func _load_default_upgrade_pool_if_empty() -> void:
+	if upgrade_pool_definition != null:
+		GameEvents.emit_debug("[RunController] UpgradePool ativa: %s" % upgrade_pool_definition.get_debug_summary())
+		return
+
+	if not upgrade_pool.is_empty():
+		GameEvents.emit_debug("[RunController] Upgrade pool legada carregada: %s opções." % str(upgrade_pool.size()))
+		return
+
+	if ResourceLoader.exists(DEFAULT_UPGRADE_POOL_PATH):
+		var pool_resource: Resource = load(DEFAULT_UPGRADE_POOL_PATH)
+
+		if pool_resource is UpgradePoolDefinition:
+			upgrade_pool_definition = pool_resource as UpgradePoolDefinition
+			GameEvents.emit_debug("[RunController] UpgradePool fallback carregada: %s" % upgrade_pool_definition.get_debug_summary())
+			return
+
+	GameEvents.emit_debug("[RunController] Nenhuma UpgradePool configurada.")
+
+func _get_option_ids(options: Array[UpgradeDefinition]) -> String:
+	var ids: Array[String] = []
+
+	for option: UpgradeDefinition in options:
+		if option == null:
+			continue
+
+		ids.append(option.id)
+
+	return ", ".join(ids)
+
+func _resolve_upgrade_pool() -> void:
+	if upgrade_pool_definition != null:
+		return
+
+	if map_definition != null and map_definition.upgrade_pool != null:
+		upgrade_pool_definition = map_definition.upgrade_pool
+		GameEvents.emit_debug("[RunController] UpgradePool carregada pelo MapDefinition: %s" % upgrade_pool_definition.id)
+		return
+
+	GameEvents.emit_debug("[RunController] MapDefinition sem UpgradePool. Tentará fallback.")
+
+func _generate_level_up_options() -> Array[UpgradeDefinition]:
+	if upgrade_pool_definition != null:
+		return LevelUpOptionService.generate_from_pool(
+			upgrade_pool_definition,
+			selected_upgrade_counts,
+			previous_upgrade_option_ids
+		)
+
+	return LevelUpOptionService.generate_options(
+		upgrade_pool,
+		level_up_option_count,
+		selected_upgrade_counts,
+		previous_upgrade_option_ids
+	)
+
+func _register_selected_upgrade(upgrade: UpgradeDefinition) -> void:
+	if upgrade == null:
+		return
+
+	var current_count: int = int(selected_upgrade_counts.get(upgrade.id, 0))
+	selected_upgrade_counts[upgrade.id] = current_count + 1
+
+	GameEvents.emit_debug("[RunController] Upgrade registrado na run: %s count=%s" % [
+		upgrade.id,
+		str(selected_upgrade_counts[upgrade.id])
+	])
+
+func _complete_level_up_without_option() -> void:
+	pending_level_ups = max(0, pending_level_ups - 1)
+
+	if pending_level_ups > 0:
+		_start_next_level_up()
+		return
+
+	is_level_up_active = false
+	current_level_up_options.clear()
+
+	if run_state != null:
+		run_state.is_paused = false
+
+	get_tree().paused = false
+
+func _get_upgrade_pool_id() -> String:
+	if upgrade_pool_definition != null:
+		return upgrade_pool_definition.id
+
+	if not upgrade_pool.is_empty():
+		return "legacy_upgrade_pool"
+
+	return "none"
+
+func _get_option_id_array(options: Array[UpgradeDefinition]) -> Array[String]:
+	var ids: Array[String] = []
+
+	for option: UpgradeDefinition in options:
+		if option == null:
+			continue
+
+		ids.append(option.id)
+
+	return ids
+
+func get_selected_upgrade_count(upgrade_id: String) -> int:
+	if upgrade_id.strip_edges() == "":
+		return 0
+
+	return int(selected_upgrade_counts.get(upgrade_id, 0))
+
+func get_next_upgrade_level(upgrade_id: String) -> int:
+	return get_selected_upgrade_count(upgrade_id) + 1
+
+func debug_force_victory() -> bool:
+	if not allow_debug_force_finish:
+		GameEvents.emit_debug("[RunController] DEBUG: tentativa de forçar vitória ignorada. Ação desabilitada.")
+		return false
+
+	if run_state == null:
+		return false
+
+	if run_state.is_finished:
+		return false
+
+	GameEvents.emit_debug("[RunController] DEBUG: vitória forçada pelo painel de teste.")
+	_finish_victory()
+
+	return true
+
+func debug_force_defeat() -> bool:
+	if not allow_debug_force_finish:
+		GameEvents.emit_debug("[RunController] DEBUG: tentativa de forçar derrota ignorada. Ação desabilitada.")
+		return false
+
+	if run_state == null:
+		return false
+
+	if run_state.is_finished:
+		return false
+
+	GameEvents.emit_debug("[RunController] DEBUG: derrota forçada pelo painel de teste.")
+	_finish_defeat("debug_force_defeat")
+
+	return true
+
+
+SCRIPT: res://gameplay/spawners/EnemySpawner.gd
+--------------------------------------------------------------------------------------------------------------
+extends Node
+
+@export_group("Base")
+@export var spawner_enabled: bool = true
+@export var spawn_on_ready: bool = true
+@export var player_group_name: String = "player"
+
+@export_group("Enemy")
+@export_file("*.tscn") var enemy_scene_path: String = "res://gameplay/enemies/EnemyBase.tscn"
+@export var enemy_definition: EnemyDefinition
+
+@export_group("Scene Roots")
+@export var enemy_root_path: NodePath
+
+@export_group("Spawn Fallback")
+@export var spawn_interval_seconds: float = 2.2
+@export var max_alive_enemies: int = 18
+@export var spawn_min_distance: float = 420.0
+@export var spawn_max_distance: float = 620.0
+
+@export_group("Spawn Safety")
+@export var initial_spawn_delay_seconds: float = 0.45
+@export var spawn_position_attempts: int = 16
+@export var minimum_safe_spawn_distance_from_player: float = 360.0
+@export var prevent_multiple_spawns_same_frame: bool = true
+@export var log_spawn_distance: bool = true
+
+@export_group("Timeline")
+@export var use_map_spawn_timeline: bool = true
+@export var spawn_timeline_definition: SpawnTimelineDefinition
+@export var log_timeline_changes: bool = true
+
+var player_node: Node2D = null
+var enemy_root: Node2D = null
+
+var spawn_timer: float = 0.0
+var active_entry_id: String = ""
+
+var elapsed_since_ready: float = 0.0
+var last_spawn_frame: int = -1
+var initial_spawn_delay_completed: bool = false
+
+func _ready() -> void:
+	enemy_root = _resolve_enemy_root()
+	player_node = _resolve_player()
+	_resolve_spawn_timeline_from_map()
+
+	if enemy_root != null:
+		GameEvents.emit_debug("[EnemySpawner] EnemyRoot encontrado: %s" % enemy_root.name)
+	else:
+		GameEvents.emit_debug("[EnemySpawner] EnemyRoot NÃO encontrado.")
+
+	if player_node != null:
+		GameEvents.emit_debug("[EnemySpawner] Player encontrado: %s" % player_node.name)
+	else:
+		GameEvents.emit_debug("[EnemySpawner] Player não encontrado no _ready(). A cena pode configurar depois.")
+
+	if spawn_timeline_definition != null:
+		GameEvents.emit_debug("[EnemySpawner] SpawnTimeline carregada: %s | %s" % [
+			spawn_timeline_definition.id,
+			spawn_timeline_definition.get_debug_summary()
+		])
+	else:
+		GameEvents.emit_debug("[EnemySpawner] Sem SpawnTimeline no _ready(). Tentará resolver em runtime.")
+
+	# Antes era comum deixar spawn_timer em 0.
+	# Agora mesmo com spawn_on_ready, aguardamos um pequeno delay para evitar spawn no primeiro frame.
+	if spawn_on_ready:
+		spawn_timer = max(0.0, initial_spawn_delay_seconds)
+	else:
+		spawn_timer = spawn_interval_seconds
+
+	if not GameEvents.run_finished.is_connected(_on_run_finished):
+		GameEvents.run_finished.connect(_on_run_finished)
+
+func _process(delta: float) -> void:
+	if not spawner_enabled:
+		return
+
+	if RunQuery.is_gameplay_blocked(get_tree()):
+		return
+
+	elapsed_since_ready += delta
+
+	if player_node == null:
+		player_node = _resolve_player()
+
+	if enemy_root == null:
+		enemy_root = _resolve_enemy_root()
+
+	if player_node == null or enemy_root == null:
+		return
+
+	_update_timeline_values()
+
+	if elapsed_since_ready < initial_spawn_delay_seconds:
+		return
+
+	if not initial_spawn_delay_completed:
+		initial_spawn_delay_completed = true
+		spawn_timer = min(spawn_timer, 0.05)
+		GameEvents.emit_debug("[EnemySpawner] Delay inicial concluído. Spawner liberado.")
+
+	spawn_timer -= delta
+
+	if spawn_timer <= 0.0:
+		var spawned: bool = force_spawn_enemy()
+
+		if spawned:
+			spawn_timer = spawn_interval_seconds
+		else:
+			# Se não conseguiu spawnar por limite de vivos ou outro motivo,
+			# tenta novamente em breve, mas não no mesmo frame.
+			spawn_timer = min(0.5, spawn_interval_seconds)
+
+func configure_player(player: Node2D) -> void:
+	player_node = player
+
+	if player_node != null:
+		GameEvents.emit_debug("[EnemySpawner] Player configurado pela cena: %s" % player_node.name)
+
+func configure_enemy_root(root: Node2D) -> void:
+	enemy_root = root
+
+	if enemy_root != null:
+		GameEvents.emit_debug("[EnemySpawner] EnemyRoot configurado pela cena: %s" % enemy_root.name)
+
+func force_spawn_enemy() -> bool:
+	if RunQuery.is_gameplay_blocked(get_tree()):
+		GameEvents.emit_debug("[EnemySpawner] Spawn cancelado: gameplay bloqueado.")
+		return false
+
+	if not spawner_enabled:
+		return false
+
+	if prevent_multiple_spawns_same_frame:
+		var current_frame: int = Engine.get_process_frames()
+
+		if current_frame == last_spawn_frame:
+			GameEvents.emit_debug("[EnemySpawner] Spawn cancelado: já houve spawn neste frame.")
+			return false
+
+	if player_node == null:
+		player_node = _resolve_player()
+
+	if enemy_root == null:
+		enemy_root = _resolve_enemy_root()
+
+	if player_node == null:
+		GameEvents.emit_debug("[EnemySpawner] Spawn cancelado: player ausente.")
+		return false
+
+	if enemy_root == null:
+		GameEvents.emit_debug("[EnemySpawner] Spawn cancelado: enemy_root ausente.")
+		return false
+
+	var alive_count: int = _get_alive_enemy_count()
+
+	if alive_count >= max_alive_enemies:
+		return false
+
+	if enemy_scene_path.strip_edges() == "":
+		push_warning("[EnemySpawner] enemy_scene_path vazio.")
+		return false
+
+	var packed_enemy: PackedScene = load(enemy_scene_path) as PackedScene
+
+	if packed_enemy == null:
+		push_warning("[EnemySpawner] Não foi possível carregar enemy_scene_path: %s" % enemy_scene_path)
+		return false
+
+	var enemy_instance: Node = packed_enemy.instantiate()
+
+	if not enemy_instance is Node2D:
+		push_warning("[EnemySpawner] Enemy scene não é Node2D.")
+		enemy_instance.queue_free()
+		return false
+
+	var enemy_node: Node2D = enemy_instance as Node2D
+	var spawn_position: Vector2 = _get_safe_spawn_position_around_player()
+	var distance_to_player: float = spawn_position.distance_to(player_node.global_position)
+
+	# Importante:
+	# Definimos a posição local ANTES de adicionar o inimigo à árvore.
+	# Assim o _ready() do EnemyBase já nasce na posição correta.
+	enemy_node.position = enemy_root.to_local(spawn_position)
+
+	enemy_root.add_child(enemy_node)
+
+	if enemy_node.has_method("setup"):
+		enemy_node.call("setup", enemy_definition, player_node)
+
+	last_spawn_frame = Engine.get_process_frames()
+
+	# Recalcula depois de entrar na árvore, apenas para log/validação.
+	distance_to_player = enemy_node.global_position.distance_to(player_node.global_position)
+
+	if log_spawn_distance:
+		GameEvents.emit_debug("[EnemySpawner] Inimigo criado em: %s | dist_player=%s | vivos=%s | wave=%s" % [
+			str(enemy_node.global_position),
+			str(distance_to_player),
+			str(_get_alive_enemy_count()),
+			active_entry_id
+		])
+	else:
+		GameEvents.emit_debug("[EnemySpawner] Inimigo criado em: %s | vivos=%s | wave=%s" % [
+			str(enemy_node.global_position),
+			str(_get_alive_enemy_count()),
+			active_entry_id
+		])
+
+	return true
+
+func _update_timeline_values() -> void:
+	if spawn_timeline_definition == null:
+		_resolve_spawn_timeline_from_map()
+
+	if spawn_timeline_definition == null:
+		return
+
+	var run_state: RunState = RunQuery.get_run_state(get_tree())
+	var elapsed_seconds: float = 0.0
+
+	if run_state != null:
+		elapsed_seconds = run_state.elapsed_seconds
+
+	var active_entry: SpawnTimelineEntryDefinition = spawn_timeline_definition.get_active_entry(elapsed_seconds)
+
+	if active_entry == null:
+		return
+
+	if active_entry.id != active_entry_id:
+		_apply_timeline_entry(active_entry, true)
+	else:
+		_apply_timeline_entry(active_entry, false)
+
+func _apply_timeline_entry(entry: SpawnTimelineEntryDefinition, changed: bool) -> void:
+	if entry == null:
+		return
+
+	active_entry_id = entry.id
+
+	if entry.enemy_scene_path.strip_edges() != "":
+		enemy_scene_path = entry.enemy_scene_path
+
+	if entry.enemy_definition != null:
+		enemy_definition = entry.enemy_definition
+
+	spawn_interval_seconds = entry.spawn_interval_seconds
+	max_alive_enemies = entry.max_alive_enemies
+	spawn_min_distance = entry.spawn_min_distance
+	spawn_max_distance = entry.spawn_max_distance
+
+	if not changed:
+		return
+
+	spawn_timer = min(spawn_timer, spawn_interval_seconds)
+
+	if log_timeline_changes:
+		GameEvents.emit_debug("[EnemySpawner] Wave ativa: %s | interval=%s max_alive=%s dist=%s-%s" % [
+			entry.id,
+			str(spawn_interval_seconds),
+			str(max_alive_enemies),
+			str(spawn_min_distance),
+			str(spawn_max_distance)
+		])
+
+	if not entry.spawn_on_activate:
+		return
+
+	# A wave inicial não deve forçar spawn antes do delay inicial.
+	if not initial_spawn_delay_completed:
+		spawn_timer = min(spawn_timer, max(0.05, initial_spawn_delay_seconds - elapsed_since_ready))
+		return
+
+	var spawned: bool = force_spawn_enemy()
+
+	if spawned:
+		# Impede spawn duplo no mesmo frame após troca de wave.
+		spawn_timer = spawn_interval_seconds
+
+func _resolve_spawn_timeline_from_map() -> void:
+	if spawn_timeline_definition != null:
+		return
+
+	if not use_map_spawn_timeline:
+		return
+
+	var run_controller: Node = RunQuery.get_run_controller(get_tree())
+
+	if run_controller == null:
+		return
+
+	if not run_controller.has_method("get_map_definition"):
+		return
+
+	var map_definition_variant: Variant = run_controller.call("get_map_definition")
+
+	if map_definition_variant is MapDefinition:
+		var map_definition: MapDefinition = map_definition_variant as MapDefinition
+
+		if map_definition.spawn_timeline != null:
+			spawn_timeline_definition = map_definition.spawn_timeline
+			GameEvents.emit_debug("[EnemySpawner] SpawnTimeline resolvida em runtime: %s" % spawn_timeline_definition.id)
+
+func _get_safe_spawn_position_around_player() -> Vector2:
+	var safe_min_distance: float = max(minimum_safe_spawn_distance_from_player, spawn_min_distance)
+	var safe_max_distance: float = max(safe_min_distance + 1.0, spawn_max_distance)
+
+	var best_position: Vector2 = player_node.global_position + Vector2.RIGHT * safe_min_distance
+	var best_distance: float = 0.0
+
+	for attempt: int in range(max(1, spawn_position_attempts)):
+		var candidate_position: Vector2 = _get_spawn_position_around_player(safe_min_distance, safe_max_distance)
+		var distance_to_player: float = candidate_position.distance_to(player_node.global_position)
+
+		if distance_to_player >= safe_min_distance:
+			return candidate_position
+
+		if distance_to_player > best_distance:
+			best_distance = distance_to_player
+			best_position = candidate_position
+
+	return best_position
+
+func _get_spawn_position_around_player(min_distance: float, max_distance: float) -> Vector2:
+	var safe_min_distance: float = max(0.0, min_distance)
+	var safe_max_distance: float = max(safe_min_distance, max_distance)
+
+	var angle: float = randf_range(0.0, TAU)
+	var distance: float = randf_range(safe_min_distance, safe_max_distance)
+
+	return player_node.global_position + Vector2(cos(angle), sin(angle)) * distance
+
+func _get_alive_enemy_count() -> int:
+	var enemies: Array[Node] = get_tree().get_nodes_in_group("enemy")
+	var count: int = 0
+
+	for enemy: Node in enemies:
+		if enemy == null:
+			continue
+
+		if not is_instance_valid(enemy):
+			continue
+
+		count += 1
+
+	return count
+
+func _resolve_enemy_root() -> Node2D:
+	if enemy_root_path != NodePath():
+		var configured_root: Node = get_node_or_null(enemy_root_path)
+
+		if configured_root is Node2D:
+			return configured_root as Node2D
+
+	var direct_sibling: Node = get_node_or_null("../EnemyRoot")
+
+	if direct_sibling is Node2D:
+		return direct_sibling as Node2D
+
+	var parent_node: Node = get_parent()
+
+	while parent_node != null:
+		var found_root: Node = parent_node.get_node_or_null("EnemyRoot")
+
+		if found_root is Node2D:
+			return found_root as Node2D
+
+		parent_node = parent_node.get_parent()
+
+	return null
+
+func _resolve_player() -> Node2D:
+	var players: Array[Node] = get_tree().get_nodes_in_group(player_group_name)
+
+	for node: Node in players:
+		if node is Node2D:
+			return node as Node2D
+
+	return null
+
+func _on_run_finished(_result_payload: RunResultPayload) -> void:
+	spawner_enabled = false
+	GameEvents.emit_debug("[EnemySpawner] Desativado após fim da run.")
+
+func configure_spawner(player: Node2D, root: Node2D) -> void:
+	configure_player(player)
+	configure_enemy_root(root)
+
+
+SCRIPT: res://gameplay/test/TestGaiaScene.gd
+--------------------------------------------------------------------------------------------------------------
+extends Node2D
+
+@export_file("*.tscn") var player_scene_path: String = "res://gameplay/player/PlayerGaia.tscn"
+
+@onready var arena_root: Node2D = $ArenaRoot
+@onready var runtime_root: Node2D = $RuntimeRoot
+
+@onready var player_root: Node2D = $RuntimeRoot/PlayerRoot
+@onready var enemy_root: Node2D = $RuntimeRoot/EnemyRoot
+@onready var drop_root: Node2D = $RuntimeRoot/DropRoot
+@onready var spawner_root: Node2D = $RuntimeRoot/SpawnerRoot
+@onready var run_controller: Node = $RuntimeRoot/RunController
+@onready var drop_controller: Node = $RuntimeRoot/DropController
+
+@onready var player_spawn_point: Marker2D = $PlayerSpawnPoint
+@onready var camera_2d: Camera2D = $Camera2D
+
+var player_instance: Node2D = null
+
+func _ready() -> void:
+	_validate_scene_structure()
+	_spawn_player()
+	_setup_camera_target()
+	_configure_spawners()
+
+	GameEvents.emit_debug("[TestGaiaScene] Cena de teste carregada.")
+
+func get_player_instance() -> Node2D:
+	return player_instance
+
+func get_enemy_root() -> Node2D:
+	return enemy_root
+
+func get_drop_root() -> Node2D:
+	return drop_root
+
+func get_arena_root() -> Node2D:
+	return arena_root
+
+func get_spawner_root() -> Node2D:
+	return spawner_root
+	
+func get_run_controller() -> Node:
+	return run_controller
+
+func get_drop_controller() -> Node:
+	return drop_controller
+	
+func _spawn_player() -> void:
+	var packed_player: PackedScene = load(player_scene_path) as PackedScene
+
+	if packed_player == null:
+		push_warning("[TestGaiaScene] PlayerGaia não encontrado: %s" % player_scene_path)
+		return
+
+	player_instance = packed_player.instantiate() as Node2D
+
+	if player_instance == null:
+		push_error("[TestGaiaScene] A cena do player não é Node2D.")
+		return
+
+	player_root.add_child(player_instance)
+	player_instance.global_position = player_spawn_point.global_position
+
+	GameEvents.emit_debug("[TestGaiaScene] Player instanciado: %s" % player_scene_path)
+
+func _setup_camera_target() -> void:
+	if camera_2d == null:
+		push_warning("[TestGaiaScene] Camera2D não encontrada.")
+		return
+
+	camera_2d.enabled = true
+	camera_2d.make_current()
+
+	if player_instance == null:
+		return
+
+	if camera_2d.has_method("set_target"):
+		camera_2d.call("set_target", player_instance)
+	else:
+		camera_2d.global_position = player_instance.global_position
+
+func _configure_spawners() -> void:
+	if spawner_root == null:
+		push_warning("[TestGaiaScene] SpawnerRoot não encontrado.")
+		return
+
+	if player_instance == null:
+		push_warning("[TestGaiaScene] Não é possível configurar spawners sem player_instance.")
+		return
+
+	if enemy_root == null:
+		push_warning("[TestGaiaScene] Não é possível configurar spawners sem EnemyRoot.")
+		return
+
+	var configured_count: int = 0
+
+	for child: Node in spawner_root.get_children():
+		if child.has_method("configure_spawner"):
+			child.call("configure_spawner", player_instance, enemy_root)
+			configured_count += 1
+
+			if child.has_method("force_spawn_enemy"):
+				child.call_deferred("force_spawn_enemy")
+
+	GameEvents.emit_debug("[TestGaiaScene] Spawners configurados: %s" % str(configured_count))
+
+func _validate_scene_structure() -> void:
+	if arena_root == null:
+		push_warning("[TestGaiaScene] ArenaRoot não encontrado.")
+
+	if runtime_root == null:
+		push_warning("[TestGaiaScene] RuntimeRoot não encontrado.")
+
+	if player_root == null:
+		push_warning("[TestGaiaScene] PlayerRoot não encontrado.")
+
+	if enemy_root == null:
+		push_warning("[TestGaiaScene] EnemyRoot não encontrado.")
+
+	if drop_root == null:
+		push_warning("[TestGaiaScene] DropRoot não encontrado.")
+
+	if spawner_root == null:
+		push_warning("[TestGaiaScene] SpawnerRoot não encontrado.")
+
+	if player_spawn_point == null:
+		push_warning("[TestGaiaScene] PlayerSpawnPoint não encontrado.")
+
+	if camera_2d == null:
+		push_warning("[TestGaiaScene] Camera2D não encontrada.")
+	
+	if run_controller == null:
+		push_warning("[TestGaiaScene] RunController não encontrado.")
+		
+	if drop_controller == null:
+		push_warning("[TestGaiaScene] DropController não encontrado.")
+
+
+SCRIPT: res://gameplay/weapons/attacks/DirectionalAttackHitbox.gd
+--------------------------------------------------------------------------------------------------------------
+extends Node2D
+class_name DirectionalAttackHitbox
+
+@export var hit_radius: float = 72.0
+@export var lifetime_seconds: float = 0.12
+
+# Fallback simples.
+@export var raw_damage: int = 5
+@export var damage_type: String = DamageTypes.PHYSICAL
+
+# Modelo oficial.
+@export var damage_components: Array[DamageComponentDefinition] = []
+
+@export var source_id: String = "gaia_initial_weapon"
+
+@export var enemy_group_name: String = "enemy"
+
+@export var draw_debug_hitbox: bool = true
+@export var debug_color: Color = Color(0.2, 0.75, 1.0, 0.35)
+@export var debug_outline_color: Color = Color(0.2, 0.9, 1.0, 0.95)
+
+var elapsed_seconds: float = 0.0
+var attack_direction: Vector2 = Vector2.RIGHT
+var source_node: Node = null
+
+var already_hit_instance_ids: Dictionary = {}
+
+func _ready() -> void:
+	queue_redraw()
+
+	if RunQuery.is_gameplay_blocked(get_tree()):
+		queue_free()
+		return
+
+	_try_hit_enemies()
+
+func _physics_process(delta: float) -> void:
+	if RunQuery.is_gameplay_blocked(get_tree()):
+		queue_free()
+		return
+
+	elapsed_seconds += delta
+
+	_try_hit_enemies()
+
+	if elapsed_seconds >= lifetime_seconds:
+		queue_free()
+
+func _draw() -> void:
+	if not draw_debug_hitbox:
+		return
+
+	draw_circle(Vector2.ZERO, hit_radius, debug_color)
+	draw_arc(Vector2.ZERO, hit_radius, 0.0, TAU, 32, debug_outline_color, 2.0)
+
+	var nose_position: Vector2 = attack_direction.normalized() * hit_radius
+	draw_line(Vector2.ZERO, nose_position, debug_outline_color, 2.0)
+	draw_circle(nose_position, 4.0, debug_outline_color)
+
+func setup(
+	p_source_node: Node,
+	p_direction: Vector2,
+	p_raw_damage: int,
+	p_damage_type: String,
+	p_hit_radius: float,
+	p_lifetime_seconds: float,
+	p_source_id: String = "gaia_initial_weapon",
+	p_damage_components: Array[DamageComponentDefinition] = []
+) -> void:
+	source_node = p_source_node
+
+	if p_direction.length() > 0.001:
+		attack_direction = p_direction.normalized()
+	else:
+		attack_direction = Vector2.RIGHT
+
+	raw_damage = p_raw_damage
+	damage_type = p_damage_type
+	hit_radius = p_hit_radius
+	lifetime_seconds = p_lifetime_seconds
+	source_id = p_source_id
+	damage_components = p_damage_components.duplicate()
+
+	rotation = attack_direction.angle()
+
+	queue_redraw()
+
+func _try_hit_enemies() -> void:
+	if raw_damage <= 0 and damage_components.is_empty():
+		return
+
+	var enemies: Array[Node] = get_tree().get_nodes_in_group(enemy_group_name)
+
+	for enemy: Node in enemies:
+		if enemy == null or not is_instance_valid(enemy):
+			continue
+
+		if not enemy is Node2D:
+			continue
+
+		var enemy_node: Node2D = enemy as Node2D
+		var instance_id: int = int(enemy_node.get_instance_id())
+
+		if already_hit_instance_ids.has(instance_id):
+			continue
+
+		var distance_to_enemy: float = global_position.distance_to(enemy_node.global_position)
+
+		if distance_to_enemy > hit_radius:
+			continue
+
+		if not enemy_node.has_method("receive_damage"):
+			continue
+
+		var payload: DamagePayload = DamagePayload.new(
+			raw_damage,
+			damage_type,
+			source_node,
+			source_id,
+			source_id
+		)
+
+		if not damage_components.is_empty():
+			payload.set_components(damage_components)
+
+		var final_damage_variant: Variant = enemy_node.call("receive_damage", payload)
+
+		already_hit_instance_ids[instance_id] = true
+
+		GameEvents.emit_debug("[DirectionalAttackHitbox] Inimigo atingido: %s raw_total=%s final=%s components=%s" % [
+			enemy_node.name,
+			str(payload.get_total_raw_damage()),
+			str(final_damage_variant),
+			str(_get_component_debug_string())
+		])
+
+		if RunQuery.is_gameplay_blocked(get_tree()):
+			return
+
+func _get_component_debug_string() -> String:
+	if damage_components.is_empty():
+		return "%s:%s" % [damage_type, str(raw_damage)]
+
+	var parts: Array[String] = []
+
+	for component: DamageComponentDefinition in damage_components:
+		if component == null:
+			continue
+
+		parts.append("%s:%s" % [component.damage_type, str(component.amount)])
+
+	return ", ".join(parts)
+
+
+SCRIPT: res://gameplay/weapons/gaia/GaiaInitialWeaponController.gd
+--------------------------------------------------------------------------------------------------------------
+extends Node
+
+@export var weapon_definition: WeaponDefinition
+
+@export_file("*.tscn") var attack_visual_scene_path: String = "res://visual/weapons/gaia_initial_weapon/GaiaAttackVisual.tscn"
+@export_file("*.tscn") var attack_hitbox_scene_path: String = "res://gameplay/weapons/attacks/DirectionalAttackHitbox.tscn"
+
+@export var attack_visual_root_path: NodePath
+@export var attack_hitbox_root_path: NodePath
+
+@export var weapon_enabled: bool = true
+
+# Se true, a arma dispara assim que a cena começa.
+# Para gameplay normal, manter false.
+@export var attack_on_ready: bool = false
+
+# Se attack_on_ready estiver false, este valor define o delay inicial.
+# Se for <= 0, usa cooldown_seconds.
+@export var initial_attack_delay_seconds: float = -1.0
+
+@export var emit_cooldown_updates: bool = true
+
+@export var cooldown_seconds: float = 2.0
+
+@export var attack_visual_offset: float = 86.0
+@export var attack_visual_lifetime: float = 0.22
+@export var attack_visual_scale: Vector2 = Vector2.ONE
+
+@export var attack_hitbox_offset: float = 86.0
+@export var attack_hitbox_radius: float = 72.0
+@export var attack_hitbox_lifetime: float = 0.12
+
+# Fallback simples.
+@export var base_damage: int = 5
+@export var damage_type: String = DamageTypes.PHYSICAL
+
+# Modelo oficial.
+@export var damage_components: Array[DamageComponentDefinition] = []
+
+@export var weapon_source_id: String = "gaia_initial_weapon"
+
+@export_group("Damage Interrupt")
+@export var reset_cooldown_when_player_damaged: bool = true
+@export var damage_reset_cooldown_ratio: float = 1.0
+
+var cooldown_timer: float = 0.0
+
+var player_controller: Node = null
+var attack_visual_root: Node2D = null
+var attack_hitbox_root: Node2D = null
+
+func _ready() -> void:
+	add_to_group("player_weapon")
+	
+	_apply_weapon_definition()
+
+	player_controller = _resolve_player_controller()
+	attack_visual_root = _resolve_attack_visual_root()
+	attack_hitbox_root = _resolve_attack_hitbox_root()
+
+	if player_controller != null:
+		GameEvents.emit_debug("[GaiaInitialWeaponController] Player controller encontrado: %s" % player_controller.name)
+	else:
+		GameEvents.emit_debug("[GaiaInitialWeaponController] Player controller NÃO encontrado.")
+
+	if attack_visual_root != null:
+		GameEvents.emit_debug("[GaiaInitialWeaponController] AttackVisualRoot encontrado: %s" % attack_visual_root.name)
+	else:
+		GameEvents.emit_debug("[GaiaInitialWeaponController] AttackVisualRoot NÃO encontrado.")
+
+	if attack_hitbox_root != null:
+		GameEvents.emit_debug("[GaiaInitialWeaponController] AttackHitboxRoot encontrado: %s" % attack_hitbox_root.name)
+	else:
+		GameEvents.emit_debug("[GaiaInitialWeaponController] AttackHitboxRoot NÃO encontrado.")
+
+	if attack_on_ready:
+		cooldown_timer = 0.0
+	else:
+		cooldown_timer = _get_initial_attack_delay()
+	
+	if not GameEvents.player_damaged.is_connected(_on_player_damaged):
+		GameEvents.player_damaged.connect(_on_player_damaged)
+
+	_emit_cooldown_update()
+
+func _process(delta: float) -> void:
+	if not weapon_enabled:
+		return
+
+	if player_controller == null:
+		player_controller = _resolve_player_controller()
+
+	if attack_visual_root == null:
+		attack_visual_root = _resolve_attack_visual_root()
+
+	if attack_hitbox_root == null:
+		attack_hitbox_root = _resolve_attack_hitbox_root()
+
+	if player_controller == null or attack_visual_root == null or attack_hitbox_root == null:
+		return
+
+	var runtime_state: PlayerRuntimeState = _get_player_runtime_state()
+
+	if runtime_state == null:
+		return
+
+	if not runtime_state.is_alive:
+		return
+
+	cooldown_timer -= delta
+	
+	cooldown_timer = max(0.0, cooldown_timer)
+	_emit_cooldown_update()
+
+	if cooldown_timer <= 0.0:
+		_fire_attack(runtime_state)
+		cooldown_timer = cooldown_seconds
+
+func force_fire() -> void:
+	var runtime_state: PlayerRuntimeState = _get_player_runtime_state()
+
+	if runtime_state == null:
+		return
+
+	_fire_attack(runtime_state)
+	cooldown_timer = cooldown_seconds
+
+func _fire_attack(runtime_state: PlayerRuntimeState) -> void:
+	var direction: Vector2 = _resolve_attack_direction(runtime_state)
+
+	_spawn_attack_visual(direction)
+	_spawn_attack_hitbox(direction)
+
+	GameEvents.emit_debug("[GaiaInitialWeaponController] Ataque disparado. direction=%s raw_total=%s components=%s" % [
+		str(direction),
+		str(_get_total_raw_damage()),
+		_get_component_debug_string()
+	])
+
+func _spawn_attack_visual(direction: Vector2) -> void:
+	var packed_visual: PackedScene = load(attack_visual_scene_path) as PackedScene
+
+	if packed_visual == null:
+		push_warning("[GaiaInitialWeaponController] Não foi possível carregar attack_visual_scene_path: %s" % attack_visual_scene_path)
+		return
+
+	var visual_instance: Node = packed_visual.instantiate()
+
+	if not visual_instance is Node2D:
+		push_warning("[GaiaInitialWeaponController] Attack visual não é Node2D.")
+		visual_instance.queue_free()
+		return
+
+	var visual_node: Node2D = visual_instance as Node2D
+
+	attack_visual_root.add_child(visual_node)
+	visual_node.global_position = _get_player_global_position() + direction * attack_visual_offset
+
+	if visual_node.has_method("setup"):
+		visual_node.call("setup", direction, attack_visual_lifetime, attack_visual_scale)
+
+func _spawn_attack_hitbox(direction: Vector2) -> void:
+	var packed_hitbox: PackedScene = load(attack_hitbox_scene_path) as PackedScene
+
+	if packed_hitbox == null:
+		push_warning("[GaiaInitialWeaponController] Não foi possível carregar attack_hitbox_scene_path: %s" % attack_hitbox_scene_path)
+		return
+
+	var hitbox_instance: Node = packed_hitbox.instantiate()
+
+	if not hitbox_instance is Node2D:
+		push_warning("[GaiaInitialWeaponController] Attack hitbox não é Node2D.")
+		hitbox_instance.queue_free()
+		return
+
+	var hitbox_node: Node2D = hitbox_instance as Node2D
+
+	attack_hitbox_root.add_child(hitbox_node)
+	hitbox_node.global_position = _get_player_global_position() + direction * attack_hitbox_offset
+
+	if hitbox_node.has_method("setup"):
+		hitbox_node.call(
+			"setup",
+			player_controller,
+			direction,
+			base_damage,
+			damage_type,
+			attack_hitbox_radius,
+			attack_hitbox_lifetime,
+			weapon_source_id,
+			damage_components
+		)
+
+func _resolve_attack_direction(runtime_state: PlayerRuntimeState) -> Vector2:
+	var direction: Vector2 = runtime_state.aim_direction
+
+	if direction.length() <= 0.001:
+		direction = runtime_state.last_valid_aim_direction
+
+	if direction.length() <= 0.001:
+		direction = Vector2.RIGHT
+
+	return direction.normalized()
+
+func _apply_weapon_definition() -> void:
+	if weapon_definition == null:
+		return
+
+	if weapon_definition.attack_visual_scene_path.strip_edges() != "":
+		attack_visual_scene_path = weapon_definition.attack_visual_scene_path
+
+	if weapon_definition.attack_hitbox_scene_path.strip_edges() != "":
+		attack_hitbox_scene_path = weapon_definition.attack_hitbox_scene_path
+
+	cooldown_seconds = weapon_definition.cooldown_seconds
+
+	attack_visual_offset = weapon_definition.attack_visual_offset
+	attack_visual_lifetime = weapon_definition.attack_visual_lifetime
+
+	attack_hitbox_offset = weapon_definition.attack_hitbox_offset
+	attack_hitbox_radius = weapon_definition.attack_hitbox_radius
+	attack_hitbox_lifetime = weapon_definition.attack_hitbox_lifetime
+
+	base_damage = weapon_definition.base_damage
+	damage_type = weapon_definition.damage_type
+
+	if weapon_definition.has_damage_components():
+		damage_components.clear()
+
+		for component: DamageComponentDefinition in weapon_definition.damage_components:
+			if component == null:
+				continue
+
+			var duplicated_component: DamageComponentDefinition = component.duplicate(true) as DamageComponentDefinition
+			damage_components.append(duplicated_component)
+	else:
+		damage_components.clear()
+
+	weapon_source_id = weapon_definition.id
+
+	GameEvents.emit_debug("[GaiaInitialWeaponController] Config aplicada: fallback_damage=%s components=%s visual_offset=%s hitbox_offset=%s hitbox_radius=%s cooldown=%s" % [
+		str(base_damage),
+		_get_component_debug_string(),
+		str(attack_visual_offset),
+		str(attack_hitbox_offset),
+		str(attack_hitbox_radius),
+		str(cooldown_seconds)
+	])
+
+func _get_total_raw_damage() -> int:
+	if damage_components.is_empty():
+		return base_damage
+
+	var total: int = 0
+
+	for component: DamageComponentDefinition in damage_components:
+		if component != null and component.is_valid_component():
+			total += component.amount
+
+	return total
+
+func _get_component_debug_string() -> String:
+	if damage_components.is_empty():
+		return "%s:%s" % [damage_type, str(base_damage)]
+
+	var parts: Array[String] = []
+
+	for component: DamageComponentDefinition in damage_components:
+		if component == null:
+			continue
+
+		parts.append("%s:%s" % [component.damage_type, str(component.amount)])
+
+	return ", ".join(parts)
+
+func _get_player_runtime_state() -> PlayerRuntimeState:
+	if player_controller == null:
+		return null
+
+	if not player_controller.has_method("get_runtime_state"):
+		return null
+
+	var runtime_state_variant: Variant = player_controller.call("get_runtime_state")
+
+	if runtime_state_variant is PlayerRuntimeState:
+		return runtime_state_variant as PlayerRuntimeState
+
+	return null
+
+func _resolve_player_controller() -> Node:
+	var current: Node = self
+
+	while current != null:
+		if current.has_method("get_runtime_state"):
+			return current
+
+		current = current.get_parent()
+
+	var players: Array[Node] = get_tree().get_nodes_in_group("player")
+
+	for player: Node in players:
+		if player.has_method("get_runtime_state"):
+			return player
+
+	return null
+
+func _resolve_attack_visual_root() -> Node2D:
+	if attack_visual_root_path != NodePath():
+		var configured_root: Node = get_node_or_null(attack_visual_root_path)
+
+		if configured_root is Node2D:
+			return configured_root as Node2D
+
+	var sibling_root: Node = get_node_or_null("../AttackVisualRoot")
+
+	if sibling_root is Node2D:
+		return sibling_root as Node2D
+
+	return null
+
+func _resolve_attack_hitbox_root() -> Node2D:
+	if attack_hitbox_root_path != NodePath():
+		var configured_root: Node = get_node_or_null(attack_hitbox_root_path)
+
+		if configured_root is Node2D:
+			return configured_root as Node2D
+
+	var sibling_root: Node = get_node_or_null("../AttackHitboxRoot")
+
+	if sibling_root is Node2D:
+		return sibling_root as Node2D
+
+	return null
+
+func _get_player_global_position() -> Vector2:
+	if player_controller is Node2D:
+		var player_node: Node2D = player_controller as Node2D
+		return player_node.global_position
+
+	return Vector2.ZERO
+
+func apply_run_upgrade(upgrade: UpgradeDefinition) -> void:
+	if upgrade == null:
+		return
+
+	match upgrade.upgrade_type:
+		UpgradeTypes.WEAPON_DAMAGE_FLAT:
+			_apply_damage_flat_upgrade(upgrade.value_int)
+
+		UpgradeTypes.WEAPON_COOLDOWN_PERCENT:
+			_apply_cooldown_percent_upgrade(upgrade.value_float)
+
+		UpgradeTypes.WEAPON_PHYSICAL_DAMAGE_FLAT:
+			_apply_component_damage_flat_upgrade(DamageTypes.PHYSICAL, upgrade.value_int)
+
+		UpgradeTypes.WEAPON_MAGICAL_DAMAGE_FLAT:
+			_apply_component_damage_flat_upgrade(DamageTypes.MAGICAL, upgrade.value_int)
+
+		UpgradeTypes.WEAPON_HITBOX_RADIUS_FLAT:
+			_apply_hitbox_radius_flat_upgrade(upgrade.value_int)
+
+		UpgradeTypes.WEAPON_HITBOX_LIFETIME_PERCENT:
+			_apply_hitbox_lifetime_percent_upgrade(upgrade.value_float)
+
+		_:
+			GameEvents.emit_debug("[GaiaInitialWeaponController] Upgrade ignorado pela arma: %s" % upgrade.id)
+
+func _apply_damage_flat_upgrade(amount: int) -> void:
+	if amount <= 0:
+		return
+
+	if damage_components.is_empty():
+		base_damage += amount
+
+		GameEvents.emit_debug("[GaiaInitialWeaponController] Upgrade dano aplicado no fallback: +%s | base_damage=%s" % [
+			str(amount),
+			str(base_damage)
+		])
+		return
+
+	for component: DamageComponentDefinition in damage_components:
+		if component == null:
+			continue
+
+		component.amount += amount
+
+	GameEvents.emit_debug("[GaiaInitialWeaponController] Upgrade dano aplicado nos componentes: +%s | components=%s" % [
+		str(amount),
+		_get_component_debug_string()
+	])
+
+func _apply_cooldown_percent_upgrade(percent: float) -> void:
+	if percent <= 0.0:
+		return
+
+	var multiplier: float = max(0.05, 1.0 - (percent * 0.01))
+	cooldown_seconds = max(0.15, cooldown_seconds * multiplier)
+
+	GameEvents.emit_debug("[GaiaInitialWeaponController] Upgrade cooldown aplicado: -%s%% | cooldown=%s" % [
+		str(percent),
+		str(cooldown_seconds)
+	])
+
+func _apply_component_damage_flat_upgrade(damage_type_to_match: String, amount: int) -> void:
+	if amount <= 0:
+		return
+
+	if damage_components.is_empty():
+		GameEvents.emit_debug("[GaiaInitialWeaponController] Sem componentes para aplicar dano específico: %s" % damage_type_to_match)
+		return
+
+	var applied_count: int = 0
+
+	for component: DamageComponentDefinition in damage_components:
+		if component == null:
+			continue
+
+		if component.damage_type != damage_type_to_match:
+			continue
+
+		component.amount += amount
+		applied_count += 1
+
+	GameEvents.emit_debug("[GaiaInitialWeaponController] Upgrade dano %s aplicado: +%s | applied=%s | components=%s" % [
+		damage_type_to_match,
+		str(amount),
+		str(applied_count),
+		_get_component_debug_string()
+	])
+
+func _apply_hitbox_radius_flat_upgrade(amount: int) -> void:
+	if amount <= 0:
+		return
+
+	attack_hitbox_radius += float(amount)
+
+	GameEvents.emit_debug("[GaiaInitialWeaponController] Upgrade raio da hitbox aplicado: +%s | radius=%s" % [
+		str(amount),
+		str(attack_hitbox_radius)
+	])
+
+func _apply_hitbox_lifetime_percent_upgrade(percent: float) -> void:
+	if percent <= 0.0:
+		return
+
+	var multiplier: float = 1.0 + (percent * 0.01)
+	attack_hitbox_lifetime = min(0.60, attack_hitbox_lifetime * multiplier)
+
+	GameEvents.emit_debug("[GaiaInitialWeaponController] Upgrade duração da hitbox aplicado: +%s%% | lifetime=%s" % [
+		str(percent),
+		str(attack_hitbox_lifetime)
+	])
+
+func _get_initial_attack_delay() -> float:
+	if initial_attack_delay_seconds > 0.0:
+		return initial_attack_delay_seconds
+
+	return cooldown_seconds
+
+func _emit_cooldown_update() -> void:
+	if not emit_cooldown_updates:
+		return
+
+	var progress_ratio: float = 1.0
+
+	if cooldown_seconds > 0.0:
+		progress_ratio = 1.0 - clamp(cooldown_timer / cooldown_seconds, 0.0, 1.0)
+
+	GameEvents.weapon_cooldown_changed.emit(
+		weapon_source_id,
+		cooldown_timer,
+		cooldown_seconds,
+		progress_ratio
+	)
+
+func _on_player_damaged(
+	_raw_damage: int,
+	final_damage: int,
+	_current_hp: int,
+	_max_hp: int,
+	_source_id: String
+) -> void:
+	if not reset_cooldown_when_player_damaged:
+		return
+
+	if final_damage <= 0:
+		return
+
+	var ratio: float = clamp(damage_reset_cooldown_ratio, 0.0, 1.0)
+	cooldown_timer = cooldown_seconds * ratio
+
+	_emit_cooldown_update()
+
+	GameEvents.emit_debug("[GaiaInitialWeaponController] Cooldown resetado por dano recebido. cooldown_timer=%s" % str(cooldown_timer))
+
+
+SCRIPT: res://scenes/Main.gd
+--------------------------------------------------------------------------------------------------------------
+extends Node
+
+@export_file("*.tscn") var initial_scene_path: String = "res://gameplay/test/TestGaiaScene.tscn"
+
+@onready var current_scene_root: Node = $CurrentSceneRoot
+
+func _ready() -> void:
+	_load_initial_scene()
+
+func _load_initial_scene() -> void:
+	if initial_scene_path.strip_edges() == "":
+		push_error("[Main] initial_scene_path vazio.")
+		return
+
+	var packed_scene := load(initial_scene_path) as PackedScene
+	if packed_scene == null:
+		push_error("[Main] Não foi possível carregar: %s" % initial_scene_path)
+		return
+
+	var scene_instance := packed_scene.instantiate()
+	current_scene_root.add_child(scene_instance)
+
+	GameEvents.emit_debug("[Main] Cena inicial carregada: %s" % initial_scene_path)
+
+
+SCRIPT: res://ui/debug/DebugOverlay.gd
+--------------------------------------------------------------------------------------------------------------
+extends CanvasLayer
+
+@export_group("Master")
+@export var debug_enabled: bool = true
+@export var show_title: bool = true
+@export var show_separators: bool = true
+
+@export_group("Panel Layout")
+@export var panel_position: Vector2 = Vector2(16.0, 16.0)
+@export var panel_size: Vector2 = Vector2(600.0, 420.0)
+@export var panel_margin: float = 8.0
+
+@export_group("Sections")
+@export var show_input_section: bool = true
+@export var show_animation_section: bool = true
+@export var show_player_core_section: bool = true
+@export var show_player_combat_section: bool = true
+@export var show_player_direction_section: bool = false
+@export var show_run_timer_section: bool = true
+@export var show_run_progression_section: bool = true
+@export var show_run_economy_section: bool = true
+@export var show_run_result_section: bool = false
+@export var show_save_section: bool = false
+@export var show_technical_section: bool = false
+
+@export_group("Formatting")
+@export var compact_vectors: bool = true
+@export var decimal_places: int = 2
+@export var max_completed_maps_to_show: int = 3
+
+@onready var panel: Panel = get_node_or_null("Panel") as Panel
+@onready var label: Label = _resolve_label()
+
+var last_animation_name: String = ""
+
+func _ready() -> void:
+	_configure_panel()
+
+	if not GameEvents.spine_animation_changed.is_connected(_on_spine_animation_changed):
+		GameEvents.spine_animation_changed.connect(_on_spine_animation_changed)
+
+	if not GameEvents.spine_animation_requested.is_connected(_on_spine_animation_changed):
+		GameEvents.spine_animation_requested.connect(_on_spine_animation_changed)
+
+	if label == null:
+		GameEvents.emit_debug("[DebugOverlay] Label NÃO encontrado.")
+	else:
+		GameEvents.emit_debug("[DebugOverlay] Label encontrado: %s" % label.name)
+
+func _process(_delta: float) -> void:
+	if panel != null:
+		panel.visible = debug_enabled
+
+	if not debug_enabled:
+		return
+
+	if label == null:
+		label = _resolve_label()
+
+		if label == null:
+			return
+
+	var lines: Array[String] = []
+
+	var player: Node = _get_player()
+	var player_data: Dictionary = _get_debug_data_from_node(player)
+
+	var run_controller: Node = _get_run_controller()
+	var run_data: Dictionary = _get_debug_data_from_node(run_controller)
+
+	var save_data: Dictionary = SaveManager.get_debug_data()
+
+	if show_title:
+		lines.append(LocalizationManager.get_text("ui.debug.title"))
+
+	if show_input_section:
+		_append_separator(lines)
+		_append_input_section(lines)
+
+	if show_animation_section:
+		_append_separator(lines)
+		_append_animation_section(lines)
+
+	if show_player_core_section:
+		_append_separator(lines)
+		_append_player_core_section(lines, player_data)
+
+	if show_player_combat_section:
+		_append_separator(lines)
+		_append_player_combat_section(lines, player_data)
+
+	if show_player_direction_section:
+		_append_separator(lines)
+		_append_player_direction_section(lines, player_data)
+
+	if show_run_timer_section:
+		_append_separator(lines)
+		_append_run_timer_section(lines, run_data)
+
+	if show_run_progression_section:
+		_append_separator(lines)
+		_append_run_progression_section(lines, run_data)
+
+	if show_run_economy_section:
+		_append_separator(lines)
+		_append_run_economy_section(lines, run_data)
+
+	if show_run_result_section:
+		_append_separator(lines)
+		_append_run_result_section(lines, run_data)
+
+	if show_save_section:
+		_append_separator(lines)
+		_append_save_section(lines, save_data)
+
+	if show_technical_section:
+		_append_separator(lines)
+		_append_technical_section(lines, player_data, run_data, save_data)
+
+	if lines.is_empty():
+		lines.append("DebugOverlay ativo, mas todas as seções estão desabilitadas.")
+
+	label.text = "\n".join(lines)
+
+func _append_input_section(lines: Array[String]) -> void:
+	var move_direction: Vector2 = InputManager.get_move_direction()
+	var aim_direction: Vector2 = InputManager.get_aim_direction()
+
+	lines.append("INPUT")
+	lines.append("Move: %s" % _format_vector(move_direction))
+	lines.append("Aim: %s" % _format_vector(aim_direction))
+
+func _append_animation_section(lines: Array[String]) -> void:
+	lines.append("ANIMATION")
+	lines.append("Last Spine: %s" % last_animation_name)
+
+func _append_player_core_section(lines: Array[String], data: Dictionary) -> void:
+	lines.append("PLAYER")
+
+	if data.is_empty():
+		lines.append("Player: não encontrado")
+		return
+
+	lines.append("Queen: %s" % str(data.get("queen_id", "-")))
+	lines.append("HP: %s / %s" % [
+		str(data.get("current_hp", "-")),
+		str(data.get("max_hp", "-"))
+	])
+	lines.append("Alive: %s" % str(data.get("is_alive", false)))
+	lines.append("State: %s" % str(data.get("current_gameplay_state", "-")))
+	lines.append("Move Speed: %s" % _format_float(float(data.get("move_speed", 0.0))))
+
+func _append_player_combat_section(lines: Array[String], data: Dictionary) -> void:
+	lines.append("PLAYER COMBAT")
+
+	if data.is_empty():
+		lines.append("Player: não encontrado")
+		return
+
+	lines.append("Defense: %s%%" % _format_float(float(data.get("defense_percent", 0.0))))
+	lines.append("Last Damage: %s" % str(data.get("last_damage_taken", 0)))
+	lines.append("Total Damage: %s" % str(data.get("total_damage_taken", 0)))
+	lines.append("Last Source: %s" % str(data.get("last_damage_source_id", "")))
+	lines.append("Death Cause: %s" % str(data.get("death_cause", "")))
+
+func _append_player_direction_section(lines: Array[String], data: Dictionary) -> void:
+	lines.append("PLAYER DIRECTIONS")
+
+	if data.is_empty():
+		lines.append("Player: não encontrado")
+		return
+
+	lines.append("Move Direction: %s" % _format_vector(data.get("move_direction", Vector2.ZERO)))
+	lines.append("Aim Direction: %s" % _format_vector(data.get("aim_direction", Vector2.ZERO)))
+	lines.append("Last Aim: %s" % _format_vector(data.get("last_valid_aim_direction", Vector2.ZERO)))
+	lines.append("Facing: %s" % _format_vector(data.get("facing_direction", Vector2.ZERO)))
+	lines.append("Position: %s" % _format_vector(data.get("global_position", Vector2.ZERO)))
+
+func _append_run_timer_section(lines: Array[String], data: Dictionary) -> void:
+	lines.append("RUN TIMER")
+
+	if data.is_empty():
+		lines.append("RunController: não encontrado")
+		return
+
+	lines.append("Map: %s" % str(data.get("map_id", "")))
+	lines.append("Time: %s" % _format_seconds(float(data.get("elapsed_seconds", 0.0))))
+	lines.append("Remaining: %s" % _format_seconds(float(data.get("remaining_seconds", 0.0))))
+	lines.append("Duration: %s" % _format_seconds(float(data.get("map_duration_seconds", 0.0))))
+
+func _append_run_progression_section(lines: Array[String], data: Dictionary) -> void:
+	lines.append("RUN PROGRESSION")
+
+	if data.is_empty():
+		lines.append("RunController: não encontrado")
+		return
+
+	lines.append("Run XP: %s" % str(data.get("run_xp_gained", 0)))
+	lines.append("Level: %s" % str(data.get("current_level", 1)))
+	lines.append("Level XP: %s / %s" % [
+		str(data.get("current_level_xp", 0)),
+		str(data.get("xp_required_for_next_level", 10))
+	])
+	lines.append("Enemies Killed: %s" % str(data.get("enemies_killed", 0)))
+	lines.append("LevelUp Active: %s" % str(data.get("is_level_up_active", false)))
+	lines.append("Pending LevelUps: %s" % str(data.get("pending_level_ups", 0)))
+
+func _append_run_economy_section(lines: Array[String], data: Dictionary) -> void:
+	lines.append("RUN ECONOMY")
+
+	if data.is_empty():
+		lines.append("RunController: não encontrado")
+		return
+
+	lines.append("Run Coins: %s" % str(data.get("run_coins_collected", 0)))
+	lines.append("Coins Available: %s" % str(data.get("run_coins_available", 0)))
+	lines.append("Coins Spent: %s" % str(data.get("run_coins_spent", 0)))
+
+func _append_run_result_section(lines: Array[String], data: Dictionary) -> void:
+	lines.append("RUN RESULT")
+
+	if data.is_empty():
+		lines.append("RunController: não encontrado")
+		return
+
+	lines.append("Finished: %s" % str(data.get("is_finished", false)))
+	lines.append("Victory: %s" % str(data.get("is_victory", false)))
+	lines.append("Defeat: %s" % str(data.get("is_defeat", false)))
+	lines.append("Result: %s" % str(data.get("result_type", "")))
+	lines.append("Final Money: %s" % str(data.get("final_money_reward", 0)))
+	lines.append("Death Cause: %s" % str(data.get("death_cause", "")))
+
+func _append_save_section(lines: Array[String], data: Dictionary) -> void:
+	lines.append("SAVE")
+
+	if data.is_empty() or not bool(data.get("has_save_data", false)):
+		lines.append("Save: não encontrado")
+		return
+
+	lines.append("Total XP: %s" % str(data.get("total_xp", 0)))
+	lines.append("Total Money: %s" % str(data.get("total_money", 0)))
+	lines.append("Completed Maps: %s" % _format_limited_array(data.get("completed_maps", []), max_completed_maps_to_show))
+	lines.append("SFW: %s" % str(data.get("sfw_enabled", true)))
+
+func _append_technical_section(lines: Array[String], player_data: Dictionary, run_data: Dictionary, save_data: Dictionary) -> void:
+	lines.append("TECHNICAL")
+	lines.append("Has Player Data: %s" % str(not player_data.is_empty()))
+	lines.append("Has Run Data: %s" % str(not run_data.is_empty()))
+	lines.append("Has Save Data: %s" % str(bool(save_data.get("has_save_data", false))))
+	lines.append("Paused Tree: %s" % str(get_tree().paused))
+	lines.append("Panel Size: %s" % _format_vector(panel_size))
+
+func _append_separator(lines: Array[String]) -> void:
+	if not show_separators:
+		return
+
+	if lines.is_empty():
+		return
+
+	lines.append("--------------------")
+
+func _configure_panel() -> void:
+	if panel != null:
+		panel.set_anchors_preset(Control.PRESET_TOP_LEFT)
+		panel.position = panel_position
+		panel.size = panel_size
+		panel.custom_minimum_size = panel_size
+		panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	var margin_container: MarginContainer = get_node_or_null("Panel/MarginContainer") as MarginContainer
+
+	if margin_container != null:
+		margin_container.set_anchors_preset(Control.PRESET_FULL_RECT)
+		margin_container.offset_left = panel_margin
+		margin_container.offset_top = panel_margin
+		margin_container.offset_right = -panel_margin
+		margin_container.offset_bottom = -panel_margin
+		margin_container.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	if label != null:
+		label.set_anchors_preset(Control.PRESET_FULL_RECT)
+		label.autowrap_mode = TextServer.AUTOWRAP_OFF
+		label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		label.text = "DebugOverlay inicializado"
+
+func _resolve_label() -> Label:
+	var direct_label: Label = get_node_or_null("Panel/MarginContainer/Label") as Label
+
+	if direct_label != null:
+		return direct_label
+
+	var found_label: Label = _find_first_label(self)
+
+	if found_label != null:
+		return found_label
+
+	return null
+
+func _find_first_label(root: Node) -> Label:
+	if root == null:
+		return null
+
+	if root is Label:
+		return root as Label
+
+	for child: Node in root.get_children():
+		var found: Label = _find_first_label(child)
+
+		if found != null:
+			return found
+
+	return null
+
+func _get_player() -> Node:
+	var players: Array[Node] = get_tree().get_nodes_in_group("player")
+
+	if players.is_empty():
+		return null
+
+	return players[0]
+
+func _get_run_controller() -> Node:
+	var nodes: Array[Node] = get_tree().get_nodes_in_group("run_controller")
+
+	if not nodes.is_empty():
+		return nodes[0]
+
+	var current_scene: Node = get_tree().current_scene
+
+	if current_scene != null:
+		var found: Node = _find_node_with_method(current_scene, "get_run_state")
+
+		if found != null:
+			return found
+
+	return null
+
+func _find_node_with_method(root: Node, method_name: String) -> Node:
+	if root == null:
+		return null
+
+	if root.has_method(method_name):
+		return root
+
+	for child: Node in root.get_children():
+		var found: Node = _find_node_with_method(child, method_name)
+
+		if found != null:
+			return found
+
+	return null
+
+func _get_debug_data_from_node(node: Node) -> Dictionary:
+	if node == null:
+		return {}
+
+	if not node.has_method("get_debug_data"):
+		return {}
+
+	var debug_data_variant: Variant = node.call("get_debug_data")
+
+	if debug_data_variant is Dictionary:
+		return debug_data_variant as Dictionary
+
+	return {}
+
+func _format_vector(value: Variant) -> String:
+	if not value is Vector2:
+		return str(value)
+
+	var vector: Vector2 = value as Vector2
+
+	if compact_vectors:
+		return "(%s, %s)" % [
+			_format_float(vector.x),
+			_format_float(vector.y)
+		]
+
+	return str(vector)
+
+func _format_float(value: float) -> String:
+	var safe_decimal_places: int = max(0, decimal_places)
+	var format_string: String = "%." + str(safe_decimal_places) + "f"
+
+	return format_string % value
+
+func _format_seconds(seconds: float) -> String:
+	var total_seconds: int = int(floor(max(0.0, seconds)))
+	var minutes: int = total_seconds / 60
+	var remaining_seconds: int = total_seconds % 60
+
+	return "%02d:%02d" % [minutes, remaining_seconds]
+
+func _format_limited_array(value: Variant, limit: int) -> String:
+	if not value is Array:
+		return str(value)
+
+	var array_value: Array = value as Array
+
+	if array_value.size() <= limit:
+		return str(array_value)
+
+	var visible_items: Array = []
+
+	for index: int in range(limit):
+		visible_items.append(array_value[index])
+
+	return "%s +%s" % [
+		str(visible_items),
+		str(array_value.size() - limit)
+	]
+
+func _on_spine_animation_changed(animation_name: String) -> void:
+	last_animation_name = animation_name
+
+
+SCRIPT: res://ui/debug/tools/PrototypeToolsPanel.gd
+--------------------------------------------------------------------------------------------------------------
+extends CanvasLayer
+
+const TOGGLE_KEY: Key = KEY_F3
+
+@export_group("Availability")
+@export var tools_enabled: bool = true
+@export var visible_on_start: bool = false
+@export var allow_save_reset: bool = true
+@export var allow_force_result_actions: bool = true
+
+@export_group("Layout")
+@export var panel_size: Vector2 = Vector2(470.0, 390.0)
+@export var panel_margin: float = 16.0
+
+@export_group("Refresh")
+@export var refresh_interval_seconds: float = 0.20
+
+@onready var panel: Panel = $Panel
+@onready var title_label: Label = $Panel/MarginContainer/VBoxContainer/TitleLabel
+@onready var hint_label: Label = $Panel/MarginContainer/VBoxContainer/HintLabel
+
+@onready var save_info_label: Label = $Panel/MarginContainer/VBoxContainer/SaveInfoLabel
+@onready var current_run_label: Label = $Panel/MarginContainer/VBoxContainer/CurrentRunLabel
+@onready var last_run_label: Label = $Panel/MarginContainer/VBoxContainer/LastRunLabel
+
+@onready var warning_label: Label = $Panel/MarginContainer/VBoxContainer/WarningLabel
+@onready var status_label: Label = $Panel/MarginContainer/VBoxContainer/StatusLabel
+
+@onready var force_victory_button: Button = $Panel/MarginContainer/VBoxContainer/ActionsRow/ForceVictoryButton
+@onready var force_defeat_button: Button = $Panel/MarginContainer/VBoxContainer/ActionsRow/ForceDefeatButton
+@onready var reset_progress_button: Button = $Panel/MarginContainer/VBoxContainer/ActionsRow/ResetProgressButton
+
+@onready var confirmation_row: HBoxContainer = $Panel/MarginContainer/VBoxContainer/ConfirmationRow
+@onready var confirm_reset_button: Button = $Panel/MarginContainer/VBoxContainer/ConfirmationRow/ConfirmResetButton
+@onready var cancel_reset_button: Button = $Panel/MarginContainer/VBoxContainer/ConfirmationRow/CancelResetButton
+
+var refresh_timer: float = 0.0
+var reset_confirmation_active: bool = false
+
+func _ready() -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS
+	layer = 100
+
+	visible = tools_enabled and visible_on_start
+
+	_configure_layout()
+	_configure_static_texts()
+	_connect_buttons()
+	_connect_events()
+	_set_reset_confirmation_visible(false)
+	_refresh_panel()
+
+	GameEvents.emit_debug("[PrototypeToolsPanel] Inicializado. Pressione F3 para mostrar/ocultar.")
+
+func _process(delta: float) -> void:
+	if not tools_enabled:
+		visible = false
+		return
+
+	if not visible:
+		return
+
+	refresh_timer += delta
+
+	if refresh_timer < refresh_interval_seconds:
+		return
+
+	refresh_timer = 0.0
+	_refresh_panel()
+
+func _unhandled_input(event: InputEvent) -> void:
+	if not tools_enabled:
+		return
+
+	if not event is InputEventKey:
+		return
+
+	var key_event: InputEventKey = event as InputEventKey
+
+	if not key_event.pressed:
+		return
+
+	if key_event.echo:
+		return
+
+	if key_event.keycode != TOGGLE_KEY:
+		return
+
+	visible = not visible
+
+	if visible:
+		_refresh_panel()
+
+	get_viewport().set_input_as_handled()
+
+func _configure_layout() -> void:
+	if panel == null:
+		return
+
+	var viewport_size: Vector2 = get_viewport().get_visible_rect().size
+
+	panel.size = panel_size
+	panel.custom_minimum_size = panel_size
+	panel.position = Vector2(
+		viewport_size.x - panel_size.x - panel_margin,
+		panel_margin
+	)
+
+func _configure_static_texts() -> void:
+	title_label.text = LocalizationManager.get_text("ui.debug_tools.title")
+	hint_label.text = LocalizationManager.get_text("ui.debug_tools.toggle_hint")
+
+	force_victory_button.text = LocalizationManager.get_text("ui.debug_tools.force_victory")
+	force_defeat_button.text = LocalizationManager.get_text("ui.debug_tools.force_defeat")
+	reset_progress_button.text = LocalizationManager.get_text("ui.debug_tools.reset_progression")
+
+	confirm_reset_button.text = LocalizationManager.get_text("ui.debug_tools.confirm_reset")
+	cancel_reset_button.text = LocalizationManager.get_text("ui.debug_tools.cancel")
+
+	warning_label.text = LocalizationManager.get_text("ui.debug_tools.force_result_warning")
+	status_label.text = ""
+
+	force_victory_button.disabled = not allow_force_result_actions
+	force_defeat_button.disabled = not allow_force_result_actions
+	reset_progress_button.disabled = not allow_save_reset
+
+func _connect_buttons() -> void:
+	if not force_victory_button.pressed.is_connected(_on_force_victory_pressed):
+		force_victory_button.pressed.connect(_on_force_victory_pressed)
+
+	if not force_defeat_button.pressed.is_connected(_on_force_defeat_pressed):
+		force_defeat_button.pressed.connect(_on_force_defeat_pressed)
+
+	if not reset_progress_button.pressed.is_connected(_on_reset_progress_pressed):
+		reset_progress_button.pressed.connect(_on_reset_progress_pressed)
+
+	if not confirm_reset_button.pressed.is_connected(_on_confirm_reset_pressed):
+		confirm_reset_button.pressed.connect(_on_confirm_reset_pressed)
+
+	if not cancel_reset_button.pressed.is_connected(_on_cancel_reset_pressed):
+		cancel_reset_button.pressed.connect(_on_cancel_reset_pressed)
+
+func _connect_events() -> void:
+	if not GameEvents.save_updated.is_connected(_on_save_updated):
+		GameEvents.save_updated.connect(_on_save_updated)
+
+	if not GameEvents.run_finished.is_connected(_on_run_finished):
+		GameEvents.run_finished.connect(_on_run_finished)
+
+func _refresh_panel() -> void:
+	_configure_layout()
+	_refresh_save_info()
+	_refresh_current_run_info()
+	_refresh_last_run_info()
+
+func _refresh_save_info() -> void:
+	var save_debug: Dictionary = SaveManager.get_debug_data()
+
+	if not bool(save_debug.get("has_save_data", false)):
+		save_info_label.text = "Save: -"
+		return
+
+	var completed_maps: Array = save_debug.get("completed_maps", []) as Array
+
+	save_info_label.text = "%s: %s\n%s: %s\n%s: %s" % [
+		LocalizationManager.get_text("ui.debug_tools.total_xp"),
+		str(save_debug.get("total_xp", 0)),
+		LocalizationManager.get_text("ui.debug_tools.total_money"),
+		str(save_debug.get("total_money", 0)),
+		LocalizationManager.get_text("ui.debug_tools.completed_maps"),
+		_format_completed_maps(completed_maps)
+	]
+
+func _refresh_current_run_info() -> void:
+	var run_controller: Node = _get_run_controller()
+
+	if run_controller == null or not run_controller.has_method("get_debug_data"):
+		current_run_label.text = "%s: -" % LocalizationManager.get_text("ui.debug_tools.current_run")
+		return
+
+	var run_data_variant: Variant = run_controller.call("get_debug_data")
+
+	if not run_data_variant is Dictionary:
+		current_run_label.text = "%s: -" % LocalizationManager.get_text("ui.debug_tools.current_run")
+		return
+
+	var run_data: Dictionary = run_data_variant as Dictionary
+	var is_finished: bool = bool(run_data.get("is_finished", false))
+
+	var run_status: String = LocalizationManager.get_text("ui.debug_tools.finished") if is_finished else LocalizationManager.get_text("ui.debug_tools.active")
+
+	current_run_label.text = "%s: %s | XP: %s | Coins: %s | Level: %s" % [
+		LocalizationManager.get_text("ui.debug_tools.current_run"),
+		run_status,
+		str(run_data.get("run_xp_gained", 0)),
+		str(run_data.get("run_coins_collected", 0)),
+		str(run_data.get("current_level", 1))
+	]
+
+func _refresh_last_run_info() -> void:
+	var save_debug: Dictionary = SaveManager.get_debug_data()
+	var last_run_variant: Variant = save_debug.get("last_run_summary", {})
+
+	if not last_run_variant is Dictionary:
+		last_run_label.text = "%s: %s" % [
+			LocalizationManager.get_text("ui.debug_tools.last_run"),
+			LocalizationManager.get_text("ui.debug_tools.no_last_run")
+		]
+		return
+
+	var last_run: Dictionary = last_run_variant as Dictionary
+
+	if last_run.is_empty():
+		last_run_label.text = "%s: %s" % [
+			LocalizationManager.get_text("ui.debug_tools.last_run"),
+			LocalizationManager.get_text("ui.debug_tools.no_last_run")
+		]
+		return
+
+	last_run_label.text = "%s: %s | XP: %s | Money: %s | Kills: %s" % [
+		LocalizationManager.get_text("ui.debug_tools.last_run"),
+		str(last_run.get("result_type", "-")),
+		str(last_run.get("run_xp_gained", 0)),
+		str(last_run.get("final_money_reward", 0)),
+		str(last_run.get("enemies_killed", 0))
+	]
+
+func _on_force_victory_pressed() -> void:
+	if not allow_force_result_actions:
+		return
+
+	var run_controller: Node = _get_run_controller()
+
+	if run_controller == null or not run_controller.has_method("debug_force_victory"):
+		status_label.text = LocalizationManager.get_text("ui.debug_tools.force_disabled")
+		return
+
+	var result_variant: Variant = run_controller.call("debug_force_victory")
+	var succeeded: bool = bool(result_variant)
+
+	if succeeded:
+		status_label.text = LocalizationManager.get_text("ui.debug_tools.force_victory_done")
+	else:
+		status_label.text = LocalizationManager.get_text("ui.debug_tools.force_disabled")
+
+	_refresh_panel()
+
+func _on_force_defeat_pressed() -> void:
+	if not allow_force_result_actions:
+		return
+
+	var run_controller: Node = _get_run_controller()
+
+	if run_controller == null or not run_controller.has_method("debug_force_defeat"):
+		status_label.text = LocalizationManager.get_text("ui.debug_tools.force_disabled")
+		return
+
+	var result_variant: Variant = run_controller.call("debug_force_defeat")
+	var succeeded: bool = bool(result_variant)
+
+	if succeeded:
+		status_label.text = LocalizationManager.get_text("ui.debug_tools.force_defeat_done")
+	else:
+		status_label.text = LocalizationManager.get_text("ui.debug_tools.force_disabled")
+
+	_refresh_panel()
+
+func _on_reset_progress_pressed() -> void:
+	if not allow_save_reset:
+		return
+
+	reset_confirmation_active = true
+	status_label.text = LocalizationManager.get_text("ui.debug_tools.reset_warning")
+	_set_reset_confirmation_visible(true)
+
+func _on_confirm_reset_pressed() -> void:
+	if not reset_confirmation_active:
+		return
+
+	SaveManager.reset_progression_and_save()
+
+	reset_confirmation_active = false
+	_set_reset_confirmation_visible(false)
+
+	status_label.text = LocalizationManager.get_text("ui.debug_tools.reset_done")
+	_refresh_panel()
+
+func _on_cancel_reset_pressed() -> void:
+	reset_confirmation_active = false
+	_set_reset_confirmation_visible(false)
+
+	status_label.text = LocalizationManager.get_text("ui.debug_tools.reset_cancelled")
+
+func _set_reset_confirmation_visible(is_visible: bool) -> void:
+	confirmation_row.visible = is_visible
+	reset_progress_button.disabled = is_visible or not allow_save_reset
+
+func _on_save_updated(_save_data: SaveData) -> void:
+	_refresh_panel()
+
+func _on_run_finished(_result_payload: RunResultPayload) -> void:
+	_refresh_panel()
+
+func _get_run_controller() -> Node:
+	var run_controllers: Array[Node] = get_tree().get_nodes_in_group("run_controller")
+
+	if run_controllers.is_empty():
+		return null
+
+	return run_controllers[0]
+
+func _format_completed_maps(completed_maps: Array) -> String:
+	if completed_maps.is_empty():
+		return LocalizationManager.get_text("ui.debug_tools.none")
+
+	var map_names: Array[String] = []
+
+	for map_id_variant: Variant in completed_maps:
+		map_names.append(str(map_id_variant))
+
+	return ", ".join(map_names)
+
+
+SCRIPT: res://ui/feedback/RunFeedbackLayer.gd
+--------------------------------------------------------------------------------------------------------------
+extends CanvasLayer
+
+@export var message_lifetime_seconds: float = 1.2
+@export var max_messages: int = 5
+
+@export var show_damage_feedback: bool = true
+@export var show_coin_feedback: bool = true
+@export var show_level_up_feedback: bool = true
+@export var show_result_feedback: bool = true
+
+@onready var message_container: VBoxContainer = $MarginContainer/MessageContainer
+
+var active_messages: Array[Label] = []
+
+func _ready() -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS
+	_connect_events()
+
+	GameEvents.emit_debug("[RunFeedbackLayer] Feedback layer inicializada.")
+
+func _connect_events() -> void:
+	if not GameEvents.player_damaged.is_connected(_on_player_damaged):
+		GameEvents.player_damaged.connect(_on_player_damaged)
+
+	if not GameEvents.run_coin_collected.is_connected(_on_run_coin_collected):
+		GameEvents.run_coin_collected.connect(_on_run_coin_collected)
+
+	if not GameEvents.run_level_up_started.is_connected(_on_run_level_up_started):
+		GameEvents.run_level_up_started.connect(_on_run_level_up_started)
+
+	if not GameEvents.run_finished.is_connected(_on_run_finished):
+		GameEvents.run_finished.connect(_on_run_finished)
+
+func show_feedback(message: String) -> void:
+	if message.strip_edges() == "":
+		return
+
+	if message_container == null:
+		return
+
+	var label: Label = Label.new()
+	label.text = message
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+
+	message_container.add_child(label)
+	active_messages.append(label)
+
+	while active_messages.size() > max_messages:
+		var old_label: Label = active_messages.pop_front()
+
+		if old_label != null and is_instance_valid(old_label):
+			old_label.queue_free()
+
+	var timer: SceneTreeTimer = get_tree().create_timer(message_lifetime_seconds)
+
+	timer.timeout.connect(func() -> void:
+		_remove_message(label)
+	)
+
+func _remove_message(label: Label) -> void:
+	if label == null:
+		return
+
+	if active_messages.has(label):
+		active_messages.erase(label)
+
+	if is_instance_valid(label):
+		label.queue_free()
+
+func _on_player_damaged(
+	_raw_damage: int,
+	final_damage: int,
+	_current_hp: int,
+	_max_hp: int,
+	_source_id: String
+) -> void:
+	if not show_damage_feedback:
+		return
+
+	show_feedback("%s: -%s" % [
+		LocalizationManager.get_text("ui.feedback.damage_taken"),
+		str(final_damage)
+	])
+
+func _on_run_coin_collected(value: int, _global_position: Vector2) -> void:
+	if not show_coin_feedback:
+		return
+
+	show_feedback("%s: +%s" % [
+		LocalizationManager.get_text("ui.feedback.coin_collected"),
+		str(value)
+	])
+
+func _on_run_level_up_started(current_level: int, _options: Array) -> void:
+	if not show_level_up_feedback:
+		return
+
+	show_feedback("%s %s" % [
+		LocalizationManager.get_text("ui.feedback.level_up"),
+		str(current_level)
+	])
+
+func _on_run_finished(result_payload: RunResultPayload) -> void:
+	if not show_result_feedback:
+		return
+
+	if result_payload == null:
+		return
+
+	if result_payload.victory:
+		show_feedback(LocalizationManager.get_text("ui.feedback.victory"))
+	else:
+		show_feedback(LocalizationManager.get_text("ui.feedback.defeat"))
+
+
+SCRIPT: res://ui/hud/RunHud.gd
+--------------------------------------------------------------------------------------------------------------
+extends CanvasLayer
+
+@export_group("Visibility")
+@export var show_hp: bool = true
+@export var show_xp: bool = true
+@export var show_timer: bool = true
+@export var show_coins: bool = true
+@export var show_level: bool = true
+@export var show_kills: bool = true
+@export var show_message: bool = true
+
+@export_group("Behavior")
+@export var update_interval_seconds: float = 0.10
+@export var show_remaining_time: bool = true
+@export var hide_when_result_panel_opens: bool = false
+
+@export_group("Node Paths")
+@export var hp_box_path: NodePath
+@export var hp_label_path: NodePath
+@export var hp_bar_path: NodePath
+
+@export var xp_box_path: NodePath
+@export var xp_label_path: NodePath
+@export var xp_bar_path: NodePath
+
+@export var timer_label_path: NodePath
+@export var coins_label_path: NodePath
+@export var level_label_path: NodePath
+@export var kills_label_path: NodePath
+@export var message_label_path: NodePath
+
+@export var cooldown_box_path: NodePath
+@export var cooldown_label_path: NodePath
+@export var cooldown_bar_path: NodePath
+
+@export var show_cooldown: bool = true
+
+@onready var hp_box: Control = get_node_or_null(hp_box_path) as Control
+@onready var hp_label: Label = get_node_or_null(hp_label_path) as Label
+@onready var hp_bar: ProgressBar = get_node_or_null(hp_bar_path) as ProgressBar
+
+@onready var xp_box: Control = get_node_or_null(xp_box_path) as Control
+@onready var xp_label: Label = get_node_or_null(xp_label_path) as Label
+@onready var xp_bar: ProgressBar = get_node_or_null(xp_bar_path) as ProgressBar
+
+@onready var cooldown_box: Control = get_node_or_null(cooldown_box_path) as Control
+@onready var cooldown_label: Label = get_node_or_null(cooldown_label_path) as Label
+@onready var cooldown_bar: ProgressBar = get_node_or_null(cooldown_bar_path) as ProgressBar
+
+@onready var timer_label: Label = get_node_or_null(timer_label_path) as Label
+@onready var coins_label: Label = get_node_or_null(coins_label_path) as Label
+@onready var level_label: Label = get_node_or_null(level_label_path) as Label
+@onready var kills_label: Label = get_node_or_null(kills_label_path) as Label
+@onready var message_label: Label = get_node_or_null(message_label_path) as Label
+
+var refresh_timer: float = 0.0
+var latest_result_type: String = ""
+
+var latest_weapon_id: String = ""
+var latest_cooldown_timer: float = 0.0
+var latest_cooldown_seconds: float = 1.0
+var latest_cooldown_progress_ratio: float = 1.0
+
+func _ready() -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS
+
+	_resolve_missing_nodes()
+	_apply_visibility()
+	_configure_bars()
+	_connect_events()
+	_refresh_all()
+
+	GameEvents.emit_debug("[RunHud] HUD inicializada.")
+
+func _process(delta: float) -> void:
+	refresh_timer += delta
+
+	if refresh_timer < update_interval_seconds:
+		return
+
+	refresh_timer = 0.0
+	_refresh_all()
+
+func _connect_events() -> void:
+	if not GameEvents.player_damaged.is_connected(_on_player_damaged):
+		GameEvents.player_damaged.connect(_on_player_damaged)
+
+	if not GameEvents.player_died.is_connected(_on_player_died):
+		GameEvents.player_died.connect(_on_player_died)
+
+	if not GameEvents.run_xp_changed.is_connected(_on_run_xp_changed):
+		GameEvents.run_xp_changed.connect(_on_run_xp_changed)
+
+	if not GameEvents.run_enemy_killed.is_connected(_on_run_enemy_killed):
+		GameEvents.run_enemy_killed.connect(_on_run_enemy_killed)
+
+	if not GameEvents.run_coins_changed.is_connected(_on_run_coins_changed):
+		GameEvents.run_coins_changed.connect(_on_run_coins_changed)
+
+	if not GameEvents.run_timer_changed.is_connected(_on_run_timer_changed):
+		GameEvents.run_timer_changed.connect(_on_run_timer_changed)
+
+	if not GameEvents.run_finished.is_connected(_on_run_finished):
+		GameEvents.run_finished.connect(_on_run_finished)
+	
+	if not GameEvents.weapon_cooldown_changed.is_connected(_on_weapon_cooldown_changed):
+		GameEvents.weapon_cooldown_changed.connect(_on_weapon_cooldown_changed)
+
+func _refresh_all() -> void:
+	_apply_visibility()
+
+	var player_data: Dictionary = _get_player_debug_data()
+	var run_data: Dictionary = _get_run_debug_data()
+
+	_update_hp(player_data)
+	_update_xp(run_data)
+	_update_timer(run_data)
+	_update_coins(run_data)
+	_update_level(run_data)
+	_update_kills(run_data)
+	_update_cooldown()
+	_update_message(run_data)
+
+func _update_cooldown() -> void:
+	if not show_cooldown:
+		return
+
+	var safe_cooldown_seconds: float = max(0.001, latest_cooldown_seconds)
+	var cooldown_percent: float = clamp(latest_cooldown_progress_ratio, 0.0, 1.0) * 100.0
+
+	if cooldown_label != null:
+		if latest_cooldown_timer <= 0.0:
+			cooldown_label.text = "%s: %s" % [
+				LocalizationManager.get_text("ui.hud.attack"),
+				LocalizationManager.get_text("ui.hud.attack_ready")
+			]
+		else:
+			cooldown_label.text = "%s: %.1fs" % [
+				LocalizationManager.get_text("ui.hud.attack"),
+				latest_cooldown_timer
+			]
+
+	if cooldown_bar != null:
+		cooldown_bar.max_value = 100.0
+		cooldown_bar.value = cooldown_percent
+
+func _update_hp(player_data: Dictionary) -> void:
+	if not show_hp:
+		return
+
+	var current_hp: int = int(player_data.get("current_hp", 0))
+	var max_hp: int = int(player_data.get("max_hp", 1))
+
+	max_hp = max(1, max_hp)
+
+	if hp_label != null:
+		hp_label.text = "%s: %s / %s" % [
+			LocalizationManager.get_text("ui.hud.hp"),
+			str(current_hp),
+			str(max_hp)
+		]
+
+	if hp_bar != null:
+		hp_bar.max_value = max_hp
+		hp_bar.value = clamp(current_hp, 0, max_hp)
+
+func _update_xp(run_data: Dictionary) -> void:
+	if not show_xp:
+		return
+
+	var current_level_xp: int = int(run_data.get("current_level_xp", 0))
+	var required_xp: int = int(run_data.get("xp_required_for_next_level", 1))
+
+	required_xp = max(1, required_xp)
+
+	if xp_label != null:
+		xp_label.text = "%s: %s / %s" % [
+			LocalizationManager.get_text("ui.hud.xp"),
+			str(current_level_xp),
+			str(required_xp)
+		]
+
+	if xp_bar != null:
+		xp_bar.max_value = required_xp
+		xp_bar.value = clamp(current_level_xp, 0, required_xp)
+
+func _update_timer(run_data: Dictionary) -> void:
+	if not show_timer:
+		return
+
+	var elapsed_seconds: float = float(run_data.get("elapsed_seconds", 0.0))
+	var remaining_seconds: float = float(run_data.get("remaining_seconds", 0.0))
+
+	var selected_time: float = remaining_seconds if show_remaining_time else elapsed_seconds
+
+	if timer_label != null:
+		timer_label.text = "%s: %s" % [
+			LocalizationManager.get_text("ui.hud.timer"),
+			_format_seconds(selected_time)
+		]
+
+func _update_coins(run_data: Dictionary) -> void:
+	if not show_coins:
+		return
+
+	var coins: int = int(run_data.get("run_coins_collected", 0))
+
+	if coins_label != null:
+		coins_label.text = "%s: %s" % [
+			LocalizationManager.get_text("ui.hud.coins"),
+			str(coins)
+		]
+
+func _update_level(run_data: Dictionary) -> void:
+	if not show_level:
+		return
+
+	var level: int = int(run_data.get("current_level", 1))
+
+	if level_label != null:
+		level_label.text = "%s: %s" % [
+			LocalizationManager.get_text("ui.hud.level"),
+			str(level)
+		]
+
+func _update_kills(run_data: Dictionary) -> void:
+	if not show_kills:
+		return
+
+	var kills: int = int(run_data.get("enemies_killed", 0))
+
+	if kills_label != null:
+		kills_label.text = "%s: %s" % [
+			LocalizationManager.get_text("ui.hud.kills"),
+			str(kills)
+		]
+
+func _update_message(run_data: Dictionary) -> void:
+	if not show_message:
+		return
+
+	if message_label == null:
+		return
+
+	var is_finished: bool = bool(run_data.get("is_finished", false))
+	var is_victory: bool = bool(run_data.get("is_victory", false))
+	var is_defeat: bool = bool(run_data.get("is_defeat", false))
+
+	if is_finished:
+		if is_victory:
+			message_label.text = LocalizationManager.get_text("ui.hud.victory")
+		elif is_defeat:
+			message_label.text = LocalizationManager.get_text("ui.hud.defeat")
+		else:
+			message_label.text = latest_result_type
+	else:
+		message_label.text = LocalizationManager.get_text("ui.hud.run_active")
+
+func _apply_visibility() -> void:
+	if hp_box != null:
+		hp_box.visible = show_hp
+
+	if xp_box != null:
+		xp_box.visible = show_xp
+
+	if timer_label != null:
+		timer_label.visible = show_timer
+
+	if coins_label != null:
+		coins_label.visible = show_coins
+
+	if level_label != null:
+		level_label.visible = show_level
+
+	if kills_label != null:
+		kills_label.visible = show_kills
+
+	if message_label != null:
+		message_label.visible = show_message
+	
+	if cooldown_box != null:
+		cooldown_box.visible = show_cooldown
+
+func _configure_bars() -> void:
+	if hp_bar != null:
+		hp_bar.min_value = 0
+		hp_bar.max_value = 100
+		hp_bar.value = 100
+		hp_bar.show_percentage = false
+
+	if xp_bar != null:
+		xp_bar.min_value = 0
+		xp_bar.max_value = 10
+		xp_bar.value = 0
+		xp_bar.show_percentage = false
+	
+	if cooldown_bar != null:
+		cooldown_bar.min_value = 0
+		cooldown_bar.max_value = 100
+		cooldown_bar.value = 100
+		cooldown_bar.show_percentage = false
+
+func _resolve_missing_nodes() -> void:
+	if hp_box == null:
+		hp_box = get_node_or_null("MarginContainer/VBoxContainer/TopRow/HpBox") as Control
+
+	if hp_label == null:
+		hp_label = get_node_or_null("MarginContainer/VBoxContainer/TopRow/HpBox/HpLabel") as Label
+
+	if hp_bar == null:
+		hp_bar = get_node_or_null("MarginContainer/VBoxContainer/TopRow/HpBox/HpBar") as ProgressBar
+
+	if xp_box == null:
+		xp_box = get_node_or_null("MarginContainer/VBoxContainer/TopRow/XpBox") as Control
+
+	if xp_label == null:
+		xp_label = get_node_or_null("MarginContainer/VBoxContainer/TopRow/XpBox/XpLabel") as Label
+
+	if xp_bar == null:
+		xp_bar = get_node_or_null("MarginContainer/VBoxContainer/TopRow/XpBox/XpBar") as ProgressBar
+
+	if timer_label == null:
+		timer_label = get_node_or_null("MarginContainer/VBoxContainer/TopRow/TimerLabel") as Label
+
+	if coins_label == null:
+		coins_label = get_node_or_null("MarginContainer/VBoxContainer/TopRow/CoinsLabel") as Label
+
+	if level_label == null:
+		level_label = get_node_or_null("MarginContainer/VBoxContainer/TopRow/LevelLabel") as Label
+
+	if kills_label == null:
+		kills_label = get_node_or_null("MarginContainer/VBoxContainer/TopRow/KillsLabel") as Label
+
+	if message_label == null:
+		message_label = get_node_or_null("MarginContainer/VBoxContainer/MessageLabel") as Label
+	
+	if cooldown_box == null:
+		cooldown_box = get_node_or_null("MarginContainer/VBoxContainer/TopRow/CooldownBox") as Control
+
+	if cooldown_label == null:
+		cooldown_label = get_node_or_null("MarginContainer/VBoxContainer/TopRow/CooldownBox/CooldownLabel") as Label
+
+	if cooldown_bar == null:
+		cooldown_bar = get_node_or_null("MarginContainer/VBoxContainer/TopRow/CooldownBox/CooldownBar") as ProgressBar
+
+func _get_player_debug_data() -> Dictionary:
+	var players: Array[Node] = get_tree().get_nodes_in_group("player")
+
+	if players.is_empty():
+		return {}
+
+	var player: Node = players[0]
+
+	if player == null:
+		return {}
+
+	if not player.has_method("get_debug_data"):
+		return {}
+
+	var debug_data_variant: Variant = player.call("get_debug_data")
+
+	if debug_data_variant is Dictionary:
+		return debug_data_variant as Dictionary
+
+	return {}
+
+func _get_run_debug_data() -> Dictionary:
+	var run_controllers: Array[Node] = get_tree().get_nodes_in_group("run_controller")
+
+	if run_controllers.is_empty():
+		return {}
+
+	var run_controller: Node = run_controllers[0]
+
+	if run_controller == null:
+		return {}
+
+	if not run_controller.has_method("get_debug_data"):
+		return {}
+
+	var debug_data_variant: Variant = run_controller.call("get_debug_data")
+
+	if debug_data_variant is Dictionary:
+		return debug_data_variant as Dictionary
+
+	return {}
+
+func _format_seconds(seconds: float) -> String:
+	var total_seconds: int = int(floor(max(0.0, seconds)))
+	var minutes: int = total_seconds / 60
+	var remaining_seconds: int = total_seconds % 60
+
+	return "%02d:%02d" % [minutes, remaining_seconds]
+
+func _on_player_damaged(
+	_raw_damage: int,
+	_final_damage: int,
+	_current_hp: int,
+	_max_hp: int,
+	_source_id: String
+) -> void:
+	_refresh_all()
+
+func _on_player_died(_source_id: String) -> void:
+	_refresh_all()
+
+func _on_run_xp_changed(
+	_run_xp_gained: int,
+	_current_level: int,
+	_current_level_xp: int,
+	_xp_required_for_next_level: int
+) -> void:
+	_refresh_all()
+
+func _on_run_enemy_killed(_enemy_id: String, _enemies_killed: int) -> void:
+	_refresh_all()
+
+func _on_run_coins_changed(_run_coins_collected: int, _run_coins_available: int) -> void:
+	_refresh_all()
+
+func _on_run_timer_changed(
+	_elapsed_seconds: float,
+	_remaining_seconds: float,
+	_duration_seconds: float
+) -> void:
+	_refresh_all()
+
+func _on_run_finished(result_payload: RunResultPayload) -> void:
+	if result_payload == null:
+		return
+
+	latest_result_type = result_payload.result_type
+
+	if hide_when_result_panel_opens:
+		visible = false
+	else:
+		_refresh_all()
+
+func _on_weapon_cooldown_changed(
+	weapon_id: String,
+	cooldown_timer: float,
+	cooldown_seconds: float,
+	progress_ratio: float
+) -> void:
+	latest_weapon_id = weapon_id
+	latest_cooldown_timer = cooldown_timer
+	latest_cooldown_seconds = cooldown_seconds
+	latest_cooldown_progress_ratio = progress_ratio
+
+	_update_cooldown()
+
+
+SCRIPT: res://ui/level_up/LevelUpPanel.gd
+--------------------------------------------------------------------------------------------------------------
+extends CanvasLayer
+
+const DEFAULT_ICON_PATH: String = "res://assets/placeholders/upgrades/upgrade_default.png"
+
+@export_group("Layout")
+@export var center_panel_by_script: bool = true
+@export var panel_size: Vector2 = Vector2(980.0, 460.0)
+@export var panel_top_offset: float = 0.0
+
+@export_group("Icons")
+@export var default_icon: Texture2D
+@export var hide_icon_when_missing: bool = false
+
+@onready var panel: Panel = $Panel
+@onready var title_label: Label = $Panel/MarginContainer/VBoxContainer/TitleLabel
+@onready var subtitle_label: Label = $Panel/MarginContainer/VBoxContainer/SubtitleLabel
+
+@onready var option_card_1: Button = $Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard1
+@onready var option_card_2: Button = $Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard2
+@onready var option_card_3: Button = $Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard3
+
+var current_options: Array[UpgradeDefinition] = []
+var cached_default_icon: Texture2D = null
+
+func _ready() -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS
+	visible = false
+
+	_load_default_icon_if_needed()
+	_configure_layout()
+	_connect_buttons()
+
+	if not get_viewport().size_changed.is_connected(_on_viewport_size_changed):
+		get_viewport().size_changed.connect(_on_viewport_size_changed)
+
+	if not GameEvents.run_level_up_started.is_connected(_on_run_level_up_started):
+		GameEvents.run_level_up_started.connect(_on_run_level_up_started)
+
+	if not GameEvents.run_level_up_completed.is_connected(_on_run_level_up_completed):
+		GameEvents.run_level_up_completed.connect(_on_run_level_up_completed)
+
+func _connect_buttons() -> void:
+	if option_card_1 != null and not option_card_1.pressed.is_connected(_on_option_1_pressed):
+		option_card_1.pressed.connect(_on_option_1_pressed)
+
+	if option_card_2 != null and not option_card_2.pressed.is_connected(_on_option_2_pressed):
+		option_card_2.pressed.connect(_on_option_2_pressed)
+
+	if option_card_3 != null and not option_card_3.pressed.is_connected(_on_option_3_pressed):
+		option_card_3.pressed.connect(_on_option_3_pressed)
+
+func _on_viewport_size_changed() -> void:
+	_configure_layout()
+
+func _configure_layout() -> void:
+	if panel == null:
+		return
+
+	if not center_panel_by_script:
+		return
+
+	var viewport_size: Vector2 = get_viewport().get_visible_rect().size
+
+	panel.size = panel_size
+	panel.custom_minimum_size = panel_size
+	panel.position = Vector2(
+		(viewport_size.x - panel_size.x) * 0.5,
+		((viewport_size.y - panel_size.y) * 0.5) + panel_top_offset
+	)
+
+func _on_run_level_up_started(current_level: int, options: Array) -> void:
+	current_options.clear()
+
+	for option_variant: Variant in options:
+		if option_variant is UpgradeDefinition:
+			current_options.append(option_variant as UpgradeDefinition)
+
+	visible = true
+	_configure_layout()
+
+	title_label.text = "%s %s" % [
+		LocalizationManager.get_text("ui.level_up.title"),
+		str(current_level)
+	]
+
+	subtitle_label.text = LocalizationManager.get_text("ui.level_up.subtitle")
+
+	_apply_option_to_card(option_card_1, 0)
+	_apply_option_to_card(option_card_2, 1)
+	_apply_option_to_card(option_card_3, 2)
+
+	GameEvents.emit_debug("[LevelUpPanel] Aberto com %s opções." % str(current_options.size()))
+
+func _on_run_level_up_completed(_current_level: int, _selected_upgrade_id: String) -> void:
+	visible = false
+	current_options.clear()
+
+func _apply_option_to_card(card: Button, option_index: int) -> void:
+	if card == null:
+		return
+
+	card.text = ""
+
+	if option_index >= current_options.size():
+		card.disabled = true
+		_set_card_text(card, LocalizationManager.get_text("ui.level_up.option_missing"), "", "")
+		_set_card_icon(card, null)
+		return
+
+	var upgrade: UpgradeDefinition = current_options[option_index]
+
+	card.disabled = false
+
+	var upgrade_name: String = LocalizationManager.get_text(upgrade.display_name_key)
+	var upgrade_description: String = LocalizationManager.get_text(upgrade.description_key)
+	var badge_text: String = _get_badge_text(upgrade)
+
+	_set_card_text(card, upgrade_name, upgrade_description, badge_text)
+	_set_card_icon(card, upgrade.icon)
+
+func _set_card_text(card: Button, upgrade_name: String, description: String, badge: String) -> void:
+	var name_label: Label = _find_label(card, "NameLabel")
+	var description_label: Label = _find_label(card, "DescriptionLabel")
+	var badge_label: Label = _find_label(card, "BadgeLabel")
+
+	if name_label != null:
+		name_label.text = upgrade_name
+
+	if description_label != null:
+		description_label.text = description
+
+	if badge_label != null:
+		badge_label.text = badge
+
+func _set_card_icon(card: Button, texture: Texture2D) -> void:
+	var icon_texture: TextureRect = _find_texture_rect(card, "IconTexture")
+
+	if icon_texture == null:
+		GameEvents.emit_debug("[LevelUpPanel] IconTexture não encontrado no card: %s" % card.name)
+		return
+
+	var final_texture: Texture2D = texture
+
+	if final_texture == null:
+		final_texture = _get_default_icon()
+
+	if final_texture == null:
+		icon_texture.visible = not hide_icon_when_missing
+		return
+
+	icon_texture.visible = true
+	icon_texture.texture = final_texture
+	icon_texture.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	icon_texture.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	icon_texture.custom_minimum_size = Vector2(56.0, 56.0)
+
+func _get_default_icon() -> Texture2D:
+	if default_icon != null:
+		return default_icon
+
+	if cached_default_icon != null:
+		return cached_default_icon
+
+	if ResourceLoader.exists(DEFAULT_ICON_PATH):
+		var loaded_resource: Resource = load(DEFAULT_ICON_PATH)
+
+		if loaded_resource is Texture2D:
+			cached_default_icon = loaded_resource as Texture2D
+			return cached_default_icon
+
+	return null
+
+func _load_default_icon_if_needed() -> void:
+	if default_icon != null:
+		return
+
+	if ResourceLoader.exists(DEFAULT_ICON_PATH):
+		var loaded_resource: Resource = load(DEFAULT_ICON_PATH)
+
+		if loaded_resource is Texture2D:
+			cached_default_icon = loaded_resource as Texture2D
+
+func _get_badge_text(upgrade: UpgradeDefinition) -> String:
+	if upgrade == null:
+		return ""
+
+	if not upgrade.show_level_badge:
+		return ""
+
+	var next_level: int = _get_next_upgrade_level(upgrade.id)
+
+	return "%s %s" % [
+		LocalizationManager.get_text("ui.level_up.badge_level"),
+		str(next_level)
+	]
+
+func _get_next_upgrade_level(upgrade_id: String) -> int:
+	var run_controller: Node = _get_run_controller()
+
+	if run_controller == null:
+		return 1
+
+	if not run_controller.has_method("get_next_upgrade_level"):
+		return 1
+
+	var level_variant: Variant = run_controller.call("get_next_upgrade_level", upgrade_id)
+
+	if level_variant is int:
+		return int(level_variant)
+
+	return 1
+
+func _get_run_controller() -> Node:
+	var nodes: Array[Node] = get_tree().get_nodes_in_group("run_controller")
+
+	if nodes.is_empty():
+		return null
+
+	return nodes[0]
+
+func _select_option(index: int) -> void:
+	if index < 0 or index >= current_options.size():
+		return
+
+	var upgrade: UpgradeDefinition = current_options[index]
+
+	if upgrade == null:
+		return
+
+	GameEvents.emit_debug("[LevelUpPanel] Upgrade selecionado: %s" % upgrade.id)
+	GameEvents.run_level_up_option_selected.emit(upgrade)
+
+func _find_label(root: Node, node_name: String) -> Label:
+	var found_node: Node = root.find_child(node_name, true, false)
+
+	if found_node is Label:
+		return found_node as Label
+
+	return null
+
+func _find_texture_rect(root: Node, node_name: String) -> TextureRect:
+	var found_node: Node = root.find_child(node_name, true, false)
+
+	if found_node is TextureRect:
+		return found_node as TextureRect
+
+	return null
+
+func _on_option_1_pressed() -> void:
+	_select_option(0)
+
+func _on_option_2_pressed() -> void:
+	_select_option(1)
+
+func _on_option_3_pressed() -> void:
+	_select_option(2)
+
+
+SCRIPT: res://ui/result/ResultPanel.gd
+--------------------------------------------------------------------------------------------------------------
+extends CanvasLayer
+
+@onready var panel: Panel = $Panel
+@onready var title_label: Label = $Panel/MarginContainer/VBoxContainer/TitleLabel
+@onready var result_type_label: Label = $Panel/MarginContainer/VBoxContainer/ResultTypeLabel
+@onready var summary_label: Label = $Panel/MarginContainer/VBoxContainer/SummaryLabel
+@onready var save_status_label: Label = $Panel/MarginContainer/VBoxContainer/SaveStatusLabel
+@onready var hint_label: Label = $Panel/MarginContainer/VBoxContainer/HintLabel
+@onready var restart_button: Button = $Panel/MarginContainer/VBoxContainer/RestartButton
+
+var latest_result_payload: RunResultPayload = null
+
+func _ready() -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS
+	visible = false
+
+	if restart_button != null:
+		restart_button.process_mode = Node.PROCESS_MODE_ALWAYS
+
+		if not restart_button.pressed.is_connected(_on_restart_button_pressed):
+			restart_button.pressed.connect(_on_restart_button_pressed)
+
+	if not GameEvents.run_finished.is_connected(_on_run_finished):
+		GameEvents.run_finished.connect(_on_run_finished)
+
+	if not GameEvents.save_updated.is_connected(_on_save_updated):
+		GameEvents.save_updated.connect(_on_save_updated)
+
+func _on_run_finished(result_payload: RunResultPayload) -> void:
+	if result_payload == null:
+		return
+
+	latest_result_payload = result_payload
+
+	visible = true
+
+	title_label.text = LocalizationManager.get_text("ui.result.title")
+
+	if result_payload.victory:
+		result_type_label.text = LocalizationManager.get_text("ui.result.victory")
+	else:
+		result_type_label.text = LocalizationManager.get_text("ui.result.defeat")
+
+	summary_label.text = _build_summary_text(result_payload)
+
+	if save_status_label != null:
+		save_status_label.text = "Salvando resultado..."
+
+	hint_label.text = LocalizationManager.get_text("ui.result.close_hint")
+
+	if restart_button != null:
+		restart_button.text = LocalizationManager.get_text("ui.result.restart")
+		restart_button.disabled = false
+
+	GameEvents.emit_debug("[ResultPanel] Resultado exibido: %s" % result_payload.result_type)
+
+func _on_save_updated(_save_data: SaveData) -> void:
+	if not visible:
+		return
+
+	if save_status_label != null:
+		save_status_label.text = LocalizationManager.get_text("ui.result.save_applied")
+
+func _on_restart_button_pressed() -> void:
+	GameEvents.emit_debug("[ResultPanel] Reinício solicitado pelo jogador.")
+
+	GameEvents.run_restart_requested.emit()
+
+	get_tree().paused = false
+	get_tree().reload_current_scene()
+
+func _build_summary_text(payload: RunResultPayload) -> String:
+	var lines: Array[String] = []
+
+	lines.append("%s: %s" % [
+		LocalizationManager.get_text("ui.result.map"),
+		payload.map_id
+	])
+
+	lines.append("%s: %s" % [
+		LocalizationManager.get_text("ui.result.queen"),
+		payload.queen_id
+	])
+
+	lines.append("%s: %s" % [
+		LocalizationManager.get_text("ui.result.time_survived"),
+		_format_seconds(payload.survived_seconds)
+	])
+
+	lines.append("%s: %s" % [
+		LocalizationManager.get_text("ui.result.coins_collected"),
+		str(payload.run_coins_collected)
+	])
+
+	if payload.victory:
+		lines.append("Multiplicador: x%s" % str(payload.victory_multiplier))
+		lines.append("Bônus: %s" % str(payload.victory_bonus))
+
+	lines.append("%s: %s" % [
+		LocalizationManager.get_text("ui.result.final_money"),
+		str(payload.final_money_reward)
+	])
+
+	lines.append("%s: %s" % [
+		LocalizationManager.get_text("ui.result.xp_gained"),
+		str(payload.run_xp_gained)
+	])
+
+	lines.append("%s: %s" % [
+		LocalizationManager.get_text("ui.result.enemies_killed"),
+		str(payload.enemies_killed)
+	])
+
+	lines.append("%s: %s" % [
+		LocalizationManager.get_text("ui.result.level_reached"),
+		str(payload.level_reached)
+	])
+
+	lines.append("Dano causado: %s" % str(payload.damage_dealt))
+	lines.append("Dano recebido: %s" % str(payload.damage_taken))
+
+	if payload.defeat:
+		lines.append("%s: %s" % [
+			LocalizationManager.get_text("ui.result.death_cause"),
+			payload.death_cause
+		])
+
+	return "\n".join(lines)
+
+func _format_seconds(seconds: float) -> String:
+	var total_seconds: int = int(floor(seconds))
+	var minutes: int = total_seconds / 60
+	var remaining_seconds: int = total_seconds % 60
+
+	return "%02d:%02d" % [minutes, remaining_seconds]
+
+
+SCRIPT: res://ui/world_feedback/FloatingCombatText.gd
+--------------------------------------------------------------------------------------------------------------
+extends Label
+class_name FloatingCombatText
+
+@export_group("Animation")
+@export var total_lifetime_seconds: float = 1.00
+@export var grow_seconds: float = 0.20
+@export var rise_distance: float = 112.0
+
+@export var start_scale: Vector2 = Vector2(0.78, 0.78)
+@export var peak_scale: Vector2 = Vector2(1.85, 1.85)
+@export var end_scale: Vector2 = Vector2(0.52, 0.52)
+
+@export_group("Text Style")
+@export var font_size: int = 52
+@export var outline_size: int = 6
+@export var outline_color: Color = Color(0.0, 0.0, 0.0, 0.92)
+
+var animation_started: bool = false
+
+func _ready() -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS
+
+	visible = true
+	mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	custom_minimum_size = Vector2(200.0, 90.0)
+	size = custom_minimum_size
+
+	horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+
+	add_theme_font_size_override("font_size", font_size)
+	add_theme_color_override("font_outline_color", outline_color)
+	add_theme_constant_override("outline_size", outline_size)
+
+	scale = start_scale
+	self_modulate = Color.WHITE
+	pivot_offset = size * 0.5
+
+func setup(display_text: String, text_color: Color) -> void:
+	text = display_text
+	visible = true
+
+	add_theme_color_override("font_color", text_color)
+
+	self_modulate = Color.WHITE
+	scale = start_scale
+	pivot_offset = size * 0.5
+
+	if animation_started:
+		return
+
+	animation_started = true
+	call_deferred("_play_animation")
+
+func _play_animation() -> void:
+	var destination: Vector2 = position + Vector2(0.0, -rise_distance)
+	var shrink_seconds: float = max(0.05, total_lifetime_seconds - grow_seconds)
+	var fade_delay: float = grow_seconds * 0.70
+	var fade_seconds: float = max(0.05, total_lifetime_seconds - fade_delay)
+
+	var movement_tween: Tween = create_tween()
+	movement_tween.bind_node(self)
+	movement_tween.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+	movement_tween.tween_property(self, "position", destination, total_lifetime_seconds).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+
+	var scale_tween: Tween = create_tween()
+	scale_tween.bind_node(self)
+	scale_tween.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+	scale_tween.tween_property(self, "scale", peak_scale, grow_seconds).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	scale_tween.tween_property(self, "scale", end_scale, shrink_seconds).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+
+	var fade_tween: Tween = create_tween()
+	fade_tween.bind_node(self)
+	fade_tween.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+	fade_tween.tween_property(self, "self_modulate:a", 0.0, fade_seconds).set_delay(fade_delay)
+
+	fade_tween.finished.connect(func() -> void:
+		queue_free()
+	)
+
+
+SCRIPT: res://ui/world_feedback/WorldFeedbackController.gd
+--------------------------------------------------------------------------------------------------------------
+extends Node
+
+@export_file("*.tscn") var floating_text_scene_path: String = "res://ui/world_feedback/FloatingCombatText.tscn"
+
+@export var player_group_name: String = "player"
+
+# Offset em coordenada de mundo antes de converter para tela.
+# Ajuste esse valor conforme a altura visual da Gaia.
+@export var player_damage_world_offset: Vector2 = Vector2(0.0, -230.0)
+
+# Ajuste final em pixels de tela.
+@export var player_damage_screen_offset: Vector2 = Vector2(-90.0, -40.0)
+
+@export var damage_color: Color = Color(1.0, 0.05, 0.05, 1.0)
+
+@export var debug_feedback: bool = true
+
+var feedback_canvas_layer: CanvasLayer = null
+var feedback_root: Control = null
+
+func _ready() -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS
+
+	_create_feedback_layer()
+
+	if not GameEvents.player_damaged.is_connected(_on_player_damaged):
+		GameEvents.player_damaged.connect(_on_player_damaged)
+
+	GameEvents.emit_debug("[WorldFeedbackController] Inicializado. CanvasLayer=%s Root=%s" % [
+		str(feedback_canvas_layer != null),
+		str(feedback_root != null)
+	])
+
+func _on_player_damaged(
+	_raw_damage: int,
+	final_damage: int,
+	_current_hp: int,
+	_max_hp: int,
+	_source_id: String
+) -> void:
+	if final_damage <= 0:
+		return
+
+	var player_node: Node2D = _get_player()
+
+	if player_node == null:
+		GameEvents.emit_debug("[WorldFeedbackController] Não criou floating damage: player ausente.")
+		return
+
+	var world_position: Vector2 = player_node.global_position + player_damage_world_offset
+
+	spawn_floating_text(
+		"-%s" % str(final_damage),
+		world_position,
+		damage_color
+	)
+
+func spawn_floating_text(text: String, world_position: Vector2, color: Color) -> void:
+	if feedback_root == null:
+		_create_feedback_layer()
+
+	if feedback_root == null:
+		GameEvents.emit_debug("[WorldFeedbackController] Não criou floating damage: feedback_root ausente.")
+		return
+
+	var packed_scene: PackedScene = load(floating_text_scene_path) as PackedScene
+
+	if packed_scene == null:
+		push_warning("[WorldFeedbackController] Não foi possível carregar FloatingCombatText: %s" % floating_text_scene_path)
+		return
+
+	var instance: Node = packed_scene.instantiate()
+
+	if not instance is Control:
+		push_warning("[WorldFeedbackController] FloatingCombatText precisa ter root Control/Label.")
+		instance.queue_free()
+		return
+
+	var text_control: Control = instance as Control
+	feedback_root.add_child(text_control)
+
+	var screen_position: Vector2 = _world_to_screen_position(world_position)
+
+	text_control.position = screen_position + player_damage_screen_offset
+
+	if text_control.has_method("setup"):
+		text_control.call("setup", text, color)
+
+	if debug_feedback:
+		GameEvents.emit_debug("[WorldFeedbackController] Floating damage criado: %s world=%s screen=%s" % [
+			text,
+			str(world_position),
+			str(screen_position)
+		])
+
+func _create_feedback_layer() -> void:
+	if feedback_canvas_layer != null and is_instance_valid(feedback_canvas_layer):
+		return
+
+	feedback_canvas_layer = CanvasLayer.new()
+	feedback_canvas_layer.name = "WorldFeedbackCanvasLayer"
+	feedback_canvas_layer.layer = 40
+	feedback_canvas_layer.process_mode = Node.PROCESS_MODE_ALWAYS
+
+	add_child(feedback_canvas_layer)
+
+	feedback_root = Control.new()
+	feedback_root.name = "WorldFeedbackRoot"
+	feedback_root.set_anchors_preset(Control.PRESET_FULL_RECT)
+	feedback_root.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	feedback_root.process_mode = Node.PROCESS_MODE_ALWAYS
+
+	feedback_canvas_layer.add_child(feedback_root)
+
+func _world_to_screen_position(world_position: Vector2) -> Vector2:
+	var canvas_transform: Transform2D = get_viewport().get_canvas_transform()
+	return canvas_transform * world_position
+
+func _get_player() -> Node2D:
+	var players: Array[Node] = get_tree().get_nodes_in_group(player_group_name)
+
+	for node: Node in players:
+		if node is Node2D:
+			return node as Node2D
+
+	return null
+
+
+SCRIPT: res://visual/characters/gaia/GaiaSpineAdapter.gd
+--------------------------------------------------------------------------------------------------------------
+extends Node
+
+@export var spine_sprite_path: NodePath
+
+@onready var spine_sprite: Node = _resolve_spine_sprite()
+
+var current_animation_name: String = ""
+var is_spine_ready: bool = false
+
+func _ready() -> void:
+	is_spine_ready = spine_sprite != null
+
+	if is_spine_ready:
+		GameEvents.emit_debug("[GaiaSpineAdapter] SpineSprite encontrado: %s" % spine_sprite.name)
+	else:
+		GameEvents.emit_debug("[GaiaSpineAdapter] SpineSprite não configurado ou não encontrado.")
+
+func play_animation(animation_name: String, loop: bool = true) -> void:
+	if not is_spine_ready:
+		GameEvents.emit_debug("[GaiaSpineAdapter] Ignorando animação. SpineSprite ausente: %s" % animation_name)
+		return
+
+	if animation_name.strip_edges() == "":
+		return
+
+	current_animation_name = animation_name
+	GameEvents.spine_animation_requested.emit(animation_name)
+
+	var played: bool = _try_play_with_animation_state(animation_name, loop)
+
+	if played:
+		GameEvents.emit_debug("[GaiaSpineAdapter] Tocando animação: %s | loop=%s" % [animation_name, str(loop)])
+	else:
+		GameEvents.emit_debug("[GaiaSpineAdapter] Não consegui tocar por código ainda. Verificar API do SpineSprite: %s" % animation_name)
+
+func get_current_animation_name() -> String:
+	return current_animation_name
+
+func _resolve_spine_sprite() -> Node:
+	if spine_sprite_path != NodePath():
+		var configured_node: Node = get_node_or_null(spine_sprite_path)
+		if configured_node != null:
+			return configured_node
+
+	var sibling: Node = get_node_or_null("../SpineSprite")
+	if sibling != null:
+		return sibling
+
+	var parent_node: Node = get_parent()
+	if parent_node != null:
+		var found: Node = _find_first_spine_sprite(parent_node)
+		if found != null:
+			return found
+
+	return null
+
+func _find_first_spine_sprite(root: Node) -> Node:
+	if root == null:
+		return null
+
+	if root.get_class() == "SpineSprite":
+		return root
+
+	for child: Node in root.get_children():
+		var found: Node = _find_first_spine_sprite(child)
+		if found != null:
+			return found
+
+	return null
+
+func _try_play_with_animation_state(animation_name: String, loop: bool) -> bool:
+	if spine_sprite == null:
+		return false
+
+	if not spine_sprite.has_method("get_animation_state"):
+		return false
+
+	var animation_state: Variant = spine_sprite.call("get_animation_state")
+
+	if animation_state == null:
+		return false
+
+	if not animation_state is Object:
+		return false
+
+	var animation_state_object: Object = animation_state as Object
+
+	if animation_state_object.has_method("set_animation"):
+		animation_state_object.call("set_animation", animation_name, loop, 0)
+		return true
+
+	return false
+
+
+SCRIPT: res://visual/characters/gaia/GaiaVisualController.gd
+--------------------------------------------------------------------------------------------------------------
+extends Node2D
+
+@export var spine_adapter_path: NodePath
+
+@export var idle_animation_name: String = "Idle1_Pose2"
+@export var blink_idle_animation_name: String = "Blink_Idle_Pose2"
+@export var run_animation_name: String = "Run1_Pose3"
+@export var dash_animation_name: String = "Dash1_Pose3"
+@export var death_animation_name: String = "Die_Pose1"
+@export var ultimate_animation_name: String = "Ultimate1_Pose1"
+
+@export_group("Damage Flash")
+@export var damage_flash_color: Color = Color(1.0, 0.25, 0.25, 1.0)
+@export var damage_flash_duration: float = 0.12
+
+var damage_flash_tween: Tween = null
+var default_modulate: Color = Color.WHITE
+
+@onready var spine_adapter: Node = _resolve_spine_adapter()
+
+var current_animation_name: String = ""
+var last_applied_gameplay_state: String = ""
+
+func _ready() -> void:
+	default_modulate = modulate
+	
+	if spine_adapter == null:
+		GameEvents.emit_debug("[GaiaVisualController] Spine adapter NÃO encontrado.")
+	else:
+		GameEvents.emit_debug("[GaiaVisualController] Spine adapter encontrado: %s" % spine_adapter.name)
+
+	play_idle()
+
+func apply_runtime_state(runtime_state: PlayerRuntimeState) -> void:
+	if runtime_state == null:
+		return
+
+	_update_facing(runtime_state.facing_direction)
+
+	var gameplay_state: String = runtime_state.current_gameplay_state
+	runtime_state.current_visual_state = gameplay_state
+
+	if gameplay_state != last_applied_gameplay_state:
+		last_applied_gameplay_state = gameplay_state
+		GameEvents.emit_debug("[GaiaVisualController] Estado visual aplicado: %s" % gameplay_state)
+
+	match gameplay_state:
+		GameplayStateTypes.IDLE:
+			play_idle()
+		GameplayStateTypes.MOVING:
+			play_run()
+		GameplayStateTypes.DASHING:
+			play_dash()
+		GameplayStateTypes.DEAD:
+			play_death()
+		_:
+			play_idle()
+
+func play_idle() -> void:
+	_play_animation_if_changed(idle_animation_name, true)
+
+func play_run() -> void:
+	_play_animation_if_changed(run_animation_name, true)
+
+func play_dash() -> void:
+	_play_animation_if_changed(dash_animation_name, false)
+
+func play_death() -> void:
+	_play_animation_if_changed(death_animation_name, false)
+
+func play_ultimate_test() -> void:
+	_play_animation_if_changed(ultimate_animation_name, false)
+
+func _play_animation_if_changed(animation_name: String, loop: bool) -> void:
+	if animation_name.strip_edges() == "":
+		return
+
+	if current_animation_name == animation_name:
+		return
+
+	current_animation_name = animation_name
+
+	if spine_adapter != null and spine_adapter.has_method("play_animation"):
+		spine_adapter.call("play_animation", animation_name, loop)
+	else:
+		GameEvents.emit_debug("[GaiaVisualController] Não foi possível tocar animação. Adapter ausente: %s" % animation_name)
+
+	GameEvents.spine_animation_changed.emit(animation_name)
+
+func _update_facing(facing_direction: Vector2) -> void:
+	if abs(facing_direction.x) <= 0.001:
+		return
+
+	if facing_direction.x < 0.0:
+		scale.x = -abs(scale.x)
+	else:
+		scale.x = abs(scale.x)
+
+func _resolve_spine_adapter() -> Node:
+	if spine_adapter_path != NodePath():
+		var configured_adapter: Node = get_node_or_null(spine_adapter_path)
+
+		if configured_adapter != null:
+			return configured_adapter
+
+	var direct_adapter: Node = get_node_or_null("GaiaSpineAdapter")
+
+	if direct_adapter != null:
+		return direct_adapter
+
+	var found_adapter: Node = _find_node_with_method(self, "play_animation")
+
+	if found_adapter != null and found_adapter != self:
+		return found_adapter
+
+	return null
+
+func _find_node_with_method(root: Node, method_name: String) -> Node:
+	if root == null:
+		return null
+
+	if root.has_method(method_name):
+		return root
+
+	for child: Node in root.get_children():
+		var found: Node = _find_node_with_method(child, method_name)
+
+		if found != null:
+			return found
+
+	return null
+
+func play_damage_flash() -> void:
+	if damage_flash_tween != null:
+		damage_flash_tween.kill()
+		damage_flash_tween = null
+
+	modulate = damage_flash_color
+
+	damage_flash_tween = create_tween()
+	damage_flash_tween.tween_property(self, "modulate", default_modulate, damage_flash_duration)
+
+	damage_flash_tween.finished.connect(func() -> void:
+		damage_flash_tween = null
+	)
+
+
+SCRIPT: res://visual/enemies/goblin_warrior/GoblinWarriorSpineAdapter.gd
+--------------------------------------------------------------------------------------------------------------
+extends Node
+
+@export var spine_sprite_path: NodePath
+
+@onready var spine_sprite: Node = _resolve_spine_sprite()
+
+var current_animation_name: String = ""
+var is_spine_ready: bool = false
+
+func _ready() -> void:
+	is_spine_ready = spine_sprite != null
+
+	if is_spine_ready:
+		GameEvents.emit_debug("[GoblinWarriorSpineAdapter] SpineSprite encontrado: %s" % spine_sprite.name)
+	else:
+		GameEvents.emit_debug("[GoblinWarriorSpineAdapter] SpineSprite não configurado ou não encontrado.")
+
+func play_animation(animation_name: String, loop: bool = true) -> void:
+	if not is_spine_ready:
+		GameEvents.emit_debug("[GoblinWarriorSpineAdapter] Ignorando animação. SpineSprite ausente: %s" % animation_name)
+		return
+
+	if animation_name.strip_edges() == "":
+		return
+
+	if current_animation_name == animation_name:
+		return
+
+	current_animation_name = animation_name
+
+	var played: bool = _try_play_with_animation_state(animation_name, loop)
+
+	if played:
+		GameEvents.emit_debug("[GoblinWarriorSpineAdapter] Tocando animação: %s | loop=%s" % [animation_name, str(loop)])
+	else:
+		GameEvents.emit_debug("[GoblinWarriorSpineAdapter] Não consegui tocar por código ainda: %s" % animation_name)
+
+func get_current_animation_name() -> String:
+	return current_animation_name
+
+func _resolve_spine_sprite() -> Node:
+	if spine_sprite_path != NodePath():
+		var configured_node: Node = get_node_or_null(spine_sprite_path)
+
+		if configured_node != null:
+			return configured_node
+
+	var sibling: Node = get_node_or_null("../SpineSprite")
+
+	if sibling != null:
+		return sibling
+
+	var parent_node: Node = get_parent()
+
+	if parent_node != null:
+		var found: Node = _find_first_spine_sprite(parent_node)
+
+		if found != null:
+			return found
+
+	return null
+
+func _find_first_spine_sprite(root: Node) -> Node:
+	if root == null:
+		return null
+
+	if root.get_class() == "SpineSprite":
+		return root
+
+	for child: Node in root.get_children():
+		var found: Node = _find_first_spine_sprite(child)
+
+		if found != null:
+			return found
+
+	return null
+
+func _try_play_with_animation_state(animation_name: String, loop: bool) -> bool:
+	if spine_sprite == null:
+		return false
+
+	if not spine_sprite.has_method("get_animation_state"):
+		return false
+
+	var animation_state: Variant = spine_sprite.call("get_animation_state")
+
+	if animation_state == null:
+		return false
+
+	if not animation_state is Object:
+		return false
+
+	var animation_state_object: Object = animation_state as Object
+
+	if animation_state_object.has_method("set_animation"):
+		animation_state_object.call("set_animation", animation_name, loop, 0)
+		return true
+
+	return false
+
+
+SCRIPT: res://visual/enemies/goblin_warrior/GoblinWarriorVisualController.gd
+--------------------------------------------------------------------------------------------------------------
+extends Node2D
+
+@export var spine_adapter_path: NodePath
+
+@export var idle_animation_name: String = "Idle"
+@export var run_animation_name: String = "Run"
+@export var walk_animation_name: String = "Run"
+@export var death_animation_name: String = "Die"
+
+@export var use_walk_when_run_missing: bool = true
+@export var flip_by_movement_direction: bool = true
+
+@onready var spine_adapter: Node = _resolve_spine_adapter()
+
+var current_visual_state: String = ""
+var current_animation_name: String = ""
+
+func _ready() -> void:
+	if spine_adapter == null:
+		GameEvents.emit_debug("[GoblinWarriorVisualController] Spine adapter NÃO encontrado.")
+	else:
+		GameEvents.emit_debug("[GoblinWarriorVisualController] Spine adapter encontrado: %s" % spine_adapter.name)
+
+	play_idle()
+
+func apply_enemy_runtime_state(is_moving: bool, movement_direction: Vector2, is_alive: bool = true) -> void:
+	if not is_alive:
+		play_death()
+		return
+
+	_update_facing(movement_direction)
+
+	if is_moving:
+		play_run()
+	else:
+		play_idle()
+
+func play_idle() -> void:
+	_play_animation_if_changed(idle_animation_name, true, "idle")
+
+func play_run() -> void:
+	var selected_animation: String = run_animation_name
+
+	if selected_animation.strip_edges() == "" and use_walk_when_run_missing:
+		selected_animation = walk_animation_name
+
+	_play_animation_if_changed(selected_animation, true, "run")
+
+func play_death() -> void:
+	_play_animation_if_changed(death_animation_name, false, "death")
+
+func _play_animation_if_changed(animation_name: String, loop: bool, visual_state: String) -> void:
+	if animation_name.strip_edges() == "":
+		return
+
+	if current_animation_name == animation_name:
+		return
+
+	current_visual_state = visual_state
+	current_animation_name = animation_name
+
+	if spine_adapter != null and spine_adapter.has_method("play_animation"):
+		spine_adapter.call("play_animation", animation_name, loop)
+	else:
+		GameEvents.emit_debug("[GoblinWarriorVisualController] Adapter ausente. Não foi possível tocar: %s" % animation_name)
+
+func _update_facing(movement_direction: Vector2) -> void:
+	if not flip_by_movement_direction:
+		return
+
+	if abs(movement_direction.x) <= 0.001:
+		return
+
+	if movement_direction.x < 0.0:
+		scale.x = -abs(scale.x)
+	else:
+		scale.x = abs(scale.x)
+
+func _resolve_spine_adapter() -> Node:
+	if spine_adapter_path != NodePath():
+		var configured_adapter: Node = get_node_or_null(spine_adapter_path)
+
+		if configured_adapter != null:
+			return configured_adapter
+
+	var direct_adapter: Node = get_node_or_null("GoblinWarriorSpineAdapter")
+
+	if direct_adapter != null:
+		return direct_adapter
+
+	var found_adapter: Node = _find_node_with_method(self, "play_animation")
+
+	if found_adapter != null and found_adapter != self:
+		return found_adapter
+
+	return null
+
+func _find_node_with_method(root: Node, method_name: String) -> Node:
+	if root == null:
+		return null
+
+	if root.has_method(method_name):
+		return root
+
+	for child: Node in root.get_children():
+		var found: Node = _find_node_with_method(child, method_name)
+
+		if found != null:
+			return found
+
+	return null
+
+
+SCRIPT: res://visual/weapons/gaia_initial_weapon/GaiaAttackVisualController.gd
+--------------------------------------------------------------------------------------------------------------
+extends Node2D
+class_name GaiaAttackVisualController
+
+enum VisualMode {
+	PLACEHOLDER,
+	SPINE
+}
+
+@export var visual_mode: VisualMode = VisualMode.PLACEHOLDER
+
+@export var placeholder_root_path: NodePath
+@export var placeholder_sprite_path: NodePath
+@export var spine_root_path: NodePath
+
+@export var default_placeholder_texture_path: String = "res://assets/placeholders/weapons/gaia_initial_weapon/gaia_attack_placeholder.png"
+@export var placeholder_texture: Texture2D
+
+# Use isso se a imagem não estiver naturalmente apontando para direita.
+# 0 = imagem aponta para direita.
+# 90 = imagem aponta para cima.
+# -90 = imagem aponta para baixo.
+@export var angle_offset_degrees: float = 0.0
+
+@export var lifetime_seconds: float = 0.22
+@export var fade_out: bool = true
+@export var auto_queue_free: bool = true
+
+@onready var placeholder_root: Node2D = get_node_or_null(placeholder_root_path) as Node2D
+@onready var placeholder_sprite: Sprite2D = get_node_or_null(placeholder_sprite_path) as Sprite2D
+@onready var spine_root: Node2D = get_node_or_null(spine_root_path) as Node2D
+
+var elapsed_seconds: float = 0.0
+var attack_direction: Vector2 = Vector2.RIGHT
+
+func _ready() -> void:
+	_resolve_nodes_if_needed()
+	_setup_placeholder_texture()
+	_apply_visual_mode()
+	_apply_direction_rotation()
+
+func _process(delta: float) -> void:
+	elapsed_seconds += delta
+
+	if fade_out and lifetime_seconds > 0.0:
+		var remaining_ratio: float = clamp(1.0 - (elapsed_seconds / lifetime_seconds), 0.0, 1.0)
+		modulate.a = remaining_ratio
+
+	if auto_queue_free and lifetime_seconds > 0.0 and elapsed_seconds >= lifetime_seconds:
+		queue_free()
+
+func setup(direction: Vector2, p_lifetime_seconds: float = -1.0, p_visual_scale: Vector2 = Vector2.ONE) -> void:
+	if direction.length() > 0.001:
+		attack_direction = direction.normalized()
+	else:
+		attack_direction = Vector2.RIGHT
+
+	if p_lifetime_seconds > 0.0:
+		lifetime_seconds = p_lifetime_seconds
+
+	scale = p_visual_scale
+	elapsed_seconds = 0.0
+	modulate.a = 1.0
+
+	_apply_direction_rotation()
+
+func set_visual_mode(new_mode: VisualMode) -> void:
+	visual_mode = new_mode
+	_apply_visual_mode()
+
+func _resolve_nodes_if_needed() -> void:
+	if placeholder_root == null:
+		placeholder_root = get_node_or_null("PlaceholderRoot") as Node2D
+
+	if placeholder_sprite == null:
+		placeholder_sprite = get_node_or_null("PlaceholderRoot/Sprite2D") as Sprite2D
+
+	if spine_root == null:
+		spine_root = get_node_or_null("SpineRoot") as Node2D
+
+func _setup_placeholder_texture() -> void:
+	if placeholder_sprite == null:
+		return
+
+	if placeholder_texture == null and ResourceLoader.exists(default_placeholder_texture_path):
+		placeholder_texture = load(default_placeholder_texture_path) as Texture2D
+
+	if placeholder_texture != null:
+		placeholder_sprite.texture = placeholder_texture
+
+func _apply_visual_mode() -> void:
+	if placeholder_root != null:
+		placeholder_root.visible = visual_mode == VisualMode.PLACEHOLDER
+
+	if spine_root != null:
+		spine_root.visible = visual_mode == VisualMode.SPINE
+
+func _apply_direction_rotation() -> void:
+	rotation = attack_direction.angle() + deg_to_rad(angle_offset_degrees)

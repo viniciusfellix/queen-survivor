@@ -47,6 +47,7 @@
 	"ui.level_up.badge_use": "Uso",
 	"ui.level_up.no_icon": "?",
 	
+	"ui.result.save_failed": "Falha ao salvar o resultado.",
 	"ui.result.victory": "Vitória",
 	"ui.result.defeat": "Derrota",
 	"ui.result.title": "Resultado da Run",

@@ -22,28 +22,27 @@ func load_or_create_save() -> void:
 
 		if loaded_successfully:
 			GameEvents.emit_debug("[SaveManager] Save carregado.")
-			GameEvents.save_loaded.emit()
 			return
 
 	_create_new_save()
 
-func save_to_disk() -> void:
+func save_to_disk() -> bool:
 	if save_data == null:
-		return
+		return false
 
 	var json_string: String = JSON.stringify(save_data.to_dictionary(), "\t")
-
 	var file: FileAccess = FileAccess.open(SAVE_PATH, FileAccess.WRITE)
 
 	if file == null:
 		push_warning("[SaveManager] Não foi possível abrir arquivo para escrita: %s" % SAVE_PATH)
-		return
+		return false
 
 	file.store_string(json_string)
 	file.close()
 
 	GameEvents.emit_debug("[SaveManager] Save salvo em: %s" % SAVE_PATH)
-	GameEvents.save_saved.emit()
+
+	return true
 
 func apply_run_result(result_payload: RunResultPayload) -> void:
 	if result_payload == null:
@@ -56,11 +55,14 @@ func apply_run_result(result_payload: RunResultPayload) -> void:
 		return
 
 	save_data.apply_run_result(result_payload)
-	save_to_disk()
+
+	var saved_successfully: bool = save_to_disk()
 
 	GameEvents.save_updated.emit(save_data)
+	GameEvents.run_result_persisted.emit(result_payload, save_data, saved_successfully)
 
-	GameEvents.emit_debug("[SaveManager] Resultado aplicado ao save. total_xp=%s total_money=%s completed_maps=%s" % [
+	GameEvents.emit_debug("[SaveManager] Resultado aplicado ao save. success=%s total_xp=%s total_money=%s completed_maps=%s" % [
+		str(saved_successfully),
 		str(save_data.total_xp),
 		str(save_data.total_money),
 		str(save_data.completed_maps)
@@ -74,10 +76,15 @@ func reset_progression_and_save() -> void:
 		return
 
 	save_data.reset_progression()
-	save_to_disk()
+
+	var saved_successfully: bool = save_to_disk()
 
 	GameEvents.save_updated.emit(save_data)
-	GameEvents.emit_debug("[SaveManager] Progressão resetada.")
+
+	if saved_successfully:
+		GameEvents.emit_debug("[SaveManager] Progressão resetada.")
+	else:
+		push_warning("[SaveManager] Progressão resetada em memória, mas não foi salva em disco.")
 
 func get_debug_data() -> Dictionary:
 	if save_data == null:
@@ -107,10 +114,13 @@ func _on_run_finished(result_payload: RunResultPayload) -> void:
 
 func _create_new_save() -> void:
 	save_data = SaveData.new()
-	save_to_disk()
 
-	GameEvents.emit_debug("[SaveManager] Novo save criado.")
-	GameEvents.save_created.emit()
+	var saved_successfully: bool = save_to_disk()
+
+	if saved_successfully:
+		GameEvents.emit_debug("[SaveManager] Novo save criado.")
+	else:
+		push_warning("[SaveManager] Novo save criado em memória, mas não foi salvo em disco.")
 
 func _load_from_disk() -> bool:
 	var file: FileAccess = FileAccess.open(SAVE_PATH, FileAccess.READ)

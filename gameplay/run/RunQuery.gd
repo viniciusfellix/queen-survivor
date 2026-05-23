@@ -28,6 +28,14 @@ static func get_run_state(scene_tree: SceneTree) -> RunState:
 
 	return null
 
+static func is_run_ending(scene_tree: SceneTree) -> bool:
+	var run_state: RunState = get_run_state(scene_tree)
+
+	if run_state == null:
+		return false
+
+	return run_state.is_ending
+
 static func is_run_finished(scene_tree: SceneTree) -> bool:
 	var run_state: RunState = get_run_state(scene_tree)
 
@@ -53,6 +61,9 @@ static func is_run_paused(scene_tree: SceneTree) -> bool:
 static func is_gameplay_blocked(scene_tree: SceneTree) -> bool:
 	if scene_tree == null:
 		return false
+
+	if is_run_ending(scene_tree):
+		return true
 
 	if is_run_finished(scene_tree):
 		return true

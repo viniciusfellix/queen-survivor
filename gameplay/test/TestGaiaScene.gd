@@ -96,15 +96,14 @@ func _configure_spawners() -> void:
 	var configured_count: int = 0
 
 	for child: Node in spawner_root.get_children():
-		if child.has_method("configure_spawner"):
-			child.call("configure_spawner", player_instance, enemy_root)
-			configured_count += 1
+		if not child.has_method("configure_spawner"):
+			continue
 
-			if child.has_method("force_spawn_enemy"):
-				child.call_deferred("force_spawn_enemy")
+		child.call("configure_spawner", player_instance, enemy_root)
+		configured_count += 1
 
 	GameEvents.emit_debug("[TestGaiaScene] Spawners configurados: %s" % str(configured_count))
-
+	
 func _validate_scene_structure() -> void:
 	if arena_root == null:
 		push_warning("[TestGaiaScene] ArenaRoot não encontrado.")

@@ -14,6 +14,8 @@
 [ext_resource type="PackedScene" uid="uid://dfurqs5avj58y" path="res://ui/world_feedback/WorldFeedbackLayer.tscn" id="11_4scrf"]
 [ext_resource type="PackedScene" uid="uid://bfu3srmi1h0cw" path="res://ui/result/ResultPanel.tscn" id="11_8gfjp"]
 [ext_resource type="PackedScene" uid="uid://cm43ov31i3a3q" path="res://ui/hud/RunHud.tscn" id="12_mnrqd"]
+[ext_resource type="Script" uid="uid://dg6hq5ltffp2w" path="res://ui/world_feedback/WorldFeedbackLayer.gd" id="12_w25q1"]
+[ext_resource type="PackedScene" uid="uid://coeswsds3t2ef" path="res://ui/world_feedback/FloatingCombatText.tscn" id="13_muu3i"]
 [ext_resource type="PackedScene" uid="uid://dw8pji4737owl" path="res://ui/debug/tools/PrototypeToolsPanel.tscn" id="13_qxn1m"]
 
 [node name="TestGaiaScene" type="Node2D" unique_id=138255397]
@@ -40,6 +42,7 @@ enemy_root_path = NodePath("../../EnemyRoot")
 [node name="RunController" type="Node" parent="RuntimeRoot" unique_id=837018724]
 script = ExtResource("4_myjtf")
 map_definition = ExtResource("5_8e1wp")
+allow_debug_force_finish = true
 
 [node name="DropController" type="Node" parent="RuntimeRoot" unique_id=1761609163]
 script = ExtResource("5_kj34v")
@@ -58,9 +61,11 @@ script = ExtResource("3_38slv")
 show_damage_feedback = false
 
 [node name="WorldFeedbackLayer" parent="." unique_id=1299703750 instance=ExtResource("11_4scrf")]
-floating_text_scene_path = "uid://coeswsds3t2ef"
-player_damage_world_offset = Vector2(0, -100)
-debug_feedback = false
+script = ExtResource("12_w25q1")
+floating_combat_text_scene = ExtResource("13_muu3i")
+player_damage_world_offset = Vector2(0, -50)
+damage_color = Color(1, 0.04, 0.04, 1)
+show_test_text_on_ready = false
 
 [node name="DebugOverlay" parent="." unique_id=1878947059 instance=ExtResource("2_jgi7i")]
 debug_enabled = false

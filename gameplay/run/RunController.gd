@@ -55,7 +55,7 @@ func _process(delta: float) -> void:
 	if run_state.is_finished:
 		return
 
-	if run_state.is_paused or run_state.is_victory or run_state.is_defeat:
+	if run_state.is_paused or run_state.is_ending or run_state.is_victory or run_state.is_defeat:
 		return
 
 	run_state.elapsed_seconds += delta
@@ -106,6 +106,7 @@ func get_debug_data() -> Dictionary:
 		"run_coins_spent": run_state.run_coins_spent,
 		"run_coins_available": run_state.get_run_coins_available(),
 		"is_paused": run_state.is_paused,
+		"is_ending": run_state.is_ending,
 		"is_level_up_active": is_level_up_active,
 		"pending_level_ups": pending_level_ups,
 		"upgrade_pool_id": _get_upgrade_pool_id(),
@@ -149,7 +150,7 @@ func _on_enemy_died(
 	if run_state == null:
 		return
 
-	if run_state.is_finished or run_state.is_victory or run_state.is_defeat:
+	if run_state.is_finished or run_state.is_ending or run_state.is_victory or run_state.is_defeat:
 		return
 
 	run_state.add_enemy_kill()
@@ -187,7 +188,7 @@ func _on_run_coin_collected(value: int, coin_global_position: Vector2) -> void:
 	if run_state == null:
 		return
 
-	if run_state.is_finished:
+	if run_state.is_finished or run_state.is_ending:
 		return
 
 	if value <= 0:
@@ -207,14 +208,33 @@ func _on_run_coin_collected(value: int, coin_global_position: Vector2) -> void:
 		str(run_state.get_run_coins_available())
 	])
 
-func _on_player_damaged(_raw_damage: int, final_damage: int, _current_hp: int, _max_hp: int, _source_id: String) -> void:
+func _on_player_damaged(
+	_raw_damage: int,
+	final_damage: int,
+	_current_hp: int,
+	_max_hp: int,
+	_source_id: String
+) -> void:
 	if run_state == null:
+		return
+
+	if run_state.is_finished or run_state.is_ending:
 		return
 
 	run_state.add_damage_taken(final_damage)
 
-func _on_enemy_damaged(_enemy_id: String, _raw_damage: int, final_damage: int, _current_hp: int, _max_hp: int, _source_id: String) -> void:
+func _on_enemy_damaged(
+	_enemy_id: String,
+	_raw_damage: int,
+	final_damage: int,
+	_current_hp: int,
+	_max_hp: int,
+	_source_id: String
+) -> void:
 	if run_state == null:
+		return
+
+	if run_state.is_finished or run_state.is_ending:
 		return
 
 	run_state.add_damage_dealt(final_damage)
@@ -223,8 +243,13 @@ func _on_player_died(source_id: String) -> void:
 	if run_state == null:
 		return
 
-	if run_state.is_finished:
+	if run_state.is_finished or run_state.is_ending:
 		return
+
+	if not run_state.begin_ending(source_id):
+		return
+
+	GameEvents.emit_debug("[RunController] Gameplay bloqueada para encerramento da run. source=%s" % source_id)
 
 	GameEvents.emit_debug("[RunController] Derrota agendada. source=%s delay=%s" % [
 		source_id,
@@ -236,6 +261,7 @@ func _on_player_died(source_id: String) -> void:
 		return
 
 	var defeat_timer: SceneTreeTimer = get_tree().create_timer(defeat_result_delay_seconds)
+
 	defeat_timer.timeout.connect(func() -> void:
 		_finish_defeat(source_id)
 	)
@@ -244,7 +270,7 @@ func _finish_victory() -> void:
 	if run_state == null:
 		return
 
-	if run_state.is_finished:
+	if run_state.is_finished or run_state.is_ending:
 		return
 
 	run_state.elapsed_seconds = run_state.map_duration_seconds
@@ -338,7 +364,7 @@ func _start_next_level_up() -> void:
 	if run_state == null:
 		return
 
-	if run_state.is_finished:
+	if run_state.is_finished or run_state.is_ending:
 		return
 
 	if pending_level_ups <= 0:
@@ -370,7 +396,7 @@ func _on_level_up_option_selected(upgrade: UpgradeDefinition) -> void:
 	if not is_level_up_active:
 		return
 
-	if run_state != null and run_state.is_finished:
+	if run_state != null and (run_state.is_finished or run_state.is_ending):
 		return
 
 	if upgrade == null or not upgrade.is_valid_definition():
@@ -536,7 +562,7 @@ func debug_force_victory() -> bool:
 	if run_state == null:
 		return false
 
-	if run_state.is_finished:
+	if run_state.is_finished or run_state.is_ending:
 		return false
 
 	GameEvents.emit_debug("[RunController] DEBUG: vitória forçada pelo painel de teste.")
@@ -552,10 +578,11 @@ func debug_force_defeat() -> bool:
 	if run_state == null:
 		return false
 
-	if run_state.is_finished:
+	if run_state.is_finished or run_state.is_ending:
 		return false
 
 	GameEvents.emit_debug("[RunController] DEBUG: derrota forçada pelo painel de teste.")
+	run_state.begin_ending("debug_force_defeat")
 	_finish_defeat("debug_force_defeat")
 
 	return true
