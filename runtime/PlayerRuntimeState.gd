@@ -47,10 +47,8 @@ func setup_from_queen_definition(definition: QueenDefinition) -> void:
 func set_gameplay_state(new_state: String) -> void:
 	if current_gameplay_state == new_state:
 		return
-
-	var previous_state: String = current_gameplay_state
+	
 	current_gameplay_state = new_state
-	GameEvents.player_state_changed.emit(previous_state, new_state)
 
 func apply_input(move: Vector2, aim: Vector2) -> void:
 	if not is_alive:

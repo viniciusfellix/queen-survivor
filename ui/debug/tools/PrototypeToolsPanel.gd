@@ -9,7 +9,7 @@ const TOGGLE_KEY: Key = KEY_F3
 @export var allow_force_result_actions: bool = true
 
 @export_group("Layout")
-@export var panel_size: Vector2 = Vector2(470.0, 390.0)
+@export var panel_size: Vector2 = Vector2(680.0, 520.0)
 @export var panel_margin: float = 16.0
 
 @export_group("Refresh")
@@ -98,13 +98,31 @@ func _configure_layout() -> void:
 		return
 
 	var viewport_size: Vector2 = get_viewport().get_visible_rect().size
+	var safe_panel_size: Vector2 = Vector2(
+		min(panel_size.x, viewport_size.x - (panel_margin * 2.0)),
+		min(panel_size.y, viewport_size.y - (panel_margin * 2.0))
+	)
 
-	panel.size = panel_size
-	panel.custom_minimum_size = panel_size
+	panel.size = safe_panel_size
+	panel.custom_minimum_size = safe_panel_size
 	panel.position = Vector2(
-		viewport_size.x - panel_size.x - panel_margin,
+		max(panel_margin, viewport_size.x - safe_panel_size.x - panel_margin),
 		panel_margin
 	)
+
+	var margin_container: MarginContainer = panel.get_node_or_null("MarginContainer") as MarginContainer
+
+	if margin_container == null:
+		return
+
+	margin_container.position = Vector2.ZERO
+	margin_container.size = safe_panel_size
+	margin_container.custom_minimum_size = safe_panel_size
+
+	margin_container.add_theme_constant_override("margin_left", 16)
+	margin_container.add_theme_constant_override("margin_top", 16)
+	margin_container.add_theme_constant_override("margin_right", 16)
+	margin_container.add_theme_constant_override("margin_bottom", 16)
 
 func _configure_static_texts() -> void:
 	title_label.text = LocalizationManager.get_text("ui.debug_tools.title")
@@ -291,9 +309,19 @@ func _on_cancel_reset_pressed() -> void:
 
 	status_label.text = LocalizationManager.get_text("ui.debug_tools.reset_cancelled")
 
-func _set_reset_confirmation_visible(is_visible: bool) -> void:
-	confirmation_row.visible = is_visible
-	reset_progress_button.disabled = is_visible or not allow_save_reset
+func _set_reset_confirmation_visible(should_show: bool) -> void:
+	if confirmation_row == null:
+		push_warning("[PrototypeToolsPanel] ConfirmationRow não encontrado.")
+		return
+
+	confirmation_row.visible = should_show
+	reset_progress_button.disabled = should_show or not allow_save_reset
+
+	GameEvents.emit_debug("[PrototypeToolsPanel] ConfirmationRow visible=%s position=%s size=%s" % [
+		str(confirmation_row.visible),
+		str(confirmation_row.position),
+		str(confirmation_row.size)
+	])
 
 func _on_save_updated(_save_data: SaveData) -> void:
 	_refresh_panel()

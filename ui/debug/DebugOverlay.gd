@@ -39,9 +39,6 @@ func _ready() -> void:
 	if not GameEvents.spine_animation_changed.is_connected(_on_spine_animation_changed):
 		GameEvents.spine_animation_changed.connect(_on_spine_animation_changed)
 
-	if not GameEvents.spine_animation_requested.is_connected(_on_spine_animation_changed):
-		GameEvents.spine_animation_requested.connect(_on_spine_animation_changed)
-
 	if label == null:
 		GameEvents.emit_debug("[DebugOverlay] Label NÃO encontrado.")
 	else:
@@ -386,7 +383,7 @@ func _format_float(value: float) -> String:
 
 func _format_seconds(seconds: float) -> String:
 	var total_seconds: int = int(floor(max(0.0, seconds)))
-	var minutes: int = total_seconds / 60
+	var minutes: int = int(floor(float(total_seconds) / 60.0))
 	var remaining_seconds: int = total_seconds % 60
 
 	return "%02d:%02d" % [minutes, remaining_seconds]

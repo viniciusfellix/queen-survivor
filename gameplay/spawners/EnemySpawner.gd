@@ -383,3 +383,7 @@ func _resolve_player() -> Node2D:
 func _on_run_finished(_result_payload: RunResultPayload) -> void:
 	spawner_enabled = false
 	GameEvents.emit_debug("[EnemySpawner] Desativado após fim da run.")
+
+func configure_spawner(player: Node2D, root: Node2D) -> void:
+	configure_player(player)
+	configure_enemy_root(root)
