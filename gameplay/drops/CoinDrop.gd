@@ -130,10 +130,18 @@ func _collect() -> void:
 	is_collected = true
 
 	GameEvents.run_coin_collected.emit(value, global_position)
-	GameEvents.emit_debug("[CoinDrop] Moeda coletada: value=%s pos=%s" % [
-		str(value),
-		str(global_position)
-	])
+
+	DeveloperAuditLogger.log_spawn(
+		"Moeda coletada: value=%s pos=%s" % [
+			str(value),
+			str(global_position)
+		],
+		"CoinDrop",
+		{
+			"value": value,
+			"position": global_position
+		}
+	)
 
 	queue_free()
 

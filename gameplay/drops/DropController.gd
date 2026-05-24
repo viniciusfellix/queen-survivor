@@ -18,12 +18,24 @@ func _ready() -> void:
 	_connect_events()
 
 	if drop_root != null:
-		GameEvents.emit_debug("[DropController] DropRoot encontrado: %s" % drop_root.name)
+		DeveloperAuditLogger.log_spawn(
+			"DropRoot encontrado: %s" % drop_root.name,
+			"DropController",
+			{
+				"drop_root": drop_root.name
+			}
+		)
 	else:
 		GameEvents.emit_debug("[DropController] DropRoot NÃO encontrado.")
 
 	if coin_definition != null:
-		GameEvents.emit_debug("[DropController] CoinDefinition configurada: %s" % coin_definition.id)
+		DeveloperAuditLogger.log_spawn(
+			"CoinDefinition configurada: %s" % coin_definition.id,
+			"DropController",
+			{
+				"coin_definition_id": coin_definition.id
+			}
+		)
 	else:
 		GameEvents.emit_debug("[DropController] CoinDefinition NÃO configurada.")
 
@@ -51,11 +63,19 @@ func _on_enemy_died(
 	var roll: float = randf()
 
 	if roll > coin_drop_chance:
-		GameEvents.emit_debug("[DropController] Moeda não dropou. enemy=%s roll=%s chance=%s" % [
-			enemy_id,
-			str(roll),
-			str(coin_drop_chance)
-		])
+		DeveloperAuditLogger.log_spawn(
+			"Moeda não dropou. enemy=%s roll=%s chance=%s" % [
+				enemy_id,
+				str(roll),
+				str(coin_drop_chance)
+			],
+			"DropController",
+			{
+				"enemy_id": enemy_id,
+				"roll": roll,
+				"chance": coin_drop_chance
+			}
+		)
 		return
 
 	_spawn_coin(enemy_global_position, coin_drop_value, enemy_id, source_id)

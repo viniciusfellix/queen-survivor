@@ -1,6 +1,9 @@
 extends CanvasLayer
 
+const RUNTIME_TREE_SNAPSHOT_SCRIPT = preload("res://core/debug/RuntimeTreeSnapshot.gd")
+
 const TOGGLE_KEY: Key = KEY_F3
+const RUNTIME_SNAPSHOT_KEY: Key = KEY_F4
 
 @export_group("Availability")
 @export var tools_enabled: bool = true
@@ -83,15 +86,18 @@ func _unhandled_input(event: InputEvent) -> void:
 	if key_event.echo:
 		return
 
-	if key_event.keycode != TOGGLE_KEY:
+	if key_event.keycode == TOGGLE_KEY:
+		visible = not visible
+
+		if visible:
+			_refresh_panel()
+
+		get_viewport().set_input_as_handled()
 		return
 
-	visible = not visible
-
-	if visible:
-		_refresh_panel()
-
-	get_viewport().set_input_as_handled()
+	if key_event.keycode == RUNTIME_SNAPSHOT_KEY:
+		_export_runtime_tree_snapshot()
+		get_viewport().set_input_as_handled()
 
 func _configure_layout() -> void:
 	if panel == null:
@@ -347,3 +353,53 @@ func _format_completed_maps(completed_maps: Array) -> String:
 		map_names.append(str(map_id_variant))
 
 	return ", ".join(map_names)
+
+func _export_runtime_tree_snapshot() -> void:
+	var current_scene: Node = get_tree().current_scene
+
+	if current_scene == null:
+		status_label.text = LocalizationManager.get_text("ui.debug_tools.runtime_tree_failed")
+		return
+
+	var snapshot_builder: RefCounted = RUNTIME_TREE_SNAPSHOT_SCRIPT.new()
+
+	if snapshot_builder == null:
+		status_label.text = LocalizationManager.get_text("ui.debug_tools.runtime_tree_failed")
+		return
+
+	var tree_snapshot_variant: Variant = snapshot_builder.call(
+		"build_snapshot",
+		current_scene,
+		true,
+		true
+	)
+
+	var group_summary_variant: Variant = snapshot_builder.call(
+		"build_group_summary",
+		get_tree()
+	)
+
+	var tree_snapshot: String = str(tree_snapshot_variant)
+	var group_summary: String = str(group_summary_variant)
+
+	var complete_snapshot: String = "%s\n\n%s" % [
+		tree_snapshot,
+		group_summary
+	]
+
+	print("")
+	print(complete_snapshot)
+	print("")
+
+	DisplayServer.clipboard_set(complete_snapshot)
+
+	status_label.text = LocalizationManager.get_text("ui.debug_tools.runtime_tree_exported")
+
+	DeveloperAuditLogger.log_audit(
+		"Arvore runtime exportada para console e area de transferencia.",
+		"PrototypeToolsPanel",
+		{
+			"scene_name": current_scene.name,
+			"scene_file_path": current_scene.scene_file_path
+		}
+	)

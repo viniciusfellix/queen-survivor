@@ -24,10 +24,7 @@ func _ready() -> void:
 	layer = 18
 
 	_configure_feedback_root()
-
-	if not get_viewport().size_changed.is_connected(_on_viewport_size_changed):
-		get_viewport().size_changed.connect(_on_viewport_size_changed)
-
+	
 	if not GameEvents.player_damaged.is_connected(_on_player_damaged):
 		GameEvents.player_damaged.connect(_on_player_damaged)
 
@@ -39,15 +36,14 @@ func _ready() -> void:
 	if show_test_text_on_ready:
 		call_deferred("_spawn_debug_test_text")
 
-func _on_viewport_size_changed() -> void:
-	_configure_feedback_root()
-
 func _configure_feedback_root() -> void:
 	if feedback_root == null:
 		return
 
-	feedback_root.position = Vector2.ZERO
-	feedback_root.size = get_viewport().get_visible_rect().size
+	# O FeedbackRoot ocupa toda a viewport por anchors.
+	# Não devemos definir size manualmente, pois o Godot recalcula
+	# automaticamente o tamanho de Controls com anchors Full Rect.
+	feedback_root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	feedback_root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	feedback_root.clip_contents = false
 	feedback_root.process_mode = Node.PROCESS_MODE_ALWAYS

@@ -32,9 +32,6 @@ func _ready() -> void:
 
 	if visual_controller == null:
 		push_warning("[PlayerController] visual_controller não encontrado. Verifique visual_controller_path.")
-		GameEvents.emit_debug("[PlayerController] Visual controller NÃO encontrado.")
-	else:
-		GameEvents.emit_debug("[PlayerController] Visual controller encontrado: %s" % visual_controller.name)
 
 	_update_visual_state()
 	queue_redraw()
@@ -93,6 +90,9 @@ func receive_damage(payload: DamagePayload) -> int:
 
 	if not payload.is_valid_payload():
 		return 0
+		
+	if RunQuery.is_gameplay_blocked(get_tree()):
+		return 0
 
 	if not runtime_state.is_alive:
 		return 0
@@ -120,17 +120,37 @@ func receive_damage(payload: DamagePayload) -> int:
 		payload.source_id
 	)
 
-	GameEvents.emit_debug("[PlayerController] Dano recebido: raw=%s final=%s HP=%s/%s fonte=%s" % [
-		str(payload.raw_damage),
-		str(final_damage),
-		str(runtime_state.current_hp),
-		str(runtime_state.max_hp),
-		payload.source_id
-	])
+	DeveloperAuditLogger.log_combat(
+		"Dano recebido: raw=%s final=%s HP=%s/%s fonte=%s" % [
+			str(payload.raw_damage),
+			str(final_damage),
+			str(runtime_state.current_hp),
+			str(runtime_state.max_hp),
+			payload.source_id
+		],
+		"PlayerController",
+		{
+			"queen_id": runtime_state.queen_id,
+			"raw_damage": payload.raw_damage,
+			"final_damage": final_damage,
+			"current_hp": runtime_state.current_hp,
+			"max_hp": runtime_state.max_hp,
+			"source_id": payload.source_id,
+			"invincibility_started": final_damage > 0 and enable_hit_invincibility
+		}
+	)
 	
 	if not runtime_state.is_alive:
 		GameEvents.player_died.emit(payload.source_id)
-		GameEvents.emit_debug("[PlayerController] Gaia morreu. Causa: %s" % payload.source_id)
+
+		DeveloperAuditLogger.log_combat(
+			"Gaia morreu. causa=%s" % payload.source_id,
+			"PlayerController",
+			{
+				"queen_id": runtime_state.queen_id,
+				"source_id": payload.source_id
+			}
+		)
 
 	_update_visual_state()
 	queue_redraw()

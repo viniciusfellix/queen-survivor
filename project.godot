@@ -17,11 +17,12 @@ config/icon="res://icon.svg"
 
 [autoload]
 
-App="*uid://dpk11lg5lf1do"
+DeveloperAuditLogger="*uid://br5oa4kxekn2k"
 GameEvents="*uid://xinybba3obyo"
 LocalizationManager="*uid://cgo3tuuksfwjp"
 SaveManager="*uid://cbymq1sv1y3bj"
 InputManager="*uid://de2j17ep6ta1e"
+App="*uid://dpk11lg5lf1do"
 
 [physics]
 

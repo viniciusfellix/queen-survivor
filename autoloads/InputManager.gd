@@ -11,7 +11,11 @@ var using_mouse_aim: bool = true
 
 func _ready() -> void:
 	_ensure_default_input_actions()
-	print("[InputManager] Ready.")
+
+	DeveloperAuditLogger.log_lifecycle(
+		"Input inicializado.",
+		"InputManager"
+	)
 
 func update_input_for_player(player_global_position: Vector2) -> void:
 	move_direction = _get_move_direction()

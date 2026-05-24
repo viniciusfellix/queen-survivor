@@ -39,8 +39,11 @@ extends Node
 
 @export var weapon_source_id: String = "gaia_initial_weapon"
 
-@export_group("Damage Interrupt")
-@export var reset_cooldown_when_player_damaged: bool = true
+@export_group("Damage Interrupt - Temporary Hook")
+# Regra temporária preservada para futuras Queens.
+# Gaia não reinicia cooldown da arma ao sofrer dano.
+# Este comportamento será migrado futuramente para QueenDefinition.
+@export var reset_cooldown_when_player_damaged: bool = false
 @export var damage_reset_cooldown_ratio: float = 1.0
 
 var cooldown_timer: float = 0.0
@@ -58,20 +61,14 @@ func _ready() -> void:
 	attack_visual_root = _resolve_attack_visual_root()
 	attack_hitbox_root = _resolve_attack_hitbox_root()
 
-	if player_controller != null:
-		GameEvents.emit_debug("[GaiaInitialWeaponController] Player controller encontrado: %s" % player_controller.name)
-	else:
-		GameEvents.emit_debug("[GaiaInitialWeaponController] Player controller NÃO encontrado.")
+	if player_controller == null:
+		push_warning("[GaiaInitialWeaponController] Player controller não encontrado.")
 
-	if attack_visual_root != null:
-		GameEvents.emit_debug("[GaiaInitialWeaponController] AttackVisualRoot encontrado: %s" % attack_visual_root.name)
-	else:
-		GameEvents.emit_debug("[GaiaInitialWeaponController] AttackVisualRoot NÃO encontrado.")
+	if attack_visual_root == null:
+		push_warning("[GaiaInitialWeaponController] AttackVisualRoot não encontrado.")
 
-	if attack_hitbox_root != null:
-		GameEvents.emit_debug("[GaiaInitialWeaponController] AttackHitboxRoot encontrado: %s" % attack_hitbox_root.name)
-	else:
-		GameEvents.emit_debug("[GaiaInitialWeaponController] AttackHitboxRoot NÃO encontrado.")
+	if attack_hitbox_root == null:
+		push_warning("[GaiaInitialWeaponController] AttackHitboxRoot não encontrado.")
 
 	if attack_on_ready:
 		cooldown_timer = 0.0
@@ -85,6 +82,9 @@ func _ready() -> void:
 
 func _process(delta: float) -> void:
 	if not weapon_enabled:
+		return
+	
+	if RunQuery.is_gameplay_blocked(get_tree()):
 		return
 
 	if player_controller == null:
@@ -117,9 +117,15 @@ func _process(delta: float) -> void:
 		cooldown_timer = cooldown_seconds
 
 func force_fire() -> void:
+	if RunQuery.is_gameplay_blocked(get_tree()):
+		return
+
 	var runtime_state: PlayerRuntimeState = _get_player_runtime_state()
 
 	if runtime_state == null:
+		return
+
+	if not runtime_state.is_alive:
 		return
 
 	_fire_attack(runtime_state)
@@ -131,11 +137,20 @@ func _fire_attack(runtime_state: PlayerRuntimeState) -> void:
 	_spawn_attack_visual(direction)
 	_spawn_attack_hitbox(direction)
 
-	GameEvents.emit_debug("[GaiaInitialWeaponController] Ataque disparado. direction=%s raw_total=%s components=%s" % [
-		str(direction),
-		str(_get_total_raw_damage()),
-		_get_component_debug_string()
-	])
+	DeveloperAuditLogger.log_combat(
+		"Ataque disparado: direction=%s raw_total=%s components=%s" % [
+			str(direction),
+			str(_get_total_raw_damage()),
+			_get_component_debug_string()
+		],
+		"GaiaInitialWeaponController",
+		{
+			"direction": direction,
+			"raw_total": _get_total_raw_damage(),
+			"components": _get_component_debug_string(),
+			"weapon_id": weapon_source_id
+		}
+	)
 
 func _spawn_attack_visual(direction: Vector2) -> void:
 	var packed_visual: PackedScene = load(attack_visual_scene_path) as PackedScene
@@ -238,14 +253,27 @@ func _apply_weapon_definition() -> void:
 
 	weapon_source_id = weapon_definition.id
 
-	GameEvents.emit_debug("[GaiaInitialWeaponController] Config aplicada: fallback_damage=%s components=%s visual_offset=%s hitbox_offset=%s hitbox_radius=%s cooldown=%s" % [
-		str(base_damage),
-		_get_component_debug_string(),
-		str(attack_visual_offset),
-		str(attack_hitbox_offset),
-		str(attack_hitbox_radius),
-		str(cooldown_seconds)
-	])
+	DeveloperAuditLogger.log_scene(
+		"Arma configurada: id=%s fallback_damage=%s components=%s visual_offset=%s hitbox_offset=%s hitbox_radius=%s cooldown=%s" % [
+			weapon_source_id,
+			str(base_damage),
+			_get_component_debug_string(),
+			str(attack_visual_offset),
+			str(attack_hitbox_offset),
+			str(attack_hitbox_radius),
+			str(cooldown_seconds)
+		],
+		"GaiaInitialWeaponController",
+		{
+			"weapon_id": weapon_source_id,
+			"fallback_damage": base_damage,
+			"components": _get_component_debug_string(),
+			"visual_offset": attack_visual_offset,
+			"hitbox_offset": attack_hitbox_offset,
+			"hitbox_radius": attack_hitbox_radius,
+			"cooldown_seconds": cooldown_seconds
+		}
+	)
 
 func _get_total_raw_damage() -> int:
 	if damage_components.is_empty():
@@ -491,4 +519,12 @@ func _on_player_damaged(
 
 	_emit_cooldown_update()
 
-	GameEvents.emit_debug("[GaiaInitialWeaponController] Cooldown resetado por dano recebido. cooldown_timer=%s" % str(cooldown_timer))
+	DeveloperAuditLogger.log_combat(
+		"Cooldown resetado por dano recebido: cooldown_timer=%s" % str(cooldown_timer),
+		"GaiaInitialWeaponController",
+		{
+			"weapon_id": weapon_source_id,
+			"cooldown_timer": cooldown_timer,
+			"reset_ratio": ratio
+		}
+	)

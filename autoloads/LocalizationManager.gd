@@ -29,7 +29,13 @@ func load_language(language_code: String) -> void:
 		return
 
 	translations = parsed
-	print("[LocalizationManager] Idioma carregado: %s" % language_code)
+	DeveloperAuditLogger.log_lifecycle(
+		"Idioma carregado: %s" % language_code,
+		"LocalizationManager",
+		{
+			"language": language_code
+		}
+	)
 
 func get_text(key: String) -> String:
 	if translations.has(key):

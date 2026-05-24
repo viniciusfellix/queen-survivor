@@ -1,12 +1,9 @@
 extends Node
 
-# Este arquivo atua como Event Bus global.
-# Os signals abaixo são declarados aqui, mas emitidos e consumidos
-# por outros domínios do jogo. Por isso, o warning local unused_signal
-# é intencionalmente ignorado apenas para este tipo de aviso.
+# Este arquivo funciona como Event Bus global.
+# Os signals são declarados aqui, mas emitidos e consumidos por outros
+# domínios do projeto; por isso o aviso local unused_signal é intencional.
 @warning_ignore_start("unused_signal")
-
-signal debug_message(message: String)
 
 signal player_damaged(
 	raw_damage: int,
@@ -86,6 +83,9 @@ signal run_result_persisted(
 	succeeded: bool
 )
 
+@warning_ignore_restore("unused_signal")
+
 func emit_debug(message: String) -> void:
-	print("[Debug] %s" % message)
-	debug_message.emit(message)
+	# Ponte temporária para logs ainda não migrados.
+	# O canal LEGACY fica desligado por padrão no DeveloperAuditLogger.
+	DeveloperAuditLogger.log_legacy(message)

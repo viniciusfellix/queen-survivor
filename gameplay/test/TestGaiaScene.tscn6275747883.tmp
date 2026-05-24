@@ -69,6 +69,13 @@ show_run_progression_section = false
 show_run_economy_section = false
 
 [node name="PrototypeToolsPanel" parent="." unique_id=531935299 instance=ExtResource("13_qxn1m")]
+tools_enabled = null
+visible_on_start = null
+allow_save_reset = null
+allow_force_result_actions = null
+panel_size = null
+panel_margin = null
+refresh_interval_seconds = null
 
 [node name="LevelUpPanel" parent="." unique_id=780617162 instance=ExtResource("7_sioag")]
 
