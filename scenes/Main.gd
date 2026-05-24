@@ -20,4 +20,10 @@ func _load_initial_scene() -> void:
 	var scene_instance := packed_scene.instantiate()
 	current_scene_root.add_child(scene_instance)
 
-	GameEvents.emit_debug("[Main] Cena inicial carregada: %s" % initial_scene_path)
+	DeveloperAuditLogger.log_scene(
+		"Cena inicial carregada: %s" % initial_scene_path,
+		"Main",
+		{
+			"scene_path": initial_scene_path
+		}
+	)

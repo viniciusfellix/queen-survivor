@@ -8,9 +8,9 @@ extends CharacterBody2D
 @export var visual_controller_path: NodePath
 
 @export var stopping_distance: float = 8.0
-@export var draw_debug_visual: bool = true
+@export var draw_debug_visual: bool = false
 @export var draw_debug_target_line: bool = false
-@export var draw_contact_radius: bool = true
+@export var draw_contact_radius: bool = false
 
 @export_group("Spawn Safety")
 @export var contact_damage_start_delay_seconds: float = 0.75
@@ -54,15 +54,8 @@ func _ready() -> void:
 	_apply_definition()
 	target_node = _resolve_target()
 
-	if target_node != null:
-		GameEvents.emit_debug("[EnemyBase] Target encontrado: %s" % target_node.name)
-	else:
-		GameEvents.emit_debug("[EnemyBase] Nenhum target encontrado no _ready().")
-
-	if visual_controller != null:
-		GameEvents.emit_debug("[EnemyBase] Visual controller encontrado: %s" % visual_controller.name)
-	else:
-		GameEvents.emit_debug("[EnemyBase] Visual controller não encontrado.")
+	if visual_controller == null:
+		push_warning("[EnemyBase] Visual controller não encontrado.")
 
 	_update_visual_state()
 	queue_redraw()
@@ -151,7 +144,10 @@ func receive_damage(payload: DamagePayload) -> int:
 
 	if not payload.is_valid_payload():
 		return 0
-
+	
+	if RunQuery.is_gameplay_blocked(get_tree()):
+		return 0
+	
 	if not is_alive:
 		return 0
 
@@ -176,15 +172,27 @@ func receive_damage(payload: DamagePayload) -> int:
 		payload.source_id
 	)
 
-	GameEvents.emit_debug("[EnemyBase] Dano recebido: enemy=%s raw_total=%s final=%s HP=%s/%s fonte=%s breakdown=%s" % [
-		enemy_id,
-		str(raw_total),
-		str(final_damage),
-		str(current_hp),
-		str(max_hp),
-		payload.source_id,
-		_format_damage_breakdown(damage_result)
-	])
+	DeveloperAuditLogger.log_combat(
+		"Dano recebido: enemy=%s raw_total=%s final=%s HP=%s/%s fonte=%s breakdown=%s" % [
+			enemy_id,
+			str(raw_total),
+			str(final_damage),
+			str(current_hp),
+			str(max_hp),
+			payload.source_id,
+			_format_damage_breakdown(damage_result)
+		],
+		"EnemyBase",
+		{
+			"enemy_id": enemy_id,
+			"raw_total": raw_total,
+			"final_damage": final_damage,
+			"current_hp": current_hp,
+			"max_hp": max_hp,
+			"source_id": payload.source_id,
+			"damage_breakdown": damage_result.get("breakdown", [])
+		}
+	)
 
 	if current_hp <= 0:
 		die(payload.source_id)
@@ -211,13 +219,23 @@ func die(source_id: String = "") -> void:
 		coin_drop_value
 	)
 
-	GameEvents.emit_debug("[EnemyBase] Inimigo morreu: enemy=%s fonte=%s xp=%s coin_chance=%s coin_value=%s" % [
-		enemy_id,
-		source_id,
-		str(xp_reward),
-		str(coin_drop_chance),
-		str(coin_drop_value)
-	])
+	DeveloperAuditLogger.log_combat(
+		"Inimigo morreu: enemy=%s fonte=%s xp=%s coin_chance=%s coin_value=%s" % [
+			enemy_id,
+			source_id,
+			str(xp_reward),
+			str(coin_drop_chance),
+			str(coin_drop_value)
+		],
+		"EnemyBase",
+		{
+			"enemy_id": enemy_id,
+			"source_id": source_id,
+			"xp_reward": xp_reward,
+			"coin_drop_chance": coin_drop_chance,
+			"coin_drop_value": coin_drop_value
+		}
+	)
 
 	_update_visual_state()
 
@@ -303,14 +321,25 @@ func _try_apply_contact_damage() -> void:
 	var distance_to_target: float = global_position.distance_to(target_node.global_position)
 	
 	if debug_contact_distance:
-		GameEvents.emit_debug("[EnemyBase] Contact check: enemy=%s distance=%s radius=%s enemy_pos=%s target_pos=%s alive_seconds=%s" % [
-			enemy_id,
-			str(distance_to_target),
-			str(contact_damage_radius),
-			str(global_position),
-			str(target_node.global_position),
-			str(alive_seconds)
-		])
+		DeveloperAuditLogger.log_combat(
+			"Contact check: enemy=%s distance=%s radius=%s enemy_pos=%s target_pos=%s alive_seconds=%s" % [
+				enemy_id,
+				str(distance_to_target),
+				str(contact_damage_radius),
+				str(global_position),
+				str(target_node.global_position),
+				str(alive_seconds)
+			],
+			"EnemyBase",
+			{
+				"enemy_id": enemy_id,
+				"distance": distance_to_target,
+				"contact_radius": contact_damage_radius,
+				"enemy_position": global_position,
+				"target_position": target_node.global_position,
+				"alive_seconds": alive_seconds
+			}
+		)
 
 	if distance_to_target > contact_damage_radius:
 		return
@@ -339,11 +368,19 @@ func _try_apply_contact_damage() -> void:
 
 	contact_damage_timer = contact_damage_interval_seconds
 
-	GameEvents.emit_debug("[EnemyBase] Dano de contato aplicado. enemy=%s raw=%s final=%s" % [
-		enemy_id,
-		str(contact_damage),
-		str(final_damage)
-	])
+	DeveloperAuditLogger.log_combat(
+		"Dano de contato aplicado: enemy=%s raw=%s final=%s" % [
+			enemy_id,
+			str(contact_damage),
+			str(final_damage)
+		],
+		"EnemyBase",
+		{
+			"enemy_id": enemy_id,
+			"raw_damage": contact_damage,
+			"final_damage": final_damage
+		}
+	)
 
 func _update_visual_state() -> void:
 	if visual_controller == null:

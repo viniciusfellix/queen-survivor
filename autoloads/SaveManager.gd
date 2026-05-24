@@ -21,7 +21,13 @@ func load_or_create_save() -> void:
 		var loaded_successfully: bool = _load_from_disk()
 
 		if loaded_successfully:
-			GameEvents.emit_debug("[SaveManager] Save carregado.")
+			DeveloperAuditLogger.log_save(
+				"Save carregado.",
+				"SaveManager",
+				{
+					"path": SAVE_PATH
+				}
+			)
 			return
 
 	_create_new_save()
@@ -40,7 +46,13 @@ func save_to_disk() -> bool:
 	file.store_string(json_string)
 	file.close()
 
-	GameEvents.emit_debug("[SaveManager] Save salvo em: %s" % SAVE_PATH)
+	DeveloperAuditLogger.log_save(
+		"Save salvo em: %s" % SAVE_PATH,
+		"SaveManager",
+		{
+			"path": SAVE_PATH
+		}
+	)
 
 	return true
 
@@ -61,12 +73,21 @@ func apply_run_result(result_payload: RunResultPayload) -> void:
 	GameEvents.save_updated.emit(save_data)
 	GameEvents.run_result_persisted.emit(result_payload, save_data, saved_successfully)
 
-	GameEvents.emit_debug("[SaveManager] Resultado aplicado ao save. success=%s total_xp=%s total_money=%s completed_maps=%s" % [
-		str(saved_successfully),
-		str(save_data.total_xp),
-		str(save_data.total_money),
-		str(save_data.completed_maps)
-	])
+	DeveloperAuditLogger.log_save(
+		"Resultado aplicado. success=%s total_xp=%s total_money=%s completed_maps=%s" % [
+			str(saved_successfully),
+			str(save_data.total_xp),
+			str(save_data.total_money),
+			str(save_data.completed_maps)
+		],
+		"SaveManager",
+		{
+			"succeeded": saved_successfully,
+			"total_xp": save_data.total_xp,
+			"total_money": save_data.total_money,
+			"completed_maps": save_data.completed_maps.duplicate()
+		}
+	)
 
 func reset_progression_and_save() -> void:
 	if save_data == null:
@@ -82,7 +103,13 @@ func reset_progression_and_save() -> void:
 	GameEvents.save_updated.emit(save_data)
 
 	if saved_successfully:
-		GameEvents.emit_debug("[SaveManager] Progressão resetada.")
+		DeveloperAuditLogger.log_save(
+			"Progressão resetada.",
+			"SaveManager",
+			{
+				"succeeded": saved_successfully
+			}
+		)
 	else:
 		push_warning("[SaveManager] Progressão resetada em memória, mas não foi salva em disco.")
 
@@ -118,7 +145,13 @@ func _create_new_save() -> void:
 	var saved_successfully: bool = save_to_disk()
 
 	if saved_successfully:
-		GameEvents.emit_debug("[SaveManager] Novo save criado.")
+		DeveloperAuditLogger.log_save(
+			"Novo save criado.",
+			"SaveManager",
+			{
+				"path": SAVE_PATH
+			}
+		)
 	else:
 		push_warning("[SaveManager] Novo save criado em memória, mas não foi salvo em disco.")
 

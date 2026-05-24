@@ -23,7 +23,10 @@ func _ready() -> void:
 	_setup_camera_target()
 	_configure_spawners()
 
-	GameEvents.emit_debug("[TestGaiaScene] Cena de teste carregada.")
+	DeveloperAuditLogger.log_scene(
+		"Cena de teste carregada.",
+		"TestGaiaScene"
+	)
 
 func get_player_instance() -> Node2D:
 	return player_instance
@@ -62,7 +65,14 @@ func _spawn_player() -> void:
 	player_root.add_child(player_instance)
 	player_instance.global_position = player_spawn_point.global_position
 
-	GameEvents.emit_debug("[TestGaiaScene] Player instanciado: %s" % player_scene_path)
+	DeveloperAuditLogger.log_scene(
+		"Player instanciado: %s" % player_instance.name,
+		"TestGaiaScene",
+		{
+			"player_name": player_instance.name,
+			"scene_file_path": player_instance.scene_file_path
+		}
+	)
 
 func _setup_camera_target() -> void:
 	if camera_2d == null:
@@ -102,7 +112,13 @@ func _configure_spawners() -> void:
 		child.call("configure_spawner", player_instance, enemy_root)
 		configured_count += 1
 
-	GameEvents.emit_debug("[TestGaiaScene] Spawners configurados: %s" % str(configured_count))
+	DeveloperAuditLogger.log_scene(
+		"Spawners configurados: %s" % str(configured_count),
+		"TestGaiaScene",
+		{
+			"configured_count": configured_count
+		}
+	)
 	
 func _validate_scene_structure() -> void:
 	if arena_root == null:

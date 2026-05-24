@@ -7,7 +7,10 @@ var is_debug_mode: bool = true
 var default_language: String = "pt_br"
 
 func _ready() -> void:
-	print("[App] Boot: %s v%s" % [GAME_TITLE, GAME_VERSION])
+	DeveloperAuditLogger.log_lifecycle(
+		"Boot iniciado: %s v%s"  % [GAME_TITLE, GAME_VERSION],
+		"App"
+	)
 
 func get_game_title() -> String:
 	return GAME_TITLE

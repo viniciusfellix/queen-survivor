@@ -11,8 +11,6 @@ radius = 18.0
 script = ExtResource("1_ffmcr")
 enemy_definition = ExtResource("2_d5hmo")
 visual_controller_path = NodePath("VisualRoot/GoblinWarriorVisual")
-draw_debug_target_line = true
-draw_contact_radius = false
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=686789010]
 shape = SubResource("CircleShape2D_m166k")

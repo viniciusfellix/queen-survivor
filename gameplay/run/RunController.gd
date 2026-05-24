@@ -43,10 +43,18 @@ func _ready() -> void:
 	_load_default_upgrade_pool_if_empty()
 	_connect_events()
 
-	GameEvents.emit_debug("[RunController] Run iniciada. map=%s duration=%s" % [
-		run_state.map_id,
-		str(run_state.map_duration_seconds)
-	])
+	DeveloperAuditLogger.log_lifecycle(
+		"Run iniciada. map=%s duration=%s" % [
+			run_state.map_id,
+			str(run_state.map_duration_seconds)
+		],
+		"RunController",
+		{
+			"map_id": run_state.map_id,
+			"duration_seconds": run_state.map_duration_seconds,
+			"queen_id": run_state.queen_id
+		}
+	)
 
 func _process(delta: float) -> void:
 	if run_state == null:
@@ -249,12 +257,25 @@ func _on_player_died(source_id: String) -> void:
 	if not run_state.begin_ending(source_id):
 		return
 
-	GameEvents.emit_debug("[RunController] Gameplay bloqueada para encerramento da run. source=%s" % source_id)
+	DeveloperAuditLogger.log_lifecycle(
+		"Gameplay bloqueada para encerramento da run. source=%s" % source_id,
+		"RunController",
+		{
+			"source_id": source_id
+		}
+	)
 
-	GameEvents.emit_debug("[RunController] Derrota agendada. source=%s delay=%s" % [
-		source_id,
-		str(defeat_result_delay_seconds)
-	])
+	DeveloperAuditLogger.log_lifecycle(
+		"Derrota agendada. source=%s delay=%s" % [
+			source_id,
+			str(defeat_result_delay_seconds)
+		],
+		"RunController",
+		{
+			"source_id": source_id,
+			"delay_seconds": defeat_result_delay_seconds
+		}
+	)
 
 	if defeat_result_delay_seconds <= 0.0:
 		_finish_defeat(source_id)
@@ -304,14 +325,25 @@ func _finish_run() -> void:
 
 	run_state.final_money_reward = result_payload.final_money_reward
 
-	GameEvents.emit_debug("[RunController] Run finalizada. result=%s coins=%s final_money=%s xp=%s kills=%s level=%s" % [
-		result_payload.result_type,
-		str(result_payload.run_coins_collected),
-		str(result_payload.final_money_reward),
-		str(result_payload.run_xp_gained),
-		str(result_payload.enemies_killed),
-		str(result_payload.level_reached)
-	])
+	DeveloperAuditLogger.log_lifecycle(
+		"Run finalizada. result=%s coins=%s final_money=%s xp=%s kills=%s level=%s" % [
+			result_payload.result_type,
+			str(result_payload.run_coins_collected),
+			str(result_payload.final_money_reward),
+			str(result_payload.run_xp_gained),
+			str(result_payload.enemies_killed),
+			str(result_payload.level_reached)
+		],
+		"RunController",
+		{
+			"result_type": result_payload.result_type,
+			"coins": result_payload.run_coins_collected,
+			"final_money": result_payload.final_money_reward,
+			"xp": result_payload.run_xp_gained,
+			"kills": result_payload.enemies_killed,
+			"level": result_payload.level_reached
+		}
+	)
 
 	GameEvents.run_finished.emit(result_payload)
 
@@ -556,7 +588,10 @@ func get_next_upgrade_level(upgrade_id: String) -> int:
 
 func debug_force_victory() -> bool:
 	if not allow_debug_force_finish:
-		GameEvents.emit_debug("[RunController] DEBUG: tentativa de forçar vitória ignorada. Ação desabilitada.")
+		DeveloperAuditLogger.log_audit(
+			"Tentativa de forçar vitória ignorada. Ação desabilitada.",
+			"RunController"
+		)
 		return false
 
 	if run_state == null:
@@ -565,7 +600,10 @@ func debug_force_victory() -> bool:
 	if run_state.is_finished or run_state.is_ending:
 		return false
 
-	GameEvents.emit_debug("[RunController] DEBUG: vitória forçada pelo painel de teste.")
+	DeveloperAuditLogger.log_audit(
+		"Vitória forçada pelo painel de teste.",
+		"RunController"
+	)
 	_finish_victory()
 
 	return true
@@ -581,7 +619,10 @@ func debug_force_defeat() -> bool:
 	if run_state.is_finished or run_state.is_ending:
 		return false
 
-	GameEvents.emit_debug("[RunController] DEBUG: derrota forçada pelo painel de teste.")
+	DeveloperAuditLogger.log_audit(
+		"Derrota forçada pelo painel de teste.",
+		"RunController"
+	)
 	run_state.begin_ending("debug_force_defeat")
 	_finish_defeat("debug_force_defeat")
 

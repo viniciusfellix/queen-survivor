@@ -46,22 +46,24 @@ func _ready() -> void:
 	_resolve_spawn_timeline_from_map()
 
 	if enemy_root != null:
-		GameEvents.emit_debug("[EnemySpawner] EnemyRoot encontrado: %s" % enemy_root.name)
+		DeveloperAuditLogger.log_spawn(
+			"EnemyRoot encontrado: %s" % enemy_root.name,
+			"EnemySpawner",
+			{
+				"enemy_root": enemy_root.name
+			}
+		)
 	else:
 		GameEvents.emit_debug("[EnemySpawner] EnemyRoot NÃO encontrado.")
 
 	if player_node != null:
 		GameEvents.emit_debug("[EnemySpawner] Player encontrado: %s" % player_node.name)
-	else:
-		GameEvents.emit_debug("[EnemySpawner] Player não encontrado no _ready(). A cena pode configurar depois.")
 
 	if spawn_timeline_definition != null:
 		GameEvents.emit_debug("[EnemySpawner] SpawnTimeline carregada: %s | %s" % [
 			spawn_timeline_definition.id,
 			spawn_timeline_definition.get_debug_summary()
 		])
-	else:
-		GameEvents.emit_debug("[EnemySpawner] Sem SpawnTimeline no _ready(). Tentará resolver em runtime.")
 
 	# Antes era comum deixar spawn_timer em 0.
 	# Agora mesmo com spawn_on_ready, aguardamos um pequeno delay para evitar spawn no primeiro frame.
@@ -99,7 +101,10 @@ func _process(delta: float) -> void:
 	if not initial_spawn_delay_completed:
 		initial_spawn_delay_completed = true
 		spawn_timer = min(spawn_timer, 0.05)
-		GameEvents.emit_debug("[EnemySpawner] Delay inicial concluído. Spawner liberado.")
+		DeveloperAuditLogger.log_spawn(
+			"Delay inicial concluído. Spawner liberado.",
+			"EnemySpawner"
+		)
 
 	spawn_timer -= delta
 
@@ -117,13 +122,25 @@ func configure_player(player: Node2D) -> void:
 	player_node = player
 
 	if player_node != null:
-		GameEvents.emit_debug("[EnemySpawner] Player configurado pela cena: %s" % player_node.name)
+		DeveloperAuditLogger.log_spawn(
+			"Player configurado pela cena: %s" % player.name,
+			"EnemySpawner",
+			{
+				"player_name": player.name
+			}
+		)
 
 func configure_enemy_root(root: Node2D) -> void:
 	enemy_root = root
 
 	if enemy_root != null:
-		GameEvents.emit_debug("[EnemySpawner] EnemyRoot configurado pela cena: %s" % enemy_root.name)
+		DeveloperAuditLogger.log_spawn(
+			"EnemyRoot configurado pela cena: %s" % root.name,
+			"EnemySpawner",
+			{
+				"enemy_root": root.name
+			}
+		)
 
 func force_spawn_enemy() -> bool:
 	if RunQuery.is_gameplay_blocked(get_tree()):
@@ -196,12 +213,14 @@ func force_spawn_enemy() -> bool:
 	distance_to_player = enemy_node.global_position.distance_to(player_node.global_position)
 
 	if log_spawn_distance:
-		GameEvents.emit_debug("[EnemySpawner] Inimigo criado em: %s | dist_player=%s | vivos=%s | wave=%s" % [
-			str(enemy_node.global_position),
-			str(distance_to_player),
-			str(_get_alive_enemy_count()),
-			active_entry_id
-		])
+		DeveloperAuditLogger.log_spawn(
+			"Inimigo criado em: %s | dist_player=%s | vivos=%s | wave=%s" % [
+				str(enemy_instance.global_position),
+				str(distance_to_player),
+				str(_get_alive_enemy_count()),
+				active_entry_id
+			],
+		)
 	else:
 		GameEvents.emit_debug("[EnemySpawner] Inimigo criado em: %s | vivos=%s | wave=%s" % [
 			str(enemy_node.global_position),
@@ -264,6 +283,16 @@ func _apply_timeline_entry(entry: SpawnTimelineEntryDefinition, changed: bool) -
 			str(spawn_min_distance),
 			str(spawn_max_distance)
 		])
+		
+		DeveloperAuditLogger.log_spawn(
+			"Wave ativa: %s | interval=%s max_alive=%s dist=%s-%s" % [
+				entry.id,
+				str(spawn_interval_seconds),
+				str(max_alive_enemies),
+				str(spawn_min_distance),
+				str(spawn_max_distance)
+			],
+		)
 
 	if not entry.spawn_on_activate:
 		return
@@ -301,7 +330,14 @@ func _resolve_spawn_timeline_from_map() -> void:
 
 		if map_definition.spawn_timeline != null:
 			spawn_timeline_definition = map_definition.spawn_timeline
-			GameEvents.emit_debug("[EnemySpawner] SpawnTimeline resolvida em runtime: %s" % spawn_timeline_definition.id)
+
+			DeveloperAuditLogger.log_spawn(
+				"SpawnTimeline resolvida: %s" % spawn_timeline_definition.id,
+				"EnemySpawner",
+				{
+					"timeline_id": spawn_timeline_definition.id
+				}
+			)
 
 func _get_safe_spawn_position_around_player() -> Vector2:
 	var safe_min_distance: float = max(minimum_safe_spawn_distance_from_player, spawn_min_distance)
@@ -382,7 +418,10 @@ func _resolve_player() -> Node2D:
 
 func _on_run_finished(_result_payload: RunResultPayload) -> void:
 	spawner_enabled = false
-	GameEvents.emit_debug("[EnemySpawner] Desativado após fim da run.")
+	DeveloperAuditLogger.log_spawn(
+		"Desativado após fim da run.",
+		"EnemySpawner"
+	)
 
 func configure_spawner(player: Node2D, root: Node2D) -> void:
 	configure_player(player)

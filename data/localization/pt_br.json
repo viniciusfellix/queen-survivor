@@ -65,7 +65,9 @@
 	"ui.result.save_applied": "Resultado salvo no progresso permanente.",
 	
 	"ui.debug_tools.title": "Ferramentas do Protótipo",
-	"ui.debug_tools.toggle_hint": "F3: mostrar ou ocultar",
+	"ui.debug_tools.toggle_hint": "F3: mostrar ou ocultar | F4: exportar árvore runtime",
+	"ui.debug_tools.runtime_tree_exported": "Árvore runtime exportada para o console e copiada.",
+"ui.debug_tools.runtime_tree_failed": "Não foi possível exportar a árvore runtime.",
 	"ui.debug_tools.total_xp": "XP Total",
 	"ui.debug_tools.total_money": "Dinheiro Total",
 	"ui.debug_tools.completed_maps": "Mapas concluídos",

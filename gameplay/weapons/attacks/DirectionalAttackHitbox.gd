@@ -15,7 +15,7 @@ class_name DirectionalAttackHitbox
 
 @export var enemy_group_name: String = "enemy"
 
-@export var draw_debug_hitbox: bool = true
+@export var draw_debug_hitbox: bool = false
 @export var debug_color: Color = Color(0.2, 0.75, 1.0, 0.35)
 @export var debug_outline_color: Color = Color(0.2, 0.9, 1.0, 0.95)
 
@@ -127,12 +127,22 @@ func _try_hit_enemies() -> void:
 
 		already_hit_instance_ids[instance_id] = true
 
-		GameEvents.emit_debug("[DirectionalAttackHitbox] Inimigo atingido: %s raw_total=%s final=%s components=%s" % [
-			enemy_node.name,
-			str(payload.get_total_raw_damage()),
-			str(final_damage_variant),
-			str(_get_component_debug_string())
-		])
+		DeveloperAuditLogger.log_combat(
+			"Inimigo atingido: %s raw_total=%s final=%s components=%s" % [
+				enemy_node.name,
+				str(payload.get_total_raw_damage()),
+				str(final_damage_variant),
+				_get_component_debug_string()
+			],
+			"DirectionalAttackHitbox",
+			{
+				"enemy_name": enemy_node.name,
+				"raw_total": payload.get_total_raw_damage(),
+				"final_damage": final_damage_variant,
+				"components": _get_component_debug_string(),
+				"source_id": source_id
+			}
+		)
 
 		if RunQuery.is_gameplay_blocked(get_tree()):
 			return
