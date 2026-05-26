@@ -1,3 +1,4 @@
+res://ui/debug/
 res://ui/world_feedback/
 res://ui/debug/tools/
 res://ui/feedback/
@@ -24,5 +25,4 @@ res://data/weapons/
 res://visual/enemies/goblin_warrior/
 res://assets/spine/goblin-warrior/
 res://gameplay/spawners/
-res://data/enemies/
 C:/Users/acer/Documents/Godot/Projects/queen-survivor/data/localization/

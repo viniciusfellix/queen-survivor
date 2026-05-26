@@ -1,22 +1,52 @@
+## Controller principal da Queen controlada pelo jogador.
+##
+## Responsabilidades:
+## - registrar a entidade no grupo `player`;
+## - criar e inicializar seu `PlayerRuntimeState`;
+## - ler movimento e mira do `InputManager`;
+## - movimentar a personagem;
+## - receber dano e aplicar feedback visual;
+## - controlar invencibilidade temporária após impacto;
+## - aplicar upgrades próprios da Queen;
+## - encaminhar upgrades de arma para controllers compatíveis;
+## - expor informações para moedas, HUD e ferramentas técnicas.
 extends CharacterBody2D
 
+## Dados base da Queen utilizada nesta cena.
 @export var queen_definition: QueenDefinition
+
+## Estado mutável da Queen durante a run atual.
 @export var runtime_state: PlayerRuntimeState
 
+## Caminho opcional para o controller visual da personagem.
 @export var visual_controller_path: NodePath
 
+## Exibe a linha técnica da direção atual de mira.
 @export var draw_debug_aim: bool = false
+
+## Comprimento visual da linha técnica de mira.
 @export var debug_aim_line_length: float = 96.0
 
+## Defesa percentual inicial aplicada ao começar a run.
+##
+## Pode ser utilizada em testes e posteriormente ampliada por upgrades.
 @export var base_defense_percent: float = 0.0
 
+## Controller visual responsável pelas animações e flash de dano.
 @onready var visual_controller: Node = _resolve_visual_controller()
 
 @export_group("Damage Feedback")
+
+## Ativa a pequena janela de invencibilidade após receber dano.
 @export var enable_hit_invincibility: bool = true
+
+## Duração, em segundos, da invencibilidade após impacto.
 @export var invincibility_duration_after_hit: float = 0.5
+
+## Define se o visual da Queen pisca ao receber dano.
 @export var play_visual_damage_flash: bool = true
 
+## Inicializa a Queen, aplica sua definition e prepara o visual inicial.
 func _ready() -> void:
 	add_to_group("player")
 
@@ -28,7 +58,7 @@ func _ready() -> void:
 	else:
 		push_warning("[PlayerController] queen_definition não configurada.")
 
-	runtime_state.defense_percent = base_defense_percent
+	runtime_state.defense_percent = clamp(base_defense_percent, 0.0, 95.0)
 
 	if visual_controller == null:
 		push_warning("[PlayerController] visual_controller não encontrado. Verifique visual_controller_path.")
@@ -36,9 +66,17 @@ func _ready() -> void:
 	_update_visual_state()
 	queue_redraw()
 
+## Executa o ciclo físico da personagem.
+##
+## Fluxo normal:
+## - reduz tempo restante de invencibilidade;
+## - obtém movimento e mira atuais;
+## - bloqueia movimento quando a Queen morreu;
+## - movimenta a personagem enquanto viva;
+## - sincroniza animações e desenho técnico.
 func _physics_process(_delta: float) -> void:
 	_update_invincibility(_delta)
-	
+
 	if runtime_state == null:
 		return
 
@@ -63,6 +101,9 @@ func _physics_process(_delta: float) -> void:
 	_update_visual_state()
 	queue_redraw()
 
+## Desenha a direção de mira quando o modo técnico correspondente está ativo.
+##
+## Este desenho é apenas diagnóstico e não interfere na direção real da arma.
 func _draw() -> void:
 	if not draw_debug_aim:
 		return
@@ -81,6 +122,16 @@ func _draw() -> void:
 	draw_circle(Vector2.ZERO, 5.0, Color.WHITE)
 	draw_circle(end_position, 5.0, Color.ORANGE)
 
+## Recebe um ataque e retorna o dano final efetivamente aplicado.
+##
+## Fluxo:
+## - valida payload e estado atual do gameplay;
+## - ignora impacto durante invencibilidade;
+## - calcula dano após defesa;
+## - atualiza o estado runtime;
+## - inicia invencibilidade e flash visual;
+## - publica eventos de dano e morte;
+## - atualiza animação da Queen.
 func receive_damage(payload: DamagePayload) -> int:
 	if runtime_state == null:
 		return 0
@@ -90,30 +141,32 @@ func receive_damage(payload: DamagePayload) -> int:
 
 	if not payload.is_valid_payload():
 		return 0
-		
+
 	if RunQuery.is_gameplay_blocked(get_tree()):
 		return 0
 
 	if not runtime_state.is_alive:
 		return 0
-		
+
 	if enable_hit_invincibility and runtime_state.is_invincible:
 		return 0
 
+	var raw_total: int = payload.get_total_raw_damage()
+
 	var final_damage: int = DamageResolver.calculate_received_damage(
-		payload.raw_damage,
+		raw_total,
 		runtime_state.defense_percent,
 		payload.can_be_reduced_by_defense
 	)
-	
+
 	runtime_state.apply_damage(final_damage, payload.source_id)
-	
+
 	if final_damage > 0:
 		_start_hit_invincibility()
 		_play_damage_feedback()
-		
+
 	GameEvents.player_damaged.emit(
-		payload.raw_damage,
+		raw_total,
 		final_damage,
 		runtime_state.current_hp,
 		runtime_state.max_hp,
@@ -121,8 +174,8 @@ func receive_damage(payload: DamagePayload) -> int:
 	)
 
 	DeveloperAuditLogger.log_combat(
-		"Dano recebido: raw=%s final=%s HP=%s/%s fonte=%s" % [
-			str(payload.raw_damage),
+		"Dano recebido: raw_total=%s final=%s HP=%s/%s fonte=%s" % [
+			str(raw_total),
 			str(final_damage),
 			str(runtime_state.current_hp),
 			str(runtime_state.max_hp),
@@ -131,7 +184,7 @@ func receive_damage(payload: DamagePayload) -> int:
 		"PlayerController",
 		{
 			"queen_id": runtime_state.queen_id,
-			"raw_damage": payload.raw_damage,
+			"raw_total": raw_total,
 			"final_damage": final_damage,
 			"current_hp": runtime_state.current_hp,
 			"max_hp": runtime_state.max_hp,
@@ -139,7 +192,7 @@ func receive_damage(payload: DamagePayload) -> int:
 			"invincibility_started": final_damage > 0 and enable_hit_invincibility
 		}
 	)
-	
+
 	if not runtime_state.is_alive:
 		GameEvents.player_died.emit(payload.source_id)
 
@@ -157,6 +210,9 @@ func receive_damage(payload: DamagePayload) -> int:
 
 	return final_damage
 
+## Encaminha o estado runtime atual para o controller visual da Queen.
+##
+## O visual decide qual animação executar com base no estado recebido.
 func _update_visual_state() -> void:
 	if visual_controller == null:
 		visual_controller = _resolve_visual_controller()
@@ -167,6 +223,12 @@ func _update_visual_state() -> void:
 	if visual_controller.has_method("apply_runtime_state"):
 		visual_controller.call("apply_runtime_state", runtime_state)
 
+## Resolve o controller visual da Queen.
+##
+## Prioridade:
+## 1. caminho informado no Inspector;
+## 2. node conhecido `VisualRoot/GaiaVisual`;
+## 3. busca recursiva por método `apply_runtime_state`.
 func _resolve_visual_controller() -> Node:
 	if visual_controller_path != NodePath():
 		var configured_visual: Node = get_node_or_null(visual_controller_path)
@@ -189,6 +251,9 @@ func _resolve_visual_controller() -> Node:
 
 	return null
 
+## Procura recursivamente um node que implemente determinado método.
+##
+## Utilizado como fallback desacoplado para controllers visuais.
 func _find_node_with_method(root: Node, method_name: String) -> Node:
 	if root == null:
 		return null
@@ -204,96 +269,211 @@ func _find_node_with_method(root: Node, method_name: String) -> Node:
 
 	return null
 
-func apply_run_upgrade(upgrade: UpgradeDefinition) -> void:
+## Aplica um upgrade selecionado durante a run.
+##
+## Upgrades próprios do player são tratados diretamente neste controller.
+## Upgrades pertencentes a armas são encaminhados para nodes do grupo
+## `player_weapon`.
+##
+## Retorna `true` somente quando o upgrade foi efetivamente aplicado,
+## permitindo ao `RunController` consumir a escolha de forma segura.
+func apply_run_upgrade(upgrade: UpgradeDefinition) -> bool:
 	if upgrade == null:
-		return
+		return false
 
 	if runtime_state == null:
-		return
+		return false
 
 	match upgrade.upgrade_type:
 		UpgradeTypes.PLAYER_MOVE_SPEED_PERCENT:
+			if upgrade.value_float <= 0.0:
+				push_warning("[PlayerController] Upgrade de velocidade sem valor válido: %s" % upgrade.id)
+				return false
+
 			var move_multiplier: float = 1.0 + (upgrade.value_float * 0.01)
 			runtime_state.move_speed *= move_multiplier
 
-			GameEvents.emit_debug("[PlayerController] Upgrade aplicado: velocidade +%s%% | move_speed=%s" % [
-				str(upgrade.value_float),
-				str(runtime_state.move_speed)
-			])
+			DeveloperAuditLogger.log_upgrade(
+				"Velocidade aplicada: +%s%% | move_speed=%s" % [
+					str(upgrade.value_float),
+					str(runtime_state.move_speed)
+				],
+				"PlayerController",
+				{
+					"upgrade_id": upgrade.id,
+					"percent": upgrade.value_float,
+					"move_speed": runtime_state.move_speed
+				}
+			)
 
 		UpgradeTypes.PLAYER_MAX_HP_FLAT:
 			var hp_gain: int = max(0, upgrade.value_int)
 
-			runtime_state.max_hp += hp_gain
-			runtime_state.current_hp = min(runtime_state.max_hp, runtime_state.current_hp + hp_gain)
+			if hp_gain <= 0:
+				push_warning("[PlayerController] Upgrade de HP sem valor válido: %s" % upgrade.id)
+				return false
 
-			GameEvents.emit_debug("[PlayerController] Upgrade aplicado: HP máximo +%s | HP=%s/%s" % [
-				str(hp_gain),
-				str(runtime_state.current_hp),
-				str(runtime_state.max_hp)
-			])
+			runtime_state.max_hp += hp_gain
+			runtime_state.heal(hp_gain)
+
+			DeveloperAuditLogger.log_upgrade(
+				"HP máximo aplicado: +%s | HP=%s/%s" % [
+					str(hp_gain),
+					str(runtime_state.current_hp),
+					str(runtime_state.max_hp)
+				],
+				"PlayerController",
+				{
+					"upgrade_id": upgrade.id,
+					"hp_gain": hp_gain,
+					"current_hp": runtime_state.current_hp,
+					"max_hp": runtime_state.max_hp
+				}
+			)
 
 		UpgradeTypes.PLAYER_DEFENSE_PERCENT:
 			var defense_gain: float = max(0.0, upgrade.value_float)
-			runtime_state.defense_percent = clamp(runtime_state.defense_percent + defense_gain, 0.0, 95.0)
 
-			GameEvents.emit_debug("[PlayerController] Upgrade aplicado: defesa +%s%% | defense=%s%%" % [
-				str(defense_gain),
-				str(runtime_state.defense_percent)
-			])
+			if defense_gain <= 0.0:
+				push_warning("[PlayerController] Upgrade de defesa sem valor válido: %s" % upgrade.id)
+				return false
+
+			var previous_defense_percent: float = runtime_state.defense_percent
+			var new_defense_percent: float = clamp(
+				runtime_state.defense_percent + defense_gain,
+				0.0,
+				95.0
+			)
+
+			if is_equal_approx(previous_defense_percent, new_defense_percent):
+				push_warning("[PlayerController] Defesa já está no limite máximo para upgrade: %s" % upgrade.id)
+				return false
+
+			runtime_state.defense_percent = new_defense_percent
+
+			DeveloperAuditLogger.log_upgrade(
+				"Defesa aplicada: +%s%% | defense=%s%%" % [
+					str(defense_gain),
+					str(runtime_state.defense_percent)
+				],
+				"PlayerController",
+				{
+					"upgrade_id": upgrade.id,
+					"defense_gain": defense_gain,
+					"defense_percent": runtime_state.defense_percent
+				}
+			)
 
 		UpgradeTypes.PLAYER_HEAL_FLAT:
 			var heal_amount: int = max(0, upgrade.value_int)
-			runtime_state.current_hp = min(runtime_state.max_hp, runtime_state.current_hp + heal_amount)
 
-			GameEvents.emit_debug("[PlayerController] Upgrade aplicado: cura +%s | HP=%s/%s" % [
-				str(heal_amount),
-				str(runtime_state.current_hp),
-				str(runtime_state.max_hp)
-			])
+			if heal_amount <= 0:
+				push_warning("[PlayerController] Upgrade de cura sem valor válido: %s" % upgrade.id)
+				return false
+
+			runtime_state.heal(heal_amount)
+
+			DeveloperAuditLogger.log_upgrade(
+				"Cura aplicada: +%s | HP=%s/%s" % [
+					str(heal_amount),
+					str(runtime_state.current_hp),
+					str(runtime_state.max_hp)
+				],
+				"PlayerController",
+				{
+					"upgrade_id": upgrade.id,
+					"heal_amount": heal_amount,
+					"current_hp": runtime_state.current_hp,
+					"max_hp": runtime_state.max_hp
+				}
+			)
 
 		UpgradeTypes.COIN_MAGNET_RADIUS_PERCENT:
 			var magnet_bonus: float = max(0.0, upgrade.value_float)
+
+			if magnet_bonus <= 0.0:
+				push_warning("[PlayerController] Upgrade de magnetismo sem valor válido: %s" % upgrade.id)
+				return false
+
 			runtime_state.coin_magnet_radius_multiplier += magnet_bonus * 0.01
 
-			GameEvents.emit_debug("[PlayerController] Upgrade aplicado: magnetismo de moeda +%s%% | multiplier=%s" % [
-				str(magnet_bonus),
-				str(runtime_state.coin_magnet_radius_multiplier)
-			])
+			DeveloperAuditLogger.log_upgrade(
+				"Magnetismo aplicado: +%s%% | multiplier=%s" % [
+					str(magnet_bonus),
+					str(runtime_state.coin_magnet_radius_multiplier)
+				],
+				"PlayerController",
+				{
+					"upgrade_id": upgrade.id,
+					"percent": magnet_bonus,
+					"multiplier": runtime_state.coin_magnet_radius_multiplier
+				}
+			)
 
 		UpgradeTypes.COIN_COLLECT_RADIUS_PERCENT:
 			var collect_bonus: float = max(0.0, upgrade.value_float)
+
+			if collect_bonus <= 0.0:
+				push_warning("[PlayerController] Upgrade de coleta sem valor válido: %s" % upgrade.id)
+				return false
+
 			runtime_state.coin_collect_radius_multiplier += collect_bonus * 0.01
 
-			GameEvents.emit_debug("[PlayerController] Upgrade aplicado: raio de coleta +%s%% | multiplier=%s" % [
-				str(collect_bonus),
-				str(runtime_state.coin_collect_radius_multiplier)
-			])
+			DeveloperAuditLogger.log_upgrade(
+				"Raio de coleta aplicado: +%s%% | multiplier=%s" % [
+					str(collect_bonus),
+					str(runtime_state.coin_collect_radius_multiplier)
+				],
+				"PlayerController",
+				{
+					"upgrade_id": upgrade.id,
+					"percent": collect_bonus,
+					"multiplier": runtime_state.coin_collect_radius_multiplier
+				}
+			)
 
 		_:
-			_forward_upgrade_to_weapons(upgrade)
+			if not UpgradeTypes.is_weapon_upgrade(upgrade.upgrade_type):
+				push_warning("[PlayerController] Tipo de upgrade não suportado: %s" % upgrade.upgrade_type)
+				return false
+
+			if not _forward_upgrade_to_weapons(upgrade):
+				return false
 
 	_update_visual_state()
 	queue_redraw()
 
-func _forward_upgrade_to_weapons(upgrade: UpgradeDefinition) -> void:
-	var weapon_nodes: Array[Node] = get_tree().get_nodes_in_group("player_weapon")
+	return true
 
+## Encaminha um upgrade de arma para todos os controllers de arma ativos.
+##
+## Retorna sucesso quando ao menos uma arma aceitou e aplicou a melhoria.
+func _forward_upgrade_to_weapons(upgrade: UpgradeDefinition) -> bool:
+	var weapon_nodes: Array[Node] = get_tree().get_nodes_in_group("player_weapon")
 	var applied_count: int = 0
 
 	for weapon_node: Node in weapon_nodes:
-		if weapon_node.has_method("apply_run_upgrade"):
-			weapon_node.call("apply_run_upgrade", upgrade)
+		if not weapon_node.has_method("apply_run_upgrade"):
+			continue
+
+		var applied_variant: Variant = weapon_node.call("apply_run_upgrade", upgrade)
+
+		if applied_variant is bool and bool(applied_variant):
 			applied_count += 1
 
-	GameEvents.emit_debug("[PlayerController] Upgrade encaminhado para armas: %s | count=%s" % [
-		upgrade.id,
-		str(applied_count)
-	])
+	if applied_count <= 0:
+		push_warning("[PlayerController] Nenhuma arma recebeu o upgrade: %s" % upgrade.id)
+		return false
 
+	return true
+
+## Retorna o estado runtime atual da Queen.
+##
+## Utilizado por arma, inimigos, moedas e sistemas de diagnóstico.
 func get_runtime_state() -> PlayerRuntimeState:
 	return runtime_state
 
+## Retorna informações técnicas do player para overlay e auditoria.
 func get_debug_data() -> Dictionary:
 	if runtime_state == null:
 		return {
@@ -319,9 +499,15 @@ func get_debug_data() -> Dictionary:
 		"total_damage_taken": runtime_state.total_damage_taken,
 		"last_damage_taken": runtime_state.last_damage_taken,
 		"last_damage_source_id": runtime_state.last_damage_source_id,
-		"death_cause": runtime_state.death_cause
+		"death_cause": runtime_state.death_cause,
+		"coin_magnet_radius_multiplier": runtime_state.coin_magnet_radius_multiplier,
+		"coin_collect_radius_multiplier": runtime_state.coin_collect_radius_multiplier
 	}
 
+## Retorna modificadores utilizados pelos drops físicos de moeda.
+##
+## O `CoinDrop` consulta esta estrutura para calcular seus raios
+## efetivos de magnetismo e coleta.
 func get_drop_collection_modifiers() -> Dictionary:
 	if runtime_state == null:
 		return {
@@ -334,6 +520,7 @@ func get_drop_collection_modifiers() -> Dictionary:
 		"coin_collect_radius_multiplier": runtime_state.coin_collect_radius_multiplier
 	}
 
+## Atualiza o tempo restante da invencibilidade temporária após dano.
 func _update_invincibility(delta: float) -> void:
 	if runtime_state == null:
 		return
@@ -347,6 +534,10 @@ func _update_invincibility(delta: float) -> void:
 		runtime_state.invincibility_timer = 0.0
 		runtime_state.is_invincible = false
 
+## Inicia uma nova janela de invencibilidade após dano válido.
+##
+## Quando a duração configurada for inválida, garante que a Queen
+## permaneça imediatamente vulnerável.
 func _start_hit_invincibility() -> void:
 	if runtime_state == null:
 		return
@@ -354,9 +545,17 @@ func _start_hit_invincibility() -> void:
 	if not enable_hit_invincibility:
 		return
 
-	runtime_state.is_invincible = true
-	runtime_state.invincibility_timer = max(0.0, invincibility_duration_after_hit)
+	if invincibility_duration_after_hit <= 0.0:
+		runtime_state.is_invincible = false
+		runtime_state.invincibility_timer = 0.0
+		return
 
+	runtime_state.is_invincible = true
+	runtime_state.invincibility_timer = invincibility_duration_after_hit
+
+## Solicita ao controller visual o feedback de impacto recebido.
+##
+## Atualmente dispara o flash vermelho temporário da Gaia.
 func _play_damage_feedback() -> void:
 	if not play_visual_damage_flash:
 		return

@@ -63,6 +63,11 @@
 	"ui.result.close_hint": "Resultado básico do protótipo. Clique em Testar novamente para reiniciar a cena.",
 	"ui.result.restart": "Testar novamente",
 	"ui.result.save_applied": "Resultado salvo no progresso permanente.",
+	"ui.result.saving": "Salvando resultado...",
+	"ui.result.victory_multiplier": "Multiplicador",
+	"ui.result.victory_bonus": "Bônus",
+	"ui.result.damage_dealt": "Dano causado",
+	"ui.result.damage_taken": "Dano recebido",
 	
 	"ui.debug_tools.title": "Ferramentas do Protótipo",
 	"ui.debug_tools.toggle_hint": "F3: mostrar ou ocultar | F4: exportar árvore runtime",
@@ -89,14 +94,15 @@
 	"ui.debug_tools.force_victory_done": "Vitória forçada para teste.",
 	"ui.debug_tools.force_defeat_done": "Derrota forçada para teste.",
 	"ui.debug_tools.force_disabled": "Ação de debug desabilitada no RunController.",
+	"ui.debug_tools.save_unavailable": "Save: -",
 
 	"upgrade.weapon_damage_flat.name": "Dano da arma +1",
 	"upgrade.weapon_damage_flat.description": "Aumenta em +1 o dano de cada componente da arma atual.",
 
 	"upgrade.weapon_cooldown_percent.name": "Recarga mais rápida",
-	"upgrade.weapon_cooldown_percent.description": "Reduz o cooldown da arma atual em 10%.",
+	"upgrade.weapon_cooldown_percent.description": "Reduz o cooldown da arma atual em 1.5%.",
 
-	"upgrade.player_move_speed_percent.name": "Velocidade +10%",
+	"upgrade.player_move_speed_percent.name": "Velocidade +8%",
 	"upgrade.player_move_speed_percent.description": "Aumenta a velocidade de movimento da Gaia em 10%.",
 
 	"upgrade.player_max_hp_flat.name": "Vida máxima +10",

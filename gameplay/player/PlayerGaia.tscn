@@ -6,8 +6,9 @@
 [ext_resource type="Script" uid="uid://bk43i87f7tv1j" path="res://gameplay/weapons/gaia/GaiaInitialWeaponController.gd" id="4_wm5q1"]
 [ext_resource type="Resource" uid="uid://rysi500pe7yh" path="res://data/weapons/weapon_gaia_initial.tres" id="5_0caxs"]
 
-[sub_resource type="CircleShape2D" id="CircleShape2D_cbat8"]
-radius = 24.0
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_0caxs"]
+radius = 23.0
+height = 102.0
 
 [node name="PlayerGaia" type="CharacterBody2D" unique_id=1984313078]
 script = ExtResource("1_64352")
@@ -15,7 +16,8 @@ queen_definition = ExtResource("2_b2oau")
 visual_controller_path = NodePath("VisualRoot/GaiaVisual")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=158647657]
-shape = SubResource("CircleShape2D_cbat8")
+position = Vector2(0, 41)
+shape = SubResource("CapsuleShape2D_0caxs")
 
 [node name="VisualRoot" type="Node2D" parent="." unique_id=721531233]
 

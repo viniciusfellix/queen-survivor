@@ -7,8 +7,6 @@
 [node name="GoblinWarriorVisual" type="Node2D" unique_id=520093498]
 script = ExtResource("1_qfo8t")
 spine_adapter_path = NodePath("GoblinWarriorSpineAdapter")
-walk_animation_name = "Run"
-death_animation_name = "Die"
 
 [node name="SpineSprite" type="SpineSprite" parent="." unique_id=157646900]
 scale = Vector2(0.1, 0.1)

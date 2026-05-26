@@ -1,18 +1,46 @@
+## Serviço estático responsável por calcular resultados finais de dano.
+##
+## Existem dois fluxos atuais:
+## - dano recebido pela Queen, reduzido por defesa percentual;
+## - dano recebido por inimigos, calculado por componente,
+##   considerando fraquezas e resistências.
 extends RefCounted
 class_name DamageResolver
 
-static func calculate_received_damage(raw_damage: int, defense_percent: float, can_be_reduced_by_defense: bool = true) -> int:
+## Calcula dano final recebido pela Queen.
+##
+## Regras atuais:
+## - dano bruto inválido retorna zero;
+## - dano não reduzível ignora defesa;
+## - defesa é limitada entre 0% e 100%;
+## - impactos válidos que atravessam defesa causam ao menos 1 ponto.
+static func calculate_received_damage(
+	raw_damage: int,
+	defense_percent: float,
+	can_be_reduced_by_defense: bool = true
+) -> int:
 	if raw_damage <= 0:
 		return 0
 
 	if not can_be_reduced_by_defense:
 		return max(1, raw_damage)
 
-	var reduced_damage: float = float(raw_damage) - (float(raw_damage) * defense_percent * 0.01)
+	var safe_defense_percent: float = clamp(defense_percent, 0.0, 100.0)
+	var reduced_damage: float = float(raw_damage) - (float(raw_damage) * safe_defense_percent * 0.01)
 	var final_damage: int = int(round(reduced_damage))
 
 	return max(1, final_damage)
 
+## Calcula dano causado a um inimigo.
+##
+## Para ataques compostos, resolve cada componente separadamente,
+## permitindo que físico e mágico reajam de formas diferentes
+## às fraquezas e resistências do alvo.
+##
+## Retorna:
+## - `raw_total`;
+## - `final_total`;
+## - `breakdown` detalhado por componente.
 static func calculate_enemy_damage(payload: DamagePayload, enemy_definition: EnemyDefinition) -> Dictionary:
 	var result: Dictionary = {
 		"raw_total": 0,
@@ -53,6 +81,12 @@ static func calculate_enemy_damage(payload: DamagePayload, enemy_definition: Ene
 
 	return result
 
+## Resolve um único componente de dano contra uma definition inimiga.
+##
+## Multiplicador inicial: `1.0`.
+## Fraqueza acrescenta percentual configurado.
+## Resistência reduz percentual configurado.
+## O multiplicador nunca fica abaixo de zero.
 static func _calculate_component_damage(component: DamageComponentDefinition, enemy_definition: EnemyDefinition) -> Dictionary:
 	var raw_damage: int = component.amount
 	var final_damage_float: float = float(raw_damage)

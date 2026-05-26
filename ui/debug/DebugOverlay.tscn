@@ -1,9 +1,14 @@
 [gd_scene format=3 uid="uid://bgefmxnkcihft"]
 
 [ext_resource type="Script" uid="uid://dtxnqp3rajhxw" path="res://ui/debug/DebugOverlay.gd" id="1_ybgx5"]
+[ext_resource type="Script" uid="uid://cte64n3menda1" path="res://ui/debug/DebugEnemyLinkDrawer.gd" id="2_m0gce"]
 
 [node name="DebugOverlay" type="CanvasLayer" unique_id=1878947059]
 script = ExtResource("1_ybgx5")
+show_player_direction_section = true
+show_run_result_section = true
+show_save_section = true
+show_technical_section = true
 
 [node name="Panel" type="Panel" parent="." unique_id=992620162]
 pivot_offset = Vector2(16, 16)
@@ -17,3 +22,7 @@ offset_bottom = 40.0
 [node name="Label" type="Label" parent="Panel/MarginContainer" unique_id=2059281577]
 layout_mode = 2
 text = "Debug"
+
+[node name="EnemyLinkDrawer" type="Node2D" parent="." unique_id=553732198]
+z_index = -10
+script = ExtResource("2_m0gce")

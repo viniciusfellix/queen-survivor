@@ -1,14 +1,14 @@
+Node2D
+Panel
 Button
 HBoxContainer
 Label
 VBoxContainer
 MarginContainer
-Panel
 Control
 CanvasLayer
 Node
 TextureRect
 ProgressBar
-Node2D
 Sprite2D
 SpineSprite

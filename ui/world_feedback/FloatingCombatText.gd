@@ -1,22 +1,50 @@
+## Texto visual temporário utilizado para feedback de combate.
+##
+## Atualmente é utilizado para informar dano recebido pela Gaia.
+## A animação padrão:
+## - inicia menor;
+## - cresce rapidamente enquanto começa a subir;
+## - reduz de tamanho;
+## - desaparece gradualmente;
+## - remove a própria instância ao concluir.
 extends Label
 class_name FloatingCombatText
 
 @export_group("Animation")
+
+## Tempo total de existência do texto na tela.
 @export var total_lifetime_seconds: float = 1.00
+
+## Duração da etapa inicial de crescimento.
 @export var grow_seconds: float = 0.20
+
+## Distância vertical percorrida para cima durante a animação.
 @export var rise_distance: float = 112.0
 
+## Escala inicial aplicada quando o texto aparece.
 @export var start_scale: Vector2 = Vector2(0.78, 0.78)
+
+## Escala máxima atingida no início da animação.
 @export var peak_scale: Vector2 = Vector2(1.85, 1.85)
+
+## Escala final antes do desaparecimento completo.
 @export var end_scale: Vector2 = Vector2(0.52, 0.52)
 
 @export_group("Text Style")
+
+## Tamanho de fonte utilizado pelo valor exibido.
 @export var font_size: int = 52
+
+## Espessura do contorno ao redor do texto.
 @export var outline_size: int = 6
+
+## Cor do contorno, utilizada para melhorar leitura sobre o cenário.
 @export var outline_color: Color = Color(0.0, 0.0, 0.0, 0.92)
 
+## Evita que a animação seja iniciada mais de uma vez.
 var animation_started: bool = false
 
+## Configura tamanho, alinhamento, estilo visual e estado inicial do label.
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 
@@ -37,6 +65,10 @@ func _ready() -> void:
 	self_modulate = Color.WHITE
 	pivot_offset = size * 0.5
 
+## Recebe o texto e a cor que devem ser apresentados.
+##
+## Após aplicar os dados visuais, agenda a animação para o próximo ciclo,
+## garantindo que o node já esteja corretamente inserido na árvore.
 func setup(display_text: String, text_color: Color) -> void:
 	text = display_text
 	visible = true
@@ -53,6 +85,12 @@ func setup(display_text: String, text_color: Color) -> void:
 	animation_started = true
 	call_deferred("_play_animation")
 
+## Executa as três animações paralelas do feedback:
+## - deslocamento vertical;
+## - crescimento e redução de escala;
+## - desaparecimento por alpha.
+##
+## Ao finalizar o fade, a instância é removida automaticamente.
 func _play_animation() -> void:
 	var destination: Vector2 = position + Vector2(0.0, -rise_distance)
 	var shrink_seconds: float = max(0.05, total_lifetime_seconds - grow_seconds)
@@ -62,18 +100,38 @@ func _play_animation() -> void:
 	var movement_tween: Tween = create_tween()
 	movement_tween.bind_node(self)
 	movement_tween.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
-	movement_tween.tween_property(self, "position", destination, total_lifetime_seconds).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	movement_tween.tween_property(
+		self,
+		"position",
+		destination,
+		total_lifetime_seconds
+	).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 
 	var scale_tween: Tween = create_tween()
 	scale_tween.bind_node(self)
 	scale_tween.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
-	scale_tween.tween_property(self, "scale", peak_scale, grow_seconds).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-	scale_tween.tween_property(self, "scale", end_scale, shrink_seconds).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	scale_tween.tween_property(
+		self,
+		"scale",
+		peak_scale,
+		grow_seconds
+	).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	scale_tween.tween_property(
+		self,
+		"scale",
+		end_scale,
+		shrink_seconds
+	).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
 
 	var fade_tween: Tween = create_tween()
 	fade_tween.bind_node(self)
 	fade_tween.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
-	fade_tween.tween_property(self, "self_modulate:a", 0.0, fade_seconds).set_delay(fade_delay)
+	fade_tween.tween_property(
+		self,
+		"self_modulate:a",
+		0.0,
+		fade_seconds
+	).set_delay(fade_delay)
 
 	fade_tween.finished.connect(func() -> void:
 		queue_free()
