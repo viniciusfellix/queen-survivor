@@ -1,72 +1,114 @@
+## Spawner runtime responsável por criar inimigos ao redor da Queen.
+##
+## Responsabilidades:
+## - resolver player e EnemyRoot;
+## - consumir a timeline configurada no mapa;
+## - aplicar valores da wave ativa;
+## - criar inimigos fora de uma distância mínima segura;
+## - impedir spawn duplo no mesmo frame;
+## - interromper criação após o fim da run.
 extends Node
 
 @export_group("Base")
+
+## Ativa ou desativa toda criação de inimigos deste spawner.
 @export var spawner_enabled: bool = true
+
+## Define se o primeiro spawn deve ser liberado após o delay inicial,
+## em vez de aguardar um intervalo completo.
 @export var spawn_on_ready: bool = true
+
+## Grupo utilizado para localizar automaticamente a Queen.
 @export var player_group_name: String = "player"
 
 @export_group("Enemy")
+
+## Cena base instanciada para cada inimigo.
 @export_file("*.tscn") var enemy_scene_path: String = "res://gameplay/enemies/EnemyBase.tscn"
+
+## Definition fallback aplicada ao inimigo quando não houver timeline ativa.
 @export var enemy_definition: EnemyDefinition
 
 @export_group("Scene Roots")
+
+## Caminho opcional para o container que receberá inimigos criados.
 @export var enemy_root_path: NodePath
 
 @export_group("Spawn Fallback")
+
+## Intervalo padrão entre spawns quando não há wave substituindo o valor.
 @export var spawn_interval_seconds: float = 2.2
+
+## Limite padrão de inimigos vivos simultaneamente.
 @export var max_alive_enemies: int = 18
+
+## Distância mínima fallback para nascimento ao redor do player.
 @export var spawn_min_distance: float = 420.0
+
+## Distância máxima fallback para nascimento ao redor do player.
 @export var spawn_max_distance: float = 620.0
 
 @export_group("Spawn Safety")
+
+## Pequeno atraso inicial antes de liberar o primeiro spawn.
+##
+## Evita que um inimigo seja criado no primeiro frame da cena,
+## antes de player, câmera e posições runtime estarem estabilizados.
 @export var initial_spawn_delay_seconds: float = 0.45
+
+## Número máximo de posições aleatórias tentadas ao escolher um spawn seguro.
 @export var spawn_position_attempts: int = 16
+
+## Distância mínima absoluta exigida entre player e novo inimigo.
 @export var minimum_safe_spawn_distance_from_player: float = 360.0
+
+## Impede a criação de mais de um inimigo no mesmo frame de processamento.
 @export var prevent_multiple_spawns_same_frame: bool = true
+
+## Ativa logs de posição e distância de cada nascimento.
 @export var log_spawn_distance: bool = true
 
 @export_group("Timeline")
+
+## Define se a timeline deve ser obtida automaticamente do mapa atual.
 @export var use_map_spawn_timeline: bool = true
+
+## Timeline ativa utilizada para alterar comportamento ao longo da run.
 @export var spawn_timeline_definition: SpawnTimelineDefinition
+
+## Ativa logs sempre que uma nova wave entra em vigor.
 @export var log_timeline_changes: bool = true
 
+## Referência atual da Queen ao redor da qual os inimigos nascerão.
 var player_node: Node2D = null
+
+## Container onde inimigos instanciados serão adicionados.
 var enemy_root: Node2D = null
 
+## Tempo restante até a próxima tentativa de spawn.
 var spawn_timer: float = 0.0
+
+## ID da faixa/wave atualmente aplicada.
 var active_entry_id: String = ""
 
+## Tempo transcorrido desde a entrada do spawner na árvore.
 var elapsed_since_ready: float = 0.0
+
+## Último frame em que um spawn foi realizado.
 var last_spawn_frame: int = -1
+
+## Define se a trava inicial de segurança já foi liberada.
 var initial_spawn_delay_completed: bool = false
 
+## Inicializa referências, timeline e timer do primeiro spawn.
+##
+## A cena principal pode injetar player e EnemyRoot depois deste momento;
+## por isso a ausência inicial dessas referências não representa erro.
 func _ready() -> void:
 	enemy_root = _resolve_enemy_root()
 	player_node = _resolve_player()
 	_resolve_spawn_timeline_from_map()
 
-	if enemy_root != null:
-		DeveloperAuditLogger.log_spawn(
-			"EnemyRoot encontrado: %s" % enemy_root.name,
-			"EnemySpawner",
-			{
-				"enemy_root": enemy_root.name
-			}
-		)
-	else:
-		GameEvents.emit_debug("[EnemySpawner] EnemyRoot NÃO encontrado.")
-
-	if player_node != null:
-		GameEvents.emit_debug("[EnemySpawner] Player encontrado: %s" % player_node.name)
-
-	if spawn_timeline_definition != null:
-		GameEvents.emit_debug("[EnemySpawner] SpawnTimeline carregada: %s | %s" % [
-			spawn_timeline_definition.id,
-			spawn_timeline_definition.get_debug_summary()
-		])
-
-	# Antes era comum deixar spawn_timer em 0.
-	# Agora mesmo com spawn_on_ready, aguardamos um pequeno delay para evitar spawn no primeiro frame.
 	if spawn_on_ready:
 		spawn_timer = max(0.0, initial_spawn_delay_seconds)
 	else:
@@ -75,6 +117,11 @@ func _ready() -> void:
 	if not GameEvents.run_finished.is_connected(_on_run_finished):
 		GameEvents.run_finished.connect(_on_run_finished)
 
+## Atualiza timeline e cria inimigos quando o timer permite.
+##
+## Nenhum spawn acontece enquanto gameplay estiver bloqueado,
+## enquanto referências obrigatórias estiverem ausentes
+## ou antes do delay inicial de segurança.
 func _process(delta: float) -> void:
 	if not spawner_enabled:
 		return
@@ -101,6 +148,7 @@ func _process(delta: float) -> void:
 	if not initial_spawn_delay_completed:
 		initial_spawn_delay_completed = true
 		spawn_timer = min(spawn_timer, 0.05)
+
 		DeveloperAuditLogger.log_spawn(
 			"Delay inicial concluído. Spawner liberado.",
 			"EnemySpawner"
@@ -114,10 +162,9 @@ func _process(delta: float) -> void:
 		if spawned:
 			spawn_timer = spawn_interval_seconds
 		else:
-			# Se não conseguiu spawnar por limite de vivos ou outro motivo,
-			# tenta novamente em breve, mas não no mesmo frame.
 			spawn_timer = min(0.5, spawn_interval_seconds)
 
+## Injeta explicitamente a referência da Queen controlada na cena.
 func configure_player(player: Node2D) -> void:
 	player_node = player
 
@@ -130,6 +177,7 @@ func configure_player(player: Node2D) -> void:
 			}
 		)
 
+## Injeta explicitamente o container onde inimigos serão adicionados.
 func configure_enemy_root(root: Node2D) -> void:
 	enemy_root = root
 
@@ -142,9 +190,18 @@ func configure_enemy_root(root: Node2D) -> void:
 			}
 		)
 
+## Tenta criar imediatamente uma instância inimiga.
+##
+## Retorna `true` somente quando o inimigo foi de fato instanciado.
+## O método respeita:
+## - estado da run;
+## - habilitação do spawner;
+## - bloqueio de múltiplos spawns no mesmo frame;
+## - limite de inimigos vivos;
+## - validação da cena do inimigo;
+## - posicionamento seguro ao redor da Queen.
 func force_spawn_enemy() -> bool:
 	if RunQuery.is_gameplay_blocked(get_tree()):
-		GameEvents.emit_debug("[EnemySpawner] Spawn cancelado: gameplay bloqueado.")
 		return false
 
 	if not spawner_enabled:
@@ -154,7 +211,6 @@ func force_spawn_enemy() -> bool:
 		var current_frame: int = Engine.get_process_frames()
 
 		if current_frame == last_spawn_frame:
-			GameEvents.emit_debug("[EnemySpawner] Spawn cancelado: já houve spawn neste frame.")
 			return false
 
 	if player_node == null:
@@ -164,11 +220,11 @@ func force_spawn_enemy() -> bool:
 		enemy_root = _resolve_enemy_root()
 
 	if player_node == null:
-		GameEvents.emit_debug("[EnemySpawner] Spawn cancelado: player ausente.")
+		push_warning("[EnemySpawner] Spawn cancelado: player ausente.")
 		return false
 
 	if enemy_root == null:
-		GameEvents.emit_debug("[EnemySpawner] Spawn cancelado: enemy_root ausente.")
+		push_warning("[EnemySpawner] Spawn cancelado: EnemyRoot ausente.")
 		return false
 
 	var alive_count: int = _get_alive_enemy_count()
@@ -197,9 +253,9 @@ func force_spawn_enemy() -> bool:
 	var spawn_position: Vector2 = _get_safe_spawn_position_around_player()
 	var distance_to_player: float = spawn_position.distance_to(player_node.global_position)
 
-	# Importante:
-	# Definimos a posição local ANTES de adicionar o inimigo à árvore.
-	# Assim o _ready() do EnemyBase já nasce na posição correta.
+	# A posição local é definida antes de adicionar o inimigo à árvore.
+	# Dessa forma, o `_ready()` do EnemyBase já executa com a posição
+	# mundial correta e não aparece colado na Queen no primeiro frame.
 	enemy_node.position = enemy_root.to_local(spawn_position)
 
 	enemy_root.add_child(enemy_node)
@@ -209,27 +265,28 @@ func force_spawn_enemy() -> bool:
 
 	last_spawn_frame = Engine.get_process_frames()
 
-	# Recalcula depois de entrar na árvore, apenas para log/validação.
 	distance_to_player = enemy_node.global_position.distance_to(player_node.global_position)
 
 	if log_spawn_distance:
 		DeveloperAuditLogger.log_spawn(
 			"Inimigo criado em: %s | dist_player=%s | vivos=%s | wave=%s" % [
-				str(enemy_instance.global_position),
+				str(enemy_node.global_position),
 				str(distance_to_player),
 				str(_get_alive_enemy_count()),
 				active_entry_id
 			],
+			"EnemySpawner",
+			{
+				"position": enemy_node.global_position,
+				"distance_to_player": distance_to_player,
+				"alive_count": _get_alive_enemy_count(),
+				"wave_id": active_entry_id
+			}
 		)
-	else:
-		GameEvents.emit_debug("[EnemySpawner] Inimigo criado em: %s | vivos=%s | wave=%s" % [
-			str(enemy_node.global_position),
-			str(_get_alive_enemy_count()),
-			active_entry_id
-		])
 
 	return true
 
+## Consulta a timeline e aplica a wave correspondente ao tempo atual da run.
 func _update_timeline_values() -> void:
 	if spawn_timeline_definition == null:
 		_resolve_spawn_timeline_from_map()
@@ -253,6 +310,10 @@ func _update_timeline_values() -> void:
 	else:
 		_apply_timeline_entry(active_entry, false)
 
+## Copia valores de uma faixa da timeline para o spawner runtime.
+##
+## Quando a wave acabou de ser ativada, pode liberar um spawn imediato,
+## respeitando o delay inicial e a trava contra spawn duplo.
 func _apply_timeline_entry(entry: SpawnTimelineEntryDefinition, changed: bool) -> void:
 	if entry == null:
 		return
@@ -276,14 +337,6 @@ func _apply_timeline_entry(entry: SpawnTimelineEntryDefinition, changed: bool) -
 	spawn_timer = min(spawn_timer, spawn_interval_seconds)
 
 	if log_timeline_changes:
-		GameEvents.emit_debug("[EnemySpawner] Wave ativa: %s | interval=%s max_alive=%s dist=%s-%s" % [
-			entry.id,
-			str(spawn_interval_seconds),
-			str(max_alive_enemies),
-			str(spawn_min_distance),
-			str(spawn_max_distance)
-		])
-		
 		DeveloperAuditLogger.log_spawn(
 			"Wave ativa: %s | interval=%s max_alive=%s dist=%s-%s" % [
 				entry.id,
@@ -292,12 +345,19 @@ func _apply_timeline_entry(entry: SpawnTimelineEntryDefinition, changed: bool) -
 				str(spawn_min_distance),
 				str(spawn_max_distance)
 			],
+			"EnemySpawner",
+			{
+				"wave_id": entry.id,
+				"spawn_interval_seconds": spawn_interval_seconds,
+				"max_alive_enemies": max_alive_enemies,
+				"spawn_min_distance": spawn_min_distance,
+				"spawn_max_distance": spawn_max_distance
+			}
 		)
 
 	if not entry.spawn_on_activate:
 		return
 
-	# A wave inicial não deve forçar spawn antes do delay inicial.
 	if not initial_spawn_delay_completed:
 		spawn_timer = min(spawn_timer, max(0.05, initial_spawn_delay_seconds - elapsed_since_ready))
 		return
@@ -305,9 +365,9 @@ func _apply_timeline_entry(entry: SpawnTimelineEntryDefinition, changed: bool) -
 	var spawned: bool = force_spawn_enemy()
 
 	if spawned:
-		# Impede spawn duplo no mesmo frame após troca de wave.
 		spawn_timer = spawn_interval_seconds
 
+## Obtém automaticamente a timeline cadastrada na definição do mapa atual.
 func _resolve_spawn_timeline_from_map() -> void:
 	if spawn_timeline_definition != null:
 		return
@@ -339,6 +399,10 @@ func _resolve_spawn_timeline_from_map() -> void:
 				}
 			)
 
+## Procura uma posição aleatória que respeite a distância segura do player.
+##
+## Caso nenhuma tentativa obtenha resultado ideal, retorna a melhor
+## posição encontrada ou um fallback diretamente à direita da Queen.
 func _get_safe_spawn_position_around_player() -> Vector2:
 	var safe_min_distance: float = max(minimum_safe_spawn_distance_from_player, spawn_min_distance)
 	var safe_max_distance: float = max(safe_min_distance + 1.0, spawn_max_distance)
@@ -359,6 +423,7 @@ func _get_safe_spawn_position_around_player() -> Vector2:
 
 	return best_position
 
+## Gera uma posição circular aleatória ao redor do player.
 func _get_spawn_position_around_player(min_distance: float, max_distance: float) -> Vector2:
 	var safe_min_distance: float = max(0.0, min_distance)
 	var safe_max_distance: float = max(safe_min_distance, max_distance)
@@ -368,6 +433,7 @@ func _get_spawn_position_around_player(min_distance: float, max_distance: float)
 
 	return player_node.global_position + Vector2(cos(angle), sin(angle)) * distance
 
+## Conta os inimigos ainda registrados no grupo ativo `enemy`.
 func _get_alive_enemy_count() -> int:
 	var enemies: Array[Node] = get_tree().get_nodes_in_group("enemy")
 	var count: int = 0
@@ -383,6 +449,12 @@ func _get_alive_enemy_count() -> int:
 
 	return count
 
+## Resolve o container onde inimigos devem ser adicionados.
+##
+## Prioridade:
+## 1. caminho configurado;
+## 2. irmão direto chamado `EnemyRoot`;
+## 3. busca ascendente por um container com esse nome.
 func _resolve_enemy_root() -> Node2D:
 	if enemy_root_path != NodePath():
 		var configured_root: Node = get_node_or_null(enemy_root_path)
@@ -407,6 +479,7 @@ func _resolve_enemy_root() -> Node2D:
 
 	return null
 
+## Resolve a Queen atual pelo grupo configurado.
 func _resolve_player() -> Node2D:
 	var players: Array[Node] = get_tree().get_nodes_in_group(player_group_name)
 
@@ -416,13 +489,16 @@ func _resolve_player() -> Node2D:
 
 	return null
 
+## Desativa definitivamente este spawner quando a run termina.
 func _on_run_finished(_result_payload: RunResultPayload) -> void:
 	spawner_enabled = false
+
 	DeveloperAuditLogger.log_spawn(
 		"Desativado após fim da run.",
 		"EnemySpawner"
 	)
 
+## Atalho utilizado pela cena principal para injetar referências runtime.
 func configure_spawner(player: Node2D, root: Node2D) -> void:
 	configure_player(player)
 	configure_enemy_root(root)

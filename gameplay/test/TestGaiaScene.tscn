@@ -11,7 +11,7 @@
 [ext_resource type="Resource" uid="uid://bcfegd6d7xccr" path="res://data/drops/coin_default.tres" id="6_eomju"]
 [ext_resource type="PackedScene" uid="uid://cct45mramyoo7" path="res://ui/level_up/LevelUpPanel.tscn" id="7_sioag"]
 [ext_resource type="PackedScene" uid="uid://b3han2v54mmov" path="res://ui/feedback/RunFeedbackLayer.tscn" id="9_fa8n6"]
-[ext_resource type="PackedScene" uid="uid://dfurqs5avj58y" path="res://ui/world_feedback/WorldFeedbackLayer.tscn" id="11_4scrf"]
+[ext_resource type="PackedScene" uid="uid://dhlthdpkspki7" path="res://ui/world_feedback/WorldFeedbackLayer.tscn" id="11_4scrf"]
 [ext_resource type="PackedScene" uid="uid://bfu3srmi1h0cw" path="res://ui/result/ResultPanel.tscn" id="11_8gfjp"]
 [ext_resource type="PackedScene" uid="uid://cm43ov31i3a3q" path="res://ui/hud/RunHud.tscn" id="12_mnrqd"]
 [ext_resource type="PackedScene" uid="uid://dw8pji4737owl" path="res://ui/debug/tools/PrototypeToolsPanel.tscn" id="13_qxn1m"]
@@ -56,17 +56,20 @@ script = ExtResource("3_38slv")
 [node name="RunHud" parent="." unique_id=1806750018 instance=ExtResource("12_mnrqd")]
 
 [node name="RunFeedbackLayer" parent="." unique_id=538188133 instance=ExtResource("9_fa8n6")]
-show_damage_feedback = false
 
-[node name="WorldFeedbackLayer" parent="." unique_id=1299703750 instance=ExtResource("11_4scrf")]
-player_damage_world_offset = Vector2(0, -50)
+[node name="WorldFeedbackLayer" parent="." unique_id=284446342 instance=ExtResource("11_4scrf")]
 
 [node name="DebugOverlay" parent="." unique_id=1878947059 instance=ExtResource("2_jgi7i")]
 debug_enabled = false
-show_player_combat_section = false
+show_player_direction_section = false
 show_run_timer_section = false
 show_run_progression_section = false
 show_run_economy_section = false
+show_run_result_section = false
+show_save_section = false
+show_technical_section = false
+show_enemy_links = true
+show_enemy_link_markers = true
 
 [node name="PrototypeToolsPanel" parent="." unique_id=531935299 instance=ExtResource("13_qxn1m")]
 

@@ -1,51 +1,119 @@
+## Controller base do inimigo perseguidor utilizado no Módulo 1.
+##
+## Responsabilidades:
+## - aplicar atributos a partir de `EnemyDefinition`;
+## - localizar e perseguir a Queen;
+## - aplicar dano de contato;
+## - receber dano composto da arma;
+## - emitir XP e chance de moeda ao morrer;
+## - coordenar animação e remoção visual após a morte.
+##
+## O inimigo atual é simples e persegue diretamente o player.
+## Melhorias futuras, como distribuição orgânica ao redor da Queen,
+## poderão substituir especificamente a lógica de perseguição.
 extends CharacterBody2D
 
+## Dados de balanceamento utilizados por esta instância.
 @export var enemy_definition: EnemyDefinition
 
+## Caminho opcional para um alvo específico.
 @export var target_path: NodePath
+
+## Grupo utilizado para localizar automaticamente a Queen.
 @export var target_group_name: String = "player"
 
+## Caminho opcional para o controller visual do inimigo.
 @export var visual_controller_path: NodePath
 
+## Distância mínima na qual o inimigo interrompe o deslocamento.
 @export var stopping_distance: float = 8.0
+
+## Exibe o placeholder técnico do corpo do inimigo.
 @export var draw_debug_visual: bool = false
+
+## Exibe linha técnica conectando inimigo ao alvo atual.
 @export var draw_debug_target_line: bool = false
+
+## Exibe o raio utilizado para dano de contato.
 @export var draw_contact_radius: bool = false
 
 @export_group("Spawn Safety")
+
+## Tempo mínimo após nascer antes que o inimigo possa causar contato.
+##
+## Evita dano imediato caso a instância surja próxima demais do player.
 @export var contact_damage_start_delay_seconds: float = 0.75
+
+## Ativa logs detalhados das verificações de distância de contato.
 @export var debug_contact_distance: bool = false
+
+## Tempo em que o corpo morto permanece visível antes de ser removido.
 @export var remove_after_death_seconds: float = 0.45
 
+## Vida máxima atual desta instância.
 var max_hp: int = 10
+
+## Vida restante desta instância.
 var current_hp: int = 10
+
+## Velocidade atual de perseguição.
 var move_speed: float = 90.0
 
+## Dano bruto causado ao tocar a Queen.
 var contact_damage: int = 5
+
+## Distância necessária para atingir a Queen por contato.
 var contact_damage_radius: float = 32.0
+
+## Intervalo mínimo entre impactos consecutivos.
 var contact_damage_interval_seconds: float = 1.0
-var contact_damage_type: String = "physical"
+
+## Tipo do dano de contato.
+var contact_damage_type: String = DamageTypes.PHYSICAL
+
+## XP concedida ao morrer.
 var xp_reward: int = 1
+
+## Chance de gerar moeda física ao morrer.
 var coin_drop_chance: float = 0.25
+
+## Valor da moeda gerada, quando houver drop.
 var coin_drop_value: int = 1
 
+## Tempo restante antes de um novo dano de contato ser permitido.
 var contact_damage_timer: float = 0.0
 
+## Referência da Queen perseguida.
 var target_node: Node2D = null
+
+## Referência do controller visual desta instância.
 var visual_controller: Node = null
 
+## ID técnico do inimigo configurado.
 var enemy_id: String = ""
+
+## Cor utilizada pelo placeholder técnico.
 var debug_color: Color = Color(0.9, 0.15, 0.15, 1.0)
+
+## Raio utilizado pelo placeholder técnico.
 var debug_radius: float = 18.0
 
+## Informa se o inimigo ainda está ativo em gameplay.
 var is_alive: bool = true
-var is_dying: bool = false
+
+## Soma do dano efetivamente recebido por esta instância.
 var total_damage_taken: int = 0
+
+## Último valor de dano efetivamente recebido.
 var last_damage_taken: int = 0
+
+## Fonte responsável pelo último dano recebido.
 var last_damage_source_id: String = ""
 
+## Tempo transcorrido desde que esta instância entrou na árvore.
 var alive_seconds: float = 0.0
 
+## Inicializa o inimigo, aplica sua definition e tenta resolver alvo e visual.
 func _ready() -> void:
 	add_to_group("enemy")
 
@@ -60,16 +128,20 @@ func _ready() -> void:
 	_update_visual_state()
 	queue_redraw()
 
+## Executa perseguição e dano de contato enquanto o gameplay estiver ativo.
+##
+## Em pausas, level-up ou encerramento da run, o inimigo permanece imóvel
+## e apenas atualiza sua representação visual.
 func _physics_process(delta: float) -> void:
 	alive_seconds += delta
-	
+
 	if RunQuery.is_gameplay_blocked(get_tree()):
 		velocity = Vector2.ZERO
 		move_and_slide()
 		_update_visual_state()
 		queue_redraw()
 		return
-		
+
 	if not is_alive:
 		velocity = Vector2.ZERO
 		move_and_slide()
@@ -97,6 +169,7 @@ func _physics_process(delta: float) -> void:
 	_update_visual_state()
 	queue_redraw()
 
+## Desenha representação técnica do inimigo quando habilitada.
 func _draw() -> void:
 	if not draw_debug_visual:
 		return
@@ -124,6 +197,10 @@ func _draw() -> void:
 		var local_target_position: Vector2 = to_local(target_node.global_position)
 		draw_line(Vector2.ZERO, local_target_position, Color.YELLOW, 1.0)
 
+## Configura uma instância criada pelo `EnemySpawner`.
+##
+## Recebe a definition correspondente à wave ativa e, quando disponível,
+## recebe diretamente o player como alvo para evitar buscas adicionais.
 func setup(definition: EnemyDefinition, target: Node2D = null) -> void:
 	enemy_definition = definition
 
@@ -138,16 +215,20 @@ func setup(definition: EnemyDefinition, target: Node2D = null) -> void:
 	_update_visual_state()
 	queue_redraw()
 
+## Recebe um payload de ataque da Queen e retorna o dano final aplicado.
+##
+## O `DamageResolver` calcula individualmente cada componente do ataque
+## considerando fraquezas e resistências cadastradas na definition.
 func receive_damage(payload: DamagePayload) -> int:
 	if payload == null:
 		return 0
 
 	if not payload.is_valid_payload():
 		return 0
-	
+
 	if RunQuery.is_gameplay_blocked(get_tree()):
 		return 0
-	
+
 	if not is_alive:
 		return 0
 
@@ -201,13 +282,20 @@ func receive_damage(payload: DamagePayload) -> int:
 	queue_redraw()
 
 	return final_damage
-	
+
+## Consolida a morte desta instância.
+##
+## Fluxo:
+## - bloqueia novas ações;
+## - emite recompensa de XP e dados de moeda;
+## - atualiza animação de morte;
+## - remove o inimigo do grupo ativo;
+## - agenda sua remoção visual após breve delay.
 func die(source_id: String = "") -> void:
 	if not is_alive:
 		return
 
 	is_alive = false
-	is_dying = true
 	velocity = Vector2.ZERO
 
 	GameEvents.enemy_died.emit(
@@ -243,24 +331,29 @@ func die(source_id: String = "") -> void:
 
 	var death_timer: SceneTreeTimer = get_tree().create_timer(remove_after_death_seconds)
 	death_timer.timeout.connect(_on_death_timer_timeout)
-	
+
+## Remove definitivamente o inimigo após concluir seu tempo visual de morte.
 func _on_death_timer_timeout() -> void:
 	queue_free()
 
+## Aplica atributos da `EnemyDefinition` à instância runtime.
+##
+## Quando nenhuma definition existe, utiliza valores fallback seguros
+## para manter a cena executável durante testes.
 func _apply_definition() -> void:
 	if enemy_definition == null:
 		enemy_id = "enemy_undefined"
 		max_hp = 10
 		current_hp = max_hp
 		move_speed = 90.0
-		
+
 		coin_drop_chance = 0.25
 		coin_drop_value = 1
 
 		contact_damage = 5
 		contact_damage_radius = 32.0
 		contact_damage_interval_seconds = 1.0
-		contact_damage_type = "physical"
+		contact_damage_type = DamageTypes.PHYSICAL
 		xp_reward = 1
 
 		debug_color = Color(0.9, 0.15, 0.15, 1.0)
@@ -276,14 +369,19 @@ func _apply_definition() -> void:
 	contact_damage_radius = enemy_definition.contact_damage_radius
 	contact_damage_interval_seconds = enemy_definition.contact_damage_interval_seconds
 	contact_damage_type = enemy_definition.contact_damage_type
-	
+
 	xp_reward = enemy_definition.xp_reward
 	coin_drop_chance = enemy_definition.coin_drop_chance
 	coin_drop_value = enemy_definition.coin_drop_value
-		
+
 	debug_color = enemy_definition.debug_color
 	debug_radius = enemy_definition.debug_radius
 
+## Atualiza a velocidade de perseguição direta em direção ao player.
+##
+## A lógica atual desloca cada inimigo diretamente ao centro da Queen.
+## O refinamento futuro de ocupação ao redor do player deverá evoluir
+## este ponto sem alterar o contrato externo do inimigo.
 func _follow_target() -> void:
 	var to_target: Vector2 = target_node.global_position - global_position
 	var distance_to_target: float = to_target.length()
@@ -295,14 +393,23 @@ func _follow_target() -> void:
 	var direction: Vector2 = to_target.normalized()
 	velocity = direction * move_speed
 
+## Reduz o cooldown interno do dano de contato.
 func _update_contact_damage_timer(delta: float) -> void:
 	if contact_damage_timer > 0.0:
 		contact_damage_timer = max(0.0, contact_damage_timer - delta)
 
+## Tenta aplicar dano de contato à Queen.
+##
+## O impacto só ocorre quando:
+## - a run permite gameplay;
+## - o tempo seguro após spawn terminou;
+## - o alvo está vivo;
+## - o cooldown de contato acabou;
+## - a distância está dentro do raio configurado.
 func _try_apply_contact_damage() -> void:
 	if RunQuery.is_gameplay_blocked(get_tree()):
 		return
-	
+
 	if alive_seconds < contact_damage_start_delay_seconds:
 		return
 
@@ -319,7 +426,7 @@ func _try_apply_contact_damage() -> void:
 		return
 
 	var distance_to_target: float = global_position.distance_to(target_node.global_position)
-	
+
 	if debug_contact_distance:
 		DeveloperAuditLogger.log_combat(
 			"Contact check: enemy=%s distance=%s radius=%s enemy_pos=%s target_pos=%s alive_seconds=%s" % [
@@ -355,6 +462,9 @@ func _try_apply_contact_damage() -> void:
 		enemy_id
 	)
 
+	if contact_damage_type == DamageTypes.TRUE_DAMAGE:
+		payload.can_be_reduced_by_defense = false
+
 	var final_damage_variant: Variant = target_node.call("receive_damage", payload)
 	var final_damage: int = 0
 
@@ -382,6 +492,7 @@ func _try_apply_contact_damage() -> void:
 		}
 	)
 
+## Encaminha estado de movimento e vida ao controller visual do inimigo.
 func _update_visual_state() -> void:
 	if visual_controller == null:
 		visual_controller = _resolve_visual_controller()
@@ -398,6 +509,12 @@ func _update_visual_state() -> void:
 	if visual_controller.has_method("apply_enemy_runtime_state"):
 		visual_controller.call("apply_enemy_runtime_state", is_moving, movement_direction, is_alive)
 
+## Resolve o controller visual associado ao inimigo.
+##
+## Prioridade:
+## 1. caminho configurado;
+## 2. node padrão do Goblin;
+## 3. busca por método compatível dentro de `VisualRoot`.
 func _resolve_visual_controller() -> Node:
 	if visual_controller_path != NodePath():
 		var configured_visual: Node = get_node_or_null(visual_controller_path)
@@ -420,6 +537,7 @@ func _resolve_visual_controller() -> Node:
 
 	return null
 
+## Busca recursivamente um node que implemente determinado método.
 func _find_node_with_method(root: Node, method_name: String) -> Node:
 	if root == null:
 		return null
@@ -435,6 +553,11 @@ func _find_node_with_method(root: Node, method_name: String) -> Node:
 
 	return null
 
+## Resolve o alvo atual do inimigo.
+##
+## Prioridade:
+## 1. caminho explícito;
+## 2. primeiro Node2D encontrado no grupo configurado.
 func _resolve_target() -> Node2D:
 	if target_path != NodePath():
 		var configured_target: Node = get_node_or_null(target_path)
@@ -449,6 +572,7 @@ func _resolve_target() -> Node2D:
 
 	return null
 
+## Retorna o primeiro `Node2D` registrado em determinado grupo.
 func _find_first_node2d_in_group(group_name: String) -> Node2D:
 	if group_name.strip_edges() == "":
 		return null
@@ -461,6 +585,7 @@ func _find_first_node2d_in_group(group_name: String) -> Node2D:
 
 	return null
 
+## Converte o breakdown calculado pelo resolver em texto legível para logs.
 func _format_damage_breakdown(damage_result: Dictionary) -> String:
 	var breakdown_variant: Variant = damage_result.get("breakdown", [])
 
@@ -487,6 +612,7 @@ func _format_damage_breakdown(damage_result: Dictionary) -> String:
 
 	return " | ".join(parts)
 
+## Retorna informações técnicas da instância para o overlay de debug.
 func get_debug_data() -> Dictionary:
 	return {
 		"enemy_id": enemy_id,
@@ -504,7 +630,11 @@ func get_debug_data() -> Dictionary:
 		"last_damage_source_id": last_damage_source_id,
 		"xp_reward": xp_reward
 	}
-	
+
+## Verifica se o alvo continua apto a receber dano.
+##
+## Players que expõem `get_runtime_state()` são verificados pelo estado
+## `is_alive`; alvos genéricos sem esse contrato são considerados ativos.
 func _is_target_alive() -> bool:
 	if target_node == null:
 		return false

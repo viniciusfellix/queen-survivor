@@ -10,6 +10,6 @@ display_name_key = "upgrade.player_move_speed_percent.name"
 description_key = "upgrade.player_move_speed_percent.description"
 icon = ExtResource("1_j3114")
 upgrade_type = "player_move_speed_percent"
-value_int = 8
+value_float = 8.0
 max_stack_in_run = 6
 metadata/_custom_type_script = "uid://yjpi6mhnsb1a"

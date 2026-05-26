@@ -1,60 +1,97 @@
+## Controller da arma inicial direcional da Gaia.
+##
+## Responsabilidades:
+## - carregar valores da `WeaponDefinition`;
+## - controlar cooldown automático;
+## - utilizar direção de mira da Queen;
+## - instanciar visual e hitbox do ataque;
+## - manter componentes de dano runtime independentes do resource original;
+## - receber upgrades de arma durante a run;
+## - emitir atualizações para HUD.
 extends Node
 
+## Definition de balanceamento inicial da arma.
 @export var weapon_definition: WeaponDefinition
 
+## Cena visual instanciada em cada disparo.
 @export_file("*.tscn") var attack_visual_scene_path: String = "res://visual/weapons/gaia_initial_weapon/GaiaAttackVisual.tscn"
+
+## Cena da hitbox instanciada em cada disparo.
 @export_file("*.tscn") var attack_hitbox_scene_path: String = "res://gameplay/weapons/attacks/DirectionalAttackHitbox.tscn"
 
+## Caminho opcional para o container dos visuais de ataque.
 @export var attack_visual_root_path: NodePath
+
+## Caminho opcional para o container das hitboxes de ataque.
 @export var attack_hitbox_root_path: NodePath
 
+## Ativa ou desativa o funcionamento automático da arma.
 @export var weapon_enabled: bool = true
 
-# Se true, a arma dispara assim que a cena começa.
-# Para gameplay normal, manter false.
+## Define se a arma dispara imediatamente ao carregar a cena.
+##
+## Para gameplay normal, deve permanecer `false`.
 @export var attack_on_ready: bool = false
 
-# Se attack_on_ready estiver false, este valor define o delay inicial.
-# Se for <= 0, usa cooldown_seconds.
+## Delay inicial até o primeiro disparo quando `attack_on_ready` é falso.
+##
+## Valores menores ou iguais a zero utilizam o cooldown normal da arma.
 @export var initial_attack_delay_seconds: float = -1.0
 
+## Define se atualizações de cooldown devem ser emitidas para a HUD.
 @export var emit_cooldown_updates: bool = true
 
+## Intervalo runtime atual entre disparos.
 @export var cooldown_seconds: float = 2.0
 
+## Distância do player em que o visual do ataque será instanciado.
 @export var attack_visual_offset: float = 86.0
+
+## Tempo de existência do visual de ataque.
 @export var attack_visual_lifetime: float = 0.22
+
+## Escala aplicada ao visual de ataque instanciado.
 @export var attack_visual_scale: Vector2 = Vector2.ONE
 
+## Distância do player em que a hitbox será instanciada.
 @export var attack_hitbox_offset: float = 86.0
+
+## Raio atual da hitbox da arma.
 @export var attack_hitbox_radius: float = 72.0
+
+## Duração atual da hitbox da arma.
 @export var attack_hitbox_lifetime: float = 0.12
 
-# Fallback simples.
+## Dano fallback para armas configuradas sem componentes.
 @export var base_damage: int = 5
+
+## Tipo do dano fallback.
 @export var damage_type: String = DamageTypes.PHYSICAL
 
-# Modelo oficial.
+## Componentes de dano atuais da arma.
+##
+## Na arma inicial da Gaia, a lista contém dano físico e dano mágico.
 @export var damage_components: Array[DamageComponentDefinition] = []
 
+## ID publicado como fonte dos ataques desta arma.
 @export var weapon_source_id: String = "gaia_initial_weapon"
 
-@export_group("Damage Interrupt - Temporary Hook")
-# Regra temporária preservada para futuras Queens.
-# Gaia não reinicia cooldown da arma ao sofrer dano.
-# Este comportamento será migrado futuramente para QueenDefinition.
-@export var reset_cooldown_when_player_damaged: bool = false
-@export var damage_reset_cooldown_ratio: float = 1.0
-
+## Tempo restante até a arma poder disparar novamente.
 var cooldown_timer: float = 0.0
 
+## Referência do controller da Queen que possui esta arma.
 var player_controller: Node = null
+
+## Container dos visuais instanciados.
 var attack_visual_root: Node2D = null
+
+## Container das hitboxes instanciadas.
 var attack_hitbox_root: Node2D = null
 
+## Inicializa a arma, duplica seus componentes runtime e prepara o cooldown.
 func _ready() -> void:
 	add_to_group("player_weapon")
-	
+
 	_apply_weapon_definition()
 
 	player_controller = _resolve_player_controller()
@@ -74,16 +111,16 @@ func _ready() -> void:
 		cooldown_timer = 0.0
 	else:
 		cooldown_timer = _get_initial_attack_delay()
-	
-	if not GameEvents.player_damaged.is_connected(_on_player_damaged):
-		GameEvents.player_damaged.connect(_on_player_damaged)
 
 	_emit_cooldown_update()
 
+## Atualiza o cooldown e dispara automaticamente quando a arma está pronta.
+##
+## A arma não processa disparos durante level-up, morte ou fim da run.
 func _process(delta: float) -> void:
 	if not weapon_enabled:
 		return
-	
+
 	if RunQuery.is_gameplay_blocked(get_tree()):
 		return
 
@@ -108,14 +145,18 @@ func _process(delta: float) -> void:
 		return
 
 	cooldown_timer -= delta
-	
+
 	cooldown_timer = max(0.0, cooldown_timer)
 	_emit_cooldown_update()
 
 	if cooldown_timer <= 0.0:
 		_fire_attack(runtime_state)
 		cooldown_timer = cooldown_seconds
+		_emit_cooldown_update()
 
+## Dispara manualmente a arma, respeitando bloqueios da run e vida do player.
+##
+## Útil para testes ou futuras mecânicas específicas.
 func force_fire() -> void:
 	if RunQuery.is_gameplay_blocked(get_tree()):
 		return
@@ -130,7 +171,12 @@ func force_fire() -> void:
 
 	_fire_attack(runtime_state)
 	cooldown_timer = cooldown_seconds
+	_emit_cooldown_update()
 
+## Executa um disparo completo na direção atual de mira.
+##
+## O visual e a hitbox são instanciados separadamente,
+## permitindo substituir efeitos visuais sem afetar o dano.
 func _fire_attack(runtime_state: PlayerRuntimeState) -> void:
 	var direction: Vector2 = _resolve_attack_direction(runtime_state)
 
@@ -152,6 +198,7 @@ func _fire_attack(runtime_state: PlayerRuntimeState) -> void:
 		}
 	)
 
+## Instancia somente a representação visual do ataque.
 func _spawn_attack_visual(direction: Vector2) -> void:
 	var packed_visual: PackedScene = load(attack_visual_scene_path) as PackedScene
 
@@ -174,6 +221,10 @@ func _spawn_attack_visual(direction: Vector2) -> void:
 	if visual_node.has_method("setup"):
 		visual_node.call("setup", direction, attack_visual_lifetime, attack_visual_scale)
 
+## Instancia a área que verificará impactos contra inimigos.
+##
+## Componentes atuais são enviados para que cada hitbox tenha
+## uma cópia independente do dano daquele disparo.
 func _spawn_attack_hitbox(direction: Vector2) -> void:
 	var packed_hitbox: PackedScene = load(attack_hitbox_scene_path) as PackedScene
 
@@ -206,6 +257,12 @@ func _spawn_attack_hitbox(direction: Vector2) -> void:
 			damage_components
 		)
 
+## Resolve a direção utilizada pelo próximo disparo.
+##
+## Prioridade:
+## 1. mira atual;
+## 2. última mira válida;
+## 3. direção padrão para a direita.
 func _resolve_attack_direction(runtime_state: PlayerRuntimeState) -> Vector2:
 	var direction: Vector2 = runtime_state.aim_direction
 
@@ -217,6 +274,10 @@ func _resolve_attack_direction(runtime_state: PlayerRuntimeState) -> Vector2:
 
 	return direction.normalized()
 
+## Copia valores iniciais da `WeaponDefinition` para o estado runtime da arma.
+##
+## Os componentes são duplicados profundamente para que upgrades
+## não alterem o resource original salvo no projeto.
 func _apply_weapon_definition() -> void:
 	if weapon_definition == null:
 		return
@@ -275,6 +336,9 @@ func _apply_weapon_definition() -> void:
 		}
 	)
 
+## Soma o dano bruto atual de todos os componentes da arma.
+##
+## Quando não existem componentes, retorna o dano fallback.
 func _get_total_raw_damage() -> int:
 	if damage_components.is_empty():
 		return base_damage
@@ -287,6 +351,7 @@ func _get_total_raw_damage() -> int:
 
 	return total
 
+## Formata componentes atuais para logs técnicos.
 func _get_component_debug_string() -> String:
 	if damage_components.is_empty():
 		return "%s:%s" % [damage_type, str(base_damage)]
@@ -301,6 +366,7 @@ func _get_component_debug_string() -> String:
 
 	return ", ".join(parts)
 
+## Obtém o estado runtime da Queen proprietária da arma.
 func _get_player_runtime_state() -> PlayerRuntimeState:
 	if player_controller == null:
 		return null
@@ -315,6 +381,10 @@ func _get_player_runtime_state() -> PlayerRuntimeState:
 
 	return null
 
+## Localiza o controller da Queen.
+##
+## Primeiro percorre a hierarquia ascendente da arma; caso necessário,
+## procura uma entidade compatível no grupo global `player`.
 func _resolve_player_controller() -> Node:
 	var current: Node = self
 
@@ -332,6 +402,7 @@ func _resolve_player_controller() -> Node:
 
 	return null
 
+## Resolve o container onde visuais do ataque serão inseridos.
 func _resolve_attack_visual_root() -> Node2D:
 	if attack_visual_root_path != NodePath():
 		var configured_root: Node = get_node_or_null(attack_visual_root_path)
@@ -346,6 +417,7 @@ func _resolve_attack_visual_root() -> Node2D:
 
 	return null
 
+## Resolve o container onde hitboxes do ataque serão inseridas.
 func _resolve_attack_hitbox_root() -> Node2D:
 	if attack_hitbox_root_path != NodePath():
 		var configured_root: Node = get_node_or_null(attack_hitbox_root_path)
@@ -360,6 +432,7 @@ func _resolve_attack_hitbox_root() -> Node2D:
 
 	return null
 
+## Retorna a posição mundial atual da Queen proprietária da arma.
 func _get_player_global_position() -> Vector2:
 	if player_controller is Node2D:
 		var player_node: Node2D = player_controller as Node2D
@@ -367,44 +440,70 @@ func _get_player_global_position() -> Vector2:
 
 	return Vector2.ZERO
 
-func apply_run_upgrade(upgrade: UpgradeDefinition) -> void:
+## Aplica um upgrade compatível com esta arma.
+##
+## Retorna `true` apenas quando o efeito foi efetivamente registrado.
+func apply_run_upgrade(upgrade: UpgradeDefinition) -> bool:
 	if upgrade == null:
-		return
+		return false
 
 	match upgrade.upgrade_type:
 		UpgradeTypes.WEAPON_DAMAGE_FLAT:
-			_apply_damage_flat_upgrade(upgrade.value_int)
+			return _apply_damage_flat_upgrade(upgrade.id, upgrade.value_int)
 
 		UpgradeTypes.WEAPON_COOLDOWN_PERCENT:
-			_apply_cooldown_percent_upgrade(upgrade.value_float)
+			return _apply_cooldown_percent_upgrade(upgrade.id, upgrade.value_float)
 
 		UpgradeTypes.WEAPON_PHYSICAL_DAMAGE_FLAT:
-			_apply_component_damage_flat_upgrade(DamageTypes.PHYSICAL, upgrade.value_int)
+			return _apply_component_damage_flat_upgrade(
+				upgrade.id,
+				DamageTypes.PHYSICAL,
+				upgrade.value_int
+			)
 
 		UpgradeTypes.WEAPON_MAGICAL_DAMAGE_FLAT:
-			_apply_component_damage_flat_upgrade(DamageTypes.MAGICAL, upgrade.value_int)
+			return _apply_component_damage_flat_upgrade(
+				upgrade.id,
+				DamageTypes.MAGICAL,
+				upgrade.value_int
+			)
 
 		UpgradeTypes.WEAPON_HITBOX_RADIUS_FLAT:
-			_apply_hitbox_radius_flat_upgrade(upgrade.value_int)
+			return _apply_hitbox_radius_flat_upgrade(upgrade.id, upgrade.value_int)
 
 		UpgradeTypes.WEAPON_HITBOX_LIFETIME_PERCENT:
-			_apply_hitbox_lifetime_percent_upgrade(upgrade.value_float)
+			return _apply_hitbox_lifetime_percent_upgrade(upgrade.id, upgrade.value_float)
 
 		_:
-			GameEvents.emit_debug("[GaiaInitialWeaponController] Upgrade ignorado pela arma: %s" % upgrade.id)
+			push_warning("[GaiaInitialWeaponController] Upgrade não suportado pela arma: %s" % upgrade.id)
+			return false
 
-func _apply_damage_flat_upgrade(amount: int) -> void:
+## Aumenta o dano geral da arma.
+##
+## Em armas compostas, o valor atual é adicionado a cada componente.
+## Esta decisão foi mantida para validação posterior com o game designer.
+func _apply_damage_flat_upgrade(upgrade_id: String, amount: int) -> bool:
 	if amount <= 0:
-		return
+		return false
 
 	if damage_components.is_empty():
 		base_damage += amount
 
-		GameEvents.emit_debug("[GaiaInitialWeaponController] Upgrade dano aplicado no fallback: +%s | base_damage=%s" % [
-			str(amount),
-			str(base_damage)
-		])
-		return
+		DeveloperAuditLogger.log_upgrade(
+			"Dano fallback aplicado: +%s | base_damage=%s" % [
+				str(amount),
+				str(base_damage)
+			],
+			"GaiaInitialWeaponController",
+			{
+				"upgrade_id": upgrade_id,
+				"weapon_id": weapon_source_id,
+				"base_damage": base_damage,
+				"mode": "fallback"
+			}
+		)
+
+		return true
 
 	for component: DamageComponentDefinition in damage_components:
 		if component == null:
@@ -412,30 +511,77 @@ func _apply_damage_flat_upgrade(amount: int) -> void:
 
 		component.amount += amount
 
-	GameEvents.emit_debug("[GaiaInitialWeaponController] Upgrade dano aplicado nos componentes: +%s | components=%s" % [
-		str(amount),
-		_get_component_debug_string()
-	])
+	DeveloperAuditLogger.log_upgrade(
+		"Dano geral aplicado em todos os componentes: +%s | components=%s" % [
+			str(amount),
+			_get_component_debug_string()
+		],
+		"GaiaInitialWeaponController",
+		{
+			"upgrade_id": upgrade_id,
+			"weapon_id": weapon_source_id,
+			"amount_per_component": amount,
+			"components": _get_component_debug_string()
+		}
+	)
 
-func _apply_cooldown_percent_upgrade(percent: float) -> void:
+	return true
+
+## Reduz percentualmente o cooldown atual da arma.
+##
+## Mantém um limite mínimo de `0.15` segundo para evitar disparos
+## excessivamente rápidos no protótipo.
+func _apply_cooldown_percent_upgrade(upgrade_id: String, percent: float) -> bool:
 	if percent <= 0.0:
-		return
+		return false
 
+	var previous_cooldown_seconds: float = cooldown_seconds
 	var multiplier: float = max(0.05, 1.0 - (percent * 0.01))
-	cooldown_seconds = max(0.15, cooldown_seconds * multiplier)
+	var new_cooldown_seconds: float = max(0.15, cooldown_seconds * multiplier)
 
-	GameEvents.emit_debug("[GaiaInitialWeaponController] Upgrade cooldown aplicado: -%s%% | cooldown=%s" % [
-		str(percent),
-		str(cooldown_seconds)
-	])
+	if is_equal_approx(previous_cooldown_seconds, new_cooldown_seconds):
+		push_warning("[GaiaInitialWeaponController] Cooldown já está no limite mínimo para upgrade: %s" % upgrade_id)
+		return false
 
-func _apply_component_damage_flat_upgrade(damage_type_to_match: String, amount: int) -> void:
+	cooldown_seconds = new_cooldown_seconds
+	cooldown_timer = min(cooldown_timer, cooldown_seconds)
+
+	_emit_cooldown_update()
+
+	DeveloperAuditLogger.log_upgrade(
+		"Cooldown aplicado: -%s%% | cooldown=%s" % [
+			str(percent),
+			str(cooldown_seconds)
+		],
+		"GaiaInitialWeaponController",
+		{
+			"upgrade_id": upgrade_id,
+			"weapon_id": weapon_source_id,
+			"percent": percent,
+			"cooldown_seconds": cooldown_seconds,
+			"cooldown_timer": cooldown_timer
+		}
+	)
+
+	return true
+
+## Aumenta apenas componentes de determinado tipo de dano.
+##
+## Utilizado para melhorias físicas ou mágicas específicas.
+func _apply_component_damage_flat_upgrade(
+	upgrade_id: String,
+	damage_type_to_match: String,
+	amount: int
+) -> bool:
 	if amount <= 0:
-		return
+		return false
 
 	if damage_components.is_empty():
-		GameEvents.emit_debug("[GaiaInitialWeaponController] Sem componentes para aplicar dano específico: %s" % damage_type_to_match)
-		return
+		push_warning(
+			"[GaiaInitialWeaponController] Sem componentes para aplicar dano específico: %s"
+			% damage_type_to_match
+		)
+		return false
 
 	var applied_count: int = 0
 
@@ -449,42 +595,96 @@ func _apply_component_damage_flat_upgrade(damage_type_to_match: String, amount: 
 		component.amount += amount
 		applied_count += 1
 
-	GameEvents.emit_debug("[GaiaInitialWeaponController] Upgrade dano %s aplicado: +%s | applied=%s | components=%s" % [
-		damage_type_to_match,
-		str(amount),
-		str(applied_count),
-		_get_component_debug_string()
-	])
+	if applied_count <= 0:
+		push_warning(
+			"[GaiaInitialWeaponController] Nenhum componente encontrado para dano: %s"
+			% damage_type_to_match
+		)
+		return false
 
-func _apply_hitbox_radius_flat_upgrade(amount: int) -> void:
+	DeveloperAuditLogger.log_upgrade(
+		"Dano %s aplicado: +%s | components=%s" % [
+			damage_type_to_match,
+			str(amount),
+			_get_component_debug_string()
+		],
+		"GaiaInitialWeaponController",
+		{
+			"upgrade_id": upgrade_id,
+			"weapon_id": weapon_source_id,
+			"damage_type": damage_type_to_match,
+			"amount": amount,
+			"applied_count": applied_count,
+			"components": _get_component_debug_string()
+		}
+	)
+
+	return true
+
+## Aumenta diretamente o raio da área de acerto do ataque.
+func _apply_hitbox_radius_flat_upgrade(upgrade_id: String, amount: int) -> bool:
 	if amount <= 0:
-		return
+		return false
 
 	attack_hitbox_radius += float(amount)
 
-	GameEvents.emit_debug("[GaiaInitialWeaponController] Upgrade raio da hitbox aplicado: +%s | radius=%s" % [
-		str(amount),
-		str(attack_hitbox_radius)
-	])
+	DeveloperAuditLogger.log_upgrade(
+		"Raio da hitbox aplicado: +%s | radius=%s" % [
+			str(amount),
+			str(attack_hitbox_radius)
+		],
+		"GaiaInitialWeaponController",
+		{
+			"upgrade_id": upgrade_id,
+			"weapon_id": weapon_source_id,
+			"amount": amount,
+			"hitbox_radius": attack_hitbox_radius
+		}
+	)
 
-func _apply_hitbox_lifetime_percent_upgrade(percent: float) -> void:
+	return true
+
+## Aumenta percentualmente o tempo ativo da hitbox.
+##
+## Mantém limite máximo de `0.60` segundo no protótipo atual.
+func _apply_hitbox_lifetime_percent_upgrade(upgrade_id: String, percent: float) -> bool:
 	if percent <= 0.0:
-		return
+		return false
 
+	var previous_lifetime: float = attack_hitbox_lifetime
 	var multiplier: float = 1.0 + (percent * 0.01)
-	attack_hitbox_lifetime = min(0.60, attack_hitbox_lifetime * multiplier)
+	var new_lifetime: float = min(0.60, attack_hitbox_lifetime * multiplier)
 
-	GameEvents.emit_debug("[GaiaInitialWeaponController] Upgrade duração da hitbox aplicado: +%s%% | lifetime=%s" % [
-		str(percent),
-		str(attack_hitbox_lifetime)
-	])
+	if is_equal_approx(previous_lifetime, new_lifetime):
+		push_warning("[GaiaInitialWeaponController] Duração da hitbox já está no limite máximo para upgrade: %s" % upgrade_id)
+		return false
 
+	attack_hitbox_lifetime = new_lifetime
+
+	DeveloperAuditLogger.log_upgrade(
+		"Duração da hitbox aplicada: +%s%% | lifetime=%s" % [
+			str(percent),
+			str(attack_hitbox_lifetime)
+		],
+		"GaiaInitialWeaponController",
+		{
+			"upgrade_id": upgrade_id,
+			"weapon_id": weapon_source_id,
+			"percent": percent,
+			"hitbox_lifetime": attack_hitbox_lifetime
+		}
+	)
+
+	return true
+
+## Retorna o delay utilizado antes do primeiro disparo automático.
 func _get_initial_attack_delay() -> float:
 	if initial_attack_delay_seconds > 0.0:
 		return initial_attack_delay_seconds
 
 	return cooldown_seconds
 
+## Emite para a HUD o progresso atual da recarga da arma.
 func _emit_cooldown_update() -> void:
 	if not emit_cooldown_updates:
 		return
@@ -499,32 +699,4 @@ func _emit_cooldown_update() -> void:
 		cooldown_timer,
 		cooldown_seconds,
 		progress_ratio
-	)
-
-func _on_player_damaged(
-	_raw_damage: int,
-	final_damage: int,
-	_current_hp: int,
-	_max_hp: int,
-	_source_id: String
-) -> void:
-	if not reset_cooldown_when_player_damaged:
-		return
-
-	if final_damage <= 0:
-		return
-
-	var ratio: float = clamp(damage_reset_cooldown_ratio, 0.0, 1.0)
-	cooldown_timer = cooldown_seconds * ratio
-
-	_emit_cooldown_update()
-
-	DeveloperAuditLogger.log_combat(
-		"Cooldown resetado por dano recebido: cooldown_timer=%s" % str(cooldown_timer),
-		"GaiaInitialWeaponController",
-		{
-			"weapon_id": weapon_source_id,
-			"cooldown_timer": cooldown_timer,
-			"reset_ratio": ratio
-		}
 	)
