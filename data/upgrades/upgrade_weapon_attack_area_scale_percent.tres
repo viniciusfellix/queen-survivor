@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="UpgradeDefinition" format=3 uid="uid://d0ifo0e0amkvd"]
+
+[ext_resource type="Texture2D" uid="uid://c51m8rojrfe4m" path="res://assets/placeholders/weapons/gaia_initial_weapon/gaia_attack_placeholder.png" id="1_4naud"]
+[ext_resource type="Script" uid="uid://yjpi6mhnsb1a" path="res://definitions/UpgradeDefinition.gd" id="2_vcgrb"]
+
+[resource]
+script = ExtResource("2_vcgrb")
+id = "upgrade_weapon_attack_area_scale_percent"
+display_name_key = "upgrade.weapon_attack_area_scale_percent.name"
+description_key = "upgrade.weapon_attack_area_scale_percent.description"
+icon = ExtResource("1_4naud")
+upgrade_type = "weapon_attack_area_scale_percent"
+value_float = 10.0
+max_stack_in_run = 6
+metadata/_custom_type_script = "uid://yjpi6mhnsb1a"

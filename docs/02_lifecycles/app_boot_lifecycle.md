@@ -1,35 +1,26 @@
-# Lifecycle — Boot do Projeto
+# Lifecycle — Boot da Aplicação
 
-## Fluxo atual
-
-```txt
-Godot abre Main.tscn
-↓
-App autoload inicializa
-↓
-LocalizationManager carrega idioma
-↓
-SaveManager carrega/cria save
-↓
-InputManager garante input actions
-↓
-Main.gd carrega TestGaiaScene.tscn
+```text
+Autoloads inicializam
+→ DeveloperAuditLogger prepara canais
+→ LocalizationManager carrega idioma
+→ SaveManager carrega/cria save
+→ InputManager assegura input
+→ Main instancia TestGaiaScene
+→ TestGaiaScene instancia Gaia e configura câmera/spawners
+→ RunController mantém RunState ativo
 ```
 
-## Logs esperados
+## Logs mínimos esperados
 
-```txt
-[App] Boot: Queen Survivors v0.1.0-module-1
-[LocalizationManager] Idioma carregado: pt_br
-[SaveManager] Save carregado.
-[InputManager] Ready.
-[Main] Cena inicial carregada: res://gameplay/test/TestGaiaScene.tscn
+```text
+[DEV][LIFECYCLE] [DeveloperAuditLogger] DeveloperAuditLogger inicializado.
+[DEV][LIFECYCLE] [LocalizationManager] Idioma carregado: pt_br
+[DEV][SAVE] [SaveManager] Save carregado.
+[DEV][LIFECYCLE] [InputManager] Input inicializado.
+[DEV][LIFECYCLE] [App] Boot iniciado: Queen Survivors v0.1.0-module-1
+[DEV][LIFECYCLE] [RunController] Run iniciada. map=map_test_arena_10min duration=600.0
+[DEV][SCENE] [TestGaiaScene] Player instanciado: PlayerGaia
+[DEV][SCENE] [TestGaiaScene] Spawners configurados: 1
+[DEV][SCENE] [Main] Cena inicial carregada: res://gameplay/test/TestGaiaScene.tscn
 ```
-
-## Responsabilidade do Main
-
-`Main` é um carregador de cena. Ele não deve conter regra da run.
-
-## Responsabilidade da cena inicial
-
-`TestGaiaScene` compõe a arena técnica atual.

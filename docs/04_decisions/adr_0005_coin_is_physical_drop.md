@@ -1,15 +1,5 @@
-# ADR 0005 — Moeda é drop físico
-
-## Status
-
-Aceita.
+# ADR — Moeda é drop físico
 
 ## Decisão
 
-Moedas devem cair no chão, usar magnetismo e exigir coleta.
-
-## Consequência
-
-Moeda não coletada não entra no resultado final.
-
-Isso diferencia moeda de XP.
+Moedas são instanciadas no mapa e só contam após coleta. Drops abandonados são perdidos; a regra fundamenta magnetismo e risco de movimentação.

@@ -1,21 +1,32 @@
 [gd_scene format=3 uid="uid://dg1wr6dv8jxxi"]
 
 [ext_resource type="Script" uid="uid://ca4qagknswd3k" path="res://gameplay/enemies/EnemyBase.gd" id="1_ffmcr"]
-[ext_resource type="Resource" uid="uid://cdk2sbcwdtnd0" path="res://data/enemies/enemy_chaser_basic.tres" id="2_d5hmo"]
 [ext_resource type="PackedScene" uid="uid://bal0n2h0w1ovu" path="res://visual/enemies/goblin_warrior/GoblinWarriorVisual.tscn" id="3_d5hmo"]
+[ext_resource type="Script" uid="uid://cjkci1xnnmduu" path="res://gameplay/combat/EnemyAttackHitbox.gd" id="3_o5f70"]
+[ext_resource type="Script" uid="uid://dq4yjwxealkr7" path="res://gameplay/combat/HurtboxComponent.gd" id="3_vrnya"]
 
-[sub_resource type="CircleShape2D" id="CircleShape2D_m166k"]
-radius = 18.0
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_vrnya"]
+radius = 21.0
+height = 80.0
 
 [node name="EnemyBase" type="CharacterBody2D" unique_id=514613083]
 script = ExtResource("1_ffmcr")
-enemy_definition = ExtResource("2_d5hmo")
 visual_controller_path = NodePath("VisualRoot/GoblinWarriorVisual")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=686789010]
-shape = SubResource("CircleShape2D_m166k")
+[node name="BodyCollision" type="CollisionShape2D" parent="." unique_id=686789010]
+position = Vector2(0, 2)
+shape = SubResource("CapsuleShape2D_vrnya")
 debug_color = Color(1, 0.011462747, 0.054261394, 0.41960785)
+
+[node name="ContactAttackHitbox" type="Area2D" parent="." unique_id=1204959538]
+script = ExtResource("3_o5f70")
+log_configuration = true
+
+[node name="Hurtbox" type="Area2D" parent="." unique_id=1269563624]
+script = ExtResource("3_vrnya")
+log_configuration = true
 
 [node name="VisualRoot" type="Node2D" parent="." unique_id=604840823]
 
 [node name="GoblinWarriorVisual" parent="VisualRoot" unique_id=520093498 instance=ExtResource("3_d5hmo")]
+position = Vector2(0, 48)

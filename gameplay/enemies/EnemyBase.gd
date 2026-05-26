@@ -3,8 +3,9 @@
 ## Responsabilidades:
 ## - aplicar atributos a partir de `EnemyDefinition`;
 ## - localizar e perseguir a Queen;
-## - aplicar dano de contato;
+## - configurar hitbox ofensiva e hurtbox independentes;
 ## - receber dano composto da arma;
+## - acionar feedback visual de dano recebido;
 ## - emitir XP e chance de moeda ao morrer;
 ## - coordenar animação e remoção visual após a morte.
 ##
@@ -34,18 +35,12 @@ extends CharacterBody2D
 ## Exibe linha técnica conectando inimigo ao alvo atual.
 @export var draw_debug_target_line: bool = false
 
-## Exibe o raio utilizado para dano de contato.
-@export var draw_contact_radius: bool = false
+@onready var hurtbox_component: HurtboxComponent = get_node_or_null("Hurtbox") as HurtboxComponent
 
-@export_group("Spawn Safety")
-
-## Tempo mínimo após nascer antes que o inimigo possa causar contato.
-##
-## Evita dano imediato caso a instância surja próxima demais do player.
-@export var contact_damage_start_delay_seconds: float = 0.75
-
-## Ativa logs detalhados das verificações de distância de contato.
-@export var debug_contact_distance: bool = false
+## Hitbox ofensiva responsável pelo ataque corporal contra a Queen.
+@onready var contact_attack_hitbox: EnemyAttackHitbox = (
+	get_node_or_null("ContactAttackHitbox") as EnemyAttackHitbox
+)
 
 ## Tempo em que o corpo morto permanece visível antes de ser removido.
 @export var remove_after_death_seconds: float = 0.45
@@ -59,18 +54,6 @@ var current_hp: int = 10
 ## Velocidade atual de perseguição.
 var move_speed: float = 90.0
 
-## Dano bruto causado ao tocar a Queen.
-var contact_damage: int = 5
-
-## Distância necessária para atingir a Queen por contato.
-var contact_damage_radius: float = 32.0
-
-## Intervalo mínimo entre impactos consecutivos.
-var contact_damage_interval_seconds: float = 1.0
-
-## Tipo do dano de contato.
-var contact_damage_type: String = DamageTypes.PHYSICAL
-
 ## XP concedida ao morrer.
 var xp_reward: int = 1
 
@@ -79,9 +62,6 @@ var coin_drop_chance: float = 0.25
 
 ## Valor da moeda gerada, quando houver drop.
 var coin_drop_value: int = 1
-
-## Tempo restante antes de um novo dano de contato ser permitido.
-var contact_damage_timer: float = 0.0
 
 ## Referência da Queen perseguida.
 var target_node: Node2D = null
@@ -110,9 +90,6 @@ var last_damage_taken: int = 0
 ## Fonte responsável pelo último dano recebido.
 var last_damage_source_id: String = ""
 
-## Tempo transcorrido desde que esta instância entrou na árvore.
-var alive_seconds: float = 0.0
-
 ## Inicializa o inimigo, aplica sua definition e tenta resolver alvo e visual.
 func _ready() -> void:
 	add_to_group("enemy")
@@ -128,13 +105,11 @@ func _ready() -> void:
 	_update_visual_state()
 	queue_redraw()
 
-## Executa perseguição e dano de contato enquanto o gameplay estiver ativo.
+## Executa perseguição enquanto o gameplay estiver ativo.
 ##
-## Em pausas, level-up ou encerramento da run, o inimigo permanece imóvel
-## e apenas atualiza sua representação visual.
-func _physics_process(delta: float) -> void:
-	alive_seconds += delta
-
+## O dano não é mais calculado por distância neste controller.
+## O contato ofensivo é detectado fisicamente por `ContactAttackHitbox`.
+func _physics_process(_delta: float) -> void:
 	if RunQuery.is_gameplay_blocked(get_tree()):
 		velocity = Vector2.ZERO
 		move_and_slide()
@@ -149,8 +124,6 @@ func _physics_process(delta: float) -> void:
 		queue_redraw()
 		return
 
-	_update_contact_damage_timer(delta)
-
 	if target_node == null:
 		target_node = _resolve_target()
 
@@ -163,8 +136,6 @@ func _physics_process(delta: float) -> void:
 
 	_follow_target()
 	move_and_slide()
-
-	_try_apply_contact_damage()
 
 	_update_visual_state()
 	queue_redraw()
@@ -181,9 +152,6 @@ func _draw() -> void:
 
 	draw_circle(Vector2.ZERO, debug_radius, body_color)
 	draw_arc(Vector2.ZERO, debug_radius + 2.0, 0.0, TAU, 24, Color.WHITE, 2.0)
-
-	if draw_contact_radius and is_alive:
-		draw_arc(Vector2.ZERO, contact_damage_radius, 0.0, TAU, 32, Color(1.0, 0.5, 0.1, 0.85), 1.0)
 
 	var forward_direction: Vector2 = Vector2.RIGHT
 
@@ -274,6 +242,8 @@ func receive_damage(payload: DamagePayload) -> int:
 			"damage_breakdown": damage_result.get("breakdown", [])
 		}
 	)
+	
+	_play_damage_feedback()
 
 	if current_hp <= 0:
 		die(payload.source_id)
@@ -287,6 +257,7 @@ func receive_damage(payload: DamagePayload) -> int:
 ##
 ## Fluxo:
 ## - bloqueia novas ações;
+## - desativa hitbox ofensiva e hurtbox;
 ## - emite recompensa de XP e dados de moeda;
 ## - atualiza animação de morte;
 ## - remove o inimigo do grupo ativo;
@@ -297,6 +268,12 @@ func die(source_id: String = "") -> void:
 
 	is_alive = false
 	velocity = Vector2.ZERO
+
+	if hurtbox_component != null:
+		hurtbox_component.set_hurtbox_active(false)
+
+	if contact_attack_hitbox != null:
+		contact_attack_hitbox.set_attack_active(false)
 
 	GameEvents.enemy_died.emit(
 		enemy_id,
@@ -336,10 +313,11 @@ func die(source_id: String = "") -> void:
 func _on_death_timer_timeout() -> void:
 	queue_free()
 
-## Aplica atributos da `EnemyDefinition` à instância runtime.
+## Aplica ao runtime os valores presentes na EnemyDefinition ativa.
 ##
-## Quando nenhuma definition existe, utiliza valores fallback seguros
-## para manter a cena executável durante testes.
+## Além dos atributos e recompensas, esta função configura:
+## - a Hurtbox que recebe dano da Gaia;
+## - a ContactAttackHitbox que causa dano à PlayerHurtbox.
 func _apply_definition() -> void:
 	if enemy_definition == null:
 		enemy_id = "enemy_undefined"
@@ -347,17 +325,14 @@ func _apply_definition() -> void:
 		current_hp = max_hp
 		move_speed = 90.0
 
+		xp_reward = 1
 		coin_drop_chance = 0.25
 		coin_drop_value = 1
 
-		contact_damage = 5
-		contact_damage_radius = 32.0
-		contact_damage_interval_seconds = 1.0
-		contact_damage_type = DamageTypes.PHYSICAL
-		xp_reward = 1
-
 		debug_color = Color(0.9, 0.15, 0.15, 1.0)
 		debug_radius = 18.0
+
+		_disable_combat_areas()
 		return
 
 	enemy_id = enemy_definition.id
@@ -365,17 +340,64 @@ func _apply_definition() -> void:
 	current_hp = max_hp
 	move_speed = enemy_definition.base_move_speed
 
-	contact_damage = enemy_definition.contact_damage
-	contact_damage_radius = enemy_definition.contact_damage_radius
-	contact_damage_interval_seconds = enemy_definition.contact_damage_interval_seconds
-	contact_damage_type = enemy_definition.contact_damage_type
-
 	xp_reward = enemy_definition.xp_reward
 	coin_drop_chance = enemy_definition.coin_drop_chance
 	coin_drop_value = enemy_definition.coin_drop_value
 
 	debug_color = enemy_definition.debug_color
 	debug_radius = enemy_definition.debug_radius
+
+	_configure_hurtbox()
+	_configure_contact_attack_hitbox()
+
+## Encaminha ao componente de hurtbox as áreas configuradas no resource
+## do inimigo, mantendo a BodyCollision separada da região vulnerável.
+func _configure_hurtbox() -> void:
+	if hurtbox_component == null:
+		hurtbox_component = get_node_or_null("Hurtbox") as HurtboxComponent
+
+	if hurtbox_component == null:
+		push_warning("[EnemyBase] HurtboxComponent não encontrado para: %s" % enemy_id)
+		return
+
+	if enemy_definition == null:
+		return
+
+	hurtbox_component.setup(
+		enemy_definition.hurtbox_areas,
+		self
+	)
+
+## Encaminha ao componente ofensivo o ataque de contato cadastrado
+## no resource do inimigo.
+func _configure_contact_attack_hitbox() -> void:
+	if contact_attack_hitbox == null:
+		contact_attack_hitbox = (
+			get_node_or_null("ContactAttackHitbox") as EnemyAttackHitbox
+		)
+
+	if contact_attack_hitbox == null:
+		push_warning("[EnemyBase] ContactAttackHitbox não encontrada para: %s" % enemy_id)
+		return
+
+	if enemy_definition == null or not enemy_definition.has_valid_contact_attack():
+		contact_attack_hitbox.set_attack_active(false)
+		push_warning("[EnemyBase] Ataque de contato inválido para: %s" % enemy_id)
+		return
+
+	contact_attack_hitbox.setup(
+		enemy_definition.contact_attack,
+		self,
+		enemy_id
+	)
+
+## Desativa hitbox e hurtbox quando não há definition válida.
+func _disable_combat_areas() -> void:
+	if hurtbox_component != null:
+		hurtbox_component.set_hurtbox_active(false)
+
+	if contact_attack_hitbox != null:
+		contact_attack_hitbox.set_attack_active(false)
 
 ## Atualiza a velocidade de perseguição direta em direção ao player.
 ##
@@ -393,104 +415,18 @@ func _follow_target() -> void:
 	var direction: Vector2 = to_target.normalized()
 	velocity = direction * move_speed
 
-## Reduz o cooldown interno do dano de contato.
-func _update_contact_damage_timer(delta: float) -> void:
-	if contact_damage_timer > 0.0:
-		contact_damage_timer = max(0.0, contact_damage_timer - delta)
-
-## Tenta aplicar dano de contato à Queen.
+## Solicita ao controller visual o flash de impacto recebido.
 ##
-## O impacto só ocorre quando:
-## - a run permite gameplay;
-## - o tempo seguro após spawn terminou;
-## - o alvo está vivo;
-## - o cooldown de contato acabou;
-## - a distância está dentro do raio configurado.
-func _try_apply_contact_damage() -> void:
-	if RunQuery.is_gameplay_blocked(get_tree()):
+## Atualmente executa um breve flash branco no Goblin.
+func _play_damage_feedback() -> void:
+	if visual_controller == null:
+		visual_controller = _resolve_visual_controller()
+
+	if visual_controller == null:
 		return
 
-	if alive_seconds < contact_damage_start_delay_seconds:
-		return
-
-	if target_node == null:
-		return
-
-	if not _is_target_alive():
-		return
-
-	if contact_damage_timer > 0.0:
-		return
-
-	if contact_damage <= 0:
-		return
-
-	var distance_to_target: float = global_position.distance_to(target_node.global_position)
-
-	if debug_contact_distance:
-		DeveloperAuditLogger.log_combat(
-			"Contact check: enemy=%s distance=%s radius=%s enemy_pos=%s target_pos=%s alive_seconds=%s" % [
-				enemy_id,
-				str(distance_to_target),
-				str(contact_damage_radius),
-				str(global_position),
-				str(target_node.global_position),
-				str(alive_seconds)
-			],
-			"EnemyBase",
-			{
-				"enemy_id": enemy_id,
-				"distance": distance_to_target,
-				"contact_radius": contact_damage_radius,
-				"enemy_position": global_position,
-				"target_position": target_node.global_position,
-				"alive_seconds": alive_seconds
-			}
-		)
-
-	if distance_to_target > contact_damage_radius:
-		return
-
-	if not target_node.has_method("receive_damage"):
-		return
-
-	var payload: DamagePayload = DamagePayload.new(
-		contact_damage,
-		contact_damage_type,
-		self,
-		enemy_id,
-		enemy_id
-	)
-
-	if contact_damage_type == DamageTypes.TRUE_DAMAGE:
-		payload.can_be_reduced_by_defense = false
-
-	var final_damage_variant: Variant = target_node.call("receive_damage", payload)
-	var final_damage: int = 0
-
-	if final_damage_variant is int:
-		final_damage = int(final_damage_variant)
-	elif final_damage_variant is float:
-		final_damage = int(final_damage_variant)
-
-	if final_damage <= 0:
-		return
-
-	contact_damage_timer = contact_damage_interval_seconds
-
-	DeveloperAuditLogger.log_combat(
-		"Dano de contato aplicado: enemy=%s raw=%s final=%s" % [
-			enemy_id,
-			str(contact_damage),
-			str(final_damage)
-		],
-		"EnemyBase",
-		{
-			"enemy_id": enemy_id,
-			"raw_damage": contact_damage,
-			"final_damage": final_damage
-		}
-	)
+	if visual_controller.has_method("play_damage_flash"):
+		visual_controller.call("play_damage_flash")
 
 ## Encaminha estado de movimento e vida ao controller visual do inimigo.
 func _update_visual_state() -> void:
@@ -612,40 +548,25 @@ func _format_damage_breakdown(damage_result: Dictionary) -> String:
 
 	return " | ".join(parts)
 
-## Retorna informações técnicas da instância para o overlay de debug.
+## Retorna informações técnicas da instância para overlay e auditoria.
 func get_debug_data() -> Dictionary:
 	return {
 		"enemy_id": enemy_id,
 		"current_hp": current_hp,
 		"max_hp": max_hp,
 		"move_speed": move_speed,
-		"contact_damage": contact_damage,
-		"contact_damage_radius": contact_damage_radius,
 		"global_position": global_position,
 		"has_target": target_node != null,
 		"has_visual": visual_controller != null,
+		"has_hurtbox": hurtbox_component != null,
+		"has_contact_attack_hitbox": contact_attack_hitbox != null,
+		"has_valid_contact_attack": (
+			enemy_definition != null
+			and enemy_definition.has_valid_contact_attack()
+		),
 		"is_alive": is_alive,
 		"total_damage_taken": total_damage_taken,
 		"last_damage_taken": last_damage_taken,
 		"last_damage_source_id": last_damage_source_id,
 		"xp_reward": xp_reward
 	}
-
-## Verifica se o alvo continua apto a receber dano.
-##
-## Players que expõem `get_runtime_state()` são verificados pelo estado
-## `is_alive`; alvos genéricos sem esse contrato são considerados ativos.
-func _is_target_alive() -> bool:
-	if target_node == null:
-		return false
-
-	if not target_node.has_method("get_runtime_state"):
-		return true
-
-	var runtime_state_variant: Variant = target_node.call("get_runtime_state")
-
-	if runtime_state_variant is PlayerRuntimeState:
-		var player_runtime_state: PlayerRuntimeState = runtime_state_variant as PlayerRuntimeState
-		return player_runtime_state.is_alive
-
-	return true

@@ -1,123 +1,64 @@
-# Arquitetura de Scenes
+# Arquitetura — Cenas e Árvore Runtime
 
-## Cena principal
+## Entrada
 
-```txt
+```text
 Main.tscn
 └── CurrentSceneRoot
+    └── TestGaiaScene.tscn
 ```
 
-`Main.gd` carrega a cena inicial:
+`Main.gd` carrega a cena inicial. `TestGaiaScene.gd` monta o protótipo e conecta player, câmera e spawners.
 
-```txt
-res://gameplay/test/TestGaiaScene.tscn
-```
+## Cena técnica
 
-## Cena de teste atual
-
-```txt
-TestGaiaScene : Node2D
-├── ArenaRoot
-│   └── TestArena
+```text
+TestGaiaScene <Node2D>
+├── ArenaRoot/TestArena
 ├── RuntimeRoot
-│   ├── RunController
-│   ├── DropController
-│   ├── PlayerRoot
-│   ├── EnemyRoot
+│   ├── PlayerRoot/PlayerGaia [runtime]
+│   ├── EnemyRoot/EnemyBase [runtime]
 │   ├── DropRoot
-│   └── SpawnerRoot
-│       └── EnemySpawner
+│   ├── SpawnerRoot/EnemySpawner
+│   ├── RunController
+│   └── DropController
 ├── PlayerSpawnPoint
 ├── Camera2D
+├── RunHud
+├── RunFeedbackLayer
+├── WorldFeedbackLayer
 ├── DebugOverlay
-└── LevelUpPanel
+├── PrototypeToolsPanel
+├── LevelUpPanel
+└── ResultPanel
 ```
 
-## Player
+## PlayerGaia
 
-```txt
-PlayerGaia : CharacterBody2D
-├── CollisionShape2D
-├── VisualRoot
-│   └── GaiaVisual
+```text
+PlayerGaia <CharacterBody2D>
+├── BodyCollision <CollisionShape2D>       # física
+├── PlayerHurtbox <Area2D>                 # recebe ataque inimigo
+│   └── RuntimeHurtboxShape_*              # criada em runtime
+├── VisualRoot/GaiaVisual
 └── WeaponRoot
     ├── AttackVisualRoot
     ├── AttackHitboxRoot
     └── GaiaInitialWeaponController
 ```
 
-## Visual da Gaia
+## EnemyBase / Goblin
 
-```txt
-GaiaVisual : Node2D
-├── SpineSprite
-└── GaiaSpineAdapter
+```text
+EnemyBase <CharacterBody2D>
+├── BodyCollision <CollisionShape2D>       # física
+├── Hurtbox <Area2D>                       # recebe arma Gaia
+│   └── RuntimeHurtboxShape_*
+├── ContactAttackHitbox <Area2D>           # ataca PlayerHurtbox
+│   └── RuntimeEnemyAttackShape_*
+└── VisualRoot/GoblinWarriorVisual
 ```
 
-## Inimigo
+## Invariante
 
-```txt
-EnemyBase : CharacterBody2D
-├── CollisionShape2D
-└── VisualRoot
-    └── GoblinWarriorVisual
-```
-
-## Visual do Goblin
-
-```txt
-GoblinWarriorVisual : Node2D
-├── SpineSprite
-└── GoblinWarriorSpineAdapter
-```
-
-## Ataque visual da Gaia
-
-```txt
-GaiaAttackVisual : Node2D
-├── PlaceholderRoot
-│   └── Sprite2D
-└── SpineRoot
-```
-
-## Hitbox do ataque
-
-```txt
-DirectionalAttackHitbox : Node2D
-```
-
-## Moeda
-
-```txt
-CoinDrop : Node2D
-```
-
-## Responsabilidades
-
-### `TestGaiaScene`
-
-Composição da cena de teste. Não deve conter regra final da run.
-
-### `RunController`
-
-Controla estado da run: XP, level, pause por level-up, moedas, kills.
-
-### `DropController`
-
-Cria drops físicos quando inimigos morrem.
-
-### `EnemySpawner`
-
-Cria inimigos em volta do player.
-
-### `PlayerGaia`
-
-Entidade viva do player.
-
-### `GaiaVisual`
-
-Visual da personagem.
-
-### `GaiaInitialWeaponController`
-
-Controla cooldown, direção, visual e hitbox da arma inicial.
+Nodes executam; resources configuram. Não guardar definição específica duplicada na cena genérica.

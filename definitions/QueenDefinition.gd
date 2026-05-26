@@ -4,6 +4,7 @@
 ## - identificação;
 ## - atributos iniciais;
 ## - arma inicial;
+## - áreas vulneráveis utilizadas para receber ataques;
 ## - cena visual;
 ## - resource Spine correspondente.
 ##
@@ -23,14 +24,27 @@ class_name QueenDefinition
 ## Chave de localização utilizada para exibir a descrição da Queen.
 @export var description_key: String = ""
 
+@export_group("Base Attributes")
+
 ## Vida máxima inicial da Queen no começo da run.
 @export var base_max_hp: int = 100
 
 ## Velocidade inicial de movimento da Queen.
 @export var base_move_speed: float = 180.0
 
+@export_group("Starting Equipment")
+
 ## ID técnico da arma equipada ao iniciar a run.
 @export var starting_weapon_id: String = ""
+
+@export_group("Hurtbox")
+
+## Áreas vulneráveis que podem receber ataques inimigos.
+##
+## Estas shapes não substituem a BodyCollision responsável por movimento.
+@export var hurtbox_areas: Array[HurtboxAreaDefinition] = []
+
+@export_group("Visual")
 
 ## Caminho da cena visual que representa a Queen em gameplay.
 @export_file("*.tscn") var visual_scene_path: String = ""
@@ -45,3 +59,14 @@ func is_valid_definition() -> bool:
 		and display_name_key.strip_edges() != ""
 		and visual_scene_path.strip_edges() != ""
 	)
+
+## Indica se existe ao menos uma área vulnerável válida cadastrada.
+func has_valid_hurtbox_areas() -> bool:
+	for hurtbox_area: HurtboxAreaDefinition in hurtbox_areas:
+		if hurtbox_area == null:
+			continue
+
+		if hurtbox_area.is_valid_definition():
+			return true
+
+	return false

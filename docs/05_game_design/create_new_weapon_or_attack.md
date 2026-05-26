@@ -1,81 +1,10 @@
-# Como criar nova arma ou ataque
+# Criar Nova Arma ou Ataque de Queen
 
-## Arma baseada na Gaia atual
+1. Crie `WeaponDefinition` com ID, localization, cooldown, visual, lifetime e área ofensiva.
+2. Para dano composto, crie resources `DamageComponentDefinition` separados.
+3. Crie `AttackAreaDefinition` alinhada ao visual.
+4. Reutilize `DirectionalAttackHitbox` para ataques direcionais instantâneos compatíveis.
+5. Ataques persistentes/projéteis/summons podem exigir controller próprio, sempre enviando `DamagePayload` a hurtboxes.
+6. Teste shape, centro/bordas, dano, upgrades e morte do alvo.
 
-Duplicar:
-
-```txt
-res://data/weapons/weapon_gaia_initial.tres
-```
-
-Exemplo:
-
-```txt
-res://data/weapons/weapon_gaia_alt.tres
-```
-
-Alterar:
-
-```txt
-id
-display_name_key
-description_key
-cooldown_seconds
-attack_visual_offset
-attack_hitbox_offset
-attack_hitbox_radius
-damage_components
-```
-
-## Criar componentes de dano
-
-Duplicar:
-
-```txt
-res://data/weapons/components/gaia_initial_physical.tres
-```
-
-ou criar novo:
-
-```txt
-res://data/weapons/components/nova_arma_fire.tres
-```
-
-Configurar:
-
-```txt
-damage_type
-amount
-affected_by_weakness
-affected_by_resistance
-```
-
-## Visual placeholder
-
-Colocar imagem em:
-
-```txt
-res://assets/placeholders/weapons/NOME_DA_ARMA/
-```
-
-Criar/duplicar visual em:
-
-```txt
-res://visual/weapons/NOME_DA_ARMA/
-```
-
-## Spine futuro
-
-Colocar assets em:
-
-```txt
-res://assets/spine/weapons/NOME_DA_ARMA/
-```
-
-Criar:
-
-```txt
-SpineSkeletonDataResource
-```
-
-Depois ajustar a scene visual.
+Tipos atuais de dano: `physical`, `magical`, `fire`, `ice`, `lightning`, `poison`, `true_damage`.

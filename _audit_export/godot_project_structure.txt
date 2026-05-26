@@ -23,48 +23,48 @@ CENA: res://gameplay/drops/CoinDrop.tscn
 CENA: res://gameplay/enemies/EnemyBase.tscn
 --------------------------------------------------------------------------------------------------------------
 - EnemyBase <CharacterBody2D> [path: .] | script: res://gameplay/enemies/EnemyBase.gd
-    - CollisionShape2D <CollisionShape2D> [path: ./CollisionShape2D]
-    - VisualRoot <Node2D> [path: ./VisualRoot]
-      - GoblinWarriorVisual <Node2D [instanced root]> [path: ./VisualRoot/GoblinWarriorVisual] | instance: res://visual/enemies/goblin_warrior/GoblinWarriorVisual.tscn
+	- CollisionShape2D <CollisionShape2D> [path: ./CollisionShape2D]
+	- VisualRoot <Node2D> [path: ./VisualRoot]
+	  - GoblinWarriorVisual <Node2D [instanced root]> [path: ./VisualRoot/GoblinWarriorVisual] | instance: res://visual/enemies/goblin_warrior/GoblinWarriorVisual.tscn
 
 CENA: res://gameplay/player/PlayerGaia.tscn
 --------------------------------------------------------------------------------------------------------------
 - PlayerGaia <CharacterBody2D> [path: .] | script: res://gameplay/player/PlayerController.gd
-    - CollisionShape2D <CollisionShape2D> [path: ./CollisionShape2D]
-    - VisualRoot <Node2D> [path: ./VisualRoot]
-      - GaiaVisual <Node2D [instanced root]> [path: ./VisualRoot/GaiaVisual] | instance: res://visual/characters/gaia/GaiaVisual.tscn
-    - WeaponRoot <Node2D> [path: ./WeaponRoot]
-      - AttackVisualRoot <Node2D> [path: ./WeaponRoot/AttackVisualRoot]
-      - AttackHitboxRoot <Node2D> [path: ./WeaponRoot/AttackHitboxRoot]
-      - GaiaInitialWeaponController <Node> [path: ./WeaponRoot/GaiaInitialWeaponController] | script: res://gameplay/weapons/gaia/GaiaInitialWeaponController.gd
+	- CollisionShape2D <CollisionShape2D> [path: ./CollisionShape2D]
+	- VisualRoot <Node2D> [path: ./VisualRoot]
+	  - GaiaVisual <Node2D [instanced root]> [path: ./VisualRoot/GaiaVisual] | instance: res://visual/characters/gaia/GaiaVisual.tscn
+	- WeaponRoot <Node2D> [path: ./WeaponRoot]
+	  - AttackVisualRoot <Node2D> [path: ./WeaponRoot/AttackVisualRoot]
+	  - AttackHitboxRoot <Node2D> [path: ./WeaponRoot/AttackHitboxRoot]
+	  - GaiaInitialWeaponController <Node> [path: ./WeaponRoot/GaiaInitialWeaponController] | script: res://gameplay/weapons/gaia/GaiaInitialWeaponController.gd
 
 CENA: res://gameplay/spawners/EnemySpawner.tscn
 --------------------------------------------------------------------------------------------------------------
 - EnemySpawner <Node2D> [path: .] | script: res://gameplay/spawners/EnemySpawner.gd
-    - HintLabel <Label> [path: ./HintLabel]
+	- HintLabel <Label> [path: ./HintLabel]
 
 CENA: res://gameplay/test/TestGaiaScene.tscn
 --------------------------------------------------------------------------------------------------------------
 - TestGaiaScene <Node2D> [path: .] | script: res://gameplay/test/TestGaiaScene.gd
-    - ArenaRoot <Node2D> [path: ./ArenaRoot]
-      - TestArena <Node2D [instanced root]> [path: ./ArenaRoot/TestArena] | instance: res://gameplay/arena/TestArena.tscn
-    - RuntimeRoot <Node2D> [path: ./RuntimeRoot]
-      - PlayerRoot <Node2D> [path: ./RuntimeRoot/PlayerRoot]
-      - EnemyRoot <Node2D> [path: ./RuntimeRoot/EnemyRoot]
-      - DropRoot <Node2D> [path: ./RuntimeRoot/DropRoot]
-      - SpawnerRoot <Node2D> [path: ./RuntimeRoot/SpawnerRoot]
-        - EnemySpawner <Node2D [instanced root]> [path: ./RuntimeRoot/SpawnerRoot/EnemySpawner] | instance: res://gameplay/spawners/EnemySpawner.tscn
-      - RunController <Node> [path: ./RuntimeRoot/RunController] | script: res://gameplay/run/RunController.gd
-      - DropController <Node> [path: ./RuntimeRoot/DropController] | script: res://gameplay/drops/DropController.gd
-    - PlayerSpawnPoint <Marker2D> [path: ./PlayerSpawnPoint]
-    - Camera2D <Camera2D> [path: ./Camera2D] | script: res://gameplay/camera/FollowCamera.gd
-    - RunHud <CanvasLayer [instanced root]> [path: ./RunHud] | instance: res://ui/hud/RunHud.tscn
-    - RunFeedbackLayer <CanvasLayer [instanced root]> [path: ./RunFeedbackLayer] | instance: res://ui/feedback/RunFeedbackLayer.tscn
-    - WorldFeedbackLayer <CanvasLayer [instanced root]> [path: ./WorldFeedbackLayer] | instance: res://ui/world_feedback/WorldFeedbackLayer.tscn
-    - DebugOverlay <CanvasLayer [instanced root]> [path: ./DebugOverlay] | instance: res://ui/debug/DebugOverlay.tscn
-    - PrototypeToolsPanel <CanvasLayer [instanced root]> [path: ./PrototypeToolsPanel] | instance: res://ui/debug/tools/PrototypeToolsPanel.tscn
-    - LevelUpPanel <CanvasLayer [instanced root]> [path: ./LevelUpPanel] | instance: res://ui/level_up/LevelUpPanel.tscn
-    - ResultPanel <CanvasLayer [instanced root]> [path: ./ResultPanel] | instance: res://ui/result/ResultPanel.tscn
+	- ArenaRoot <Node2D> [path: ./ArenaRoot]
+	  - TestArena <Node2D [instanced root]> [path: ./ArenaRoot/TestArena] | instance: res://gameplay/arena/TestArena.tscn
+	- RuntimeRoot <Node2D> [path: ./RuntimeRoot]
+	  - PlayerRoot <Node2D> [path: ./RuntimeRoot/PlayerRoot]
+	  - EnemyRoot <Node2D> [path: ./RuntimeRoot/EnemyRoot]
+	  - DropRoot <Node2D> [path: ./RuntimeRoot/DropRoot]
+	  - SpawnerRoot <Node2D> [path: ./RuntimeRoot/SpawnerRoot]
+		- EnemySpawner <Node2D [instanced root]> [path: ./RuntimeRoot/SpawnerRoot/EnemySpawner] | instance: res://gameplay/spawners/EnemySpawner.tscn
+	  - RunController <Node> [path: ./RuntimeRoot/RunController] | script: res://gameplay/run/RunController.gd
+	  - DropController <Node> [path: ./RuntimeRoot/DropController] | script: res://gameplay/drops/DropController.gd
+	- PlayerSpawnPoint <Marker2D> [path: ./PlayerSpawnPoint]
+	- Camera2D <Camera2D> [path: ./Camera2D] | script: res://gameplay/camera/FollowCamera.gd
+	- RunHud <CanvasLayer [instanced root]> [path: ./RunHud] | instance: res://ui/hud/RunHud.tscn
+	- RunFeedbackLayer <CanvasLayer [instanced root]> [path: ./RunFeedbackLayer] | instance: res://ui/feedback/RunFeedbackLayer.tscn
+	- WorldFeedbackLayer <CanvasLayer [instanced root]> [path: ./WorldFeedbackLayer] | instance: res://ui/world_feedback/WorldFeedbackLayer.tscn
+	- DebugOverlay <CanvasLayer [instanced root]> [path: ./DebugOverlay] | instance: res://ui/debug/DebugOverlay.tscn
+	- PrototypeToolsPanel <CanvasLayer [instanced root]> [path: ./PrototypeToolsPanel] | instance: res://ui/debug/tools/PrototypeToolsPanel.tscn
+	- LevelUpPanel <CanvasLayer [instanced root]> [path: ./LevelUpPanel] | instance: res://ui/level_up/LevelUpPanel.tscn
+	- ResultPanel <CanvasLayer [instanced root]> [path: ./ResultPanel] | instance: res://ui/result/ResultPanel.tscn
 
 CENA: res://gameplay/weapons/attacks/DirectionalAttackHitbox.tscn
 --------------------------------------------------------------------------------------------------------------
@@ -73,109 +73,109 @@ CENA: res://gameplay/weapons/attacks/DirectionalAttackHitbox.tscn
 CENA: res://scenes/Main.tscn
 --------------------------------------------------------------------------------------------------------------
 - Main <Node> [path: .] | script: res://scenes/Main.gd
-    - CurrentSceneRoot <Node> [path: ./CurrentSceneRoot]
+	- CurrentSceneRoot <Node> [path: ./CurrentSceneRoot]
 
 CENA: res://ui/debug/DebugOverlay.tscn
 --------------------------------------------------------------------------------------------------------------
 - DebugOverlay <CanvasLayer> [path: .] | script: res://ui/debug/DebugOverlay.gd
-    - Panel <Panel> [path: ./Panel]
-      - MarginContainer <MarginContainer> [path: ./Panel/MarginContainer]
-        - Label <Label> [path: ./Panel/MarginContainer/Label]
+	- Panel <Panel> [path: ./Panel]
+	  - MarginContainer <MarginContainer> [path: ./Panel/MarginContainer]
+		- Label <Label> [path: ./Panel/MarginContainer/Label]
 
 CENA: res://ui/debug/tools/PrototypeToolsPanel.tscn
 --------------------------------------------------------------------------------------------------------------
 - PrototypeToolsPanel <CanvasLayer> [path: .] | script: res://ui/debug/tools/PrototypeToolsPanel.gd
-    - Panel <Panel> [path: ./Panel]
-      - MarginContainer <MarginContainer> [path: ./Panel/MarginContainer]
-        - VBoxContainer <VBoxContainer> [path: ./Panel/MarginContainer/VBoxContainer]
-          - TitleLabel <Label> [path: ./Panel/MarginContainer/VBoxContainer/TitleLabel]
-          - HintLabel <Label> [path: ./Panel/MarginContainer/VBoxContainer/HintLabel]
-          - ActionsRow <HBoxContainer> [path: ./Panel/MarginContainer/VBoxContainer/ActionsRow]
-            - ForceVictoryButton <Button> [path: ./Panel/MarginContainer/VBoxContainer/ActionsRow/ForceVictoryButton]
-            - ForceDefeatButton <Button> [path: ./Panel/MarginContainer/VBoxContainer/ActionsRow/ForceDefeatButton]
-            - ResetProgressButton <Button> [path: ./Panel/MarginContainer/VBoxContainer/ActionsRow/ResetProgressButton]
-          - ConfirmationRow <HBoxContainer> [path: ./Panel/MarginContainer/VBoxContainer/ConfirmationRow]
-            - ConfirmResetButton <Button> [path: ./Panel/MarginContainer/VBoxContainer/ConfirmationRow/ConfirmResetButton]
-            - CancelResetButton <Button> [path: ./Panel/MarginContainer/VBoxContainer/ConfirmationRow/CancelResetButton]
-          - SaveInfoLabel <Label> [path: ./Panel/MarginContainer/VBoxContainer/SaveInfoLabel]
-          - CurrentRunLabel <Label> [path: ./Panel/MarginContainer/VBoxContainer/CurrentRunLabel]
-          - LastRunLabel <Label> [path: ./Panel/MarginContainer/VBoxContainer/LastRunLabel]
-          - WarningLabel <Label> [path: ./Panel/MarginContainer/VBoxContainer/WarningLabel]
-          - StatusLabel <Label> [path: ./Panel/MarginContainer/VBoxContainer/StatusLabel]
+	- Panel <Panel> [path: ./Panel]
+	  - MarginContainer <MarginContainer> [path: ./Panel/MarginContainer]
+		- VBoxContainer <VBoxContainer> [path: ./Panel/MarginContainer/VBoxContainer]
+		  - TitleLabel <Label> [path: ./Panel/MarginContainer/VBoxContainer/TitleLabel]
+		  - HintLabel <Label> [path: ./Panel/MarginContainer/VBoxContainer/HintLabel]
+		  - ActionsRow <HBoxContainer> [path: ./Panel/MarginContainer/VBoxContainer/ActionsRow]
+			- ForceVictoryButton <Button> [path: ./Panel/MarginContainer/VBoxContainer/ActionsRow/ForceVictoryButton]
+			- ForceDefeatButton <Button> [path: ./Panel/MarginContainer/VBoxContainer/ActionsRow/ForceDefeatButton]
+			- ResetProgressButton <Button> [path: ./Panel/MarginContainer/VBoxContainer/ActionsRow/ResetProgressButton]
+		  - ConfirmationRow <HBoxContainer> [path: ./Panel/MarginContainer/VBoxContainer/ConfirmationRow]
+			- ConfirmResetButton <Button> [path: ./Panel/MarginContainer/VBoxContainer/ConfirmationRow/ConfirmResetButton]
+			- CancelResetButton <Button> [path: ./Panel/MarginContainer/VBoxContainer/ConfirmationRow/CancelResetButton]
+		  - SaveInfoLabel <Label> [path: ./Panel/MarginContainer/VBoxContainer/SaveInfoLabel]
+		  - CurrentRunLabel <Label> [path: ./Panel/MarginContainer/VBoxContainer/CurrentRunLabel]
+		  - LastRunLabel <Label> [path: ./Panel/MarginContainer/VBoxContainer/LastRunLabel]
+		  - WarningLabel <Label> [path: ./Panel/MarginContainer/VBoxContainer/WarningLabel]
+		  - StatusLabel <Label> [path: ./Panel/MarginContainer/VBoxContainer/StatusLabel]
 
 CENA: res://ui/feedback/RunFeedbackLayer.tscn
 --------------------------------------------------------------------------------------------------------------
 - RunFeedbackLayer <CanvasLayer> [path: .] | script: res://ui/feedback/RunFeedbackLayer.gd
-    - MarginContainer <MarginContainer> [path: ./MarginContainer]
-      - MessageContainer <VBoxContainer> [path: ./MarginContainer/MessageContainer]
+	- MarginContainer <MarginContainer> [path: ./MarginContainer]
+	  - MessageContainer <VBoxContainer> [path: ./MarginContainer/MessageContainer]
 
 CENA: res://ui/hud/RunHud.tscn
 --------------------------------------------------------------------------------------------------------------
 - RunHud <CanvasLayer> [path: .] | script: res://ui/hud/RunHud.gd
-    - MarginContainer <MarginContainer> [path: ./MarginContainer]
-      - VBoxContainer <VBoxContainer> [path: ./MarginContainer/VBoxContainer]
-        - TopRow <HBoxContainer> [path: ./MarginContainer/VBoxContainer/TopRow]
-          - HpBox <VBoxContainer> [path: ./MarginContainer/VBoxContainer/TopRow/HpBox]
-            - HpLabel <Label> [path: ./MarginContainer/VBoxContainer/TopRow/HpBox/HpLabel]
-            - HpBar <ProgressBar> [path: ./MarginContainer/VBoxContainer/TopRow/HpBox/HpBar]
-          - XpBox <VBoxContainer> [path: ./MarginContainer/VBoxContainer/TopRow/XpBox]
-            - XpLabel <Label> [path: ./MarginContainer/VBoxContainer/TopRow/XpBox/XpLabel]
-            - XpBar <ProgressBar> [path: ./MarginContainer/VBoxContainer/TopRow/XpBox/XpBar]
-          - CooldownBox <VBoxContainer> [path: ./MarginContainer/VBoxContainer/TopRow/CooldownBox]
-            - CooldownLabel <Label> [path: ./MarginContainer/VBoxContainer/TopRow/CooldownBox/CooldownLabel]
-            - CooldownBar <ProgressBar> [path: ./MarginContainer/VBoxContainer/TopRow/CooldownBox/CooldownBar]
-          - TimerLabel <Label> [path: ./MarginContainer/VBoxContainer/TopRow/TimerLabel]
-          - CoinsLabel <Label> [path: ./MarginContainer/VBoxContainer/TopRow/CoinsLabel]
-          - LevelLabel <Label> [path: ./MarginContainer/VBoxContainer/TopRow/LevelLabel]
-          - KillsLabel <Label> [path: ./MarginContainer/VBoxContainer/TopRow/KillsLabel]
-        - MessageLabel <Label> [path: ./MarginContainer/VBoxContainer/MessageLabel]
+	- MarginContainer <MarginContainer> [path: ./MarginContainer]
+	  - VBoxContainer <VBoxContainer> [path: ./MarginContainer/VBoxContainer]
+		- TopRow <HBoxContainer> [path: ./MarginContainer/VBoxContainer/TopRow]
+		  - HpBox <VBoxContainer> [path: ./MarginContainer/VBoxContainer/TopRow/HpBox]
+			- HpLabel <Label> [path: ./MarginContainer/VBoxContainer/TopRow/HpBox/HpLabel]
+			- HpBar <ProgressBar> [path: ./MarginContainer/VBoxContainer/TopRow/HpBox/HpBar]
+		  - XpBox <VBoxContainer> [path: ./MarginContainer/VBoxContainer/TopRow/XpBox]
+			- XpLabel <Label> [path: ./MarginContainer/VBoxContainer/TopRow/XpBox/XpLabel]
+			- XpBar <ProgressBar> [path: ./MarginContainer/VBoxContainer/TopRow/XpBox/XpBar]
+		  - CooldownBox <VBoxContainer> [path: ./MarginContainer/VBoxContainer/TopRow/CooldownBox]
+			- CooldownLabel <Label> [path: ./MarginContainer/VBoxContainer/TopRow/CooldownBox/CooldownLabel]
+			- CooldownBar <ProgressBar> [path: ./MarginContainer/VBoxContainer/TopRow/CooldownBox/CooldownBar]
+		  - TimerLabel <Label> [path: ./MarginContainer/VBoxContainer/TopRow/TimerLabel]
+		  - CoinsLabel <Label> [path: ./MarginContainer/VBoxContainer/TopRow/CoinsLabel]
+		  - LevelLabel <Label> [path: ./MarginContainer/VBoxContainer/TopRow/LevelLabel]
+		  - KillsLabel <Label> [path: ./MarginContainer/VBoxContainer/TopRow/KillsLabel]
+		- MessageLabel <Label> [path: ./MarginContainer/VBoxContainer/MessageLabel]
 
 CENA: res://ui/level_up/LevelUpPanel.tscn
 --------------------------------------------------------------------------------------------------------------
 - LevelUpPanel <CanvasLayer> [path: .] | script: res://ui/level_up/LevelUpPanel.gd
-    - Panel <Panel> [path: ./Panel]
-      - MarginContainer <MarginContainer> [path: ./Panel/MarginContainer]
-        - VBoxContainer <VBoxContainer> [path: ./Panel/MarginContainer/VBoxContainer]
-          - TitleLabel <Label> [path: ./Panel/MarginContainer/VBoxContainer/TitleLabel]
-          - SubtitleLabel <Label> [path: ./Panel/MarginContainer/VBoxContainer/SubtitleLabel]
-          - OptionsContainer <HBoxContainer> [path: ./Panel/MarginContainer/VBoxContainer/OptionsContainer]
-            - OptionCard1 <Button> [path: ./Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard1]
-              - MarginContainer <MarginContainer> [path: ./Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard1/MarginContainer]
-                - HBoxContainer <HBoxContainer> [path: ./Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard1/MarginContainer/HBoxContainer]
-                  - IconTexture <TextureRect> [path: ./Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard1/MarginContainer/HBoxContainer/IconTexture]
-                  - TextBox <VBoxContainer> [path: ./Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard1/MarginContainer/HBoxContainer/TextBox]
-                    - NameLabel <Label> [path: ./Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard1/MarginContainer/HBoxContainer/TextBox/NameLabel]
-                    - DescriptionLabel <Label> [path: ./Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard1/MarginContainer/HBoxContainer/TextBox/DescriptionLabel]
-                    - BadgeLabel <Label> [path: ./Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard1/MarginContainer/HBoxContainer/TextBox/BadgeLabel]
-            - OptionCard2 <Button> [path: ./Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard2]
-              - MarginContainer <MarginContainer> [path: ./Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard2/MarginContainer]
-                - HBoxContainer <HBoxContainer> [path: ./Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard2/MarginContainer/HBoxContainer]
-                  - IconTexture <TextureRect> [path: ./Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard2/MarginContainer/HBoxContainer/IconTexture]
-                  - TextBox <VBoxContainer> [path: ./Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard2/MarginContainer/HBoxContainer/TextBox]
-                    - NameLabel <Label> [path: ./Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard2/MarginContainer/HBoxContainer/TextBox/NameLabel]
-                    - DescriptionLabel <Label> [path: ./Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard2/MarginContainer/HBoxContainer/TextBox/DescriptionLabel]
-                    - BadgeLabel <Label> [path: ./Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard2/MarginContainer/HBoxContainer/TextBox/BadgeLabel]
-            - OptionCard3 <Button> [path: ./Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard3]
-              - MarginContainer <MarginContainer> [path: ./Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard3/MarginContainer]
-                - HBoxContainer <HBoxContainer> [path: ./Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard3/MarginContainer/HBoxContainer]
-                  - IconTexture <TextureRect> [path: ./Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard3/MarginContainer/HBoxContainer/IconTexture]
-                  - TextBox <VBoxContainer> [path: ./Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard3/MarginContainer/HBoxContainer/TextBox]
-                    - NameLabel <Label> [path: ./Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard3/MarginContainer/HBoxContainer/TextBox/NameLabel]
-                    - DescriptionLabel <Label> [path: ./Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard3/MarginContainer/HBoxContainer/TextBox/DescriptionLabel]
-                    - BadgeLabel <Label> [path: ./Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard3/MarginContainer/HBoxContainer/TextBox/BadgeLabel]
+	- Panel <Panel> [path: ./Panel]
+	  - MarginContainer <MarginContainer> [path: ./Panel/MarginContainer]
+		- VBoxContainer <VBoxContainer> [path: ./Panel/MarginContainer/VBoxContainer]
+		  - TitleLabel <Label> [path: ./Panel/MarginContainer/VBoxContainer/TitleLabel]
+		  - SubtitleLabel <Label> [path: ./Panel/MarginContainer/VBoxContainer/SubtitleLabel]
+		  - OptionsContainer <HBoxContainer> [path: ./Panel/MarginContainer/VBoxContainer/OptionsContainer]
+			- OptionCard1 <Button> [path: ./Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard1]
+			  - MarginContainer <MarginContainer> [path: ./Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard1/MarginContainer]
+				- HBoxContainer <HBoxContainer> [path: ./Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard1/MarginContainer/HBoxContainer]
+				  - IconTexture <TextureRect> [path: ./Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard1/MarginContainer/HBoxContainer/IconTexture]
+				  - TextBox <VBoxContainer> [path: ./Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard1/MarginContainer/HBoxContainer/TextBox]
+					- NameLabel <Label> [path: ./Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard1/MarginContainer/HBoxContainer/TextBox/NameLabel]
+					- DescriptionLabel <Label> [path: ./Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard1/MarginContainer/HBoxContainer/TextBox/DescriptionLabel]
+					- BadgeLabel <Label> [path: ./Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard1/MarginContainer/HBoxContainer/TextBox/BadgeLabel]
+			- OptionCard2 <Button> [path: ./Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard2]
+			  - MarginContainer <MarginContainer> [path: ./Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard2/MarginContainer]
+				- HBoxContainer <HBoxContainer> [path: ./Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard2/MarginContainer/HBoxContainer]
+				  - IconTexture <TextureRect> [path: ./Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard2/MarginContainer/HBoxContainer/IconTexture]
+				  - TextBox <VBoxContainer> [path: ./Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard2/MarginContainer/HBoxContainer/TextBox]
+					- NameLabel <Label> [path: ./Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard2/MarginContainer/HBoxContainer/TextBox/NameLabel]
+					- DescriptionLabel <Label> [path: ./Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard2/MarginContainer/HBoxContainer/TextBox/DescriptionLabel]
+					- BadgeLabel <Label> [path: ./Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard2/MarginContainer/HBoxContainer/TextBox/BadgeLabel]
+			- OptionCard3 <Button> [path: ./Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard3]
+			  - MarginContainer <MarginContainer> [path: ./Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard3/MarginContainer]
+				- HBoxContainer <HBoxContainer> [path: ./Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard3/MarginContainer/HBoxContainer]
+				  - IconTexture <TextureRect> [path: ./Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard3/MarginContainer/HBoxContainer/IconTexture]
+				  - TextBox <VBoxContainer> [path: ./Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard3/MarginContainer/HBoxContainer/TextBox]
+					- NameLabel <Label> [path: ./Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard3/MarginContainer/HBoxContainer/TextBox/NameLabel]
+					- DescriptionLabel <Label> [path: ./Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard3/MarginContainer/HBoxContainer/TextBox/DescriptionLabel]
+					- BadgeLabel <Label> [path: ./Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard3/MarginContainer/HBoxContainer/TextBox/BadgeLabel]
 
 CENA: res://ui/result/ResultPanel.tscn
 --------------------------------------------------------------------------------------------------------------
 - ResultPanel <CanvasLayer> [path: .] | script: res://ui/result/ResultPanel.gd
-    - Panel <Panel> [path: ./Panel]
-      - MarginContainer <MarginContainer> [path: ./Panel/MarginContainer]
-        - VBoxContainer <VBoxContainer> [path: ./Panel/MarginContainer/VBoxContainer]
-          - TitleLabel <Label> [path: ./Panel/MarginContainer/VBoxContainer/TitleLabel]
-          - ResultTypeLabel <Label> [path: ./Panel/MarginContainer/VBoxContainer/ResultTypeLabel]
-          - SummaryLabel <Label> [path: ./Panel/MarginContainer/VBoxContainer/SummaryLabel]
-          - SaveStatusLabel <Label> [path: ./Panel/MarginContainer/VBoxContainer/SaveStatusLabel]
-          - HintLabel <Label> [path: ./Panel/MarginContainer/VBoxContainer/HintLabel]
-          - RestartButton <Button> [path: ./Panel/MarginContainer/VBoxContainer/RestartButton]
+	- Panel <Panel> [path: ./Panel]
+	  - MarginContainer <MarginContainer> [path: ./Panel/MarginContainer]
+		- VBoxContainer <VBoxContainer> [path: ./Panel/MarginContainer/VBoxContainer]
+		  - TitleLabel <Label> [path: ./Panel/MarginContainer/VBoxContainer/TitleLabel]
+		  - ResultTypeLabel <Label> [path: ./Panel/MarginContainer/VBoxContainer/ResultTypeLabel]
+		  - SummaryLabel <Label> [path: ./Panel/MarginContainer/VBoxContainer/SummaryLabel]
+		  - SaveStatusLabel <Label> [path: ./Panel/MarginContainer/VBoxContainer/SaveStatusLabel]
+		  - HintLabel <Label> [path: ./Panel/MarginContainer/VBoxContainer/HintLabel]
+		  - RestartButton <Button> [path: ./Panel/MarginContainer/VBoxContainer/RestartButton]
 
 CENA: res://ui/world_feedback/FloatingCombatText.tscn
 --------------------------------------------------------------------------------------------------------------
@@ -184,26 +184,26 @@ CENA: res://ui/world_feedback/FloatingCombatText.tscn
 CENA: res://ui/world_feedback/WorldFeedbackLayer.tscn
 --------------------------------------------------------------------------------------------------------------
 - WorldFeedbackLayer <CanvasLayer> [path: .] | script: res://ui/world_feedback/WorldFeedbackLayer.gd
-    - FeedbackRoot <Control> [path: ./FeedbackRoot]
+	- FeedbackRoot <Control> [path: ./FeedbackRoot]
 
 CENA: res://visual/characters/gaia/GaiaVisual.tscn
 --------------------------------------------------------------------------------------------------------------
 - GaiaVisual <Node2D> [path: .] | script: res://visual/characters/gaia/GaiaVisualController.gd
-    - SpineSprite <SpineSprite> [path: ./SpineSprite]
-    - GaiaSpineAdapter <Node> [path: ./GaiaSpineAdapter] | script: res://visual/characters/gaia/GaiaSpineAdapter.gd
+	- SpineSprite <SpineSprite> [path: ./SpineSprite]
+	- GaiaSpineAdapter <Node> [path: ./GaiaSpineAdapter] | script: res://visual/characters/gaia/GaiaSpineAdapter.gd
 
 CENA: res://visual/enemies/goblin_warrior/GoblinWarriorVisual.tscn
 --------------------------------------------------------------------------------------------------------------
 - GoblinWarriorVisual <Node2D> [path: .] | script: res://visual/enemies/goblin_warrior/GoblinWarriorVisualController.gd
-    - SpineSprite <SpineSprite> [path: ./SpineSprite]
-    - GoblinWarriorSpineAdapter <Node> [path: ./GoblinWarriorSpineAdapter] | script: res://visual/enemies/goblin_warrior/GoblinWarriorSpineAdapter.gd
+	- SpineSprite <SpineSprite> [path: ./SpineSprite]
+	- GoblinWarriorSpineAdapter <Node> [path: ./GoblinWarriorSpineAdapter] | script: res://visual/enemies/goblin_warrior/GoblinWarriorSpineAdapter.gd
 
 CENA: res://visual/weapons/gaia_initial_weapon/GaiaAttackVisual.tscn
 --------------------------------------------------------------------------------------------------------------
 - GaiaAttackVisual <Node2D> [path: .] | script: res://visual/weapons/gaia_initial_weapon/GaiaAttackVisualController.gd
-    - PlaceholderRoot <Node2D> [path: ./PlaceholderRoot]
-      - Sprite2D <Sprite2D> [path: ./PlaceholderRoot/Sprite2D]
-    - SpineRoot <Node2D> [path: ./SpineRoot]
+	- PlaceholderRoot <Node2D> [path: ./PlaceholderRoot]
+	  - Sprite2D <Sprite2D> [path: ./PlaceholderRoot/Sprite2D]
+	- SpineRoot <Node2D> [path: ./SpineRoot]
 
 
 SCRIPTS ANEXADOS AOS NÓS

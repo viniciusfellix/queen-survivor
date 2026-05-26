@@ -1,46 +1,44 @@
-# Tabelas Rápidas
+# Referência Rápida de Balanceamento
 
-## Inimigo Goblin
+## Valores validados
 
-| O que editar | Arquivo | Campo |
-|---|---|---|
-| HP | `data/enemies/enemy_chaser_basic.tres` | `base_max_hp` |
-| Velocidade | `data/enemies/enemy_chaser_basic.tres` | `base_move_speed` |
-| Dano contato | `data/enemies/enemy_chaser_basic.tres` | `contact_damage` |
-| Raio contato | `data/enemies/enemy_chaser_basic.tres` | `contact_damage_radius` |
-| XP | `data/enemies/enemy_chaser_basic.tres` | `xp_reward` |
-| Chance moeda | `data/enemies/enemy_chaser_basic.tres` | `coin_drop_chance` |
-| Valor moeda | `data/enemies/enemy_chaser_basic.tres` | `coin_drop_value` |
-| Fraqueza | `data/enemies/enemy_chaser_basic.tres` | `weak_damage_types` |
-| Resistência | `data/enemies/enemy_chaser_basic.tres` | `resistant_damage_types` |
+| Conteúdo | Valor |
+|---|---|
+| Duração mapa | 600s |
+| Level-up inicial | 3 opções |
+| Gaia HP base | 100 |
+| Arma Gaia | cooldown 2.0; physical 3 + magical 3 |
+| Shape Gaia ataque | rectangle `(90,300)`; offset de origem `160` |
+| Goblin ataque | physical 6; intervalo 1.0; delay 0.75 |
+| Goblin fraqueza | physical/magical +50% |
+| Gaia invencibilidade | 0.5s |
 
-## Arma da Gaia
+## Layers
 
-| O que editar | Arquivo | Campo |
-|---|---|---|
-| Cooldown | `data/weapons/weapon_gaia_initial.tres` | `cooldown_seconds` |
-| Offset visual | `data/weapons/weapon_gaia_initial.tres` | `attack_visual_offset` |
-| Offset hitbox | `data/weapons/weapon_gaia_initial.tres` | `attack_hitbox_offset` |
-| Raio hitbox | `data/weapons/weapon_gaia_initial.tres` | `attack_hitbox_radius` |
-| Dano físico | `data/weapons/components/gaia_initial_physical.tres` | `amount` |
-| Dano mágico | `data/weapons/components/gaia_initial_magical.tres` | `amount` |
+| # | Uso |
+|---:|---|
+| 1 | World |
+| 2 | PlayerBody |
+| 3 | EnemyBody |
+| 4 | PlayerAttackHitbox |
+| 5 | EnemyHurtbox |
+| 6 | EnemyAttackHitbox |
+| 7 | PlayerHurtbox |
+| 8 | DropPickup |
 
-## Moeda
+## Upgrades suportados relevantes
 
-| O que editar | Arquivo | Campo |
-|---|---|---|
-| Valor padrão | `data/drops/coin_default.tres` | `default_value` |
-| Magnetismo | `data/drops/coin_default.tres` | `magnet_radius` |
-| Coleta | `data/drops/coin_default.tres` | `collect_radius` |
-| Velocidade ímã | `data/drops/coin_default.tres` | `max_magnet_speed` |
-
-
-## Mapa e Resultado
-
-| O que editar | Arquivo | Campo |
-|---|---|---|
-| Duração do mapa | `data/maps/map_test_arena_10min.tres` | `duration_seconds` |
-| Multiplicador de vitória | `data/maps/map_test_arena_10min.tres` | `victory_multiplier` |
-| Bônus de vitória | `data/maps/map_test_arena_10min.tres` | `victory_bonus` |
-| Nome do mapa | `data/maps/map_test_arena_10min.tres` + `data/localization/pt_br.json` | `display_name_key` |
-| Descrição do mapa | `data/maps/map_test_arena_10min.tres` + `data/localization/pt_br.json` | `description_key` |
+| Tipo | Valor |
+|---|---|
+| `player_move_speed_percent` | float |
+| `player_max_hp_flat` | int |
+| `player_defense_percent` | float |
+| `player_heal_flat` | int |
+| `weapon_damage_flat` | int |
+| `weapon_cooldown_percent` | float |
+| `weapon_physical_damage_flat` | int |
+| `weapon_magical_damage_flat` | int |
+| `weapon_hitbox_lifetime_percent` | float |
+| `weapon_attack_area_scale_percent` | float |
+| `coin_magnet_radius_percent` | float |
+| `coin_collect_radius_percent` | float |

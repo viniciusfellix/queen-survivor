@@ -1,3 +1,6 @@
+EnemyAttackDefinition
+AttackAreaDefinition
+HurtboxAreaDefinition
 UpgradeDefinition
 UpgradePoolDefinition
 SpawnTimelineDefinition

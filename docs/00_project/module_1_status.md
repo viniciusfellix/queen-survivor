@@ -1,144 +1,74 @@
-# Status do Módulo 1
+# Estado Atual — Módulo 1: Core, Gaia e Arena Infinita
 
-## Nome
+## Status consolidado
 
-Queen Survivors — Módulo 1: Core, Gaia e Arena Infinita
+O Módulo 1 está funcionalmente implementado e validado após auditoria, refatoração, comentários inline, regressão e migração do combate modular. O próximo desenvolvimento deve partir desta base, sem restaurar soluções antigas removidas.
 
-## Objetivo do módulo
+## Implementado
 
-Criar a primeira base jogável real do projeto em Godot, com Gaia, arena de teste, inimigo perseguidor, ataque direcional, XP direta, level-up inicial, moeda física e magnetismo.
+### Gameplay
 
-## Checkpoints concluídos
+- Gaia jogável, movimento e mira direcional independente.
+- Arena técnica infinita e câmera seguindo a Queen.
+- Goblin perseguidor instanciado por timeline de spawn.
+- Arma inicial direcional com dano físico + mágico.
+- Hitbox ofensiva da Gaia configurada como retângulo por resource.
+- Hurtboxes independentes para Gaia e Goblin.
+- Ataque corporal do Goblin por `EnemyAttackHitbox`.
+- Fraquezas e resistências resolvidas por componente de dano.
+- XP direta/única e level-up com três opções.
+- Upgrades de player, arma, magnetismo e área ofensiva.
+- Moeda física com magnetismo e coleta.
+- Vitória, derrota, resultado e save básico.
+- Feedback flutuante/flash vermelho da Gaia e flash claro do Goblin.
+- Ferramentas técnicas: audit logger, overlay, painel do protótipo e snapshot runtime.
 
-### QS-M1-001 — Base inicial da Gaia
+### Arquitetura consolidada
 
-Validado:
+- `RunState.is_ending` bloqueia gameplay durante encerramento.
+- `RunQuery` centraliza consulta de bloqueio de gameplay.
+- `RewardResolver` calcula dinheiro final.
+- `DamageResolver` calcula defesa/fraqueza/resistência.
+- `LevelUpOptionService` seleciona upgrades válidos.
+- `SpineAnimationAdapterBase` e `SpineVisualControllerBase` removem duplicação visual.
+- `CombatShapeDefinition`, `AttackAreaDefinition` e `HurtboxAreaDefinition` suportam shapes editáveis.
+- `HurtboxComponent` é reutilizado por player e inimigos.
+- `EnemyAttackDefinition` e `EnemyAttackHitbox` padronizam ataques de inimigos.
 
-- Godot com Spine integrado.
-- Gaia carregando via `SpineSprite`.
-- `GaiaSpineAdapter` encontrando o `SpineSprite`.
-- Animação `Idle1_Pose2`.
-- Animação `Run1_Pose3`.
-- Movimento.
-- Mira por mouse.
-- Linha de debug da mira.
-- Câmera seguindo Gaia.
-- `DebugOverlay`.
+## Valores validados desta etapa
 
-### QS-M1-002 — Primeiro inimigo perseguidor
+| Conteúdo | Valor atual validado |
+|---|---|
+| Mapa técnico | 600 segundos |
+| Ataque Gaia | `physical:3`, `magical:3`, cooldown `2.0s` |
+| Shape ataque Gaia | rectangle `size=(90,300)`, local offset `(0,0)` |
+| Origem hitbox Gaia | offset direcional `160` |
+| Hurtbox Goblin | capsule `radius=21`, `height=80`, offset `(0,0)` |
+| Goblin fraquezas | `physical`, `magical`, bônus `50%` |
+| Ataque Goblin | physical, raw `6`, intervalo `1.0s`, delay `0.75s` |
+| Shape ataque Goblin | capsule `radius=25`, `height=88`, offset `(0,2)` |
+| Hurtbox Gaia | capsule `radius=23`, `height=102`, offset `(0,41)` |
+| Invencibilidade Gaia | `0.5s` após dano |
 
-Validado:
+## Pendências futuras fora do fechamento atual
 
-- `EnemyDefinition`.
-- `enemy_chaser_basic.tres`.
-- `EnemyBase.tscn`.
-- `EnemySpawner.tscn`.
-- Spawn em volta da Gaia.
-- Inimigo perseguindo player.
-- Organização em `RuntimeRoot/EnemyRoot`.
+- movimentação orgânica de bando ao redor da Gaia;
+- possível migração para tradução nativa Godot;
+- proteção/assinatura/criptografia do save;
+- balanceamento definitivo entre dano geral, físico e mágico;
+- valores progressivos por stack de upgrade;
+- mercadores, NPC raro, objetos quebráveis e caixas especiais;
+- fragmentos, galeria, HUD lateral completa e Campanha;
+- armas supremas, Rolls e Blocks;
+- progressões completas e estatísticas ampliadas;
+- novas Queens, inimigos e mapas.
 
-### QS-M1-003 — Dano, defesa e morte da Gaia
+## Regra de encerramento para todo módulo futuro
 
-Validado:
-
-- Dano de contato do goblin.
-- HP da Gaia.
-- Fórmula de defesa.
-- Dano mínimo 1.
-- Morte da Gaia.
-- Animação `Die_Pose1`.
-
-### QS-M1-004 — Goblin Warrior com Spine
-
-Validado:
-
-- Skeleton resource do goblin.
-- `GoblinWarriorVisual.tscn`.
-- `GoblinWarriorSpineAdapter`.
-- `GoblinWarriorVisualController`.
-- Animações `Idle`, `Run` e `Die`.
-
-### QS-M1-005 — Ataque direcional da Gaia
-
-Validado:
-
-- Arma inicial da Gaia.
-- Ataque automático por cooldown.
-- Direção por `aim_direction`.
-- Placeholder visual por PNG.
-- Hitbox direcional.
-- Dano no goblin.
-- Morte do goblin.
-
-### QS-M1-006 — Dano híbrido
-
-Validado:
-
-- Componentes `physical` e `magical`.
-- `DamageComponentDefinition`.
-- `DamagePayload` com componentes.
-- `DamageResolver` com fraqueza/resistência.
-- Goblin fraco a físico.
-- Goblin fraco a mágico.
-- Goblin fraco aos dois.
-- Resistência mágica validada.
-
-### QS-M1-007 — XP direta e level-up
-
-Validado:
-
-- XP entra diretamente ao matar inimigo.
-- XP não cai no chão.
-- `RunController` escuta morte de inimigo.
-- `RunState` acumula XP.
-- Level interno sobe.
-- `LevelUpPanel` abre com 3 opções.
-- Upgrades de dano, cooldown, velocidade e HP funcionam.
-
-### QS-M1-008 — Moeda física
-
-Validado:
-
-- Moeda dropa no chão.
-- Moeda não entra automaticamente.
-- Magnetismo.
-- Coleta.
-- `run_coins_collected`.
-- `run_coins_available`.
-- XP e moeda estão separados corretamente.
-
-### QS-M1-009 — Timer da run, vitória, derrota e resultado básico
-
-Validado:
-
-- `MapDefinition` criado.
-- `map_test_arena_10min.tres` criado.
-- Mapa configurado com duração oficial de 10 minutos.
-- Duração do mapa configurável para testes.
-- `RunController` carregando `MapDefinition`.
-- Timer da run funcionando.
-- Tempo restante exibido no debug.
-- Vitória disparando ao fim do tempo do mapa.
-- Derrota disparando quando Gaia morre.
-- `RunResultPayload` criado.
-- `RewardResolver` criado.
-- Fórmula oficial de vitória validada.
-- Fórmula oficial de derrota validada.
-- Moeda não coletada não entra no resultado.
-- XP da run aparece no resultado.
-- Kills aparecem no resultado.
-- Nível alcançado aparece no resultado.
-- Dano causado e dano recebido aparecem no resultado.
-- Causa da morte aparece em derrota.
-- `ResultPanel` criado.
-- `ResultPanel` exibe payload recebido, sem recalcular resultado.
-- Gameplay pausa ao final da run.
-
-Regras validadas:
-
-```txt
-Vitória:
-dinheiro_final = (moedas_coletadas × victory_multiplier) + victory_bonus
-
-Derrota:
-dinheiro_final = moedas_coletadas
+1. revisar blocos de scripts/scenes/resources alterados;
+2. remover nodes, sinais, funções e arquivos sem uso;
+3. extrair helpers/bases quando houver redundância real;
+4. comentar as funções relevantes;
+5. executar regressão completa;
+6. atualizar docs e ADRs;
+7. gerar contexto de atualização do Chat Core.

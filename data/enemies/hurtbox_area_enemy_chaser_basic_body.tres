@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="HurtboxAreaDefinition" format=3 uid="uid://u75uut5lm3eg"]
+
+[ext_resource type="Script" uid="uid://dbnkbm8ijaa0r" path="res://definitions/HurtboxAreaDefinition.gd" id="1_54u1n"]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_54u1n"]
+radius = 21.0
+height = 80.0
+
+[resource]
+script = ExtResource("1_54u1n")
+id = "hurtbox_area_enemy_chaser_basic_body"
+shape = SubResource("CapsuleShape2D_54u1n")
+metadata/_custom_type_script = "uid://dbnkbm8ijaa0r"

@@ -1,23 +1,5 @@
-# ADR 0002 — XP é única
-
-## Status
-
-Aceita.
+# ADR — XP é única
 
 ## Decisão
 
-Existe apenas uma XP.
-
-Durante a run, ela serve para level-up.
-
-Ao final da run, futuramente será adicionada ao progresso permanente.
-
-## Consequência
-
-Não criar:
-
-- XP global separada.
-- XP individual separada.
-- XP coletiva 10x separada.
-
-Pode existir gasto futuro da XP em sistemas diferentes, mas o recurso base é único.
+A XP obtida na run alimenta level-up durante a sessão e integra o progresso registrado no resultado. A separação rígida antiga entre experiências não deve ser aplicada ao Módulo 1.

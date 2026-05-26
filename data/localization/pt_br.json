@@ -116,8 +116,8 @@
 	"upgrade.weapon_magical_damage_flat.name": "Dano mágico +1",
 	"upgrade.weapon_magical_damage_flat.description": "Aumenta em +1 o dano mágico da arma atual.",
 
-	"upgrade.weapon_hitbox_radius_flat.name": "Alcance do ataque +10",
-	"upgrade.weapon_hitbox_radius_flat.description": "Aumenta o raio da área de acerto da arma atual.",
+	"upgrade.weapon_attack_area_scale_percent.name": "Área do ataque +10%",
+	"upgrade.weapon_attack_area_scale_percent.description": "Aumenta em 10% o tamanho da área de acerto da arma atual.",
 
 	"upgrade.weapon_hitbox_lifetime_percent.name": "Golpe mais duradouro",
 	"upgrade.weapon_hitbox_lifetime_percent.description": "Aumenta em 10% o tempo ativo da hitbox do ataque.",

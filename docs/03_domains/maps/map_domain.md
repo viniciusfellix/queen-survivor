@@ -1,72 +1,7 @@
-# Domínio — Mapas
+# Domínio — Mapas e Spawn
 
-## Arquivos principais
+`map_test_arena_10min.tres` representa a arena infinita técnica de 600 segundos. `MapDefinition` configura duração, reward de vitória, timeline e pool.
 
-```txt
-definitions/MapDefinition.gd
-data/maps/map_test_arena_10min.tres
+`SpawnTimelineEntryDefinition` informa faixa temporal, cena/definition inimiga, intervalo, máximo vivo, distâncias e spawn ao ativar.
 
-Responsabilidade
-
-O domínio de mapas define os dados configuráveis do mapa usado pela run.
-
-No momento, o primeiro mapa é uma arena infinita simples de 10 minutos.
-
-MapDefinition
-
-Campos atuais:
-
-id
-display_name_key
-description_key
-duration_seconds
-victory_multiplier
-victory_bonus
-Mapa atual
-res://data/maps/map_test_arena_10min.tres
-
-Configuração oficial:
-
-duration_seconds = 600
-victory_multiplier = 2.0
-victory_bonus = 0
-Testes
-
-Para testar vitória rapidamente, é permitido alterar temporariamente:
-
-duration_seconds = 30
-
-ou:
-
-duration_seconds = 60
-
-Depois do teste, voltar para:
-
-duration_seconds = 600
-Recompensa de vitória
-
-A recompensa de vitória depende do mapa.
-
-Fórmula:
-
-final_money_reward = (run_coins_collected × victory_multiplier) + victory_bonus
-Recompensa de derrota
-
-Na derrota, o mapa não aplica multiplicador.
-
-Fórmula:
-
-final_money_reward = run_coins_collected
-Futuro
-
-O domínio de mapas poderá evoluir para incluir:
-
-spawn timeline;
-eventos de mapa;
-duração 10/15/20/30 minutos;
-multiplicadores por mapa;
-bônus por dificuldade;
-bioma;
-música;
-objetivos especiais;
-regras especiais.
+O ataque do Goblin possui seu próprio delay de segurança após nascer; ele não depende de dano por distância manual.

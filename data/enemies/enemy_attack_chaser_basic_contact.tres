@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="EnemyAttackDefinition" format=3 uid="uid://bct06pf54aowq"]
+
+[ext_resource type="Script" uid="uid://dvk8ne584ljjf" path="res://definitions/AttackAreaDefinition.gd" id="1_k1ots"]
+[ext_resource type="Resource" uid="uid://bvg0lb4l1mkr8" path="res://data/enemies/attack_area_enemy_chaser_basic_contact.tres" id="2_c7e16"]
+[ext_resource type="Script" uid="uid://boqakqbjl2mwv" path="res://definitions/EnemyAttackDefinition.gd" id="2_p0fgj"]
+
+[resource]
+script = ExtResource("2_p0fgj")
+id = "enemy_attack_chaser_basic_contact"
+raw_damage = 6
+attack_areas = Array[ExtResource("1_k1ots")]([ExtResource("2_c7e16")])
+metadata/_custom_type_script = "uid://boqakqbjl2mwv"

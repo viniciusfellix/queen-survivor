@@ -1,81 +1,38 @@
-# Lifecycle — Inimigo
+# Lifecycle — Goblin / EnemyBase
 
-## Spawn
+## Criação
 
-```txt
-EnemySpawner
-↓
-load EnemyBase.tscn
-↓
-EnemyRoot.add_child
-↓
-EnemyBase.setup(enemy_definition, player)
+```text
+EnemySpawner seleciona SpawnTimelineEntryDefinition
+→ instancia EnemyBase
+→ setup(enemy_definition, player)
+→ EnemyBase lê enemy_chaser_basic.tres
+→ configura Hurtbox e ContactAttackHitbox
+→ visual inicia idle/run
 ```
 
-## Inicialização
+## Perseguição
 
-```txt
-EnemyBase._ready()
-↓
-add_to_group("enemy")
-↓
-aplica EnemyDefinition
-↓
-encontra target
-↓
-encontra visual controller
+O Goblin atual move-se diretamente em direção à Gaia. A evolução futura para formação orgânica ao redor da Queen não deve alterar os contratos de ataque/hurtbox.
+
+## Ataque
+
+```text
+ContactAttackHitbox
+→ detecta PlayerHurtbox
+→ respeita start_delay_seconds e hit_interval_seconds
+→ cria DamagePayload physical
+→ PlayerController.receive_damage
 ```
 
-## Movimento
+O antigo dano por distância manual não existe mais.
 
-```txt
-EnemyBase._physics_process
-↓
-_follow_target()
-↓
-move_and_slide()
-↓
-_update_visual_state()
-```
+## Dano e morte
 
-## Dano no player
-
-```txt
-distância até player <= contact_damage_radius
-↓
-cooldown de contato disponível
-↓
-PlayerController.receive_damage()
-```
-
-## Dano recebido
-
-```txt
-DirectionalAttackHitbox detecta EnemyBase
-↓
-EnemyBase.receive_damage(payload)
-↓
-DamageResolver.calculate_enemy_damage()
-↓
-HP reduz
-```
-
-## Morte
-
-```txt
-HP <= 0
-↓
-EnemyBase.die()
-↓
-GameEvents.enemy_died
-↓
-RunController adiciona XP
-↓
-DropController talvez cria moeda
-↓
-Goblin toca Die
-↓
-remove_from_group("enemy")
-↓
-queue_free após timer
+```text
+DirectionalAttackHitbox detecta Hurtbox
+→ EnemyBase.receive_damage
+→ DamageResolver processa fraquezas
+→ flash claro
+→ se HP zerar: desativa hurtbox e attack hitbox, emite reward, toca death e agenda remoção
 ```

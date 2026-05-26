@@ -1,53 +1,11 @@
 # Domínio — Drops e Moedas
 
-## Arquivos principais
+`DropController` reage a `enemy_died` e cria `CoinDrop` conforme chance do inimigo. O drop físico utiliza `CoinDropDefinition` para magnetismo/coleta.
 
-```txt
-definitions/CoinDropDefinition.gd
-data/drops/coin_default.tres
-gameplay/drops/CoinDrop.gd
-gameplay/drops/CoinDrop.tscn
-gameplay/drops/DropController.gd
-```
+## Regras
 
-## Regra oficial
-
-Moeda é física.
-
-Moeda precisa ser coletada.
-
-Moeda não coletada é perdida no fim da run.
-
-## DropController
-
-Escuta:
-
-```txt
-GameEvents.enemy_died
-```
-
-E cria `CoinDrop` se a chance passar.
-
-## CoinDrop
-
-Responsável por:
-
-- Ficar no chão.
-- Detectar player.
-- Ser puxada por magnetismo.
-- Emitir coleta.
-- Sumir.
-
-## RunController
-
-Escuta:
-
-```txt
-GameEvents.run_coin_collected
-```
-
-E soma em:
-
-```txt
-RunState.run_coins_collected
-```
+- matar não concede moeda automaticamente;
+- a moeda precisa ser coletada;
+- moeda abandonada é perdida;
+- vitória aplica multiplicador do mapa apenas às moedas coletadas;
+- derrota entrega moedas coletadas sem multiplicador.

@@ -1,171 +1,63 @@
-# Game Design — Guia para Balanceamento
+# Guia do Game Designer — Resources e Balanceamento
 
-Esta pasta é para game designers, artistas técnicos e pessoas que vão ajustar números, inimigos, armas, drops e placeholders sem precisar entender todo o código.
+## Objetivo
 
-## Onde você provavelmente vai mexer
+Este documento orienta edição e criação de conteúdo sem mexer na lógica GDScript já implementada. Antes de alterar `.tres`, faça commit ou backup.
 
-### Goblin
+## Regra de ouro
 
-```txt
-res://data/enemies/enemy_chaser_basic.tres
+Edite dados no Inspector por resources. Não coloque valores específicos de um inimigo/arma em cenas genéricas quando o resource já é a fonte oficial.
+
+## Nomenclatura de IDs
+
+Use inglês, minúsculas e `snake_case`.
+
+| Conteúdo | Padrão | Exemplo |
+|---|---|---|
+| Queen | nome | `gaia` |
+| Arma | `weapon_<queen>_<nome>` | `weapon_gaia_initial` |
+| Componente | `<arma>_<tipo>` | `gaia_initial_physical` |
+| Área de arma | `attack_area_<arma>_<parte>` | `attack_area_gaia_initial_primary` |
+| Inimigo | `enemy_<função>` | `enemy_chaser_basic` |
+| Hurtbox inimiga | `hurtbox_area_<enemy>_<parte>` | `hurtbox_area_enemy_chaser_basic_body` |
+| Ataque inimigo | `enemy_attack_<nome>_<ataque>` | `enemy_attack_chaser_basic_contact` |
+| Área do ataque | `attack_area_<nome>_<ataque>` | `attack_area_enemy_chaser_basic_contact` |
+| Upgrade | `upgrade_<efeito>` | `upgrade_weapon_attack_area_scale_percent` |
+| Mapa | `map_<nome>_<duracao>` | `map_test_arena_10min` |
+
+## Localization
+
+Todo texto exibido deve ter chave em `res://data/localization/pt_br.json`. Padrões:
+
+```text
+queen.gaia.name / queen.gaia.description
+enemy.chaser_basic.name / enemy.chaser_basic.description
+weapon.gaia_initial.name / weapon.gaia_initial.description
+upgrade.weapon_attack_area_scale_percent.name / .description
+map.test_arena_10min.name / .description
 ```
 
-### Arma da Gaia
-
-```txt
-res://data/weapons/weapon_gaia_initial.tres
-```
-
-### Dano físico/mágico da Gaia
-
-```txt
-res://data/weapons/components/gaia_initial_physical.tres
-res://data/weapons/components/gaia_initial_magical.tres
-```
-
-### Moeda
-
-```txt
-res://data/drops/coin_default.tres
-```
-
-### Upgrades do level-up
-
-```txt
-res://data/upgrades/
-```
-
-### Textos
-
-```txt
-res://data/localization/pt_br.json
-```
-
-### Placeholder do ataque
-
-```txt
-res://assets/placeholders/weapons/gaia_initial_weapon/gaia_attack_placeholder.png
-```
-
-### Visual Spine da Gaia
-
-```txt
-res://visual/characters/gaia/GaiaVisual.tscn
-```
-
-### Visual Spine do Goblin
-
-```txt
-res://visual/enemies/goblin_warrior/GoblinWarriorVisual.tscn
-```
-
-### Mapa, duração e recompensa de vitória
-
-```txt
-res://data/maps/map_test_arena_10min.tres
-
-Resultado da run
-
-A tela está em:
-
-res://ui/result/ResultPanel.tscn
-
-Mas o game designer normalmente não precisa editar essa tela para balanceamento.
-
-
-Adicione também esta seção:
-
-```md
-## Resultado e recompensa
-
-O resultado usa as moedas realmente coletadas na run.
-
-Moedas que ficaram no chão não entram no resultado.
-
-A recompensa final segue:
-
-```txt
-Vitória:
-dinheiro_final = (moedas_coletadas × victory_multiplier) + victory_bonus
-
-Derrota:
-dinheiro_final = moedas_coletadas
-
-Para editar multiplicador e bônus de vitória, use:
-
-res://data/maps/map_test_arena_10min.tres
-
----
-
-# 7. Atualizar `docs/05_game_design/where_to_edit_balance.md`
-
-Adicione esta seção:
-
-```md
-## Duração do mapa
-
-Arquivo:
-
-```txt
-res://data/maps/map_test_arena_10min.tres
-
-Campo:
-
-duration_seconds
-
-Valores úteis:
-
-30    # teste rápido
-60    # teste médio
-600   # valor oficial de 10 minutos
-Multiplicador de vitória
-
-Arquivo:
-
-res://data/maps/map_test_arena_10min.tres
-
-Campo:
-
-victory_multiplier
-
-Exemplo:
-
-2.0
-
-Se o jogador coletar 10 moedas e vencer:
-
-10 × 2.0 = 20
-Bônus de vitória
-
-Arquivo:
-
-res://data/maps/map_test_arena_10min.tres
-
-Campo:
-
-victory_bonus
-
-Exemplo:
-
-victory_bonus = 5
-
-Se o jogador coletar 10 moedas, multiplicador for 2 e bônus for 5:
-
-final_money_reward = (10 × 2) + 5
-final_money_reward = 25
-Recompensa na derrota
-
-Não existe multiplicador na derrota.
-
-final_money_reward = moedas_coletadas
-
----
-
-
-## Regra importante
-
-Se é número de balanceamento, quase sempre está em `res://data/`.
-
-Se é visual/animação, está em `res://visual/` ou `res://assets/`.
-
-Se é código, está em `res://gameplay/`, `res://runtime/`, `res://definitions/`.
+## `value_int` e `value_float`
+
+| Campo | Quando usar | Exemplos |
+|---|---|---|
+| `value_int` | quantidade inteira/flat | vida `+10`, cura `+20`, dano `+1` |
+| `value_float` | porcentagem/multiplicador | velocidade `+8.0%`, cooldown `-1.5%`, área `+10.0%` |
+
+## Resources centrais editáveis
+
+- `queen_gaia.tres` e sua hurtbox;
+- `weapon_gaia_initial.tres`, components e attack area;
+- `enemy_chaser_basic.tres`, hurtbox e attack definition;
+- resources de upgrades e pool;
+- map e spawn timeline;
+- coin definition.
+
+## Aprovação de balanceamento
+
+1. altere o resource;
+2. execute a cena técnica;
+3. ative logs somente quando necessário;
+4. valide shapes com `Visible Collision Shapes`;
+5. confira dano/upgrades/results;
+6. registre o valor aprovado na documentação ou changelog.

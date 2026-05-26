@@ -35,6 +35,11 @@ extends CharacterBody2D
 ## Controller visual responsável pelas animações e flash de dano.
 @onready var visual_controller: Node = _resolve_visual_controller()
 
+## Hurtbox responsável por receber ataques de inimigos.
+@onready var player_hurtbox: HurtboxComponent = (
+	get_node_or_null("PlayerHurtbox") as HurtboxComponent
+)
+
 @export_group("Damage Feedback")
 
 ## Ativa a pequena janela de invencibilidade após receber dano.
@@ -59,6 +64,8 @@ func _ready() -> void:
 		push_warning("[PlayerController] queen_definition não configurada.")
 
 	runtime_state.defense_percent = clamp(base_defense_percent, 0.0, 95.0)
+
+	_configure_player_hurtbox()
 
 	if visual_controller == null:
 		push_warning("[PlayerController] visual_controller não encontrado. Verifique visual_controller_path.")
@@ -194,6 +201,9 @@ func receive_damage(payload: DamagePayload) -> int:
 	)
 
 	if not runtime_state.is_alive:
+		if player_hurtbox != null:
+			player_hurtbox.set_hurtbox_active(false)
+
 		GameEvents.player_died.emit(payload.source_id)
 
 		DeveloperAuditLogger.log_combat(
@@ -209,6 +219,32 @@ func receive_damage(payload: DamagePayload) -> int:
 	queue_redraw()
 
 	return final_damage
+
+## Configura a área vulnerável da Queen com base em sua definition.
+##
+## Mantém a BodyCollision responsável por movimento separada da região
+## utilizada para receber ataques inimigos.
+func _configure_player_hurtbox() -> void:
+	if player_hurtbox == null:
+		player_hurtbox = get_node_or_null("PlayerHurtbox") as HurtboxComponent
+
+	if player_hurtbox == null:
+		push_warning("[PlayerController] PlayerHurtbox não encontrada.")
+		return
+
+	if queen_definition == null:
+		player_hurtbox.set_hurtbox_active(false)
+		return
+
+	if not queen_definition.has_valid_hurtbox_areas():
+		player_hurtbox.set_hurtbox_active(false)
+		push_warning("[PlayerController] Queen sem hurtbox válida: %s" % queen_definition.id)
+		return
+
+	player_hurtbox.setup(
+		queen_definition.hurtbox_areas,
+		self
+	)
 
 ## Encaminha o estado runtime atual para o controller visual da Queen.
 ##
@@ -493,6 +529,7 @@ func get_debug_data() -> Dictionary:
 		"facing_direction": runtime_state.facing_direction,
 		"is_moving": runtime_state.is_moving,
 		"is_alive": runtime_state.is_alive,
+		"has_player_hurtbox": player_hurtbox != null,
 		"current_gameplay_state": runtime_state.current_gameplay_state,
 		"current_visual_state": runtime_state.current_visual_state,
 		"global_position": global_position,

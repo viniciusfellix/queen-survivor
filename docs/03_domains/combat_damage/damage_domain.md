@@ -1,85 +1,41 @@
 # Domínio — Combate e Dano
 
-## Arquivos principais
+## Responsabilidades
 
-```txt
-gameplay/combat/DamagePayload.gd
-gameplay/combat/DamageResolver.gd
-definitions/DamageComponentDefinition.gd
-core/constants/DamageTypes.gd
+Este domínio define payloads, componentes, formas, hitboxes/hurtboxes e resolução de defesa/fraquezas/resistências.
+
+## Arquivos centrais
+
+| Arquivo | Responsabilidade |
+|---|---|
+| `CombatShapeDefinition.gd` | geometria configurável base |
+| `AttackAreaDefinition.gd` | área ofensiva semântica |
+| `HurtboxAreaDefinition.gd` | área vulnerável semântica |
+| `DamageComponentDefinition.gd` | componente tipado |
+| `DamagePayload.gd` | transporte de dano/fonte |
+| `DamageResolver.gd` | resolução determinística |
+| `HurtboxComponent.gd` | construção runtime de hurtboxes |
+| `DirectionalAttackHitbox.gd` | ataque de arma contra EnemyHurtbox |
+| `EnemyAttackDefinition.gd` | dados de ataque inimigo |
+| `EnemyAttackHitbox.gd` | ataque inimigo contra PlayerHurtbox |
+
+## Gaia contra Goblin
+
+A arma base possui `physical:3` e `magical:3`. O Goblin atual é fraco a ambos com 50% de bônus:
+
+```text
+physical: round(3 × 1.5) = 5
+magical:  round(3 × 1.5) = 5
+final_total = 10
 ```
 
-## Dano no player
+## Goblin contra Gaia
 
-Usa:
+O ataque corporal envia dano físico bruto 6, redutível por defesa. O `PlayerController` resolve defesa e assegura dano mínimo válido conforme implementação atual.
 
-```gdscript
-DamageResolver.calculate_received_damage(raw_damage, defense_percent)
-```
+## Invariantes
 
-Fórmula:
-
-```txt
-Dano recebido = Dano inimigo - (Dano inimigo × Defesa × 0,01)
-```
-
-Dano mínimo:
-
-```txt
-1
-```
-
-## Dano em inimigos
-
-Usa:
-
-```gdscript
-DamageResolver.calculate_enemy_damage(payload, enemy_definition)
-```
-
-## Dano por componentes
-
-A arma da Gaia usa:
-
-```txt
-physical 3
-magical 3
-```
-
-Cada componente pode sofrer:
-
-- Fraqueza.
-- Resistência.
-
-## Fraqueza
-
-Se inimigo for fraco ao tipo:
-
-```txt
-final = raw × (1 + weakness_bonus_percent/100)
-```
-
-## Resistência
-
-Se inimigo for resistente ao tipo:
-
-```txt
-final = raw × (1 - resistance_reduction_percent/100)
-```
-
-## Exemplo
-
-Gaia:
-
-```txt
-physical 3
-magical 3
-```
-
-Goblin fraco aos dois, bônus 50%:
-
-```txt
-physical 3 -> 5
-magical 3 -> 5
-total 10
-```
+- Dano só ocorre entre hitbox e hurtbox compatíveis.
+- `BodyCollision` nunca processa dano.
+- Entidade morta desativa regiões relevantes.
+- Gameplay bloqueado impede novos efeitos.

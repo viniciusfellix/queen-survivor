@@ -1,62 +1,28 @@
 # Domínio — Armas
 
-## Arquivos principais
+## Arma da Gaia
 
-```txt
-definitions/WeaponDefinition.gd
-definitions/DamageComponentDefinition.gd
-data/weapons/weapon_gaia_initial.tres
-data/weapons/components/
-gameplay/weapons/gaia/GaiaInitialWeaponController.gd
-gameplay/weapons/attacks/DirectionalAttackHitbox.gd
-visual/weapons/gaia_initial_weapon/GaiaAttackVisual.tscn
+Ataque direcional pela mira, sem auto-target. A arma base contém components `physical:3` e `magical:3`, cooldown `2.0s` e hitbox retangular configurável.
+
+## Geometria aprovada
+
+```text
+attack_area_gaia_initial_primary
+shape: rectangle
+size: (90,300)
+local_offset: (0,0)
+attack_hitbox_offset: 160
 ```
 
-## WeaponDefinition
+## Upgrades da arma
 
-Configura:
+| Tipo | Efeito |
+|---|---|
+| `weapon_damage_flat` | aumenta todos os components |
+| `weapon_physical_damage_flat` | aumenta physical |
+| `weapon_magical_damage_flat` | aumenta magical |
+| `weapon_cooldown_percent` | reduz cooldown |
+| `weapon_hitbox_lifetime_percent` | amplia tempo ativo |
+| `weapon_attack_area_scale_percent` | escala attack areas |
 
-- ID.
-- Nome.
-- Cooldown.
-- Visual do ataque.
-- Offset visual.
-- Hitbox.
-- Offset da hitbox.
-- Raio da hitbox.
-- Lifetime.
-- Componentes de dano.
-
-## GaiaInitialWeaponController
-
-Executa a arma em runtime:
-
-- Lê `aim_direction`.
-- Controla cooldown.
-- Cria visual.
-- Cria hitbox.
-- Aplica upgrades de dano/cooldown.
-
-## DirectionalAttackHitbox
-
-Responsável por:
-
-- Detectar inimigos.
-- Enviar `DamagePayload`.
-- Garantir que a mesma hitbox não acerte o mesmo inimigo várias vezes.
-
-## Visual do ataque
-
-Atualmente:
-
-```txt
-assets/placeholders/weapons/gaia_initial_weapon/gaia_attack_placeholder.png
-```
-
-Scene:
-
-```txt
-visual/weapons/gaia_initial_weapon/GaiaAttackVisual.tscn
-```
-
-Pode usar placeholder agora e Spine no futuro.
+O upgrade antigo `weapon_hitbox_radius_flat` foi eliminado.

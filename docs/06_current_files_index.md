@@ -1,81 +1,34 @@
-# Índice de Arquivos Atuais
+# Índice Atual de Arquivos — Módulo 1
 
-## Core/constants
+Para pesquisa rápida detalhada, leia [`06_reference/file_responsibilities.md`](06_reference/file_responsibilities.md).
 
-```txt
-core/constants/DamageTypes.gd
-core/constants/GameplayStateTypes.gd
-core/constants/UpgradeTypes.gd
+## Combate modular
+
+```text
+definitions/CombatShapeDefinition.gd
+definitions/AttackAreaDefinition.gd
+definitions/HurtboxAreaDefinition.gd
+definitions/EnemyAttackDefinition.gd
+gameplay/combat/HurtboxComponent.gd
+gameplay/combat/EnemyAttackHitbox.gd
+gameplay/weapons/attacks/DirectionalAttackHitbox.gd
 ```
 
-## Definitions
+## Arquivos alterados pela migração
 
-```txt
+```text
 definitions/QueenDefinition.gd
 definitions/EnemyDefinition.gd
 definitions/WeaponDefinition.gd
-definitions/DamageComponentDefinition.gd
-definitions/UpgradeDefinition.gd
-definitions/CoinDropDefinition.gd
-definitions/MapDefinition.gd
-```
-
-## Runtime
-
-```txt
-runtime/RunState.gd
-runtime/PlayerRuntimeState.gd
-```
-
-## Gameplay
-
-```txt
+definitions/UpgradeTypes.gd
 gameplay/player/PlayerController.gd
 gameplay/enemies/EnemyBase.gd
-gameplay/spawners/EnemySpawner.gd
 gameplay/weapons/gaia/GaiaInitialWeaponController.gd
-gameplay/weapons/attacks/DirectionalAttackHitbox.gd
-gameplay/combat/DamagePayload.gd
-gameplay/combat/DamageResolver.gd
-gameplay/run/RunController.gd
-gameplay/run/RunResultPayload.gd
-gameplay/run/RewardResolver.gd
-gameplay/drops/DropController.gd
-gameplay/drops/CoinDrop.gd
-gameplay/test/TestGaiaScene.gd
-gameplay/camera/FollowCamera.gd
-gameplay/arena/TestArena.gd
-gameplay/level_up/LevelUpOptionService.gd
-```
-
-## UI
-
-```txt
-ui/debug/DebugOverlay.gd
-ui/level_up/LevelUpPanel.gd
-ui/result/ResultPanel.gd
-ui/result/ResultPanel.tscn
-```
-
-## Visual
-
-```txt
-visual/characters/gaia/GaiaVisualController.gd
-visual/characters/gaia/GaiaSpineAdapter.gd
 visual/enemies/goblin_warrior/GoblinWarriorVisualController.gd
-visual/enemies/goblin_warrior/GoblinWarriorSpineAdapter.gd
-visual/weapons/gaia_initial_weapon/GaiaAttackVisualController.gd
 ```
 
-## Data
+## Referências adicionais
 
-```txt
-data/queens/queen_gaia.tres
-data/enemies/enemy_chaser_basic.tres
-data/weapons/weapon_gaia_initial.tres
-data/weapons/components/gaia_initial_physical.tres
-data/weapons/components/gaia_initial_magical.tres
-data/drops/coin_default.tres
-data/upgrades/
-data/maps/map_test_arena_10min.tres
-```
+- Resources atuais: `06_reference/current_resources_index.md`.
+- Debug/audit: `07_debug_audit/README_DEBUG_AUDIT.md`.
+- Regressão: `08_testing/regression_module_1.md`.

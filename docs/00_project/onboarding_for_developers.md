@@ -1,65 +1,31 @@
 # Onboarding para Desenvolvedores
 
-## Primeiro entendimento
+## Princípio central
 
-O projeto usa uma separação rígida entre:
+O projeto é um survivor-like em Godot com visuais Spine. A regra principal é: **gameplay decide; visual representa**. Scripts Spine não calculam dano, XP, recompensa, progressão ou colisão ofensiva.
 
-- Dados configuráveis.
-- Runtime de gameplay.
-- Visual.
-- UI.
-- Eventos.
-- Save.
+## Primeira leitura
 
-Essa separação evita que animação controle regra de jogo ou que assets visuais virem dependência da lógica.
+Leia `docs/README.md`, o status do módulo, a arquitetura de cenas, a arquitetura de combate, os lifecycles e o índice de responsabilidades.
 
-## Regra mais importante
+## Cena técnica
 
-A gameplay não depende diretamente do Spine.
+Execute `res://gameplay/test/TestGaiaScene.tscn` para validar o protótipo atual.
 
-Fluxo correto:
+## Antes de alterar
 
-```txt
-Gameplay State
-→ Visual Controller
-→ Spine Adapter
-→ SpineSprite
-```
+- Descubra o domínio responsável pela regra.
+- Para balanceamento, edite resource antes de editar script.
+- Nunca use `BodyCollision` como dano.
+- Não duplique definitions em cena genérica e resource de conteúdo.
+- Não crie signals especulativos sem fluxo real.
+- Não copie lógica já extraída para bases/helpers.
 
-Nunca:
+## Antes de concluir
 
-```txt
-SpineSprite
-→ decide dano, morte, cooldown ou movimento
-```
-
-## Onde começar a ler
-
-1. `01_architecture/folder_structure.md`
-2. `01_architecture/scene_architecture.md`
-3. `01_architecture/event_bus.md`
-4. `02_lifecycles/run_lifecycle.md`
-5. `03_domains/player/player_domain.md`
-6. `03_domains/weapons/weapon_domain.md`
-
-## Como testar o projeto atualmente
-
-1. Abrir a cena principal configurada em `Main.tscn`.
-2. Conferir se `Main.gd` carrega `TestGaiaScene.tscn`.
-3. Rodar o jogo.
-4. Mover Gaia com WASD.
-5. Mirar com mouse.
-6. Observar goblins spawnando.
-7. Matar goblins com ataque automático.
-8. Ver XP, level-up e moedas no debug overlay.
-
-## Convenções atuais
-
-- Dados ficam em `res://data/`.
-- Definitions ficam em `res://definitions/`.
-- Lógica runtime fica em `res://gameplay/`.
-- Estados runtime ficam em `res://runtime/`.
-- Visual fica em `res://visual/`.
-- Assets brutos ficam em `res://assets/`.
-- UI fica em `res://ui/`.
-- Constantes ficam em `res://core/constants/`.
+- Ative apenas logs necessários.
+- Valide shapes com `Debug > Visible Collision Shapes`.
+- Faça busca por nomes removidos se renomeou um sistema.
+- Execute regressão.
+- Comente funções novas/alteradas.
+- Atualize documentação e ADRs.
