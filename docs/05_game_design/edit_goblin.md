@@ -1,127 +1,36 @@
-# Como editar o Goblin
+# Editar o Goblin Básico
 
-Arquivo principal:
+## Resources
 
-```txt
-res://data/enemies/enemy_chaser_basic.tres
+```text
+enemy_chaser_basic.tres
+hurtbox_area_enemy_chaser_basic_body.tres
+enemy_attack_chaser_basic_contact.tres
+attack_area_enemy_chaser_basic_contact.tres
 ```
 
-## Campos principais
+## Fraqueza atual
 
-### HP
-
-```txt
-base_max_hp
+```text
+Weak Damage Types: physical, magical
+Weakness Bonus Percent: 50.0
 ```
 
-Quanto maior, mais ataques a Gaia precisa para matar.
+O ataque base da Gaia (`3+3`) deve causar `10` dano final.
 
-### Velocidade
+## Hurtbox atual
 
-```txt
-base_move_speed
+```text
+Capsule radius=21 height=80 offset=(0,0)
 ```
 
-Define a velocidade com que o goblin persegue Gaia.
+## Ataque atual
 
-### Dano de contato
-
-```txt
-contact_damage
+```text
+Raw Damage=6; physical; interval=1.0; delay=0.75
+Capsule radius=25 height=88 offset=(0,2)
 ```
 
-Dano bruto aplicado quando encosta na Gaia.
+## Feedback
 
-### Raio de contato
-
-```txt
-contact_damage_radius
-```
-
-Se parecer que o goblin encosta e não causa dano, aumente esse valor.
-
-Valor atual recomendado:
-
-```txt
-64
-```
-
-### Intervalo de contato
-
-```txt
-contact_damage_interval_seconds
-```
-
-Tempo entre um dano e outro enquanto está encostado.
-
-### XP
-
-```txt
-xp_reward
-```
-
-XP direta dada ao morrer.
-
-### Moeda
-
-```txt
-coin_drop_chance
-coin_drop_value
-```
-
-Exemplos:
-
-```txt
-coin_drop_chance = 1.0   # 100%
-coin_drop_chance = 0.25  # 25%
-coin_drop_value = 1
-```
-
-## Fraquezas
-
-Campo:
-
-```txt
-weak_damage_types
-```
-
-Valores possíveis atuais:
-
-```txt
-physical
-magical
-```
-
-Se adicionar os dois:
-
-```txt
-physical
-magical
-```
-
-A Gaia aplica bônus nos dois componentes.
-
-## Resistências
-
-Campo:
-
-```txt
-resistant_damage_types
-```
-
-Exemplo:
-
-```txt
-magical
-```
-
-Reduz dano mágico.
-
-## Bônus/redução
-
-```txt
-weakness_bonus_percent = 50
-resistance_reduction_percent = 50
-```
-
-Com 50%, dano 3 vira aproximadamente 5 em fraqueza e 2 em resistência.
+O clarão do Goblin ao receber dano é visual e configurado pelo controller visual; não é parâmetro de balanceamento de combate.

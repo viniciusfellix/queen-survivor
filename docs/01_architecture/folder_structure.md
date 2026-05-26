@@ -1,145 +1,56 @@
-# Estrutura de Pastas
+# Arquitetura — Estrutura de Pastas
 
-## Visão geral
-
-```txt
+```text
 res://
-├── assets/
-├── autoloads/
-├── core/
+├── core/debug/                    # audit logger e snapshot runtime
 ├── data/
-├── definitions/
+│   ├── drops/                     # coin definitions
+│   ├── enemies/                   # inimigos, attacks e hurtboxes
+│   ├── localization/              # JSON atual
+│   ├── maps/                      # mapas
+│   ├── queens/                    # Queens e hurtboxes
+│   ├── spawn_timelines/           # waves
+│   ├── upgrades/                  # upgrades
+│   ├── upgrade_pools/             # pools
+│   └── weapons/                   # armas, components e attack areas
+├── definitions/                   # classes Resource/tipos
 ├── gameplay/
-├── runtime/
-├── ui/
-├── visual/
-└── docs/
+│   ├── arena/
+│   ├── camera/
+│   ├── combat/
+│   ├── drops/
+│   ├── enemies/
+│   ├── player/
+│   ├── run/
+│   ├── spawners/
+│   ├── test/
+│   └── weapons/
+├── scenes/                        # Main
+├── ui/                            # HUD, feedback, level-up, result, debug
+└── visual/                        # Spine, Gaia, Goblin e arma
 ```
 
-## `assets/`
+## Conteúdo de combate novo
 
-Arquivos brutos do projeto.
+Estrutura recomendada, respeitando as referências reais existentes no projeto:
 
-Exemplos:
+```text
+data/enemies/
+├── enemy_chaser_basic.tres
+├── hurtboxes/hurtbox_area_enemy_chaser_basic_body.tres
+└── attacks/
+    ├── enemy_attack_chaser_basic_contact.tres
+    └── attack_area_enemy_chaser_basic_contact.tres
 
-```txt
-assets/spine/gaia/
-assets/spine/goblin-warrior/
-assets/placeholders/weapons/gaia_initial_weapon/
+data/queens/
+├── queen_gaia.tres
+└── hurtboxes/hurtbox_area_gaia_body.tres
+
+data/weapons/
+├── weapon_gaia_initial.tres
+├── components/gaia_initial_physical.tres
+├── components/gaia_initial_magical.tres
+└── attack_areas/attack_area_gaia_initial_primary.tres
 ```
 
-Não colocar lógica aqui.
-
-## `autoloads/`
-
-Singletons globais carregados pelo Godot.
-
-Atuais:
-
-```txt
-GameEvents.gd
-InputManager.gd
-LocalizationManager.gd
-SaveManager.gd
-App.gd
-```
-
-## `core/constants/`
-
-Constantes compartilhadas.
-
-Atuais:
-
-```txt
-DamageTypes.gd
-GameplayStateTypes.gd
-UpgradeTypes.gd
-```
-
-## `data/`
-
-Resources configuráveis do jogo.
-
-Exemplos:
-
-```txt
-data/queens/queen_gaia.tres
-data/enemies/enemy_chaser_basic.tres
-data/weapons/weapon_gaia_initial.tres
-data/weapons/components/gaia_initial_physical.tres
-data/weapons/components/gaia_initial_magical.tres
-data/drops/coin_default.tres
-data/upgrades/
-data/localization/pt_br.json
-```
-
-Esta é a área mais importante para Game Design.
-
-## `definitions/`
-
-Classes Resource usadas por arquivos `.tres`.
-
-Exemplos:
-
-```txt
-QueenDefinition.gd
-EnemyDefinition.gd
-WeaponDefinition.gd
-DamageComponentDefinition.gd
-UpgradeDefinition.gd
-CoinDropDefinition.gd
-```
-
-## `gameplay/`
-
-Scenes/scripts que executam a lógica do jogo.
-
-Exemplos:
-
-```txt
-gameplay/player/
-gameplay/enemies/
-gameplay/weapons/
-gameplay/drops/
-gameplay/run/
-gameplay/spawners/
-gameplay/test/
-```
-
-## `runtime/`
-
-Estados temporários da run.
-
-Exemplos:
-
-```txt
-RunState.gd
-PlayerRuntimeState.gd
-```
-
-Esses dados morrem ao final da run.
-
-## `ui/`
-
-Interfaces.
-
-Exemplos:
-
-```txt
-ui/debug/DebugOverlay.tscn
-ui/level_up/LevelUpPanel.tscn
-```
-
-## `visual/`
-
-Camada visual/animação.
-
-Exemplos:
-
-```txt
-visual/characters/gaia/
-visual/enemies/goblin_warrior/
-visual/weapons/gaia_initial_weapon/
-```
-
-A pasta `visual/` não deve decidir dano, HP, XP, cooldown ou morte.
+Não mover resources apenas para adequar pastas à documentação se a referência atual já funciona; faça reorganizações somente em etapa própria com regressão.

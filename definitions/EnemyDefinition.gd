@@ -1,102 +1,111 @@
-## Resource de balanceamento de um tipo de inimigo.
+## Resource de configuração base de um inimigo.
 ##
-## Este é um dos principais arquivos editáveis pelo game designer.
-## Nele podem ser configurados:
-## - vida e velocidade;
-## - dano de contato;
-## - fraquezas e resistências;
-## - XP concedida;
-## - chance e valor de moeda;
-## - visual real ou placeholder.
+## Responsabilidades:
+## - definir atributos básicos;
+## - definir ataques configuráveis;
+## - definir fraquezas e resistências;
+## - definir recompensas;
+## - definir áreas vulneráveis independentes da colisão corporal;
+## - definir visual e informações técnicas.
 extends Resource
 class_name EnemyDefinition
 
-## ID técnico único do tipo de inimigo.
-##
-## Exemplo atual: `enemy_chaser_basic`.
+## ID técnico único do inimigo.
 @export var id: String = ""
 
-## Chave de localização utilizada para o nome do inimigo.
+## Chave de localização utilizada para exibir o nome do inimigo.
 @export var display_name_key: String = ""
 
-## Chave de localização utilizada para a descrição do inimigo.
+## Chave de localização utilizada para exibir sua descrição.
 @export var description_key: String = ""
 
-## Vida máxima inicial de cada instância deste inimigo.
+@export_group("Base Attributes")
+
+## Vida máxima inicial desta categoria de inimigo.
 @export var base_max_hp: int = 10
 
-## Velocidade base de perseguição/movimento do inimigo.
+## Velocidade base de perseguição.
 @export var base_move_speed: float = 90.0
 
-## Dano bruto causado quando o inimigo entra em contato com a Queen.
-@export var contact_damage: int = 5
+@export_group("Attacks")
 
-## Distância máxima para considerar contato ofensivo com a Queen.
-@export var contact_damage_radius: float = 32.0
-
-## Intervalo mínimo, em segundos, entre danos consecutivos de contato.
-@export var contact_damage_interval_seconds: float = 1.0
-
-## Tipo do dano causado pelo contato.
+## Ataque executado enquanto o inimigo encosta na PlayerHurtbox.
 ##
-## O tipo pode interagir com sistemas futuros de defesa ou efeitos.
-@export var contact_damage_type: String = DamageTypes.PHYSICAL
+## No Goblin atual, representa o ataque corporal de contato.
+@export var contact_attack: EnemyAttackDefinition
 
-## Tipos de dano aos quais este inimigo possui fraqueza.
-##
-## Quando atingido por um tipo listado aqui, recebe o bônus configurado
-## em `weakness_bonus_percent`.
+@export_group("Weaknesses and Resistances")
+
+## Tipos de dano que recebem multiplicador positivo contra este inimigo.
 @export var weak_damage_types: PackedStringArray = []
 
-## Tipos de dano aos quais este inimigo possui resistência.
-##
-## Quando atingido por um tipo listado aqui, sofre a redução configurada
-## em `resistance_reduction_percent`.
+## Tipos de dano que recebem redução contra este inimigo.
 @export var resistant_damage_types: PackedStringArray = []
 
-## Percentual adicional de dano recebido para cada componente fraco.
-##
-## Exemplo: `50.0` transforma 3 de dano em aproximadamente 5 após arredondamento.
+## Percentual adicional aplicado quando houver fraqueza.
 @export var weakness_bonus_percent: float = 50.0
 
-## Percentual reduzido de dano recebido para cada componente resistido.
-##
-## Exemplo: `50.0` transforma 3 de dano em aproximadamente 2 após arredondamento.
+## Percentual removido quando houver resistência.
 @export var resistance_reduction_percent: float = 50.0
+
+@export_group("Rewards")
 
 ## XP concedida diretamente à run ao derrotar este inimigo.
 @export var xp_reward: int = 1
 
-## Chance, entre `0.0` e `1.0`, de gerar moeda física ao morrer.
-##
-## Exemplo: `0.20` representa 20% de chance de drop.
+## Chance de gerar moeda física ao morrer.
+## A moeda somente entra no saldo quando for coletada.
 @export var coin_drop_chance: float = 0.25
 
-## Valor da moeda física criada quando o drop ocorre.
-##
-## A moeda só entra no saldo quando for coletada pela Queen.
+## Valor da moeda física gerada quando o drop ocorrer.
 @export var coin_drop_value: int = 1
 
-## Cena visual real opcional associada ao inimigo.
+@export_group("Hurtbox")
+
+## Áreas vulneráveis que recebem ataques.
+##
+## Estas shapes são independentes da BodyCollision utilizada para movimento.
+@export var hurtbox_areas: Array[HurtboxAreaDefinition] = []
+
+@export_group("Visual")
+
+## Cena visual real utilizada para representar o inimigo.
 @export_file("*.tscn") var visual_scene_path: String = ""
 
-## Resource Spine opcional utilizado pelo visual real do inimigo.
+## Resource Spine correspondente ao visual real.
 @export_file("*.tres") var spine_skeleton_data_resource_path: String = ""
 
-## Cor utilizada por visuais de placeholder ou debug.
+@export_group("Debug Placeholder")
+
+## Cor utilizada por desenhos técnicos opcionais.
 @export var debug_color: Color = Color(0.9, 0.15, 0.15, 1.0)
 
-## Raio visual utilizado por placeholders ou desenhos técnicos do inimigo.
+## Raio utilizado pelo placeholder visual técnico.
 @export var debug_radius: float = 18.0
 
-## Verifica se a definição possui ao menos um ID técnico válido.
+## Verifica se a definição possui identificação técnica.
 func is_valid_definition() -> bool:
 	return id.strip_edges() != ""
 
-## Informa se este inimigo é fraco contra determinado tipo de dano.
+## Indica se o ataque de contato está configurado corretamente.
+func has_valid_contact_attack() -> bool:
+	return contact_attack != null and contact_attack.is_valid_definition()
+
+## Indica se existe ao menos uma hurtbox válida configurada.
+func has_valid_hurtbox_areas() -> bool:
+	for hurtbox_area: HurtboxAreaDefinition in hurtbox_areas:
+		if hurtbox_area == null:
+			continue
+
+		if hurtbox_area.is_valid_definition():
+			return true
+
+	return false
+
+## Indica se o inimigo possui fraqueza ao tipo informado.
 func is_weak_to_damage_type(damage_type: String) -> bool:
 	return weak_damage_types.has(damage_type)
 
-## Informa se este inimigo é resistente contra determinado tipo de dano.
+## Indica se o inimigo possui resistência ao tipo informado.
 func is_resistant_to_damage_type(damage_type: String) -> bool:
 	return resistant_damage_types.has(damage_type)

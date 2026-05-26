@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="AttackAreaDefinition" format=3 uid="uid://dhoryvrcjt82m"]
+
+[ext_resource type="Script" uid="uid://dvk8ne584ljjf" path="res://definitions/AttackAreaDefinition.gd" id="1_qt4k7"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_qt4k7"]
+size = Vector2(90, 300)
+
+[resource]
+script = ExtResource("1_qt4k7")
+id = "attack_area_gaia_initial_primary"
+shape = SubResource("RectangleShape2D_qt4k7")
+metadata/_custom_type_script = "uid://dvk8ne584ljjf"

@@ -38,14 +38,14 @@ func _configure_default_channels() -> void:
 	enabled_channels = {
 		DeveloperLogChannels.LIFECYCLE: true,
 		DeveloperLogChannels.SCENE: true,
-		DeveloperLogChannels.SPAWN: false,
-		DeveloperLogChannels.COMBAT: false,
-		DeveloperLogChannels.ANIMATION: false,
+		DeveloperLogChannels.SPAWN: true,
+		DeveloperLogChannels.COMBAT: true,
+		DeveloperLogChannels.ANIMATION: true,
 		DeveloperLogChannels.UPGRADE: false,
 		DeveloperLogChannels.SAVE: true,
 		DeveloperLogChannels.UI: false,
 		DeveloperLogChannels.SIGNAL: false,
-		DeveloperLogChannels.AUDIT: true
+		DeveloperLogChannels.AUDIT: false
 	}
 
 ## Registra uma entrada em um canal técnico.

@@ -1,68 +1,25 @@
 # Domínio — Inimigos
 
-## Arquivos principais
+## Conteúdo atual
 
-```txt
-definitions/EnemyDefinition.gd
-data/enemies/enemy_chaser_basic.tres
-gameplay/enemies/EnemyBase.gd
-gameplay/enemies/EnemyBase.tscn
-gameplay/spawners/EnemySpawner.gd
-gameplay/spawners/EnemySpawner.tscn
-visual/enemies/goblin_warrior/
-```
+O Goblin perseguidor básico é configurado por `enemy_chaser_basic.tres`.
 
-## EnemyDefinition
+## `EnemyBase`
 
-Define dados configuráveis do inimigo:
+Responsável por aplicar definition, perseguir Gaia, configurar hitbox/hurtbox, receber dano, acionar feedback, emitir recompensas e morrer.
 
-- HP.
-- Velocidade.
-- Dano de contato.
-- Raio de contato.
-- Cooldown de contato.
-- Tipo de dano de contato.
-- Fraquezas.
-- Resistências.
-- XP.
-- Chance de moeda.
-- Valor da moeda.
-- Visual.
+## Definition
 
-## EnemyBase
+`EnemyDefinition` contém atributos, `contact_attack`, fraquezas/resistências, XP/moeda, hurtboxes e visual.
 
-Entidade viva do inimigo.
+## Goblin validado
 
-Responsável por:
+| Regra | Valor |
+|---|---|
+| Fraquezas | `physical`, `magical` |
+| Bônus | `50%` |
+| Hurtbox | capsule `21/80`, offset `(0,0)` |
+| Ataque | physical raw `6`, intervalo `1.0`, delay `0.75` |
+| Shape ofensiva | capsule `25/88`, offset `(0,2)` |
 
-- Perseguir o player.
-- Aplicar dano de contato.
-- Receber dano.
-- Morrer.
-- Emitir evento `enemy_died`.
-
-## EnemySpawner
-
-Cria inimigos ao redor do player.
-
-Configura:
-
-- Cena do inimigo.
-- Definition do inimigo.
-- Intervalo de spawn.
-- Distância de spawn.
-- Máximo de inimigos vivos.
-
-## Visual do inimigo
-
-Goblin atual:
-
-```txt
-visual/enemies/goblin_warrior/GoblinWarriorVisual.tscn
-```
-
-Usa:
-
-- `GoblinWarriorVisualController`
-- `GoblinWarriorSpineAdapter`
-- `SpineSprite`
+O flash claro ocorre ao receber dano e é somente feedback visual.

@@ -1,103 +1,37 @@
-# Como editar a arma inicial da Gaia
+# Editar a Arma Inicial da Gaia
 
-Arquivo principal:
+## Resources envolvidos
 
-```txt
-res://data/weapons/weapon_gaia_initial.tres
+```text
+weapon_gaia_initial.tres
+gaia_initial_physical.tres
+gaia_initial_magical.tres
+attack_area_gaia_initial_primary.tres
 ```
 
-## Cooldown
+## Configuração aprovada
 
-Campo:
-
-```txt
-cooldown_seconds
+```text
+Cooldown: 2.0
+Hitbox Offset: 160
+Area: rectangle size=(90,300), offset=(0,0)
+Components: physical:3, magical:3
 ```
 
-Exemplo:
+## Alterar dano
 
-```txt
-2.0
+Edite o component físico ou mágico. Contra o Goblin atual, cada componente recebe bônus de fraqueza de 50%.
+
+## Alterar forma/alcance
+
+Edite `AttackAreaDefinition`, valide centro e bordas com collision shapes visíveis e confirme que inimigos fora da área não são atingidos.
+
+## Upgrade de escala
+
+```text
+ID: upgrade_weapon_attack_area_scale_percent
+Type: weapon_attack_area_scale_percent
+Value Float: 10.0
 ```
 
-Menor = ataca mais rápido.
-
-## Posição do visual
-
-Campo:
-
-```txt
-attack_visual_offset
-```
-
-Controla onde o PNG/visual aparece em relação à Gaia.
-
-## Posição da hitbox
-
-Campo:
-
-```txt
-attack_hitbox_offset
-```
-
-Controla onde a área real de dano fica.
-
-## Tamanho da hitbox
-
-Campo:
-
-```txt
-attack_hitbox_radius
-```
-
-Quanto maior, mais fácil acertar.
-
-## Tempo da hitbox
-
-Campo:
-
-```txt
-attack_hitbox_lifetime
-```
-
-Tempo que a hitbox fica ativa.
-
-## Dano físico
-
-Arquivo:
-
-```txt
-res://data/weapons/components/gaia_initial_physical.tres
-```
-
-Campo:
-
-```txt
-amount
-```
-
-## Dano mágico
-
-Arquivo:
-
-```txt
-res://data/weapons/components/gaia_initial_magical.tres
-```
-
-Campo:
-
-```txt
-amount
-```
-
-## Observação sobre alinhamento do placeholder
-
-O placeholder atual é uma elipse/meia elipse na ponta do ataque. Portanto, é normal precisar ajustar:
-
-```txt
-attack_visual_offset
-attack_hitbox_offset
-attack_hitbox_radius
-```
-
-A hitbox não precisa ficar exatamente em cima do desenho. Ela precisa cobrir a área que deve causar dano, inclusive o caminho do golpe.
+O antigo upgrade de raio não é válido.

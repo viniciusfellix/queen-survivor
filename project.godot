@@ -24,6 +24,17 @@ SaveManager="*uid://cbymq1sv1y3bj"
 InputManager="*uid://de2j17ep6ta1e"
 App="*uid://dpk11lg5lf1do"
 
+[layer_names]
+
+2d_physics/layer_1="World"
+2d_physics/layer_2="PlayerBody"
+2d_physics/layer_3="EnemyBody"
+2d_physics/layer_4="PlayerAttackHitbox"
+2d_physics/layer_5="EnemyHurtbox"
+2d_physics/layer_6="EnemyAttackHitbox"
+2d_physics/layer_7="PlayerHurtbox"
+2d_physics/layer_8="DropPickup"
+
 [physics]
 
 3d/physics_engine="Jolt Physics"

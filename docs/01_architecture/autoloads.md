@@ -1,56 +1,17 @@
-# Autoloads
+# Arquitetura — Autoloads
 
-## GameEvents
+| Autoload | Responsabilidade atual |
+|---|---|
+| `App` | título, versão e log de boot |
+| `LocalizationManager` | carregar JSON de idioma e retornar `get_text(key)` |
+| `InputManager` | movimento, mira e última direção válida |
+| `SaveManager` | carregar/criar save, aplicar resultado e persistir JSON |
+| `GameEvents` | Event Bus de gameplay, UI e persistência |
+| `DeveloperAuditLogger` | log técnico por canais e buffer de auditoria |
 
-Event bus global. Serve para desacoplar sistemas.
+## Regras
 
-Exemplos de sinais:
-
-- `enemy_died`
-- `run_xp_changed`
-- `run_coin_collected`
-- `run_level_up_started`
-- `player_damaged`
-- `player_died`
-
-Regra:
-
-```txt
-Sistemas comunicam eventos.
-Sistemas não devem se acoplar diretamente sem necessidade.
-```
-
-## InputManager
-
-Centraliza input de movimento e mira.
-
-Responsabilidades:
-
-- Movimento por WASD/setas.
-- Mira por mouse.
-- Mira futura por analógico direito.
-- `move_direction`.
-- `aim_direction`.
-- `last_valid_aim_direction`.
-
-## LocalizationManager
-
-Busca textos por chave.
-
-Regra:
-
-```txt
-Não hardcodar textos finais em lógica.
-Usar chaves como:
-queen.gaia.name
-weapon.gaia_initial.name
-ui.level_up.title
-```
-
-## SaveManager
-
-Gerencia save básico. Ainda será mais usado nas próximas etapas.
-
-## App
-
-Boot geral do projeto.
+- Autoload não deve conhecer a árvore interna de uma cena específica quando uma referência/evento resolve a integração.
+- `GameEvents` publica ocorrências; não executa lógica de domínio.
+- O sistema atual de localização é funcional, mas sua possível migração para tradução nativa Godot continua pendente.
+- O save atual é JSON; proteção contra edição externa ainda é futura.

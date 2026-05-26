@@ -1,53 +1,33 @@
-# Regras de Dependência
+# Arquitetura — Regras de Dependência
 
-## Regra 1 — Gameplay não depende de Spine
+## Direção preferencial
 
-Correto:
-
-```txt
-EnemyBase
-→ GoblinWarriorVisualController
-→ GoblinWarriorSpineAdapter
-→ SpineSprite
+```text
+Definitions / Resources
+→ Controllers de Gameplay
+→ Estado e Eventos
+→ UI e Visual
 ```
 
-Errado:
+## Regras obrigatórias
 
-```txt
-EnemyBase
-→ SpineSprite diretamente
-```
+1. Resources armazenam configuração; controllers executam comportamento runtime.
+2. `DamageResolver`, `RewardResolver` e `LevelUpOptionService` concentram regras determinísticas reutilizáveis.
+3. UI exibe estado/eventos e não calcula dano ou recompensa.
+4. Spine representa estado e não decide gameplay.
+5. `BodyCollision`, `Hitbox` e `Hurtbox` são responsabilidades distintas.
+6. Game design deve conseguir editar dano, shapes, drops e recompensas por `.tres` quando a regra já existe.
+7. Logs operacionais passam pelo `DeveloperAuditLogger`.
 
-## Regra 2 — Data não conhece runtime
+## Prevenção de redundância
 
-Resources `.tres` não devem guardar estado vivo da partida.
+Antes de criar métodos repetidos em duas entidades, avalie uma base comum sem ocultar responsabilidade. Bases já consolidadas:
 
-## Regra 3 — Runtime não é save
+- `SpineAnimationAdapterBase`;
+- `SpineVisualControllerBase`;
+- `CombatShapeDefinition`;
+- `HurtboxComponent`.
 
-`RunState` morre no fim da run. Ele não é progresso permanente.
+## Critério de conclusão
 
-## Regra 4 — Visual não aplica dano
-
-Visual pode tocar animação, trocar sprite, esconder placeholder, mas não decide dano.
-
-## Regra 5 — UI não recalcula regra
-
-UI apenas exibe ou envia escolha do jogador.
-
-Exemplo:
-
-`LevelUpPanel` emite a escolha, mas quem aplica o upgrade é o `RunController` e o `PlayerController`.
-
-## Regra 6 — Event Bus para sistemas cruzados
-
-Quando um evento afeta múltiplos sistemas, use `GameEvents`.
-
-Exemplo:
-
-`enemy_died` afeta:
-
-- XP.
-- Kills.
-- Drops.
-- Futuro histórico.
-- Futuro resultado.
+Uma funcionalidade só encerra após auditoria estrutural, comentários inline, regressão e documentação.

@@ -1,74 +1,27 @@
-# Event Bus — GameEvents
+# Arquitetura — Event Bus (`GameEvents`)
 
-`GameEvents.gd` é um autoload usado para comunicação entre sistemas.
+`GameEvents` reduz acoplamento entre gameplay, HUD, feedback visual, painel final e save.
 
-## Por que usar
+| Signal | Significado | Consumidores típicos |
+|---|---|---|
+| `player_damaged` | Gaia sofreu dano efetivo | feedback flutuante/HUD |
+| `player_died` | Gaia morreu | RunController |
+| `enemy_damaged` | inimigo sofreu dano efetivo | diagnóstico/feedback futuro |
+| `enemy_died` | inimigo morreu | RunController/DropController |
+| `run_xp_changed` | XP ou nível mudou | HUD |
+| `run_enemy_killed` | kill contabilizada | HUD |
+| `run_coin_collected` | moeda física coletada | feedback |
+| `run_coins_changed` | saldo mudou | HUD |
+| `run_level_up_started` | escolha foi aberta | LevelUpPanel/feedback |
+| `run_level_up_option_selected` | opção selecionada | RunController |
+| `run_level_up_completed` | aplicação finalizada | UI/diagnóstico |
+| `run_timer_changed` | timer mudou | HUD |
+| `run_finished` | resultado consolidado | ResultPanel/SaveManager |
+| `weapon_cooldown_changed` | cooldown mudou | HUD |
+| `spine_animation_changed` | animação publicada | DebugOverlay |
+| `save_updated` | save alterado | painel técnico |
+| `run_result_persisted` | resultado salvo/falhou | ResultPanel |
 
-Evita que sistemas fiquem buscando uns aos outros diretamente.
+## Disciplina
 
-Exemplo correto:
-
-```txt
-EnemyBase morre
-↓
-emite GameEvents.enemy_died
-↓
-RunController ganha XP
-↓
-DropController cria moeda física
-```
-
-O `EnemyBase` não precisa conhecer `RunController` nem `DropController`.
-
-## Principais eventos atuais
-
-### Player
-
-```gdscript
-player_damaged(raw_damage, final_damage, current_hp, max_hp, source_id)
-player_died(source_id)
-player_state_changed(previous_state, new_state)
-```
-
-### Enemy
-
-```gdscript
-enemy_damaged(enemy_id, raw_damage, final_damage, current_hp, max_hp, source_id)
-enemy_died(enemy_id, source_id, xp_reward, global_position, coin_drop_chance, coin_drop_value)
-```
-
-### Run
-
-```gdscript
-run_xp_changed(run_xp_gained, current_level, current_level_xp, xp_required_for_next_level)
-run_enemy_killed(enemy_id, enemies_killed)
-run_coin_collected(value, global_position)
-run_coins_changed(run_coins_collected, run_coins_available)
-```
-
-### Level-up
-
-```gdscript
-run_level_up_started(current_level, options)
-run_level_up_option_selected(upgrade)
-run_level_up_completed(current_level, selected_upgrade_id)
-```
-
-### Spine
-
-```gdscript
-spine_animation_requested(animation_name)
-spine_animation_changed(animation_name)
-```
-
-## Cuidado
-
-Ao alterar assinatura de um signal, é obrigatório atualizar todos os listeners.
-
-Exemplo:
-
-Quando `enemy_died` ganhou parâmetros de moeda, foi preciso atualizar:
-
-- `RunController._on_enemy_died`
-- `DropController._on_enemy_died`
-- `EnemyBase.die`
+Não manter signals sem fluxo real. Quando um sistema for removido ou renomeado, pesquisar emissores e consumidores antes de decidir manter o signal.

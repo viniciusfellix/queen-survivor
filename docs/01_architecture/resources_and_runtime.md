@@ -1,67 +1,30 @@
-# Resources, Runtime e Save
+# Arquitetura — Resources e Runtime
 
-## Definitions
+## Resources
 
-Classes Resource que definem o formato dos dados.
-
-Exemplos:
-
-- `EnemyDefinition`
-- `WeaponDefinition`
-- `UpgradeDefinition`
-- `CoinDropDefinition`
-
-## Data
-
-Arquivos `.tres` configuráveis.
-
-Exemplos:
-
-- `enemy_chaser_basic.tres`
-- `weapon_gaia_initial.tres`
-- `coin_default.tres`
+Dados editáveis pelo game designer devem permanecer em `.tres`: Queen, inimigo, arma, ataque, shape, upgrade, mapa, wave e drop.
 
 ## Runtime
 
-Estado vivo temporário.
+Runtime armazena valores temporários: HP, posições, XP, moedas, stacks, cooldowns, shapes instanciadas e resultado em construção. Ele não deve editar resources originais diretamente; components que recebem modificação em run devem duplicar definitions quando necessário.
 
-Exemplos:
+## Definitions centrais
 
-- `RunState`
-- `PlayerRuntimeState`
+| Definition | Responsabilidade |
+|---|---|
+| `QueenDefinition` | atributos, arma inicial, visual e hurtboxes da Queen |
+| `EnemyDefinition` | atributos, ataque, fraquezas, recompensas e hurtboxes |
+| `WeaponDefinition` | cooldown, visual, components e attack areas |
+| `CombatShapeDefinition` | geometria compartilhada configurável |
+| `AttackAreaDefinition` | shape ofensiva |
+| `HurtboxAreaDefinition` | shape vulnerável |
+| `EnemyAttackDefinition` | dano, timing e shapes do ataque inimigo |
+| `UpgradeDefinition` | uma opção de level-up |
+| `UpgradePoolDefinition` | opções disponíveis e regras de repetição |
+| `MapDefinition` | duração, recompensa, spawn e pool |
+| `SpawnTimelineDefinition` | waves por faixa temporal |
+| `CoinDropDefinition` | moeda/magnetismo/coleta |
 
-## Save
+## Fonte única
 
-Estado permanente do jogador.
-
-Ainda será expandido.
-
-## Regra fundamental
-
-Não confundir:
-
-```txt
-Definition/Data = configuração
-Runtime = estado vivo da partida
-Save = progresso permanente
-```
-
-## Exemplo
-
-`weapon_gaia_initial.tres` diz:
-
-```txt
-cooldown base = 2.0
-dano físico = 3
-dano mágico = 3
-```
-
-Durante a run, um upgrade pode transformar em:
-
-```txt
-cooldown atual = 1.8
-dano físico atual = 4
-dano mágico atual = 4
-```
-
-Esse valor alterado não deve editar o `.tres` original. Por isso os componentes da arma são duplicados em runtime.
+Uma cena genérica executa comportamento; o resource define o conteúdo. `EnemyBase.tscn` não deve reter uma `EnemyDefinition` específica ou attack definition duplicada; o Goblin recebe `enemy_chaser_basic.tres` pelo spawn.

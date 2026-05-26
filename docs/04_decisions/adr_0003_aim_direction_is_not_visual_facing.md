@@ -1,20 +1,5 @@
-# ADR 0003 — Aim Direction não controla o facing visual
-
-## Status
-
-Aceita.
+# ADR — Mira não é facing visual
 
 ## Decisão
 
-A Gaia possui:
-
-- `aim_direction`: mira/ataque.
-- `facing_direction`: lado visual do corpo.
-
-O corpo da Gaia vira pelo movimento horizontal.
-
-A arma usa `aim_direction`.
-
-## Consequência
-
-O jogador pode andar para um lado e atacar para outro.
+A arma da Gaia aponta pela mira de mouse/analógico. O corpo visual troca de lado apenas conforme movimento horizontal, evitando inversões incorretas ao atacar em direções livres.

@@ -1,51 +1,8 @@
 # Domínio — Visual e Spine
 
-## Regra principal
+Spine representa estado e não decide gameplay. `SpineAnimationAdapterBase` e `SpineVisualControllerBase` centralizam comportamento comum.
 
-Visual não decide gameplay.
+- `GaiaVisualController`: idle/run/death e flash vermelho.
+- `GoblinWarriorVisualController`: idle/run/death e flash claro.
 
-Spine só representa estado.
-
-## Gaia
-
-Arquivos:
-
-```txt
-visual/characters/gaia/GaiaVisual.tscn
-visual/characters/gaia/GaiaVisualController.gd
-visual/characters/gaia/GaiaSpineAdapter.gd
-assets/spine/gaia/
-```
-
-## Goblin
-
-Arquivos:
-
-```txt
-visual/enemies/goblin_warrior/GoblinWarriorVisual.tscn
-visual/enemies/goblin_warrior/GoblinWarriorVisualController.gd
-visual/enemies/goblin_warrior/GoblinWarriorSpineAdapter.gd
-assets/spine/goblin-warrior/
-```
-
-## Ataque da Gaia
-
-Atual placeholder:
-
-```txt
-visual/weapons/gaia_initial_weapon/GaiaAttackVisual.tscn
-assets/placeholders/weapons/gaia_initial_weapon/gaia_attack_placeholder.png
-```
-
-Futuro Spine:
-
-```txt
-assets/spine/weapons/gaia_initial_weapon/
-visual/weapons/gaia_initial_weapon/GaiaAttackSpineAdapter.gd
-```
-
-## Quando trocar placeholder por Spine
-
-Não mexer no `GaiaInitialWeaponController`.
-
-Trocar apenas `GaiaAttackVisual.tscn` e o controller visual/adapters.
+Feedback de modulação não substitui animação nem altera dano.

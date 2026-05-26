@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://86cml1ily235" path="res://gameplay/weapons/attacks/DirectionalAttackHitbox.gd" id="1_tw1wm"]
 
-[node name="DirectionalAttackHitbox" type="Node2D" unique_id=634161783]
+[node name="DirectionalAttackHitbox" type="Area2D" unique_id=104047366]
 script = ExtResource("1_tw1wm")
-debug_color = Color(0.78342515, 5.4869055e-05, 3.1958818e-05, 0.34901962)
+debug_color = Color(0.7019608, 0, 0, 0.5764706)
+debug_outline_color = Color(0.4745633, 0.42036623, 0, 0.9490196)

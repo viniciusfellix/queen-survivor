@@ -1,5 +1,6 @@
 [gd_resource type="Resource" script_class="UpgradeDefinition" format=3 uid="uid://dtjby6a7r1eiw"]
 
+[ext_resource type="Texture2D" uid="uid://d1wn7xhc8hnoe" path="res://assets/placeholders/upgrades/upgrade_cooldown.png" id="1_ikevd"]
 [ext_resource type="Script" uid="uid://yjpi6mhnsb1a" path="res://definitions/UpgradeDefinition.gd" id="1_vpdk1"]
 
 [resource]
@@ -7,6 +8,7 @@ script = ExtResource("1_vpdk1")
 id = "upgrade_weapon_hitbox_lifetime_percent"
 display_name_key = "upgrade.weapon_hitbox_lifetime_percent.name"
 description_key = "upgrade.weapon_hitbox_lifetime_percent.description"
+icon = ExtResource("1_ikevd")
 upgrade_type = "weapon_hitbox_lifetime_percent"
 value_float = 10.0
 max_stack_in_run = 4

@@ -1,64 +1,23 @@
-# Como criar um novo upgrade de level-up
+# Criar Novo Upgrade
 
-## 1. Criar Resource
+## Processo
 
-Criar em:
+1. Confirme que o tipo é suportado em `UpgradeTypes.gd`.
+2. Crie `upgrade_<efeito>.tres`.
+3. Configure ID, localization, ícone, `upgrade_type`, valores, stacks e badge.
+4. Inclua na pool apropriada.
+5. Teste aparição, seleção, efeito e limites.
 
-```txt
-res://data/upgrades/
+## ID versus upgrade type
+
+```text
+id: upgrade_weapon_attack_area_scale_percent
+upgrade_type: weapon_attack_area_scale_percent
 ```
 
-Tipo:
+O type não recebe o prefixo `upgrade_`.
 
-```txt
-	
-```
+## Valores
 
-## 2. Configurar campos
-
-Exemplo:
-
-```txt
-id = upgrade_player_move_speed_percent
-display_name_key = upgrade.player_move_speed_percent.name
-description_key = upgrade.player_move_speed_percent.description
-upgrade_type = player_move_speed_percent
-value_int = 0
-value_float = 10
-max_stack_in_run = 999
-```
-
-## 3. Adicionar texto
-
-No:
-
-```txt
-res://data/localization/pt_br.json
-```
-
-Adicionar:
-
-```json
-"upgrade.novo.name": "Nome do upgrade",
-"upgrade.novo.description": "Descrição do upgrade."
-```
-
-## 4. Colocar na pool
-
-Atualmente a pool padrão é carregada em:
-
-```txt
-gameplay/run/RunController.gd
-```
-
-Função:
-
-```txt
-_load_default_upgrade_pool_if_empty()
-```
-
-Para novo upgrade aparecer no level-up, adicionar o path na lista default.
-
-Futuro recomendado:
-
-Transformar pool em resource data-driven.
+- `value_int`: dano +1, HP +10, cura +20.
+- `value_float`: velocidade +8%, cooldown -1.5%, área +10%.

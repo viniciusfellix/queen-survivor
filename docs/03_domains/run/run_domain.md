@@ -1,39 +1,5 @@
 # Domínio — Run
 
-## Arquivos principais
+`RunState` guarda dados temporários: mapa, Queen, tempo, flags, XP, nível, moedas, kills, dano, causa de morte e reward final. `RunController` orquestra eventos, level-up e encerramento. `RunQuery` bloqueia efeitos durante pausa, ending ou resultado final.
 
-```txt
-runtime/RunState.gd
-gameplay/run/RunController.gd
-```
-
-## RunState guarda
-
-- Tempo.
-- XP da run.
-- Level.
-- XP do level.
-- Moedas coletadas.
-- Moedas gastas.
-- Inimigos mortos.
-- Estado de pause.
-- Vitória/derrota futura.
-
-## RunController faz
-
-- Escuta morte de inimigos.
-- Adiciona XP.
-- Conta kills.
-- Escuta moedas coletadas.
-- Abre level-up.
-- Pausa/despausa a run.
-
-## Próxima expansão
-
-2G deve adicionar:
-
-- Timer de 10 minutos.
-- Vitória.
-- Derrota.
-- Resultado.
-- Cálculo de recompensa.
+`is_ending` é essencial para impedir dano/drop/XP posterior enquanto a animação/espera da derrota ainda acontece.

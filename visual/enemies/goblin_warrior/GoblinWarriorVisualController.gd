@@ -3,10 +3,11 @@
 ## Responsabilidades:
 ## - alternar entre animações idle, run e death;
 ## - inverter horizontalmente o inimigo conforme sua movimentação;
+## - executar flash claro ao receber dano;
 ## - utilizar animação alternativa de caminhada quando configurado.
 ##
 ## Este controller apenas representa visualmente o estado recebido.
-## Movimento, ataque e morte são decididos por `EnemyBase`.
+## Movimento, ataque, dano e morte são decididos por `EnemyBase`.
 extends "res://visual/spine/SpineVisualControllerBase.gd"
 
 @export_group("Animations")
@@ -30,6 +31,28 @@ extends "res://visual/spine/SpineVisualControllerBase.gd"
 
 ## Define se o visual deve ser espelhado conforme a direção horizontal.
 @export var flip_by_movement_direction: bool = true
+
+@export_group("Damage Flash")
+
+## Intensidade clara aplicada durante o impacto.
+##
+## `Color.WHITE` comum não altera o visual, pois representa a modulação
+## padrão. Valores acima de 1.0 produzem um clarão visível no Spine.
+@export_range(1.0, 8.0, 0.1) var damage_flash_brightness: float = 4.0
+
+## Tempo em que o clarão permanece no pico antes de começar a desaparecer.
+@export var damage_flash_hold_seconds: float = 0.035
+
+## Duração da transição entre o clarão e a aparência normal.
+@export var damage_flash_duration: float = 0.12
+
+var damage_flash_tween: Tween = null
+var default_modulate: Color = Color.WHITE
+
+## Registra a modulação original antes da inicialização visual base.
+func _ready() -> void:
+	default_modulate = modulate
+	super._ready()
 
 ## Define o identificador utilizado nos logs deste controller.
 func _get_visual_log_name() -> String:
@@ -92,4 +115,55 @@ func play_death() -> void:
 		death_animation_name,
 		false,
 		"death"
+	)
+
+## Executa um clarão branco breve ao receber dano.
+##
+## Caso outro impacto aconteça antes do término do flash anterior,
+## reinicia o tween para manter o feedback responsivo.
+func play_damage_flash() -> void:
+	if damage_flash_tween != null:
+		damage_flash_tween.kill()
+		damage_flash_tween = null
+
+	var safe_brightness: float = max(1.0, damage_flash_brightness)
+	var flash_modulate: Color = Color(
+		safe_brightness,
+		safe_brightness,
+		safe_brightness,
+		default_modulate.a
+	)
+
+	modulate = flash_modulate
+
+	damage_flash_tween = create_tween()
+	damage_flash_tween.set_trans(Tween.TRANS_QUAD)
+	damage_flash_tween.set_ease(Tween.EASE_OUT)
+
+	if damage_flash_hold_seconds > 0.0:
+		damage_flash_tween.tween_interval(damage_flash_hold_seconds)
+
+	damage_flash_tween.tween_property(
+		self,
+		"modulate",
+		default_modulate,
+		max(0.01, damage_flash_duration)
+	)
+
+	damage_flash_tween.finished.connect(func() -> void:
+		damage_flash_tween = null
+	)
+
+	DeveloperAuditLogger.log_animation(
+		"Flash de dano executado: brightness=%s hold=%s duration=%s" % [
+			str(safe_brightness),
+			str(damage_flash_hold_seconds),
+			str(damage_flash_duration)
+		],
+		"GoblinWarriorVisualController",
+		{
+			"brightness": safe_brightness,
+			"hold_seconds": damage_flash_hold_seconds,
+			"duration_seconds": damage_flash_duration
+		}
 	)

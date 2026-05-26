@@ -1,74 +1,32 @@
-# Lifecycle — Player Gaia
+# Lifecycle — Gaia / Player
 
 ## Criação
 
-```txt
-TestGaiaScene instancia PlayerGaia
-↓
-PlayerController cria PlayerRuntimeState
-↓
-QueenDefinition aplica HP e velocidade base
-↓
-GaiaVisual é encontrado
-↓
-GaiaInitialWeaponController é iniciado
+```text
+TestGaiaScene._spawn_player()
+→ PlayerController lê QueenDefinition
+→ PlayerRuntimeState recebe HP e velocidade
+→ PlayerHurtbox é configurada pelas hurtbox_areas de queen_gaia.tres
+→ GaiaVisual inicia idle
 ```
 
-## Input
+## Movimento e mira
 
-```txt
-InputManager.update_input_for_player()
-↓
-move_direction
-aim_direction
-↓
-PlayerRuntimeState.apply_input()
-```
+Movimento controla posição e facing visual horizontal. Mira controla ataque direcional e pode vir do mouse ou analógico; não existe auto-target do inimigo mais próximo.
 
-## Movimento visual
+## Recebendo dano
 
-```txt
-move_direction horizontal
-↓
-facing_direction
-↓
-GaiaVisualController aplica scale.x
-```
-
-## Mira
-
-```txt
-Mouse
-↓
-aim_direction
-↓
-Linha amarela
-↓
-GaiaInitialWeaponController usa para ataque
-```
-
-A mira não controla o lado visual do corpo.
-
-## Dano recebido
-
-```txt
-EnemyBase cria DamagePayload
-↓
-PlayerController.receive_damage()
-↓
-DamageResolver.calculate_received_damage()
-↓
-PlayerRuntimeState.apply_damage()
+```text
+EnemyAttackHitbox detecta PlayerHurtbox
+→ constrói DamagePayload
+→ PlayerController.receive_damage(payload)
+→ DamageResolver aplica defesa
+→ HP é reduzido
+→ player_damaged
+→ flash vermelho + floating text
+→ invencibilidade de 0.5s
 ```
 
 ## Morte
 
-```txt
-HP <= 0
-↓
-PlayerRuntimeState.kill()
-↓
-state = dead
-↓
-GaiaVisualController toca Die_Pose1
-```
+Ao zerar HP, a Gaia desativa `PlayerHurtbox`, emite `player_died`, aplica estado visual morto e faz o `RunController` iniciar derrota. Depois disso não deve receber dano adicional.
