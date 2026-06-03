@@ -41,6 +41,14 @@ extends Node
 
 @export var emit_cooldown_updates: bool = true
 
+## Se verdadeiro, a arma não dispara enquanto a Queen está em dash.
+@export var block_attacks_while_player_dashing: bool = true
+
+## Se verdadeiro, ao iniciar dash o cooldown da arma volta para o valor cheio.
+##
+## O cooldown só volta a contar quando o dash terminar.
+@export var reset_cooldown_when_dash_starts: bool = true
+
 @export_group("Cooldown")
 
 @export var cooldown_seconds: float = 2.0
@@ -63,6 +71,17 @@ extends Node
 ## Quando uma WeaponDefinition estiver configurada, suas áreas prevalecem.
 @export var attack_areas: Array[AttackAreaDefinition] = []
 
+@export_group("On Hit Effects")
+
+## Define se a arma atual aplica knockback em inimigos atingidos.
+@export var hit_knockback_enabled: bool = false
+
+## Distância aproximada, em pixels, repassada à hitbox de ataque.
+@export var hit_knockback_pixels: float = 0.0
+
+## Duração do knockback aplicado pela hitbox.
+@export var hit_knockback_duration_seconds: float = 0.12
+
 @export_group("Damage")
 
 ## Dano simples usado somente caso não existam componentes cadastrados.
@@ -77,6 +96,9 @@ extends Node
 @export var weapon_source_id: String = "gaia_initial_weapon"
 
 var cooldown_timer: float = 0.0
+
+## Guarda se o player estava em dash no frame anterior.
+var was_player_dashing: bool = false
 
 ## Multiplicador runtime das áreas ofensivas.
 ## Inicia em 1.0 e pode crescer por upgrades durante a run.
@@ -134,6 +156,9 @@ func _process(delta: float) -> void:
 
 	if runtime_state == null or not runtime_state.is_alive:
 		return
+	
+	if _handle_dash_attack_block(runtime_state):
+		return
 
 	cooldown_timer = max(0.0, cooldown_timer - delta)
 
@@ -153,9 +178,47 @@ func force_fire() -> void:
 
 	if runtime_state == null or not runtime_state.is_alive:
 		return
+	
+	if _is_player_dashing(runtime_state):
+		return
 
 	_fire_attack(runtime_state)
 	cooldown_timer = cooldown_seconds
+
+## Bloqueia disparos durante dash e controla o reset do cooldown.
+##
+## Regra:
+## - ao iniciar dash, cooldown volta para cheio;
+## - enquanto está em dash, cooldown não conta;
+## - ao terminar dash, cooldown começa a contar do valor cheio.
+func _handle_dash_attack_block(runtime_state: PlayerRuntimeState) -> bool:
+	if not block_attacks_while_player_dashing:
+		was_player_dashing = false
+		return false
+
+	var is_dashing: bool = _is_player_dashing(runtime_state)
+
+	if not is_dashing:
+		was_player_dashing = false
+		return false
+
+	if not was_player_dashing and reset_cooldown_when_dash_starts:
+		cooldown_timer = cooldown_seconds
+		_emit_cooldown_update()
+
+	was_player_dashing = true
+
+	return true
+
+## Indica se o player está no estado de dash.
+func _is_player_dashing(runtime_state: PlayerRuntimeState) -> bool:
+	if runtime_state == null:
+		return false
+
+	return (
+		runtime_state.is_dashing
+		or runtime_state.current_gameplay_state == GameplayStateTypes.DASHING
+	)
 
 ## Executa um ataque completo na direção atual da mira.
 func _fire_attack(runtime_state: PlayerRuntimeState) -> void:
@@ -251,7 +314,10 @@ func _spawn_attack_hitbox(direction: Vector2) -> void:
 			attack_hitbox_lifetime,
 			weapon_source_id,
 			damage_components,
-			attack_area_scale_multiplier
+			attack_area_scale_multiplier,
+			hit_knockback_enabled,
+			hit_knockback_pixels,
+			hit_knockback_duration_seconds
 		)
 
 ## Retorna direção normalizada de mira usada pelo ataque.
@@ -288,7 +354,14 @@ func _apply_weapon_definition() -> void:
 
 	attack_hitbox_offset = weapon_definition.attack_hitbox_offset
 	attack_hitbox_lifetime = weapon_definition.attack_hitbox_lifetime
-
+	
+	hit_knockback_enabled = weapon_definition.hit_knockback_enabled
+	hit_knockback_pixels = max(0.0, weapon_definition.hit_knockback_pixels)
+	hit_knockback_duration_seconds = max(
+		0.01,
+		weapon_definition.hit_knockback_duration_seconds
+	)
+	
 	attack_areas.clear()
 
 	for attack_area: AttackAreaDefinition in weapon_definition.attack_areas:
@@ -327,14 +400,16 @@ func _apply_weapon_definition() -> void:
 	weapon_source_id = weapon_definition.id
 
 	DeveloperAuditLogger.log_scene(
-		"Arma configurada: id=%s fallback_damage=%s components=%s visual_offset=%s hitbox_offset=%s attack_areas=%s cooldown=%s" % [
+		"Arma configurada: id=%s fallback_damage=%s components=%s visual_offset=%s hitbox_offset=%s attack_areas=%s cooldown=%s knockback=%s/%spx" % [
 			weapon_source_id,
 			str(base_damage),
 			_get_component_debug_string(),
 			str(attack_visual_offset),
 			str(attack_hitbox_offset),
 			_get_attack_area_debug_string(),
-			str(cooldown_seconds)
+			str(cooldown_seconds),
+			str(hit_knockback_enabled),
+			str(hit_knockback_pixels)
 		],
 		"GaiaInitialWeaponController",
 		{
@@ -344,7 +419,10 @@ func _apply_weapon_definition() -> void:
 			"visual_offset": attack_visual_offset,
 			"hitbox_offset": attack_hitbox_offset,
 			"attack_areas": _get_attack_area_debug_string(),
-			"cooldown_seconds": cooldown_seconds
+			"cooldown_seconds": cooldown_seconds,
+			"hit_knockback_enabled": hit_knockback_enabled,
+			"hit_knockback_pixels": hit_knockback_pixels,
+			"hit_knockback_duration_seconds": hit_knockback_duration_seconds
 		}
 	)
 

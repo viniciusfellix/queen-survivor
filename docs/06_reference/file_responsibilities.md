@@ -19,8 +19,8 @@ Use busca textual por termos como `visual`, `Gaia`, `ataque`, `hurtbox`, `upgrad
 | Arquivo | Responsabilidades |
 |---|---|
 | `QueenDefinition.gd` | atributos, equipamento e hurtboxes da Queen |
-| `EnemyDefinition.gd` | atributos, ataque, hurtboxes, fraquezas e reward |
-| `WeaponDefinition.gd` | arma, cooldown, components e attack areas |
+| `EnemyDefinition.gd` | atributos, recompensas, hurtboxes, ataque de contato, esbarrão corporal e knockback recebido.
+| `WeaponDefinition.gd` | dados da arma, áreas ofensivas, dano e efeitos pós-hit como knockback. |
 | `CombatShapeDefinition.gd` | shape/offset/rotação runtime |
 | `AttackAreaDefinition.gd` | região ofensiva |
 | `HurtboxAreaDefinition.gd` | região vulnerável |
@@ -42,11 +42,11 @@ Use busca textual por termos como `visual`, `Gaia`, `ataque`, `hurtbox`, `upgrad
 | `DamageTypes.gd` | tipos válidos |
 | `GameplayStateTypes.gd` | estados lógicos |
 | `HurtboxComponent.gd` | construir hurtboxes e expor receiver |
-| `DirectionalAttackHitbox.gd` | atacar EnemyHurtbox pela arma Gaia |
+| `DirectionalAttackHitbox.gd` | Detecta EnemyHurtbox, envia DamagePayload e solicita knockback pós-hit quando configurado. |
 | `EnemyAttackHitbox.gd` | atacar PlayerHurtbox pelo inimigo |
 | `PlayerController.gd` | Gaia: input, dano, upgrades, morte, hurtbox |
 | `PlayerRuntimeState.gd` | estado mutável da Gaia |
-| `EnemyBase.gd` | perseguição, dano, ataque, morte/reward |
+| `EnemyBase.gd` | perseguição direta, velocidades externas temporárias, esbarrão físico, knockback recebido, dano, morte e comunicação visual.
 | `GaiaInitialWeaponController.gd` | disparo/cooldown/upgrades arma |
 | `EnemySpawner.gd` | waves/instâncias |
 | `DropController.gd` | chance/criação de coin drop |
@@ -61,10 +61,10 @@ Use busca textual por termos como `visual`, `Gaia`, `ataque`, `hurtbox`, `upgrad
 
 | Arquivo | Responsabilidades |
 |---|---|
-| `SpineAnimationAdapterBase.gd` | resolver SpineSprite/animações |
-| `SpineVisualControllerBase.gd` | estado comum/flip |
+| `SpineAnimationAdapterBase.gd` | Centraliza comunicação com Spine, incluindo execução em tracks específicas e limpeza de track |
+| `SpineVisualControllerBase.gd` | Fornece helpers para animação base e overlays em tracks superiores |
 | `GaiaSpineAdapter.gd` | adapter Gaia |
-| `GaiaVisualController.gd` | animações e flash vermelho |
+| `GaiaVisualController.gd` | Controla animações visuais da Gaia, flash de dano e blink overlay |
 | `GoblinWarriorSpineAdapter.gd` | adapter Goblin |
 | `GoblinWarriorVisualController.gd` | animações e flash claro |
 | `GaiaAttackVisualController.gd` | visual/fade/rotação do ataque |

@@ -58,6 +58,12 @@ var facing_direction: Vector2 = Vector2.RIGHT
 ## Informa se a Queen está se deslocando neste frame.
 var is_moving: bool = false
 
+## Informa se a Queen está executando dash neste momento.
+var is_dashing: bool = false
+
+## Direção atual do dash.
+var dash_direction: Vector2 = Vector2.ZERO
+
 ## Informa se a Queen ainda pode atuar na run.
 var is_alive: bool = true
 
@@ -114,6 +120,8 @@ func set_gameplay_state(new_state: String) -> void:
 ##
 ## Quando a Queen está morta, bloqueia movimentação, mas mantém
 ## atualização de mira segura antes de fixar o estado `DEAD`.
+##
+## Durante o dash, o input normal não pode sobrescrever o estado DASHING.
 func apply_input(move: Vector2, aim: Vector2) -> void:
 	if not is_alive:
 		move_direction = Vector2.ZERO
@@ -121,11 +129,59 @@ func apply_input(move: Vector2, aim: Vector2) -> void:
 		set_gameplay_state(GameplayStateTypes.DEAD)
 		return
 
+	if is_dashing:
+		_update_aim_direction(aim)
+		_update_visual_facing_from_movement(dash_direction)
+		set_gameplay_state(GameplayStateTypes.DASHING)
+		return
+
 	move_direction = move
 
 	_update_aim_direction(aim)
 	_update_visual_facing_from_movement(move_direction)
 	_update_movement_state()
+
+## Inicia o estado runtime de dash.
+##
+## O PlayerController controla duração, velocidade e cooldown.
+## O RuntimeState apenas registra estado, direção e informações visuais.
+func start_dash(direction: Vector2, aim: Vector2) -> void:
+	if not is_alive:
+		return
+
+	if direction.length() <= 0.001:
+		return
+
+	is_dashing = true
+	dash_direction = direction.normalized()
+	move_direction = dash_direction
+	is_moving = true
+
+	_update_aim_direction(aim)
+	_update_visual_facing_from_movement(dash_direction)
+	set_gameplay_state(GameplayStateTypes.DASHING)
+
+## Mantém o estado runtime durante o dash.
+func update_dash(direction: Vector2, aim: Vector2) -> void:
+	if not is_alive:
+		return
+
+	if direction.length() > 0.001:
+		dash_direction = direction.normalized()
+
+	move_direction = dash_direction
+	is_moving = true
+
+	_update_aim_direction(aim)
+	_update_visual_facing_from_movement(dash_direction)
+	set_gameplay_state(GameplayStateTypes.DASHING)
+
+## Finaliza o dash e retorna para o estado normal derivado do input atual.
+func finish_dash(move: Vector2, aim: Vector2) -> void:
+	is_dashing = false
+	dash_direction = Vector2.ZERO
+
+	apply_input(move, aim)
 
 ## Aplica dano final já resolvido contra a Queen.
 ##
@@ -163,7 +219,10 @@ func kill(source_id: String = "") -> void:
 
 	move_direction = Vector2.ZERO
 	is_moving = false
-
+	
+	is_dashing = false
+	dash_direction = Vector2.ZERO
+	
 	set_gameplay_state(GameplayStateTypes.DEAD)
 
 ## Recupera HP sem ultrapassar o máximo atual.

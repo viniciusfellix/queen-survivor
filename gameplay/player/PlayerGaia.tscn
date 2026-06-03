@@ -4,14 +4,14 @@
 [ext_resource type="Resource" uid="uid://clvjmbxgwi00b" path="res://data/queens/queen_gaia.tres" id="2_b2oau"]
 [ext_resource type="PackedScene" uid="uid://dxtnkjw5suqk" path="res://visual/characters/gaia/GaiaVisual.tscn" id="2_cbat8"]
 [ext_resource type="Script" uid="uid://dq4yjwxealkr7" path="res://gameplay/combat/HurtboxComponent.gd" id="3_0a7w7"]
+[ext_resource type="Script" uid="uid://cc230rlqxp6av" path="res://gameplay/player/PlayerDashImpactArea.gd" id="4_85b2w"]
 [ext_resource type="Script" uid="uid://bk43i87f7tv1j" path="res://gameplay/weapons/gaia/GaiaInitialWeaponController.gd" id="4_wm5q1"]
 [ext_resource type="Resource" uid="uid://rysi500pe7yh" path="res://data/weapons/weapon_gaia_initial.tres" id="5_0caxs"]
 [ext_resource type="Script" uid="uid://dvk8ne584ljjf" path="res://definitions/AttackAreaDefinition.gd" id="6_xdj3q"]
 [ext_resource type="Resource" uid="uid://dhoryvrcjt82m" path="res://data/weapons/attack_areas/attack_area_gaia_initial_primary.tres.tres" id="7_0a7w7"]
 
-[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_0caxs"]
-radius = 23.0
-height = 102.0
+[sub_resource type="CircleShape2D" id="CircleShape2D_0a7w7"]
+radius = 30.016663
 
 [node name="PlayerGaia" type="CharacterBody2D" unique_id=1984313078]
 collision_layer = 2
@@ -21,17 +21,24 @@ queen_definition = ExtResource("2_b2oau")
 visual_controller_path = NodePath("VisualRoot/GaiaVisual")
 
 [node name="BodyCollision" type="CollisionShape2D" parent="." unique_id=158647657]
-position = Vector2(0, 41)
-shape = SubResource("CapsuleShape2D_0caxs")
+position = Vector2(-1, 63)
+shape = SubResource("CircleShape2D_0a7w7")
 
 [node name="PlayerHurtbox" type="Area2D" parent="." unique_id=1729074534]
 script = ExtResource("3_0a7w7")
 collision_layer_number = 7
 log_configuration = true
 
+[node name="DashImpactArea" type="Area2D" parent="." unique_id=1755591863]
+monitoring = false
+monitorable = false
+script = ExtResource("4_85b2w")
+
 [node name="VisualRoot" type="Node2D" parent="." unique_id=721531233]
 
 [node name="GaiaVisual" parent="VisualRoot" unique_id=337840 instance=ExtResource("2_cbat8")]
+damage_flash_color = Color(1, 0, 0, 1)
+damage_flash_duration = 0.35
 
 [node name="WeaponRoot" type="Node2D" parent="." unique_id=1652286854]
 
@@ -46,4 +53,7 @@ attack_visual_scene_path = "uid://dpikvdhhe37hy"
 attack_hitbox_scene_path = "uid://f301wqo5vajy"
 attack_visual_root_path = NodePath("../AttackVisualRoot")
 attack_hitbox_root_path = NodePath("../AttackHitboxRoot")
+attack_hitbox_offset = 0.0
 attack_areas = Array[ExtResource("6_xdj3q")]([ExtResource("7_0a7w7")])
+hit_knockback_enabled = true
+hit_knockback_pixels = 360.0

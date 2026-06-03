@@ -4,7 +4,8 @@
 ## - localizar um adapter Spine descendente;
 ## - solicitar animações somente quando houver mudança real;
 ## - registrar mudanças visuais relevantes;
-## - oferecer flip horizontal reutilizável.
+## - oferecer flip horizontal reutilizável;
+## - expor helpers para animações em tracks superiores.
 ##
 ## Controllers específicos, como Gaia e Goblin, definem:
 ## - nomes de animações;
@@ -29,7 +30,7 @@ class_name SpineVisualControllerBase
 ## Referência ao adapter Spine resolvido ao iniciar o controller.
 @onready var spine_adapter: Node = _resolve_spine_adapter()
 
-## Nome da última animação visual aplicada com sucesso.
+## Nome da última animação visual base aplicada com sucesso.
 var current_animation_name: String = ""
 
 ## Nome lógico do estado visual atualmente aplicado.
@@ -54,10 +55,10 @@ func _play_initial_animation() -> void:
 func _get_visual_log_name() -> String:
 	return name
 
-## Toca uma animação apenas quando ela difere da animação atual.
+## Toca uma animação base apenas quando ela difere da animação atual.
 ##
-## Retorna `true` quando a animação já estava ativa ou quando
-## o adapter executou a nova animação com sucesso.
+## Esta função controla a track principal, normalmente track 0.
+## Overlays temporários, como blink, devem usar `_play_animation_on_track`.
 func _play_animation_if_changed(
 	animation_name: String,
 	loop: bool,
@@ -115,6 +116,58 @@ func _play_animation_if_changed(
 		)
 
 	return true
+
+## Toca uma animação em uma track específica sem necessariamente alterar
+## a animação base registrada pelo controller.
+##
+## Usado para overlays temporários, como blink de olhos sobre idle/run.
+func _play_animation_on_track(
+	animation_name: String,
+	loop: bool,
+	track_index: int,
+	updates_base_animation: bool = false
+) -> bool:
+	if animation_name.strip_edges() == "":
+		return false
+
+	if spine_adapter == null:
+		push_warning("[%s] Adapter ausente. Não foi possível tocar animação em track: %s" % [
+			_get_visual_log_name(),
+			animation_name
+		])
+		return false
+
+	if not spine_adapter.has_method("play_animation_on_track"):
+		push_warning("[%s] Adapter não implementa play_animation_on_track: %s" % [
+			_get_visual_log_name(),
+			animation_name
+		])
+		return false
+
+	var play_result_variant: Variant = spine_adapter.call(
+		"play_animation_on_track",
+		animation_name,
+		loop,
+		track_index,
+		updates_base_animation
+	)
+
+	return bool(play_result_variant)
+
+## Limpa uma track específica quando o adapter/runtime Spine oferecer suporte.
+func _clear_animation_track(track_index: int) -> bool:
+	if spine_adapter == null:
+		return false
+
+	if not spine_adapter.has_method("clear_animation_track"):
+		return false
+
+	var result_variant: Variant = spine_adapter.call(
+		"clear_animation_track",
+		track_index
+	)
+
+	return bool(result_variant)
 
 ## Espelha horizontalmente o visual conforme a direção recebida.
 ##

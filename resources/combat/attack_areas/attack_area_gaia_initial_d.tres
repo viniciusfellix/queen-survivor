@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="AttackAreaDefinition" format=3 uid="uid://oaclyehjgory"]
+
+[ext_resource type="Script" uid="uid://dvk8ne584ljjf" path="res://definitions/AttackAreaDefinition.gd" id="1_k60vn"]
+
+[sub_resource type="ConvexPolygonShape2D" id="ConvexPolygonShape2D_qp3ff"]
+points = PackedVector2Array(1.469576e-14, -150, 31.326286, -148.71674, 62.11657, -144.88887, 91.844025, -138.58192, 120, -129.90381, 146.10274, -119.003, 169.70563, -106.06602, 190.4048, -91.31422, 207.8461, -75, 221.7311, -57.402515, 231.8222, -38.822857, 237.94676, -19.578928, 240, 0, 237.94676, 19.578928, 231.8222, 38.822857, 221.7311, 57.402515, 207.8461, 75, 190.4048, 91.31422, 169.70563, 106.06602, 146.10274, 119.003, 120, 129.90381, 91.844025, 138.58192, 62.11657, 144.88887, 31.326286, 148.71674, 1.469576e-14, 150)
+
+[resource]
+script = ExtResource("1_k60vn")
+id = "attack_area_gaia_initial_d"
+shape = SubResource("ConvexPolygonShape2D_qp3ff")
+local_offset = Vector2(160, 0)

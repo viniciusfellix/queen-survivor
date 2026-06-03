@@ -24,6 +24,11 @@ SaveManager="*uid://cbymq1sv1y3bj"
 InputManager="*uid://de2j17ep6ta1e"
 App="*uid://dpk11lg5lf1do"
 
+[display]
+
+window/size/viewport_width=1366
+window/size/window_width_override=768
+
 [layer_names]
 
 2d_physics/layer_1="World"

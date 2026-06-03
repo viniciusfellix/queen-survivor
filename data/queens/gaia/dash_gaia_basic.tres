@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="QueenDashDefinition" format=3 uid="uid://bur0bcw5tmnkx"]
+
+[ext_resource type="Script" uid="uid://dvk8ne584ljjf" path="res://definitions/AttackAreaDefinition.gd" id="1_amsvo"]
+[ext_resource type="Script" uid="uid://bxs38nfkbxel5" path="res://definitions/QueenDashDefinition.gd" id="2_htne8"]
+[ext_resource type="Resource" uid="uid://bhya3vd2g1dan" path="res://data/queens/gaia/dash_impact_area_gaia_basic.tres" id="2_jdo3y"]
+
+[resource]
+script = ExtResource("2_htne8")
+id = "gaia_basic_dash"
+dash_distance_pixels = 700.0
+dash_duration_seconds = 3.0
+impact_knockback_pixels = 320.0
+impact_source_id = "gaia_dash"
+impact_areas = Array[ExtResource("1_amsvo")]([ExtResource("2_jdo3y")])
+metadata/_custom_type_script = "uid://bxs38nfkbxel5"

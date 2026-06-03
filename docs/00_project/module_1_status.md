@@ -72,3 +72,19 @@ O Módulo 1 está funcionalmente implementado e validado após auditoria, refato
 5. executar regressão completa;
 6. atualizar docs e ADRs;
 7. gerar contexto de atualização do Chat Core.
+
+## Etapa 2R2-B — Movimento orgânico, knockback e blink overlay
+
+Status: concluída funcionalmente.
+
+Foram implementados:
+
+- esbarrão físico configurável entre Goblins;
+- correção visual para Goblins deslizarem sem inverter animação;
+- knockback configurável por arma;
+- knockback recebido configurável por inimigo;
+- blink automático da Gaia como overlay em track superior do Spine.
+
+A arquitetura modular Hitbox/Hurtbox foi preservada. BodyCollision continua sendo apenas colisão física/movimento e não causa dano.
+
+O Goblin permanece um perseguidor simples. A organicidade do bando vem da resposta física entre inimigos e dos impulsos externos, não de IA de cerco.

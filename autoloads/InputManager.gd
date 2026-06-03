@@ -22,6 +22,9 @@ var aim_direction: Vector2 = Vector2.RIGHT
 ## Última direção de mira válida, reutilizada quando não existe input novo.
 var last_valid_aim_direction: Vector2 = Vector2.RIGHT
 
+## Indica se o botão de dash foi pressionado neste frame.
+var dash_just_pressed: bool = false
+
 ## Garante que as ações mínimas de input existam e registra inicialização.
 func _ready() -> void:
 	_ensure_default_input_actions()
@@ -38,6 +41,7 @@ func _ready() -> void:
 func update_input_for_player(player_global_position: Vector2) -> void:
 	move_direction = _get_move_direction()
 	aim_direction = _get_aim_direction(player_global_position)
+	dash_just_pressed = Input.is_action_just_pressed("dash")
 
 	if aim_direction.length() > 0.01:
 		last_valid_aim_direction = aim_direction.normalized()
@@ -55,6 +59,10 @@ func get_aim_direction() -> Vector2:
 ## Retorna a última direção de mira que possuía magnitude válida.
 func get_last_valid_aim_direction() -> Vector2:
 	return last_valid_aim_direction
+
+## Retorna se o dash foi pressionado neste frame.
+func was_dash_just_pressed() -> bool:
+	return dash_just_pressed
 
 ## Calcula a direção de movimento usando as ações configuradas.
 ##
@@ -111,12 +119,14 @@ func _ensure_default_input_actions() -> void:
 	_add_action_if_missing("move_right")
 	_add_action_if_missing("move_up")
 	_add_action_if_missing("move_down")
+	_add_key_event("dash", KEY_SPACE)
 
 	_add_action_if_missing("aim_left")
 	_add_action_if_missing("aim_right")
 	_add_action_if_missing("aim_up")
 	_add_action_if_missing("aim_down")
-
+	
+	_add_action_if_missing("dash")
 	_add_key_event("move_left", KEY_A)
 	_add_key_event("move_left", KEY_LEFT)
 

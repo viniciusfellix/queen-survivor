@@ -54,6 +54,26 @@ class_name WeaponDefinition
 ## combinar mais de uma área sem alterar o controller.
 @export var attack_areas: Array[AttackAreaDefinition] = []
 
+@export_group("On Hit Effects")
+
+## Define se esta arma aplica knockback em inimigos atingidos.
+##
+## O knockback só é aplicado quando o dano foi aceito pelo receiver.
+## Isso evita empurrar inimigos mortos, invulneráveis ou que não receberam dano.
+@export var hit_knockback_enabled: bool = false
+
+## Distância aproximada, em pixels, que a arma tenta empurrar o inimigo.
+##
+## O deslocamento real pode ser menor se houver colisão física no caminho,
+## pois o inimigo continua usando CharacterBody2D e move_and_slide().
+@export var hit_knockback_pixels: float = 0.0
+
+## Duração, em segundos, usada para distribuir o knockback.
+##
+## Valores muito baixos deixam o impacto seco.
+## Valores maiores deixam o inimigo deslizar por mais tempo.
+@export var hit_knockback_duration_seconds: float = 0.12
+
 @export_group("Damage")
 
 ## Modelo oficial atual: uma arma pode possuir um ou mais componentes

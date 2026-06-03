@@ -176,3 +176,52 @@ func get_debug_summary(scale_multiplier: float = 1.0) -> String:
 		]
 
 	return "%s:unsupported" % id
+
+## Cria os pontos de um formato em D voltado para a direita.
+##
+## O lado reto fica em x = 0.
+## A curva frontal avança até x = width.
+##
+## Exemplo visual:
+## x=0
+##  |
+##  |\
+##  | )
+##  |/
+##
+## Este formato é compatível com ConvexPolygonShape2D porque é convexo.
+static func build_d_shape_points(
+	width: float,
+	height: float,
+	segments: int = 24
+) -> PackedVector2Array:
+	var points: PackedVector2Array = PackedVector2Array()
+
+	var safe_width: float = max(1.0, width)
+	var safe_height: float = max(1.0, height)
+	var safe_segments: int = max(4, segments)
+
+	var half_height: float = safe_height * 0.5
+
+	for i: int in range(safe_segments + 1):
+		var t: float = float(i) / float(safe_segments)
+		var angle: float = lerp(-PI / 2.0, PI / 2.0, t)
+
+		var x: float = cos(angle) * safe_width
+		var y: float = sin(angle) * half_height
+
+		points.append(Vector2(x, y))
+
+	return points
+
+
+## Cria uma ConvexPolygonShape2D em formato de D.
+static func create_d_shape(
+	width: float,
+	height: float,
+	segments: int = 24
+) -> ConvexPolygonShape2D:
+	var polygon_shape: ConvexPolygonShape2D = ConvexPolygonShape2D.new()
+	polygon_shape.points = build_d_shape_points(width, height, segments)
+
+	return polygon_shape

@@ -5,17 +5,18 @@
 [ext_resource type="Script" uid="uid://cjkci1xnnmduu" path="res://gameplay/combat/EnemyAttackHitbox.gd" id="3_o5f70"]
 [ext_resource type="Script" uid="uid://dq4yjwxealkr7" path="res://gameplay/combat/HurtboxComponent.gd" id="3_vrnya"]
 
-[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_vrnya"]
-radius = 21.0
-height = 80.0
+[sub_resource type="CircleShape2D" id="CircleShape2D_vrnya"]
+radius = 27.166155
 
 [node name="EnemyBase" type="CharacterBody2D" unique_id=514613083]
+collision_layer = 4
+collision_mask = 7
 script = ExtResource("1_ffmcr")
 visual_controller_path = NodePath("VisualRoot/GoblinWarriorVisual")
 
 [node name="BodyCollision" type="CollisionShape2D" parent="." unique_id=686789010]
-position = Vector2(0, 2)
-shape = SubResource("CapsuleShape2D_vrnya")
+position = Vector2(0, 24)
+shape = SubResource("CircleShape2D_vrnya")
 debug_color = Color(1, 0.011462747, 0.054261394, 0.41960785)
 
 [node name="ContactAttackHitbox" type="Area2D" parent="." unique_id=1204959538]

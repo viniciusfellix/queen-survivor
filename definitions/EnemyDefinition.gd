@@ -6,7 +6,8 @@
 ## - definir fraquezas e resistências;
 ## - definir recompensas;
 ## - definir áreas vulneráveis independentes da colisão corporal;
-## - definir visual e informações técnicas.
+## - definir visual e informações técnicas;
+## - definir parâmetros simples de resposta física corporal.
 extends Resource
 class_name EnemyDefinition
 
@@ -82,6 +83,76 @@ class_name EnemyDefinition
 
 ## Raio utilizado pelo placeholder visual técnico.
 @export var debug_radius: float = 18.0
+
+@export_group("Body Bump")
+
+## Ativa a resposta física leve quando este inimigo colide com outros inimigos.
+##
+## Isso não causa dano e não substitui Hitbox/Hurtbox.
+## Serve apenas para reduzir empilhamento visual e dar sensação de massa.
+@export var body_bump_enabled: bool = true
+
+## Nível de força/massa usado ao resolver esbarrões entre inimigos.
+##
+## Regra atual:
+## - se dois inimigos possuem o mesmo valor, ambos recebem esse nível de impulso;
+## - se um inimigo possui valor maior, o menor recebe a diferença;
+## - o maior não é empurrado pelo menor.
+##
+## Exemplo:
+## - Goblin 2 contra Goblin 2: ambos recebem 2;
+## - Inimigo grande 12 contra Goblin 2: grande recebe 0, Goblin recebe 10.
+@export var body_bump_power: float = 2.0
+
+## Conversão do nível de esbarrão em velocidade de impulso.
+##
+## Mantém `body_bump_power` como um valor fácil de balancear
+## e permite ajustar a sensação física sem mudar a regra de força.
+@export var body_bump_velocity_per_power: float = 24.0
+
+## Limite máximo da velocidade externa gerada por esbarrões.
+##
+## Evita acúmulo exagerado quando muitos inimigos colidem ao mesmo tempo.
+@export var body_bump_max_velocity: float = 140.0
+
+## Velocidade com que o impulso externo desaparece.
+##
+## Valores maiores fazem o esbarrão durar menos.
+@export var body_bump_decay_per_second: float = 280.0
+
+## Influência lateral adicionada ao impulso.
+##
+## Ajuda a criar dinâmica de deslizamento para os lados,
+## em vez de sempre empurrar somente para trás.
+@export_range(0.0, 1.0, 0.05) var body_bump_lateral_influence: float = 0.35
+
+@export_group("Received Knockback")
+
+## Multiplicador aplicado ao knockback recebido por armas, dash ou impactos.
+##
+## Exemplos:
+## - 1.0 = recebe knockback normal;
+## - 0.5 = recebe metade;
+## - 0.0 = imune;
+## - 1.5 = recebe mais knockback.
+@export var received_knockback_multiplier: float = 1.0
+
+## Limite máximo da velocidade externa causada por knockback.
+##
+## Evita que impactos muito fortes arremessem o inimigo de forma incoerente.
+@export var received_knockback_max_velocity: float = 520.0
+
+## Velocidade com que o knockback desaparece.
+##
+## Valores maiores deixam o impacto mais seco.
+## Valores menores deixam o inimigo deslizar por mais tempo.
+@export var received_knockback_decay_per_second: float = 1800.0
+
+## Quanto da perseguição normal continua ativa enquanto o inimigo está em knockback.
+##
+## 0.0 = o knockback domina totalmente por alguns instantes.
+## 1.0 = o inimigo continua perseguindo com força total durante o knockback.
+@export_range(0.0, 1.0, 0.05) var received_knockback_chase_weight: float = 0.15
 
 ## Verifica se a definição possui identificação técnica.
 func is_valid_definition() -> bool:

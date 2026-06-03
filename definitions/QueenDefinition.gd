@@ -6,7 +6,8 @@
 ## - arma inicial;
 ## - áreas vulneráveis utilizadas para receber ataques;
 ## - cena visual;
-## - resource Spine correspondente.
+## - resource Spine correspondente;
+## - dash configurável.
 ##
 ## Comportamentos especiais exclusivos de futuras Queens deverão ser
 ## adicionados de forma configurável quando suas regras forem implementadas.
@@ -51,6 +52,14 @@ class_name QueenDefinition
 
 ## Caminho do resource Spine utilizado pelo visual real da Queen.
 @export_file("*.tres") var spine_skeleton_data_resource_path: String = ""
+
+@export_group("Dash")
+
+## Configuração de dash desta Queen.
+##
+## Cada Queen poderá ter distância, duração, cooldown, área de impacto
+## e knockback próprios.
+@export var dash_definition: QueenDashDefinition
 
 ## Verifica se a Queen possui os dados mínimos exigidos pelo protótipo.
 func is_valid_definition() -> bool:

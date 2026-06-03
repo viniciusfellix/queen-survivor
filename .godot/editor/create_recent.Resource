@@ -1,5 +1,6 @@
-EnemyAttackDefinition
 AttackAreaDefinition
+QueenDashDefinition
+EnemyAttackDefinition
 HurtboxAreaDefinition
 UpgradeDefinition
 UpgradePoolDefinition
@@ -11,5 +12,3 @@ DamageComponentDefinition
 Resource
 WeaponDefinition
 SpineSkeletonDataResource
-EnemyDefinition
-QueenDefinition

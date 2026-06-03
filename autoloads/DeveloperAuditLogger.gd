@@ -37,12 +37,12 @@ func _ready() -> void:
 func _configure_default_channels() -> void:
 	enabled_channels = {
 		DeveloperLogChannels.LIFECYCLE: true,
-		DeveloperLogChannels.SCENE: true,
-		DeveloperLogChannels.SPAWN: true,
-		DeveloperLogChannels.COMBAT: true,
+		DeveloperLogChannels.SCENE: false,
+		DeveloperLogChannels.SPAWN: false,
+		DeveloperLogChannels.COMBAT: false,
 		DeveloperLogChannels.ANIMATION: true,
 		DeveloperLogChannels.UPGRADE: false,
-		DeveloperLogChannels.SAVE: true,
+		DeveloperLogChannels.SAVE: false,
 		DeveloperLogChannels.UI: false,
 		DeveloperLogChannels.SIGNAL: false,
 		DeveloperLogChannels.AUDIT: false

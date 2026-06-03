@@ -27,8 +27,10 @@ player_scene_path = "uid://d3b8gxr3tu0p7"
 [node name="RuntimeRoot" type="Node2D" parent="." unique_id=1278207903]
 
 [node name="PlayerRoot" type="Node2D" parent="RuntimeRoot" unique_id=1719150669]
+y_sort_enabled = true
 
 [node name="EnemyRoot" type="Node2D" parent="RuntimeRoot" unique_id=1513150753]
+y_sort_enabled = true
 
 [node name="DropRoot" type="Node2D" parent="RuntimeRoot" unique_id=660049363]
 

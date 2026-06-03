@@ -7,6 +7,7 @@
 ## - impedir múltiplos hits no mesmo receiver pela mesma instância;
 ## - construir DamagePayload;
 ## - enviar dano ao receiver;
+## - solicitar knockback pós-hit quando configurado;
 ## - desenhar a área ofensiva durante testes;
 ## - desaparecer ao fim do lifetime.
 extends Area2D
@@ -24,6 +25,17 @@ class_name DirectionalAttackHitbox
 @export_group("Damage Components")
 
 @export var damage_components: Array[DamageComponentDefinition] = []
+
+@export_group("On Hit Effects")
+
+## Define se esta instância de hitbox aplica knockback no receiver atingido.
+@export var hit_knockback_enabled: bool = false
+
+## Distância aproximada, em pixels, solicitada ao receiver.
+@export var hit_knockback_pixels: float = 0.0
+
+## Duração usada para converter o deslocamento em velocidade inicial.
+@export var hit_knockback_duration_seconds: float = 0.12
 
 @export_group("Attack Areas")
 
@@ -91,9 +103,8 @@ func _physics_process(delta: float) -> void:
 
 ## Desenha a configuração ofensiva atual para balanceamento visual.
 ##
-## A arma atual da Gaia utiliza RectangleShape2D.
-## Shapes futuras continuam visíveis por Debug > Visible Collision Shapes,
-## mesmo que ainda não tenham desenho customizado neste método.
+## A arma atual da Gaia pode utilizar RectangleShape2D, CircleShape2D
+## ou outras shapes suportadas por AttackAreaDefinition.
 func _draw() -> void:
 	if not draw_debug_hitbox:
 		return
@@ -144,7 +155,7 @@ func _draw() -> void:
 ## Configura esta hitbox no momento do disparo.
 ##
 ## A assinatura permanece compatível com o controller da Gaia já alterado
-## para utilizar AttackAreaDefinition.
+## para utilizar AttackAreaDefinition, componentes compostos e knockback.
 func setup(
 	p_source_node: Node,
 	p_direction: Vector2,
@@ -154,7 +165,10 @@ func setup(
 	p_lifetime_seconds: float,
 	p_source_id: String = "gaia_initial_weapon",
 	p_damage_components: Array[DamageComponentDefinition] = [],
-	p_attack_area_scale_multiplier: float = 1.0
+	p_attack_area_scale_multiplier: float = 1.0,
+	p_hit_knockback_enabled: bool = false,
+	p_hit_knockback_pixels: float = 0.0,
+	p_hit_knockback_duration_seconds: float = 0.12
 ) -> void:
 	source_node = p_source_node
 
@@ -168,6 +182,10 @@ func setup(
 	lifetime_seconds = max(0.01, p_lifetime_seconds)
 	source_id = p_source_id
 	attack_area_scale_multiplier = max(0.01, p_attack_area_scale_multiplier)
+
+	hit_knockback_enabled = p_hit_knockback_enabled
+	hit_knockback_pixels = max(0.0, p_hit_knockback_pixels)
+	hit_knockback_duration_seconds = max(0.01, p_hit_knockback_duration_seconds)
 
 	damage_components.clear()
 
@@ -206,6 +224,12 @@ func setup(
 
 	is_configured = true
 	queue_redraw()
+
+	# A hitbox corpo a corpo pode nascer já sobre uma EnemyHurtbox.
+	# O signal area_entered só cobre entradas novas; por isso fazemos uma
+	# checagem adiada para capturar áreas que já estavam dentro da hitbox
+	# no momento da criação.
+	call_deferred("_process_current_overlaps")
 
 ## Configura a hitbox para existir somente na layer de ataque do player
 ## e detectar somente hurtboxes de inimigos.
@@ -305,25 +329,28 @@ func _try_apply_damage_to_hurtbox(area: Area2D) -> void:
 		payload
 	)
 
-	var final_damage: int = 0
-
-	if final_damage_variant is int:
-		final_damage = int(final_damage_variant)
-	elif final_damage_variant is float:
-		final_damage = int(final_damage_variant)
+	var final_damage: int = _variant_to_damage(final_damage_variant)
 
 	if final_damage <= 0:
 		return
 
 	already_hit_instance_ids[receiver_instance_id] = true
 
+	# O knockback é efeito pós-hit: só acontece depois que o receiver
+	# confirmou que recebeu dano real. Assim não empurra inimigo morto,
+	# inválido ou bloqueado por fim de run.
+	var knockback_applied: bool = _try_apply_hit_knockback_to_receiver(damage_receiver)
+
 	DeveloperAuditLogger.log_combat(
-		"Hurtbox atingida: receiver=%s raw_total=%s final=%s components=%s areas=%s" % [
+		"Hurtbox atingida: receiver=%s raw_total=%s final=%s components=%s areas=%s knockback=%s/%spx applied=%s" % [
 			damage_receiver.name,
 			str(payload.get_total_raw_damage()),
 			str(final_damage),
 			_get_component_debug_string(),
-			_get_attack_area_debug_string()
+			_get_attack_area_debug_string(),
+			str(hit_knockback_enabled),
+			str(hit_knockback_pixels),
+			str(knockback_applied)
 		],
 		"DirectionalAttackHitbox",
 		{
@@ -332,9 +359,54 @@ func _try_apply_damage_to_hurtbox(area: Area2D) -> void:
 			"final_damage": final_damage,
 			"components": _get_component_debug_string(),
 			"attack_areas": _get_attack_area_debug_string(),
-			"source_id": source_id
+			"source_id": source_id,
+			"hit_knockback_enabled": hit_knockback_enabled,
+			"hit_knockback_pixels": hit_knockback_pixels,
+			"hit_knockback_duration_seconds": hit_knockback_duration_seconds,
+			"knockback_applied": knockback_applied
 		}
 	)
+
+## Solicita knockback ao receiver atingido, quando a arma estiver configurada
+## para aplicar esse efeito.
+##
+## O receiver decide a direção final com base no próprio movimento.
+## A direção do ataque é enviada apenas como fallback seguro.
+func _try_apply_hit_knockback_to_receiver(damage_receiver: Node) -> bool:
+	if not hit_knockback_enabled:
+		return false
+
+	if hit_knockback_pixels <= 0.0:
+		return false
+
+	if damage_receiver == null or not is_instance_valid(damage_receiver):
+		return false
+
+	if not damage_receiver.has_method("apply_hit_knockback"):
+		return false
+
+	var result_variant: Variant = damage_receiver.call(
+		"apply_hit_knockback",
+		hit_knockback_pixels,
+		hit_knockback_duration_seconds,
+		source_node,
+		attack_direction
+	)
+
+	if result_variant is bool:
+		return bool(result_variant)
+
+	return false
+
+## Converte retorno numérico genérico do receiver em dano inteiro.
+func _variant_to_damage(value: Variant) -> int:
+	if value is int:
+		return int(value)
+
+	if value is float:
+		return int(value)
+
+	return 0
 
 ## Retorna componentes de dano em formato compacto.
 func _get_component_debug_string() -> String:
