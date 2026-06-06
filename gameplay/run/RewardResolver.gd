@@ -1,6 +1,17 @@
+## Serviço estático responsável por calcular recompensa final de dinheiro.
+##
+## Responsabilidades:
+## - aplicar a fórmula oficial de vitória;
+## - aplicar regra oficial de derrota;
+## - proteger contra moedas negativas e bônus negativo.
+##
+## Fórmula oficial:
+## Vitória: (moedas_coletadas × victory_multiplier) + victory_bonus
+## Derrota: moedas_coletadas
 extends RefCounted
 class_name RewardResolver
 
+## Calcula dinheiro final respeitando fórmulas oficiais de vitória e derrota.
 static func calculate_final_money_reward(
 	victory: bool,
 	run_coins_collected: int,

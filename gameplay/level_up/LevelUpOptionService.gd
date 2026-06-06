@@ -1,6 +1,18 @@
+## Serviço estático que gera opções de level-up.
+##
+## Responsabilidades:
+## - receber uma UpgradePoolDefinition;
+## - filtrar upgrades válidos;
+## - respeitar stacks máximos por run;
+## - evitar repetir imediatamente opções anteriores quando configurado;
+## - preencher opções de fallback quando a pool válida estiver pequena.
+##
+## Importante:
+## Este serviço apenas escolhe opções. Ele não aplica upgrades.
 extends RefCounted
 class_name LevelUpOptionService
 
+## Entrada pública: gera opções de level-up a partir de uma pool.
 static func generate_from_pool(
 	upgrade_pool_definition: UpgradePoolDefinition,
 	selected_counts: Dictionary = {},
@@ -22,6 +34,7 @@ static func generate_from_pool(
 		upgrade_pool_definition.allow_repeat_when_valid_pool_is_small
 	)
 
+## Escolhe opções válidas, evita repetição imediata e usa fallback quando necessário.
 static func _generate_from_valid_options(
 	valid_upgrades: Array[UpgradeDefinition],
 	option_count: int,
@@ -83,6 +96,7 @@ static func _generate_from_valid_options(
 
 	return result
 
+## Verifica se uma lista de resultado já contém determinado upgrade.
 static func _result_has_upgrade(
 	result: Array[UpgradeDefinition],
 	upgrade_id: String

@@ -1,12 +1,26 @@
+## Cena/root principal do jogo.
+##
+## Responsabilidades:
+## - carregar a cena inicial configurada;
+## - instanciar essa cena dentro de CurrentSceneRoot;
+## - registrar carregamento no logger técnico.
+##
+## Importante:
+## Este script não gerencia gameplay diretamente.
+## Ele apenas monta a primeira cena.
 extends Node
 
+## Cena inicial carregada ao iniciar o jogo.
 @export_file("*.tscn") var initial_scene_path: String = "res://gameplay/test/TestGaiaScene.tscn"
 
+## Root onde a cena carregada será instanciada.
 @onready var current_scene_root: Node = $CurrentSceneRoot
 
+## Carrega a cena inicial quando Main entra na árvore.
 func _ready() -> void:
 	_load_initial_scene()
 
+## Carrega e instancia a cena inicial configurada.
 func _load_initial_scene() -> void:
 	if initial_scene_path.strip_edges() == "":
 		push_error("[Main] initial_scene_path vazio.")

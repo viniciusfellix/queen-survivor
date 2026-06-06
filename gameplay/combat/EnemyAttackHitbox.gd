@@ -1,3 +1,15 @@
+## Área ofensiva runtime usada por inimigos.
+##
+## Responsabilidades:
+## - construir shapes de ataque a partir de EnemyAttackDefinition;
+## - detectar PlayerHurtbox;
+## - respeitar delay inicial e intervalo entre hits;
+## - gerar DamagePayload para o receiver;
+## - evitar dano enquanto a run está bloqueada/encerrando;
+## - manter BodyCollision separado do sistema de dano.
+##
+## Exemplo atual:
+## - ataque corporal do Goblin contra a Gaia.
 extends Area2D
 class_name EnemyAttackHitbox
 
@@ -15,17 +27,21 @@ class_name EnemyAttackHitbox
 
 @export var log_successful_hits: bool = true
 
+## Definition e origem usadas por esta instância runtime.
 var runtime_definition: EnemyAttackDefinition = null
 var source_node: Node = null
 var source_id: String = ""
 
+## Shapes geradas em runtime e cooldowns por receiver atingido.
 var runtime_shape_nodes: Array[CollisionShape2D] = []
 var receiver_cooldowns: Dictionary = {}
 
+## Controle de tempo interno e estado de ativação.
 var elapsed_seconds: float = 0.0
 var is_active: bool = false
 var is_configured: bool = false
 
+## Inicializa grupo, modo de monitoramento e filtro de colisão da hitbox inimiga.
 func _ready() -> void:
 	add_to_group("enemy_attack_hitbox")
 
@@ -35,6 +51,7 @@ func _ready() -> void:
 	if configure_collision_filter_on_ready:
 		_configure_collision_filter()
 
+## Atualiza timing, cooldowns por receiver e tenta aplicar dano quando ativo.
 func _physics_process(delta: float) -> void:
 	if not is_configured or not is_active:
 		return
@@ -54,6 +71,7 @@ func _physics_process(delta: float) -> void:
 
 	_try_damage_overlapping_hurtboxes()
 
+## Configura esta hitbox com definition, fonte e id do inimigo.
 func setup(
 	p_attack_definition: EnemyAttackDefinition,
 	p_source_node: Node,
@@ -108,6 +126,7 @@ func setup(
 			}
 		)
 
+## Reconstrói shapes runtime a partir das AttackAreaDefinitions configuradas.
 func rebuild_runtime_shapes() -> void:
 	_clear_runtime_shapes()
 
@@ -135,6 +154,7 @@ func rebuild_runtime_shapes() -> void:
 	if runtime_shape_nodes.is_empty():
 		push_warning("[EnemyAttackHitbox] Nenhuma shape ofensiva válida foi construída.")
 
+## Ativa ou desativa a detecção ofensiva desta hitbox.
 func set_attack_active(should_be_active: bool) -> void:
 	is_active = should_be_active
 
@@ -149,6 +169,7 @@ func set_attack_active(should_be_active: bool) -> void:
 	if not should_be_active:
 		receiver_cooldowns.clear()
 
+## Verifica hurtboxes sobrepostas e aplica dano respeitando cooldown por receiver.
 func _try_damage_overlapping_hurtboxes() -> void:
 	if runtime_definition == null:
 		return
@@ -209,6 +230,7 @@ func _try_damage_overlapping_hurtboxes() -> void:
 				}
 			)
 
+## Reduz os cooldowns individuais de receivers atingidos recentemente.
 func _update_receiver_cooldowns(delta: float) -> void:
 	for receiver_id_variant: Variant in receiver_cooldowns.keys():
 		var remaining_seconds: float = (
@@ -220,6 +242,7 @@ func _update_receiver_cooldowns(delta: float) -> void:
 		else:
 			receiver_cooldowns[receiver_id_variant] = remaining_seconds
 
+## Configura layer/mask conforme números definidos no Inspector.
 func _configure_collision_filter() -> void:
 	collision_layer = 0
 	collision_mask = 0
@@ -227,6 +250,7 @@ func _configure_collision_filter() -> void:
 	set_collision_layer_value(collision_layer_number, true)
 	set_collision_mask_value(target_hurtbox_layer_number, true)
 
+## Remove CollisionShape2D criadas em runtime.
 func _clear_runtime_shapes() -> void:
 	for shape_node: CollisionShape2D in runtime_shape_nodes:
 		if shape_node == null or not is_instance_valid(shape_node):
@@ -237,6 +261,7 @@ func _clear_runtime_shapes() -> void:
 
 	runtime_shape_nodes.clear()
 
+## Converte retorno do receiver em inteiro de dano confirmado.
 func _variant_to_damage(value: Variant) -> int:
 	if value is int:
 		return int(value)
@@ -246,6 +271,7 @@ func _variant_to_damage(value: Variant) -> int:
 
 	return 0
 
+## Retorna dados compactos para debug/auditoria.
 func get_debug_data() -> Dictionary:
 	return {
 		"is_configured": is_configured,

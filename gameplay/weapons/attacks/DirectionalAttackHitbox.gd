@@ -1,45 +1,54 @@
+## Hitbox direcional da arma inicial da Gaia.
+##
+## Responsabilidades:
+## - construir shapes runtime a partir de AttackAreaDefinition;
+## - rotacionar e posicionar o ataque conforme a mira;
+## - detectar EnemyHurtbox;
+## - montar DamagePayload com dano simples ou composto;
+## - aplicar knockback pós-hit quando configurado;
+## - impedir acerto duplicado no mesmo alvo por instância;
+## - respeitar bloqueio da run.
+##
+## Importante:
+## Esta hitbox é ofensiva. Ela não depende da BodyCollision da Gaia.
 extends Area2D
 class_name DirectionalAttackHitbox
 
+## Tempo de vida da instância runtime.
 @export_group("Lifetime")
-
 @export var lifetime_seconds: float = 0.12
 
+## Dano usado quando não há componentes compostos.
 @export_group("Damage Fallback")
-
 @export var raw_damage: int = 5
 @export var damage_type: String = DamageTypes.PHYSICAL
 
-@export_group("Damage Components")
 
+## Componentes de dano usados para ataques híbridos/compostos.
+@export_group("Damage Components")
 @export var damage_components: Array[DamageComponentDefinition] = []
 
+## Efeitos aplicados somente depois de um hit válido.
 @export_group("On Hit Effects")
-
 @export var hit_knockback_enabled: bool = false
-
 @export var hit_knockback_pixels: float = 0.0
-
 @export var hit_knockback_duration_seconds: float = 0.12
 
 @export_group("Attack Areas")
-
 @export var attack_areas: Array[AttackAreaDefinition] = []
-
 @export var attack_area_scale_multiplier: float = 1.0
 
+## Identificação da fonte do ataque para logs, dano e estatísticas.
 @export_group("Source")
-
 @export var source_id: String = "gaia_initial_weapon"
 
+## Layers/masks usados para detectar as hurtboxes corretas.
 @export_group("Collision Filter")
-
 @export_range(1, 32, 1) var attack_collision_layer_number: int = 4
-
 @export_range(1, 32, 1) var target_hurtbox_mask_number: int = 5
 
+## Configurações usadas apenas para visualização e diagnóstico.
 @export_group("Debug")
-
 @export var draw_debug_hitbox: bool = false
 @export var debug_color: Color = Color(0.2, 0.75, 1.0, 0.35)
 @export var debug_outline_color: Color = Color(0.2, 0.9, 1.0, 0.95)
@@ -53,6 +62,7 @@ var already_hit_instance_ids: Dictionary = {}
 
 var is_configured: bool = false
 
+## Configura filtros, conecta sinais e prepara a hitbox runtime.
 func _ready() -> void:
 	monitoring = true
 	monitorable = false
@@ -68,6 +78,7 @@ func _ready() -> void:
 
 	queue_redraw()
 
+## Controla lifetime e processa overlaps enquanto a hitbox está ativa.
 func _physics_process(delta: float) -> void:
 	if not is_configured:
 		return
@@ -83,6 +94,7 @@ func _physics_process(delta: float) -> void:
 	if elapsed_seconds >= lifetime_seconds:
 		queue_free()
 
+## Desenha shapes de debug quando habilitado.
 func _draw() -> void:
 	if not draw_debug_hitbox:
 		return
@@ -130,6 +142,7 @@ func _draw() -> void:
 
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 
+## Recebe dados do ataque e constrói shapes runtime.
 func setup(
 	p_source_node: Node,
 	p_direction: Vector2,
@@ -201,6 +214,7 @@ func setup(
 
 	call_deferred("_process_current_overlaps")
 
+## Configura layer/mask da hitbox ofensiva.
 func _configure_collision_filter() -> void:
 	collision_layer = 0
 	collision_mask = 0
@@ -208,6 +222,7 @@ func _configure_collision_filter() -> void:
 	set_collision_layer_value(attack_collision_layer_number, true)
 	set_collision_mask_value(target_hurtbox_mask_number, true)
 
+## Cria CollisionShape2D a partir das attack_areas e escala atual.
 func _build_runtime_shapes() -> void:
 	_clear_runtime_shapes()
 
@@ -231,6 +246,7 @@ func _build_runtime_shapes() -> void:
 		add_child(shape_node)
 		runtime_shape_nodes.append(shape_node)
 
+## Remove shapes runtime antigas antes de reconstruir ou liberar.
 func _clear_runtime_shapes() -> void:
 	for shape_node: CollisionShape2D in runtime_shape_nodes:
 		if shape_node == null or not is_instance_valid(shape_node):
@@ -241,13 +257,17 @@ func _clear_runtime_shapes() -> void:
 
 	runtime_shape_nodes.clear()
 
+
+## Processa hurtbox que entrou na área ofensiva.
 func _on_area_entered(area: Area2D) -> void:
 	_try_apply_damage_to_hurtbox(area)
 
+## Reprocessa overlaps atuais para garantir detecção contínua.
 func _process_current_overlaps() -> void:
 	for overlapping_area: Area2D in get_overlapping_areas():
 		_try_apply_damage_to_hurtbox(overlapping_area)
 
+## Valida EnemyHurtbox/receiver e aplica DamagePayload.
 func _try_apply_damage_to_hurtbox(area: Area2D) -> void:
 	if not is_configured:
 		return
@@ -324,6 +344,7 @@ func _try_apply_damage_to_hurtbox(area: Area2D) -> void:
 		}
 	)
 
+## Solicita knockback pós-hit quando configurado e dano válido foi confirmado.
 func _try_apply_hit_knockback_to_receiver(damage_receiver: Node) -> bool:
 	if not hit_knockback_enabled:
 		return false
@@ -350,6 +371,7 @@ func _try_apply_hit_knockback_to_receiver(damage_receiver: Node) -> bool:
 
 	return false
 
+## Converte retorno genérico de receive_damage em valor inteiro seguro.
 func _variant_to_damage(value: Variant) -> int:
 	if value is int:
 		return int(value)
@@ -359,6 +381,7 @@ func _variant_to_damage(value: Variant) -> int:
 
 	return 0
 
+## Gera resumo dos componentes de dano para logs.
 func _get_component_debug_string() -> String:
 	if damage_components.is_empty():
 		return "%s:%s" % [damage_type, str(raw_damage)]
@@ -376,6 +399,7 @@ func _get_component_debug_string() -> String:
 
 	return ", ".join(parts)
 
+## Gera resumo das áreas ofensivas para logs.
 func _get_attack_area_debug_string() -> String:
 	var parts: Array[String] = []
 

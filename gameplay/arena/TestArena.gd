@@ -1,3 +1,13 @@
+## Arena técnica usada para testes do Módulo 1.
+##
+## Responsabilidades:
+## - desenhar uma grade visual opcional para referência de escala;
+## - desenhar marcador opcional da origem do mundo;
+## - ajudar testes de movimento, câmera, spawn e alcance de ataques.
+##
+## Importante:
+## Esta arena não implementa geração procedural nem regra de gameplay.
+## Ela é uma ferramenta visual simples para validar o protótipo.
 extends Node2D
 
 @export var draw_debug_grid: bool = true
@@ -10,6 +20,7 @@ extends Node2D
 
 @export var origin_marker_radius: float = 10.0
 
+## Valida parâmetros de debug e agenda redesenho da arena.
 func _ready() -> void:
 	if draw_debug_grid and grid_size <= 0:
 		push_warning("[TestArena] grid_size precisa ser maior que zero para desenhar a grade.")
@@ -22,6 +33,7 @@ func _ready() -> void:
 
 	queue_redraw()
 
+## Desenha os elementos visuais opcionais da arena técnica.
 func _draw() -> void:
 	if draw_debug_grid:
 		_draw_grid()
@@ -29,6 +41,7 @@ func _draw() -> void:
 	if draw_origin_marker:
 		_draw_origin_marker()
 
+## Desenha a grade de referência ao redor da origem do mundo.
 func _draw_grid() -> void:
 	if grid_size <= 0 or grid_extent <= 0:
 		return
@@ -82,6 +95,7 @@ func _draw_grid() -> void:
 		3.0
 	)
 
+## Desenha o marcador visual da origem do mundo.
 func _draw_origin_marker() -> void:
 	if origin_marker_radius <= 0.0:
 		return

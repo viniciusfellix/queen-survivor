@@ -1,6 +1,18 @@
+## Serviço estático responsável por calcular dano final.
+##
+## Responsabilidades:
+## - aplicar defesa no dano recebido pelo player;
+## - calcular dano causado a inimigos;
+## - processar componentes de dano separadamente;
+## - aplicar fraquezas e resistências configuradas no EnemyDefinition;
+## - gerar breakdown detalhado para logs e auditoria.
+##
+## Importante:
+## Este arquivo concentra regra matemática de dano para evitar duplicação.
 extends RefCounted
 class_name DamageResolver
 
+## Calcula dano recebido pelo player após defesa percentual e dano mínimo.
 static func calculate_received_damage(
 	raw_damage: int,
 	defense_percent: float,
@@ -18,6 +30,7 @@ static func calculate_received_damage(
 
 	return max(1, final_damage)
 
+## Calcula dano total em inimigo, usando componentes ou fallback simples.
 static func calculate_enemy_damage(payload: DamagePayload, enemy_definition: EnemyDefinition) -> Dictionary:
 	var result: Dictionary = {
 		"raw_total": 0,
@@ -58,6 +71,7 @@ static func calculate_enemy_damage(payload: DamagePayload, enemy_definition: Ene
 
 	return result
 
+## Calcula um único componente de dano contra fraquezas/resistências do inimigo.
 static func _calculate_component_damage(component: DamageComponentDefinition, enemy_definition: EnemyDefinition) -> Dictionary:
 	var raw_damage: int = component.amount
 	var final_damage_float: float = float(raw_damage)

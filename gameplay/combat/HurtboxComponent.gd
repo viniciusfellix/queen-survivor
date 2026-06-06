@@ -1,3 +1,13 @@
+## Componente de hurtbox reutilizável.
+##
+## Responsabilidades:
+## - construir CollisionShape2D runtime a partir de HurtboxAreaDefinition;
+## - expor uma área vulnerável detectável por hitboxes;
+## - resolver o node que receberá o dano;
+## - permitir ativar/desativar a hurtbox durante morte, encerramento ou estados especiais.
+##
+## Importante:
+## Hurtbox recebe detecção; quem processa dano é o receiver.
 extends Area2D
 class_name HurtboxComponent
 
@@ -17,10 +27,12 @@ class_name HurtboxComponent
 
 @export var log_configuration: bool = false
 
+## Receiver real que receberá chamadas de dano.
 var damage_receiver: Node = null
 var runtime_shape_nodes: Array[CollisionShape2D] = []
 var is_active: bool = true
 
+## Inicializa grupo, monitoramento e shapes iniciais da hurtbox.
 func _ready() -> void:
 	add_to_group("hurtbox")
 
@@ -35,6 +47,7 @@ func _ready() -> void:
 	if not hurtbox_areas.is_empty():
 		rebuild_runtime_shapes()
 
+## Configura áreas vulneráveis e receiver de dano em runtime.
 func setup(
 	p_hurtbox_areas: Array[HurtboxAreaDefinition],
 	p_damage_receiver: Node = null
@@ -75,6 +88,7 @@ func setup(
 			}
 		)
 
+## Reconstrói CollisionShape2D runtime a partir de HurtboxAreaDefinition.
 func rebuild_runtime_shapes() -> void:
 	_clear_runtime_shapes()
 
@@ -99,9 +113,11 @@ func rebuild_runtime_shapes() -> void:
 	if runtime_shape_nodes.is_empty() and log_configuration:
 		push_warning("[HurtboxComponent] Nenhuma shape válida foi construída.")
 
+## Retorna o node que deve receber o dano detectado nesta hurtbox.
 func get_damage_receiver() -> Node:
 	return damage_receiver
 
+## Verifica se a hurtbox e o receiver estão aptos a receber dano.
 func can_receive_damage() -> bool:
 	return (
 		is_active
@@ -110,6 +126,7 @@ func can_receive_damage() -> bool:
 		and damage_receiver.has_method("receive_damage")
 	)
 
+## Ativa/desativa a hurtbox sem remover suas shapes.
 func set_hurtbox_active(should_be_active: bool) -> void:
 	is_active = should_be_active
 	set_deferred("monitorable", should_be_active)
@@ -120,12 +137,14 @@ func set_hurtbox_active(should_be_active: bool) -> void:
 
 		shape_node.set_deferred("disabled", not should_be_active)
 
+## Configura layer da hurtbox conforme collision_layer_number.
 func _configure_collision_filter() -> void:
 	collision_layer = 0
 	collision_mask = 0
 
 	set_collision_layer_value(collision_layer_number, true)
 
+## Resolve o receiver pelo NodePath configurado.
 func _resolve_damage_receiver() -> Node:
 	if damage_receiver_path != NodePath():
 		var configured_receiver: Node = get_node_or_null(damage_receiver_path)
@@ -135,6 +154,7 @@ func _resolve_damage_receiver() -> Node:
 
 	return get_parent()
 
+## Remove shapes runtime geradas anteriormente.
 func _clear_runtime_shapes() -> void:
 	for shape_node: CollisionShape2D in runtime_shape_nodes:
 		if shape_node == null or not is_instance_valid(shape_node):
@@ -145,12 +165,14 @@ func _clear_runtime_shapes() -> void:
 
 	runtime_shape_nodes.clear()
 
+## Retorna nome amigável do receiver para logs.
 func _get_receiver_debug_name() -> String:
 	if damage_receiver == null:
 		return "none"
 
 	return damage_receiver.name
 
+## Retorna resumo textual das áreas vulneráveis configuradas.
 func _get_areas_debug_summary() -> String:
 	var summaries: Array[String] = []
 

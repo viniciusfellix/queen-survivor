@@ -1,5 +1,18 @@
+## Painel de resultado final da run.
+##
+## Responsabilidades:
+## - exibir vitória ou derrota;
+## - mostrar resumo da run;
+## - informar se o save foi persistido com sucesso;
+## - permitir reiniciar a cena atual;
+## - reagir aos eventos globais de fim da run e persistência.
+##
+## Importante:
+## Este painel não calcula recompensa.
+## Ele apenas exibe dados já calculados em RunResultPayload.
 extends CanvasLayer
 
+## Referências dos nodes principais.
 @onready var panel: Panel = $Panel
 @onready var title_label: Label = $Panel/MarginContainer/VBoxContainer/TitleLabel
 @onready var result_type_label: Label = $Panel/MarginContainer/VBoxContainer/ResultTypeLabel
@@ -8,12 +21,16 @@ extends CanvasLayer
 @onready var hint_label: Label = $Panel/MarginContainer/VBoxContainer/HintLabel
 @onready var restart_button: Button = $Panel/MarginContainer/VBoxContainer/RestartButton
 
+## Resultado mais recente recebido.
 var latest_result_payload: RunResultPayload = null
 
+## Payload que já teve tentativa de persistência confirmada.
 var persisted_result_payload: RunResultPayload = null
 
+## Resultado da tentativa de persistência do save.
 var persisted_result_succeeded: bool = false
 
+## Inicializa painel oculto e conecta eventos.
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	visible = false
@@ -30,6 +47,7 @@ func _ready() -> void:
 	if not GameEvents.run_result_persisted.is_connected(_on_run_result_persisted):
 		GameEvents.run_result_persisted.connect(_on_run_result_persisted)
 
+## Abre painel quando a run termina.
 func _on_run_finished(result_payload: RunResultPayload) -> void:
 	if result_payload == null:
 		return
@@ -65,6 +83,7 @@ func _on_run_finished(result_payload: RunResultPayload) -> void:
 		}
 	)
 
+## Recebe confirmação de persistência do resultado no save.
 func _on_run_result_persisted(
 	result_payload: RunResultPayload,
 	_save_data: SaveData,
@@ -76,6 +95,7 @@ func _on_run_result_persisted(
 	if latest_result_payload == result_payload:
 		_update_save_status_label()
 
+## Atualiza texto de status do save.
 func _update_save_status_label() -> void:
 	if save_status_label == null:
 		return
@@ -93,6 +113,7 @@ func _update_save_status_label() -> void:
 	else:
 		save_status_label.text = LocalizationManager.get_text("ui.result.save_failed")
 
+## Reinicia a cena atual.
 func _on_restart_button_pressed() -> void:
 	DeveloperAuditLogger.log_ui(
 		"Reinício solicitado pelo jogador.",
@@ -102,6 +123,7 @@ func _on_restart_button_pressed() -> void:
 	get_tree().paused = false
 	get_tree().reload_current_scene()
 
+## Monta resumo textual da run.
 func _build_summary_text(payload: RunResultPayload) -> String:
 	var lines: Array[String] = []
 
@@ -174,6 +196,7 @@ func _build_summary_text(payload: RunResultPayload) -> String:
 
 	return "\n".join(lines)
 
+## Formata segundos como MM:SS.
 func _format_seconds(seconds: float) -> String:
 	var total_seconds: int = int(floor(seconds))
 	var minutes: int = int(floor(float(total_seconds) / 60.0))

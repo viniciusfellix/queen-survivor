@@ -1,25 +1,45 @@
+## Camada de feedback flutuante em coordenadas de tela.
+##
+## Responsabilidades:
+## - escutar dano recebido pelo player;
+## - converter posição de mundo para tela;
+## - instanciar FloatingCombatText;
+## - exibir números de dano próximos à Gaia.
+##
+## Observação:
+## O arquivo foi escrito como "WordlFeedbackLayer.gd" na mensagem.
+## Se esse typo existir no projeto, vale renomear para "WorldFeedbackLayer.gd"
+## em uma etapa segura, revisando referências e UIDs.
 extends CanvasLayer
 
 @export_group("Scene")
 
+## Cena usada para criar textos flutuantes.
 @export var floating_combat_text_scene: PackedScene
 
 @export_group("Player Damage")
 
+## Grupo usado para localizar a Gaia/player.
 @export var player_group_name: String = "player"
 
+## Offset em mundo aplicado acima do player para posicionar o texto.
 @export var player_damage_world_offset: Vector2 = Vector2(0.0, -60.0)
 
+## Cor usada para dano recebido.
 @export var damage_color: Color = Color(1.0, 0.04, 0.04, 1.0)
 
 @export_group("Debug")
 
+## Habilita logs de debug ao criar feedback.
 @export var debug_feedback: bool = false
 
+## Exibe texto de teste ao iniciar.
 @export var show_test_text_on_ready: bool = false
 
+## Root onde os textos são adicionados.
 @onready var feedback_root: Control = $FeedbackRoot
 
+## Inicializa camada e conecta evento de dano do player.
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	layer = 18
@@ -44,6 +64,7 @@ func _ready() -> void:
 	if show_test_text_on_ready:
 		call_deferred("_spawn_debug_test_text")
 
+## Configura FeedbackRoot para ocupar a tela inteira e ignorar mouse.
 func _configure_feedback_root() -> void:
 	if feedback_root == null:
 		return
@@ -53,6 +74,7 @@ func _configure_feedback_root() -> void:
 	feedback_root.clip_contents = false
 	feedback_root.process_mode = Node.PROCESS_MODE_ALWAYS
 
+## Evento de dano recebido pelo player.
 func _on_player_damaged(
 	_raw_damage: int,
 	final_damage: int,
@@ -74,6 +96,7 @@ func _on_player_damaged(
 
 	spawn_floating_text("-%s" % str(final_damage), screen_position, damage_color)
 
+## Instancia um texto flutuante na posição de tela informada.
 func spawn_floating_text(display_text: String, screen_position: Vector2, color: Color) -> void:
 	if feedback_root == null:
 		push_warning("[WorldFeedbackLayer] Floating damage cancelado: FeedbackRoot ausente.")
@@ -115,6 +138,7 @@ func spawn_floating_text(display_text: String, screen_position: Vector2, color: 
 			}
 		)
 
+## Cria texto de teste no centro da tela.
 func _spawn_debug_test_text() -> void:
 	var center_position: Vector2 = get_viewport().get_visible_rect().size * 0.5
 
@@ -124,10 +148,12 @@ func _spawn_debug_test_text() -> void:
 		damage_color
 	)
 
+## Converte posição de mundo para posição de tela/canvas.
 func _world_to_screen_position(world_position: Vector2) -> Vector2:
 	var canvas_transform: Transform2D = get_viewport().get_canvas_transform()
 	return canvas_transform * world_position
 
+## Retorna o primeiro Node2D encontrado no grupo do player.
 func _get_player() -> Node2D:
 	var players: Array[Node] = get_tree().get_nodes_in_group(player_group_name)
 

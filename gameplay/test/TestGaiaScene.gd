@@ -1,29 +1,31 @@
+## Cena técnica integrada usada para testar Gaia no Módulo 1.
+##
+## Responsabilidades:
+## - validar a estrutura esperada da cena;
+## - instanciar a Gaia no ponto de spawn;
+## - configurar câmera;
+## - configurar spawners;
+## - expor roots e controllers para testes/debug.
+##
+## Esta cena é o laboratório jogável atual do Módulo 1.
 extends Node2D
 
 @export_file("*.tscn") var player_scene_path: String = "res://gameplay/player/PlayerGaia.tscn"
 
 @onready var arena_root: Node2D = $ArenaRoot
-
 @onready var runtime_root: Node2D = $RuntimeRoot
-
 @onready var player_root: Node2D = $RuntimeRoot/PlayerRoot
-
 @onready var enemy_root: Node2D = $RuntimeRoot/EnemyRoot
-
 @onready var drop_root: Node2D = $RuntimeRoot/DropRoot
-
 @onready var spawner_root: Node2D = $RuntimeRoot/SpawnerRoot
-
 @onready var run_controller: Node = $RuntimeRoot/RunController
-
 @onready var drop_controller: Node = $RuntimeRoot/DropController
-
 @onready var player_spawn_point: Marker2D = $PlayerSpawnPoint
-
 @onready var camera_2d: Camera2D = $Camera2D
 
 var player_instance: Node2D = null
 
+## Valida estrutura, instancia player, configura câmera e spawners.
 func _ready() -> void:
 	_validate_scene_structure()
 	_spawn_player()
@@ -35,18 +37,23 @@ func _ready() -> void:
 		"TestGaiaScene"
 	)
 
+## Retorna instância atual da Gaia criada pela cena.
 func get_player_instance() -> Node2D:
 	return player_instance
 
+## Retorna root de inimigos da cena.
 func get_enemy_root() -> Node2D:
 	return enemy_root
 
+## Retorna root de drops/moedas da cena.
 func get_drop_root() -> Node2D:
 	return drop_root
 
+## Retorna RunController da cena.
 func get_run_controller() -> Node:
 	return run_controller
 
+## Instancia PlayerGaia no ponto de spawn configurado.
 func _spawn_player() -> void:
 	var packed_player: PackedScene = load(player_scene_path) as PackedScene
 
@@ -72,6 +79,7 @@ func _spawn_player() -> void:
 		}
 	)
 
+## Configura FollowCamera para seguir a Gaia instanciada.
 func _setup_camera_target() -> void:
 	if camera_2d == null:
 		push_warning("[TestGaiaScene] Camera2D não encontrada.")
@@ -88,6 +96,7 @@ func _setup_camera_target() -> void:
 	else:
 		camera_2d.global_position = player_instance.global_position
 
+## Entrega player e EnemyRoot aos spawners da cena.
 func _configure_spawners() -> void:
 	if spawner_root == null:
 		push_error("[TestGaiaScene] SpawnerRoot não encontrado.")
@@ -118,6 +127,7 @@ func _configure_spawners() -> void:
 		}
 	)
 
+## Verifica nodes obrigatórios da cena técnica.
 func _validate_scene_structure() -> void:
 	if arena_root == null:
 		push_warning("[TestGaiaScene] ArenaRoot não encontrado.")

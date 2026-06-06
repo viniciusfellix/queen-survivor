@@ -1,3 +1,18 @@
+## Controller principal da Gaia/player durante a run.
+##
+## Responsabilidades:
+## - inicializar a Queen a partir de QueenDefinition;
+## - ler InputManager e aplicar movimento;
+## - controlar dash configurável por QueenDashDefinition;
+## - configurar PlayerHurtbox;
+## - receber dano via arquitetura Hitbox/Hurtbox;
+## - controlar invulnerabilidade, morte e feedback visual;
+## - aplicar upgrades de player e encaminhar upgrades de arma;
+## - fornecer dados para DebugOverlay e outros sistemas técnicos.
+##
+## Importante:
+## Este script executa regras de gameplay. A camada Spine/visual apenas representa
+## os estados decididos aqui.
 extends CharacterBody2D
 
 @export var queen_definition: QueenDefinition
@@ -7,6 +22,8 @@ extends CharacterBody2D
 @export var debug_aim_line_length: float = 96.0
 @export var base_defense_percent: float = 0.0
 
+
+## Configurações runtime do dash da Gaia/player.
 @export_group("Dash")
 @export var dash_impact_area_path: NodePath
 @export var dash_disable_enemy_body_collision: bool = true
@@ -23,6 +40,8 @@ extends CharacterBody2D
 	_resolve_dash_impact_area()
 )
 
+
+## Feedback visual e invulnerabilidade após dano recebido.
 @export_group("Damage Feedback")
 @export var enable_hit_invincibility: bool = true
 @export var invincibility_duration_after_hit: float = 0.5
@@ -41,6 +60,9 @@ var dash_distance_multiplier: float = 1.0
 var dash_duration_multiplier: float = 1.0
 var dash_impact_area_scale_multiplier: float = 1.0
 
+
+## Inicializa runtime da Gaia, aplica QueenDefinition, configura hurtbox/dash e resolve referências
+## visuais.
 func _ready() -> void:
 	add_to_group("player")
 
@@ -65,6 +87,8 @@ func _ready() -> void:
 	_update_visual_state()
 	queue_redraw()
 
+
+## Atualiza input, dash, invulnerabilidade, movimento físico e estado visual a cada frame físico.
 func _physics_process(_delta: float) -> void:
 	_update_invincibility(_delta)
 	_update_dash_cooldown(_delta)
@@ -106,6 +130,8 @@ func _physics_process(_delta: float) -> void:
 	_update_visual_state()
 	queue_redraw()
 
+
+## Desenha linha técnica de mira quando o debug visual está habilitado.
 func _draw() -> void:
 	if not draw_debug_aim:
 		return
@@ -124,6 +150,9 @@ func _draw() -> void:
 	draw_circle(Vector2.ZERO, 5.0, Color.WHITE)
 	draw_circle(end_position, 5.0, Color.ORANGE)
 
+
+## Recebe DamagePayload vindo da PlayerHurtbox e aplica defesa, invulnerabilidade, feedback e
+## morte.
 func receive_damage(payload: DamagePayload) -> int:
 	if _should_ignore_damage_during_dash():
 		return 0
@@ -208,6 +237,8 @@ func receive_damage(payload: DamagePayload) -> int:
 
 	return final_damage
 
+
+## Verifica se o dano deve ser ignorado por causa da invulnerabilidade opcional do dash.
 func _should_ignore_damage_during_dash() -> bool:
 	if runtime_state == null:
 		return false
@@ -220,6 +251,8 @@ func _should_ignore_damage_during_dash() -> bool:
 
 	return dash_definition.ignore_damage_while_dashing
 
+
+## Atualiza o cooldown próprio do dash.
 func _update_dash_cooldown(delta: float) -> void:
 	if dash_cooldown_timer <= 0.0:
 		dash_cooldown_timer = 0.0
@@ -227,6 +260,8 @@ func _update_dash_cooldown(delta: float) -> void:
 
 	dash_cooldown_timer = max(0.0, dash_cooldown_timer - delta)
 
+
+## Decide se o dash pode iniciar neste frame com base em input, cooldown, vida e configuração.
 func _should_start_dash() -> bool:
 	if dash_definition == null:
 		return false
@@ -245,6 +280,9 @@ func _should_start_dash() -> bool:
 
 	return InputManager.was_dash_just_pressed()
 
+
+## Inicializa estado do dash, velocidade ativa, animação, impacto, colisão temporária e regras de
+## arma.
 func _start_dash(move_direction: Vector2, aim_direction: Vector2) -> void:
 	if dash_definition == null:
 		return
@@ -280,6 +318,8 @@ func _start_dash(move_direction: Vector2, aim_direction: Vector2) -> void:
 
 	_update_visual_state()
 	
+
+## Atualiza movimento e controle lateral enquanto o dash está ativo.
 func _update_active_dash(
 	delta: float,
 	move_direction: Vector2,
@@ -306,6 +346,8 @@ func _update_active_dash(
 	if dash_timer <= 0.0:
 		_finish_dash(move_direction, aim_direction)
 		
+
+## Finaliza o dash normalmente e restaura colisão/impacto/regras temporárias.
 func _finish_dash(move_direction: Vector2, aim_direction: Vector2) -> void:
 	is_dash_active = false
 	dash_timer = 0.0
@@ -320,6 +362,8 @@ func _finish_dash(move_direction: Vector2, aim_direction: Vector2) -> void:
 
 	runtime_state.finish_dash(move_direction, aim_direction)
 	
+
+## Cancela dash ativo por interrupção ou encerramento da run, restaurando estado seguro.
 func _cancel_active_dash() -> void:
 	is_dash_active = false
 	dash_timer = 0.0
@@ -337,6 +381,8 @@ func _cancel_active_dash() -> void:
 		runtime_state.dash_direction = Vector2.ZERO
 		runtime_state.dash_animation_time_scale = 1.0
 
+
+## Resolve a direção usada pelo dash com fallback para movimento, mira ou direção padrão.
 func _resolve_dash_direction(
 	move_direction: Vector2,
 	aim_direction: Vector2
@@ -355,6 +401,8 @@ func _resolve_dash_direction(
 
 	return Vector2.RIGHT
 
+
+## Configura PlayerHurtbox a partir das hurtbox_areas da QueenDefinition.
 func _configure_player_hurtbox() -> void:
 	if player_hurtbox == null:
 		player_hurtbox = get_node_or_null("PlayerHurtbox") as HurtboxComponent
@@ -377,6 +425,8 @@ func _configure_player_hurtbox() -> void:
 		self
 	)
 
+
+## Envia estado, direção e dados de dash para o controller visual da Gaia.
 func _update_visual_state() -> void:
 	if visual_controller == null:
 		visual_controller = _resolve_visual_controller()
@@ -387,6 +437,8 @@ func _update_visual_state() -> void:
 	if visual_controller.has_method("apply_runtime_state"):
 		visual_controller.call("apply_runtime_state", runtime_state)
 
+
+## Localiza o controller visual configurado ou disponível na hierarquia.
 func _resolve_visual_controller() -> Node:
 	if visual_controller_path != NodePath():
 		var configured_visual: Node = get_node_or_null(visual_controller_path)
@@ -409,6 +461,8 @@ func _resolve_visual_controller() -> Node:
 
 	return null
 
+
+## Localiza a área de impacto do dash usada pelo PlayerController.
 func _resolve_dash_impact_area() -> PlayerDashImpactArea:
 	if dash_impact_area_path != NodePath():
 		var configured_area: Node = get_node_or_null(dash_impact_area_path)
@@ -423,6 +477,8 @@ func _resolve_dash_impact_area() -> PlayerDashImpactArea:
 
 	return _find_first_dash_impact_area(self)
 
+
+## Busca recursivamente a primeira PlayerDashImpactArea abaixo de um node.
 func _find_first_dash_impact_area(root: Node) -> PlayerDashImpactArea:
 	if root == null:
 		return null
@@ -438,6 +494,8 @@ func _find_first_dash_impact_area(root: Node) -> PlayerDashImpactArea:
 
 	return null
 
+
+## Busca recursivamente um node que possua determinado método.
 func _find_node_with_method(root: Node, method_name: String) -> Node:
 	if root == null:
 		return null
@@ -453,6 +511,8 @@ func _find_node_with_method(root: Node, method_name: String) -> Node:
 
 	return null
 
+
+## Aplica upgrades de player ou encaminha upgrades de arma para os controllers adequados.
 func apply_run_upgrade(upgrade: UpgradeDefinition) -> bool:
 	if upgrade == null:
 		return false
@@ -633,6 +693,8 @@ func apply_run_upgrade(upgrade: UpgradeDefinition) -> bool:
 
 	return true
 
+
+## Encaminha upgrade para armas ativas quando o tipo pertence ao grupo de arma.
 func _forward_upgrade_to_weapons(upgrade: UpgradeDefinition) -> bool:
 	var weapon_nodes: Array[Node] = get_tree().get_nodes_in_group("player_weapon")
 	var applied_count: int = 0
@@ -652,9 +714,13 @@ func _forward_upgrade_to_weapons(upgrade: UpgradeDefinition) -> bool:
 
 	return true
 
+
+## Expõe o PlayerRuntimeState atual para outros sistemas.
 func get_runtime_state() -> PlayerRuntimeState:
 	return runtime_state
 
+
+## Retorna snapshot técnico do estado da Gaia para DebugOverlay/ferramentas.
 func get_debug_data() -> Dictionary:
 	if runtime_state == null:
 		return {
@@ -692,6 +758,8 @@ func get_debug_data() -> Dictionary:
 		"coin_collect_radius_multiplier": runtime_state.coin_collect_radius_multiplier
 	}
 
+
+## Retorna modificadores de magnetismo/coleta usados por moedas.
 func get_drop_collection_modifiers() -> Dictionary:
 	if runtime_state == null:
 		return {
@@ -704,6 +772,8 @@ func get_drop_collection_modifiers() -> Dictionary:
 		"coin_collect_radius_multiplier": runtime_state.coin_collect_radius_multiplier
 	}
 
+
+## Atualiza temporizador de invulnerabilidade pós-dano.
 func _update_invincibility(delta: float) -> void:
 	if runtime_state == null:
 		return
@@ -717,6 +787,8 @@ func _update_invincibility(delta: float) -> void:
 		runtime_state.invincibility_timer = 0.0
 		runtime_state.is_invincible = false
 
+
+## Inicia invulnerabilidade temporária após dano recebido.
 func _start_hit_invincibility() -> void:
 	if runtime_state == null:
 		return
@@ -732,6 +804,8 @@ func _start_hit_invincibility() -> void:
 	runtime_state.is_invincible = true
 	runtime_state.invincibility_timer = invincibility_duration_after_hit
 
+
+## Dispara feedback visual de dano na Gaia quando disponível.
 func _play_damage_feedback() -> void:
 	if not play_visual_damage_flash:
 		return
@@ -742,6 +816,8 @@ func _play_damage_feedback() -> void:
 	if visual_controller.has_method("play_damage_flash"):
 		visual_controller.call("play_damage_flash")
 
+
+## Calcula contribuição lateral permitida durante dash.
 func _get_dash_lateral_control_velocity(move_direction: Vector2) -> Vector2:
 	if move_direction.length() <= 0.001:
 		return Vector2.ZERO
@@ -770,6 +846,8 @@ func _get_dash_lateral_control_velocity(move_direction: Vector2) -> Vector2:
 
 	return dash_lateral * lateral_input_amount * lateral_speed
 
+
+## Copia QueenDashDefinition para o estado runtime do player.
 func _apply_dash_definition() -> void:
 	dash_definition = null
 	dash_impact_area_scale_multiplier = 1.0
@@ -790,6 +868,8 @@ func _apply_dash_definition() -> void:
 		dash_definition.impact_area_scale_multiplier
 	)
 
+
+## Configura PlayerDashImpactArea com os dados atuais do dash.
 func _configure_dash_impact_area() -> void:
 	if dash_impact_area == null:
 		dash_impact_area = _resolve_dash_impact_area()
@@ -808,6 +888,8 @@ func _configure_dash_impact_area() -> void:
 		dash_impact_area_scale_multiplier
 	)
 
+
+## Calcula distância efetiva do dash considerando multiplicadores de upgrade.
 func _get_effective_dash_distance_pixels() -> float:
 	if dash_definition == null:
 		return 0.0
@@ -817,6 +899,8 @@ func _get_effective_dash_distance_pixels() -> float:
 		dash_definition.dash_distance_pixels * dash_distance_multiplier
 	)
 
+
+## Calcula duração efetiva do dash considerando multiplicadores de velocidade/duração.
 func _get_effective_dash_duration_seconds() -> float:
 	if dash_definition == null:
 		return 0.01
@@ -826,6 +910,8 @@ func _get_effective_dash_duration_seconds() -> float:
 		dash_definition.dash_duration_seconds * dash_duration_multiplier
 	)
 
+
+## Calcula time scale da animação de dash para caber na duração configurada.
 func _get_dash_animation_time_scale(effective_dash_duration: float) -> float:
 	if dash_definition == null:
 		return 1.0
@@ -841,6 +927,8 @@ func _get_dash_animation_time_scale(effective_dash_duration: float) -> float:
 		dash_definition.dash_animation_source_duration_seconds / max(0.01, effective_dash_duration)
 	)
 
+
+## Ativa/restaura máscara de colisão para permitir atravessar EnemyBody durante dash.
 func _apply_dash_collision_mode(should_enable_dash_mode: bool) -> void:
 	if not dash_disable_enemy_body_collision:
 		return
@@ -857,10 +945,14 @@ func _apply_dash_collision_mode(should_enable_dash_mode: bool) -> void:
 		collision_mask = collision_mask_before_dash
 		has_collision_mask_before_dash = false
 
+
+## Hook de upgrade: aumenta distância do dash em percentual.
 func apply_dash_distance_percent(percent: float) -> void:
 	var multiplier: float = 1.0 + max(0.0, percent) * 0.01
 	dash_distance_multiplier *= multiplier
 
+
+## Hook de upgrade: altera velocidade/duração efetiva do dash em percentual.
 func apply_dash_speed_percent(percent: float) -> void:
 	var multiplier: float = 1.0 + max(0.0, percent) * 0.01
 
@@ -869,6 +961,8 @@ func apply_dash_speed_percent(percent: float) -> void:
 
 	dash_duration_multiplier /= multiplier
 
+
+## Hook de upgrade: escala área de impacto do dash em percentual.
 func apply_dash_impact_area_scale_percent(percent: float) -> void:
 	var multiplier: float = 1.0 + max(0.0, percent) * 0.01
 	dash_impact_area_scale_multiplier *= multiplier
@@ -881,24 +975,32 @@ func apply_dash_impact_area_scale_percent(percent: float) -> void:
 			dash_impact_area_scale_multiplier
 		)
 
+
+## Consulta se armas podem atacar durante dash.
 func can_weapon_attack_while_dashing() -> bool:
 	if dash_definition == null:
 		return false
 
 	return dash_definition.allow_weapon_attacks_while_dashing
 
+
+## Consulta se cooldown da arma deve pausar durante dash.
 func should_pause_weapon_cooldown_while_dashing() -> bool:
 	if dash_definition == null:
 		return true
 
 	return dash_definition.pause_weapon_cooldown_while_dashing
 
+
+## Consulta se cooldown da arma deve resetar ao iniciar dash.
 func should_reset_weapon_cooldown_when_dash_starts() -> bool:
 	if dash_definition == null:
 		return false
 
 	return dash_definition.reset_weapon_cooldown_when_dash_starts
 
+
+## Consulta se cooldown da arma deve resetar ao finalizar dash.
 func should_reset_weapon_cooldown_when_dash_ends() -> bool:
 	if dash_definition == null:
 		return true

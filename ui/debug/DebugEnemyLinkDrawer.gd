@@ -1,33 +1,56 @@
+## Ferramenta visual de debug que desenha linhas entre Gaia e inimigos.
+##
+## Responsabilidades:
+## - localizar o player por grupo;
+## - localizar inimigos por grupo;
+## - desenhar linhas em tela entre player e inimigos vivos;
+## - exibir marcadores opcionais;
+## - funcionar apenas quando habilitada pelo DebugOverlay/Inspector.
+##
+## Importante:
+## Este script é somente visual/debug.
+## Ele não altera IA, movimento, combate, hitbox, hurtbox ou spawn.
 extends Node2D
 class_name DebugEnemyLinkDrawer
 
+## Define se as linhas estão habilitadas.
 var links_enabled: bool = false
 
+## Grupo usado para localizar o player/Gaia.
 var player_group_name: String = "player"
 
+## Grupo usado para localizar inimigos.
 var enemy_group_name: String = "enemy"
 
+## Cor das linhas e marcadores.
 var link_color: Color = Color(1.0, 0.18, 0.18, 0.70)
 
+## Espessura da linha.
 var link_width: float = 2.0
 
+## Define se desenha círculos nos pontos de player/inimigos.
 var show_markers: bool = false
 
+## Raio do marcador do player.
 var player_marker_radius: float = 5.0
 
+## Raio do marcador dos inimigos.
 var enemy_marker_radius: float = 4.0
 
+## Inicializa a ferramenta desligada.
 func _ready() -> void:
 	z_index = -10
 	set_process(false)
 	visible = false
 
+## Atualiza desenho enquanto a ferramenta estiver ativa.
 func _process(_delta: float) -> void:
 	if not links_enabled:
 		return
 
 	queue_redraw()
 
+## Configura a ferramenta a partir de outro script, normalmente DebugOverlay.
 func configure(
 	should_enable: bool,
 	p_player_group_name: String,
@@ -55,6 +78,7 @@ func configure(
 	if was_enabled != links_enabled:
 		queue_redraw()
 
+## Desenha linhas do player até os inimigos ativos.
 func _draw() -> void:
 	if not links_enabled:
 		return
@@ -95,6 +119,10 @@ func _draw() -> void:
 		if show_markers and enemy_marker_radius > 0.0:
 			draw_circle(enemy_screen_position, enemy_marker_radius, link_color)
 
+## Decide se um inimigo deve ser desenhado.
+##
+## Se o inimigo expõe get_debug_data() com is_alive=false, ele é ignorado.
+## Caso não exponha esse método, assume que pode ser desenhado.
 func _should_draw_enemy(enemy: Node) -> bool:
 	if enemy == null or not is_instance_valid(enemy):
 		return false
@@ -114,11 +142,15 @@ func _should_draw_enemy(enemy: Node) -> bool:
 
 	return bool(debug_data.get("is_alive", true))
 
+## Converte posição de mundo em posição de tela/canvas atual.
+##
+## Necessário porque o desenho do Node2D acontece em coordenadas de canvas.
 func _world_to_screen_position(world_position: Vector2) -> Vector2:
 	var canvas_transform: Transform2D = get_viewport().get_canvas_transform()
 
 	return canvas_transform * world_position
 
+## Retorna o primeiro Node2D encontrado em determinado grupo.
 func _get_first_node2d_in_group(group_name: String) -> Node2D:
 	if group_name.strip_edges() == "":
 		return null
