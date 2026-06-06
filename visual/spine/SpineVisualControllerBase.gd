@@ -1,22 +1,42 @@
+## Controller visual base para personagens/entidades com Spine.
+##
+## Responsabilidades:
+## - localizar adapter Spine;
+## - pedir execução de animações;
+## - evitar repetir animação igual;
+## - aplicar flip horizontal;
+## - oferecer helpers para tracks superiores;
+## - centralizar logs visuais.
+##
+## Importante:
+## Este controller não decide gameplay.
+## Ele apenas traduz estado de gameplay em animação.
 extends Node2D
 class_name SpineVisualControllerBase
 
 @export_group("Spine")
 
+## Caminho opcional para o adapter Spine.
 @export var spine_adapter_path: NodePath
 
 @export_group("Diagnostics")
 
+## Loga mudanças visuais quando ativo.
 @export var log_visual_state_changes: bool = true
 
+## Referência ao adapter visual.
 @onready var spine_adapter: Node = _resolve_spine_adapter()
 
+## Nome da animação base atual.
 var current_animation_name: String = ""
 
+## Estado visual atual.
 var current_visual_state: String = ""
 
+## Time scale da animação base atual.
 var current_animation_time_scale: float = 1.0
 
+## Inicializa e toca animação inicial.
 func _ready() -> void:
 	if spine_adapter == null:
 		push_warning("[%s] Spine adapter não encontrado." % _get_visual_log_name())
@@ -24,12 +44,15 @@ func _ready() -> void:
 
 	_play_initial_animation()
 
+## Hook para subclasses definirem animação inicial.
 func _play_initial_animation() -> void:
 	pass
 
+## Nome usado em logs.
 func _get_visual_log_name() -> String:
 	return name
 
+## Toca animação base somente se mudou.
 func _play_animation_if_changed(
 	animation_name: String,
 	loop: bool,
@@ -38,7 +61,7 @@ func _play_animation_if_changed(
 ) -> bool:
 	if animation_name.strip_edges() == "":
 		return false
-	
+
 	if (
 		current_animation_name == animation_name
 		and current_visual_state == visual_state
@@ -71,9 +94,8 @@ func _play_animation_if_changed(
 
 	if not played_successfully:
 		return false
-	
-	current_animation_time_scale = max(0.01, time_scale)
 
+	current_animation_time_scale = max(0.01, time_scale)
 	current_animation_name = animation_name
 
 	if visual_state.strip_edges() != "":
@@ -98,6 +120,9 @@ func _play_animation_if_changed(
 
 	return true
 
+## Toca animação em track específica.
+##
+## Usado para overlays, como blink em track superior.
 func _play_animation_on_track(
 	animation_name: String,
 	loop: bool,
@@ -133,6 +158,7 @@ func _play_animation_on_track(
 
 	return bool(play_result_variant)
 
+## Limpa uma track específica no adapter.
 func _clear_animation_track(track_index: int) -> bool:
 	if spine_adapter == null:
 		return false
@@ -147,6 +173,7 @@ func _clear_animation_track(track_index: int) -> bool:
 
 	return bool(result_variant)
 
+## Aplica flip horizontal pelo sinal do eixo X.
 func _apply_horizontal_facing(
 	facing_direction: Vector2,
 	should_flip: bool = true
@@ -162,6 +189,7 @@ func _apply_horizontal_facing(
 	else:
 		scale.x = abs(scale.x)
 
+## Resolve adapter por path ou busca recursiva.
 func _resolve_spine_adapter() -> Node:
 	if spine_adapter_path != NodePath():
 		var configured_adapter: Node = get_node_or_null(spine_adapter_path)
@@ -171,6 +199,7 @@ func _resolve_spine_adapter() -> Node:
 
 	return _find_node_with_method(self, "play_animation")
 
+## Busca recursivamente um node que implemente determinado método.
 func _find_node_with_method(root: Node, method_name: String) -> Node:
 	if root == null:
 		return null

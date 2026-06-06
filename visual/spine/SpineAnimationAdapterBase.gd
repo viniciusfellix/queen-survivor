@@ -2,23 +2,16 @@ extends Node
 class_name SpineAnimationAdapterBase
 
 @export_group("Spine")
-
 @export var spine_sprite_path: NodePath
 
 @export_group("Diagnostics")
-
 @export var log_ready_status: bool = true
-
 @export var log_animation_changes: bool = false
-
 @onready var spine_sprite: Node = _resolve_spine_sprite()
 
 var current_animation_name: String = ""
-
 var current_animation_by_track: Dictionary = {}
-
 var is_spine_ready: bool = false
-
 var current_time_scale_by_track: Dictionary = {}
 
 func _ready() -> void:

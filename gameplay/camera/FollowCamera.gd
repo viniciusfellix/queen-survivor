@@ -1,3 +1,13 @@
+## Câmera de acompanhamento do player.
+##
+## Responsabilidades:
+## - localizar um alvo por NodePath ou grupo;
+## - seguir esse alvo com suavização configurável;
+## - aplicar offset visual;
+## - permitir snap inicial para evitar transição estranha no começo da run.
+##
+## Importante:
+## Esta câmera não altera gameplay. Ela apenas acompanha visualmente a Gaia.
 extends Camera2D
 
 @export_group("Target")
@@ -18,6 +28,7 @@ extends Camera2D
 
 var target_node: Node2D = null
 
+## Ativa a câmera, torna-a atual e tenta resolver o alvo inicial.
 func _ready() -> void:
 	enabled = true
 	make_current()
@@ -27,6 +38,7 @@ func _ready() -> void:
 	if target_node != null and snap_to_target_on_ready:
 		global_position = target_node.global_position + position_offset
 
+## Atualiza a câmera a cada frame enquanto o follow estiver habilitado.
 func _process(delta: float) -> void:
 	if not follow_enabled:
 		return
@@ -39,6 +51,7 @@ func _process(delta: float) -> void:
 
 	_update_follow(delta)
 
+## Define explicitamente o alvo da câmera e aplica snap inicial se configurado.
 func set_target(new_target: Node2D) -> void:
 	target_node = new_target
 
@@ -56,9 +69,11 @@ func set_target(new_target: Node2D) -> void:
 	if snap_to_target_on_ready:
 		global_position = target_node.global_position + position_offset
 
+## Remove o alvo atual. A câmera poderá tentar resolver outro alvo depois.
 func clear_target() -> void:
 	target_node = null
 
+## Move a câmera em direção ao alvo usando suavização exponencial.
 func _update_follow(delta: float) -> void:
 	if target_node == null:
 		return
@@ -72,6 +87,7 @@ func _update_follow(delta: float) -> void:
 	var weight: float = clamp(delta * follow_smoothing, 0.0, 1.0)
 	global_position = global_position.lerp(desired_position, weight)
 
+## Resolve o alvo por NodePath configurado ou pelo primeiro Node2D no grupo.
 func _resolve_target() -> Node2D:
 	if target_path != NodePath():
 		var configured_target: Node = get_node_or_null(target_path)
@@ -86,6 +102,7 @@ func _resolve_target() -> Node2D:
 
 	return null
 
+## Busca o primeiro Node2D pertencente ao grupo informado.
 func _find_first_node2d_in_group(group_name: String) -> Node2D:
 	if group_name.strip_edges() == "":
 		return null

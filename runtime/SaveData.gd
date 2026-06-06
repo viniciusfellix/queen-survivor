@@ -1,16 +1,37 @@
+## Dados persistentes do jogador.
+##
+## Responsabilidades:
+## - armazenar XP total;
+## - armazenar dinheiro total;
+## - armazenar mapas concluídos;
+## - armazenar resumo da última run;
+## - armazenar recordes básicos;
+## - armazenar configurações;
+## - armazenar estado SFW;
+## - armazenar upgrades comprados futuramente.
+##
+## Importante:
+## Este resource representa save permanente.
+## Ele é serializado pelo SaveManager em JSON.
 extends Resource
 class_name SaveData
 
+## Versão do formato de save.
 var save_version: int = 1
 
+## XP permanente acumulada.
 var total_xp: int = 0
 
+## Dinheiro/recurso permanente acumulado.
 var total_money: int = 0
 
+## Lista de mapas concluídos.
 var completed_maps: Array[String] = []
 
+## Resumo da última run jogada.
 var last_run_summary: Dictionary = {}
 
+## Recordes básicos por mapa.
 var basic_records: Dictionary = {
 	"best_survived_seconds_by_map": {},
 	"best_level_by_map": {},
@@ -19,16 +40,23 @@ var basic_records: Dictionary = {
 	"victories_by_map": {}
 }
 
+## Configurações gerais persistentes.
 var settings: Dictionary = {
 	"language": "pt_br"
 }
 
+## Define se modo SFW está ativo.
 var sfw_enabled: bool = true
 
+## Define se o prompt inicial de SFW já foi respondido.
 var sfw_first_prompt_answered: bool = false
 
+## Upgrades permanentes comprados.
+##
+## Estrutura futura para permitir reset gratuito e reembolso.
 var purchased_upgrades: Dictionary = {}
 
+## Aplica resultado de uma run ao save permanente.
 func apply_run_result(result_payload: RunResultPayload) -> void:
 	if result_payload == null:
 		return
@@ -43,6 +71,9 @@ func apply_run_result(result_payload: RunResultPayload) -> void:
 	last_run_summary = result_payload.to_dictionary()
 	_update_basic_records(result_payload)
 
+## Reseta progressão permanente.
+##
+## Mantém configurações como idioma/SFW, mas zera progresso.
 func reset_progression() -> void:
 	total_xp = 0
 	total_money = 0
@@ -59,6 +90,7 @@ func reset_progression() -> void:
 
 	purchased_upgrades.clear()
 
+## Converte SaveData em Dictionary serializável.
 func to_dictionary() -> Dictionary:
 	return {
 		"save_version": save_version,
@@ -73,6 +105,9 @@ func to_dictionary() -> Dictionary:
 		"purchased_upgrades": purchased_upgrades
 	}
 
+## Carrega SaveData a partir de Dictionary vindo do JSON.
+##
+## Usa defaults seguros quando campos não existem.
 func load_from_dictionary(data: Dictionary) -> void:
 	save_version = int(data.get("save_version", 1))
 
@@ -96,6 +131,7 @@ func load_from_dictionary(data: Dictionary) -> void:
 
 	purchased_upgrades = _safe_dictionary(data.get("purchased_upgrades", {}))
 
+## Marca mapa como concluído, evitando duplicidade.
 func _mark_map_completed(map_id: String) -> void:
 	if map_id.strip_edges() == "":
 		return
@@ -105,6 +141,7 @@ func _mark_map_completed(map_id: String) -> void:
 
 	completed_maps.append(map_id)
 
+## Atualiza recordes básicos com base no resultado da run.
 func _update_basic_records(result_payload: RunResultPayload) -> void:
 	if result_payload == null:
 		return
@@ -119,6 +156,7 @@ func _update_basic_records(result_payload: RunResultPayload) -> void:
 	_set_best_int_record("best_coins_by_map", map_id, result_payload.run_coins_collected)
 	_set_best_int_record("best_kills_by_map", map_id, result_payload.enemies_killed)
 
+## Incrementa contador de vitórias por mapa.
 func _increment_map_victory(map_id: String) -> void:
 	if map_id.strip_edges() == "":
 		return
@@ -129,6 +167,7 @@ func _increment_map_victory(map_id: String) -> void:
 	victories[map_id] = current_value + 1
 	basic_records["victories_by_map"] = victories
 
+## Atualiza recorde inteiro se o novo valor for maior.
 func _set_best_int_record(record_key: String, map_id: String, value: int) -> void:
 	var record: Dictionary = _get_record_dictionary(record_key)
 	var previous_value: int = int(record.get(map_id, 0))
@@ -138,6 +177,7 @@ func _set_best_int_record(record_key: String, map_id: String, value: int) -> voi
 
 	basic_records[record_key] = record
 
+## Atualiza recorde float se o novo valor for maior.
 func _set_best_float_record(record_key: String, map_id: String, value: float) -> void:
 	var record: Dictionary = _get_record_dictionary(record_key)
 	var previous_value: float = float(record.get(map_id, 0.0))
@@ -147,6 +187,7 @@ func _set_best_float_record(record_key: String, map_id: String, value: float) ->
 
 	basic_records[record_key] = record
 
+## Retorna dicionário de recorde ou dicionário vazio se inválido.
 func _get_record_dictionary(record_key: String) -> Dictionary:
 	var record_variant: Variant = basic_records.get(record_key, {})
 
@@ -155,6 +196,9 @@ func _get_record_dictionary(record_key: String) -> Dictionary:
 
 	return {}
 
+## Mescla recordes carregados com estrutura padrão.
+##
+## Garante que todos os grupos esperados existam mesmo em saves antigos.
 func _merge_basic_records(loaded_records: Dictionary) -> Dictionary:
 	var merged: Dictionary = {
 		"best_survived_seconds_by_map": {},
@@ -172,6 +216,7 @@ func _merge_basic_records(loaded_records: Dictionary) -> Dictionary:
 
 	return merged
 
+## Retorna Dictionary seguro.
 func _safe_dictionary(value: Variant) -> Dictionary:
 	if value is Dictionary:
 		return value as Dictionary

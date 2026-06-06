@@ -1,3 +1,18 @@
+## Classe base runtime de inimigo.
+##
+## Responsabilidades:
+## - receber EnemyDefinition;
+## - configurar HP, recompensas, hurtbox e ataque;
+## - perseguir a Gaia;
+## - combinar velocidades físicas de perseguição, body bump, slide e knockback;
+## - receber dano via Hurtbox/Hitbox;
+## - morrer emitindo XP e chance de moeda;
+## - atualizar visual Spine sem usar animação como regra de gameplay.
+##
+## Decisão arquitetural:
+## BodyCollision é apenas física/movimento.
+## Dano do inimigo é feito por EnemyAttackHitbox contra PlayerHurtbox.
+## Dano recebido vem de PlayerAttackHitbox/DirectionalAttackHitbox contra EnemyHurtbox.
 extends CharacterBody2D
 
 @export var enemy_definition: EnemyDefinition
@@ -13,9 +28,11 @@ extends CharacterBody2D
 )
 @export var remove_after_death_seconds: float = 0.45
 
+## Estado runtime básico de vida/movimento copiado do EnemyDefinition.
 var max_hp: int = 10
 var current_hp: int = 10
 var move_speed: float = 90.0
+## Parâmetros runtime de esbarrão físico entre inimigos.
 var body_bump_enabled: bool = true
 var body_bump_power: float = 2.0
 var body_bump_velocity_per_power: float = 24.0
@@ -23,25 +40,30 @@ var body_bump_max_velocity: float = 140.0
 var body_bump_decay_per_second: float = 280.0
 var body_bump_lateral_influence: float = 0.35
 var body_bump_velocity: Vector2 = Vector2.ZERO
+## Parâmetros runtime para escorregar ao redor da BodyCollision da Gaia.
 var player_body_slide_enabled: bool = true
 var player_body_slide_power: float = 2.0
 var player_body_slide_velocity_per_power: float = 36.0
 var player_body_slide_max_velocity: float = 160.0
 var player_body_slide_away_influence: float = 0.30
+## Parâmetros runtime de knockback recebido por arma, dash ou efeitos futuros.
 var received_knockback_multiplier: float = 1.0
 var received_knockback_max_velocity: float = 520.0
 var received_knockback_decay_per_second: float = 1800.0
 var received_knockback_chase_weight: float = 0.15
 var received_knockback_velocity: Vector2 = Vector2.ZERO
+## Recompensas e referências runtime do inimigo.
 var xp_reward: int = 1
 var coin_drop_chance: float = 0.25
 var coin_drop_value: int = 1
+## Referências runtime para alvo e visual.
 var target_node: Node2D = null
 var visual_chase_direction: Vector2 = Vector2.RIGHT
 var visual_controller: Node = null
 var enemy_id: String = ""
 var debug_color: Color = Color(0.9, 0.15, 0.15, 1.0)
 var debug_radius: float = 18.0
+## Estado de vida e telemetria de dano.
 var is_alive: bool = true
 var total_damage_taken: int = 0
 var last_damage_taken: int = 0
@@ -50,6 +72,7 @@ var active_knockback_chase_weight: float = -1.0
 var player_body_slide_velocity: Vector2 = Vector2.ZERO
 var player_body_slide_decay_per_second: float = 360.0
 
+## Inicializa inimigo, aplica definition, resolve alvo/visual e prepara debug.
 func _ready() -> void:
 	add_to_group("enemy")
 
@@ -64,6 +87,7 @@ func _ready() -> void:
 	_update_visual_state()
 	queue_redraw()
 
+## Atualiza movimento, forças físicas, perseguição e visual a cada frame.
 func _physics_process(_delta: float) -> void:
 	if RunQuery.is_gameplay_blocked(get_tree()):
 		velocity = Vector2.ZERO
@@ -128,6 +152,7 @@ func _physics_process(_delta: float) -> void:
 	_update_visual_state()
 	queue_redraw()
 
+## Desenha placeholder/debug visual do inimigo e linha até o alvo.
 func _draw() -> void:
 	if not draw_debug_visual:
 		return
@@ -152,6 +177,7 @@ func _draw() -> void:
 		var local_target_position: Vector2 = to_local(target_node.global_position)
 		draw_line(Vector2.ZERO, local_target_position, Color.YELLOW, 1.0)
 
+## Recebe EnemyDefinition e alvo opcional após instância pelo spawner.
 func setup(definition: EnemyDefinition, target: Node2D = null) -> void:
 	enemy_definition = definition
 
@@ -166,6 +192,7 @@ func setup(definition: EnemyDefinition, target: Node2D = null) -> void:
 	_update_visual_state()
 	queue_redraw()
 
+## Recebe DamagePayload, calcula dano final, atualiza HP e dispara eventos.
 func receive_damage(payload: DamagePayload) -> int:
 	if payload == null:
 		return 0
@@ -232,6 +259,7 @@ func receive_damage(payload: DamagePayload) -> int:
 
 	return final_damage
 
+## Finaliza inimigo, desativa combate, emite morte e agenda remoção.
 func die(source_id: String = "") -> void:
 	if not is_alive:
 		return
@@ -281,9 +309,11 @@ func die(source_id: String = "") -> void:
 	var death_timer: SceneTreeTimer = get_tree().create_timer(remove_after_death_seconds)
 	death_timer.timeout.connect(_on_death_timer_timeout)
 
+## Remove o node depois do pequeno delay de morte.
 func _on_death_timer_timeout() -> void:
 	queue_free()
 
+## Copia dados do EnemyDefinition para estado runtime do inimigo.
 func _apply_definition() -> void:
 	if enemy_definition == null:
 		enemy_id = "enemy_undefined"
@@ -371,6 +401,7 @@ func _apply_definition() -> void:
 	_configure_hurtbox()
 	_configure_contact_attack_hitbox()
 
+## Configura HurtboxComponent com áreas vulneráveis do EnemyDefinition.
 func _configure_hurtbox() -> void:
 	if hurtbox_component == null:
 		hurtbox_component = get_node_or_null("Hurtbox") as HurtboxComponent
@@ -387,6 +418,7 @@ func _configure_hurtbox() -> void:
 		self
 	)
 
+## Configura EnemyAttackHitbox com o ataque de contato do EnemyDefinition.
 func _configure_contact_attack_hitbox() -> void:
 	if contact_attack_hitbox == null:
 		contact_attack_hitbox = (
@@ -408,6 +440,7 @@ func _configure_contact_attack_hitbox() -> void:
 		enemy_id
 	)
 
+## Desativa hurtbox e hitbox quando inimigo não pode mais combater.
 func _disable_combat_areas() -> void:
 	if hurtbox_component != null:
 		hurtbox_component.set_hurtbox_active(false)
@@ -415,6 +448,7 @@ func _disable_combat_areas() -> void:
 	if contact_attack_hitbox != null:
 		contact_attack_hitbox.set_attack_active(false)
 
+## Calcula perseguição direta em direção à Gaia.
 func _follow_target() -> void:
 	var to_target: Vector2 = target_node.global_position - global_position
 	var distance_to_target: float = to_target.length()
@@ -428,6 +462,7 @@ func _follow_target() -> void:
 
 	velocity = visual_chase_direction * move_speed
 
+## Aplica decaimento da velocidade de esbarrão entre inimigos.
 func _update_body_bump_velocity(delta: float) -> void:
 	if body_bump_velocity.length() <= 0.001:
 		body_bump_velocity = Vector2.ZERO
@@ -436,6 +471,7 @@ func _update_body_bump_velocity(delta: float) -> void:
 	var decay_amount: float = body_bump_decay_per_second * delta
 	body_bump_velocity = body_bump_velocity.move_toward(Vector2.ZERO, decay_amount)
 
+## Lê colisões do move_and_slide e gera body bump ou player body slide.
 func _process_body_bump_collisions() -> void:
 	var processed_colliders: Dictionary = {}
 
@@ -504,6 +540,7 @@ func _process_body_bump_collisions() -> void:
 
 		_add_body_bump_velocity(bump_direction, received_bump_power)
 
+## Calcula quanto bump este inimigo recebe ao colidir com outro.
 func _calculate_received_body_bump_power(other_body_bump_power: float) -> float:
 	var own_power: float = max(0.0, body_bump_power)
 	var other_power: float = max(0.0, other_body_bump_power)
@@ -519,6 +556,7 @@ func _calculate_received_body_bump_power(other_body_bump_power: float) -> float:
 
 	return 0.0
 
+## Calcula direção de afastamento/lateralização ao esbarrar em outro inimigo.
 func _get_body_bump_direction_from(other_enemy: Node2D) -> Vector2:
 	if other_enemy == null:
 		return Vector2.ZERO
@@ -556,6 +594,7 @@ func _get_body_bump_direction_from(other_enemy: Node2D) -> Vector2:
 
 	return mixed_direction.normalized()
 
+## Adiciona impulso de body bump respeitando velocidade máxima.
 func _add_body_bump_velocity(
 	bump_direction: Vector2,
 	received_bump_power: float
@@ -577,6 +616,7 @@ func _add_body_bump_velocity(
 	if body_bump_max_velocity > 0.0 and body_bump_velocity.length() > body_bump_max_velocity:
 		body_bump_velocity = body_bump_velocity.normalized() * body_bump_max_velocity
 
+## Identifica se o collider representa o corpo do player/Gaia.
 func _is_player_body_collider(collider_node: Node2D) -> bool:
 	if collider_node == null:
 		return false
@@ -592,6 +632,7 @@ func _is_player_body_collider(collider_node: Node2D) -> bool:
 
 	return false
 
+## Processa escorregamento ao colidir com a BodyCollision da Gaia.
 func _process_player_body_slide_collision(player_body: Node2D) -> void:
 	if not player_body_slide_enabled:
 		return
@@ -609,6 +650,7 @@ func _process_player_body_slide_collision(player_body: Node2D) -> void:
 
 	_add_player_body_slide_velocity(slide_direction)
 
+## Calcula direção lateral/afastamento para deslizar ao redor da Gaia.
 func _get_player_body_slide_direction(player_body: Node2D) -> Vector2:
 	if player_body == null:
 		return Vector2.ZERO
@@ -641,6 +683,7 @@ func _get_player_body_slide_direction(player_body: Node2D) -> Vector2:
 
 	return slide_direction.normalized()
 
+## Decide lado preferencial do slide para reduzir inversões/jitter.
 func _get_player_body_slide_lateral_sign(lateral_direction: Vector2) -> float:
 	if velocity.length() > 0.001:
 		var velocity_side: float = velocity.normalized().dot(lateral_direction)
@@ -656,6 +699,7 @@ func _get_player_body_slide_lateral_sign(lateral_direction: Vector2) -> float:
 
 	return 1.0
 
+## Aplica impulso de slide do player respeitando velocidade máxima.
 func _add_player_body_slide_velocity(slide_direction: Vector2) -> void:
 	if slide_direction.length() <= 0.001:
 		return
@@ -677,9 +721,11 @@ func _add_player_body_slide_velocity(slide_direction: Vector2) -> void:
 			* player_body_slide_max_velocity
 		)
 
+## Expõe força de body bump para outros inimigos calcularem colisões.
 func get_body_bump_power() -> float:
 	return body_bump_power
 
+## Aplica knockback externo vindo de arma, dash ou efeitos futuros.
 func apply_hit_knockback(
 	knockback_pixels: float,
 	duration_seconds: float,
@@ -734,6 +780,7 @@ func apply_hit_knockback(
 
 	return true
 
+## Aplica decaimento do knockback recebido.
 func _update_received_knockback_velocity(delta: float) -> void:
 	if received_knockback_velocity.length() <= 0.001:
 		received_knockback_velocity = Vector2.ZERO
@@ -745,13 +792,16 @@ func _update_received_knockback_velocity(delta: float) -> void:
 		decay_amount
 	)
 
+## Informa se existe knockback recebido ainda ativo.
 func _is_received_knockback_active() -> bool:
 	return received_knockback_velocity.length() > 0.001
 
+## Limpa knockback recebido e override de chase weight.
 func _clear_received_knockback() -> void:
 	received_knockback_velocity = Vector2.ZERO
 	active_knockback_chase_weight = -1.0
 
+## Resolve direção do knockback usando fonte, fallback ou movimento atual.
 func _resolve_received_knockback_direction(
 	source_node: Node = null,
 	fallback_direction: Vector2 = Vector2.ZERO
@@ -777,9 +827,11 @@ func _resolve_received_knockback_direction(
 
 	return Vector2.ZERO
 
+## Retorna se o inimigo ainda está vivo.
 func is_enemy_alive() -> bool:
 	return is_alive
 
+## Solicita flash/feedback visual ao visual controller.
 func _play_damage_feedback() -> void:
 	if visual_controller == null:
 		visual_controller = _resolve_visual_controller()
@@ -790,6 +842,7 @@ func _play_damage_feedback() -> void:
 	if visual_controller.has_method("play_damage_flash"):
 		visual_controller.call("play_damage_flash")
 
+## Atualiza animação/estado visual com movimento e vida atuais.
 func _update_visual_state() -> void:
 	if visual_controller == null:
 		visual_controller = _resolve_visual_controller()
@@ -820,6 +873,7 @@ func _update_visual_state() -> void:
 			is_alive
 		)
 
+## Mantém direção visual voltada à Gaia, separada da velocidade física final.
 func _get_visual_movement_direction() -> Vector2:
 	if target_node != null and is_instance_valid(target_node):
 		var to_target: Vector2 = target_node.global_position - global_position
@@ -829,6 +883,7 @@ func _get_visual_movement_direction() -> Vector2:
 
 	return visual_chase_direction
 
+## Localiza visual controller por path, fallback direto ou busca recursiva.
 func _resolve_visual_controller() -> Node:
 	if visual_controller_path != NodePath():
 		var configured_visual: Node = get_node_or_null(visual_controller_path)
@@ -851,6 +906,7 @@ func _resolve_visual_controller() -> Node:
 
 	return null
 
+## Busca recursivamente um node que implemente determinado método.
 func _find_node_with_method(root: Node, method_name: String) -> Node:
 	if root == null:
 		return null
@@ -866,6 +922,7 @@ func _find_node_with_method(root: Node, method_name: String) -> Node:
 
 	return null
 
+## Resolve alvo por NodePath ou grupo configurado.
 func _resolve_target() -> Node2D:
 	if target_path != NodePath():
 		var configured_target: Node = get_node_or_null(target_path)
@@ -880,6 +937,7 @@ func _resolve_target() -> Node2D:
 
 	return null
 
+## Retorna o primeiro Node2D encontrado em um grupo.
 func _find_first_node2d_in_group(group_name: String) -> Node2D:
 	if group_name.strip_edges() == "":
 		return null
@@ -892,6 +950,7 @@ func _find_first_node2d_in_group(group_name: String) -> Node2D:
 
 	return null
 
+## Formata breakdown do DamageResolver para logs técnicos.
 func _format_damage_breakdown(damage_result: Dictionary) -> String:
 	var breakdown_variant: Variant = damage_result.get("breakdown", [])
 
@@ -918,6 +977,7 @@ func _format_damage_breakdown(damage_result: Dictionary) -> String:
 
 	return " | ".join(parts)
 
+## Retorna estado interno do inimigo para DebugOverlay/ferramentas.
 func get_debug_data() -> Dictionary:
 	return {
 		"enemy_id": enemy_id,
@@ -951,6 +1011,7 @@ func get_debug_data() -> Dictionary:
 		"player_body_slide_decay_per_second": player_body_slide_decay_per_second,
 	}
 
+## Aplica decaimento da velocidade de slide ao redor do player.
 func _update_player_body_slide_velocity(delta: float) -> void:
 	if player_body_slide_velocity.length() <= 0.001:
 		player_body_slide_velocity = Vector2.ZERO

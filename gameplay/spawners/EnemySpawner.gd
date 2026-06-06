@@ -1,5 +1,18 @@
+## Spawner de inimigos da arena.
+##
+## Responsabilidades:
+## - resolver player e EnemyRoot;
+## - usar SpawnTimelineDefinition do mapa quando configurado;
+## - aplicar SpawnTimelineEntryDefinition ativa;
+## - instanciar inimigos fora da tela/ao redor do player;
+## - configurar EnemyDefinition no EnemyBase;
+## - respeitar limites de quantidade e delay inicial.
+##
+## O spawner cria inimigos, mas não controla comportamento de combate diretamente.
 extends Node
 
+
+## Configurações básicas de ativação do sistema.
 @export_group("Base")
 
 @export var spawner_enabled: bool = true
@@ -8,16 +21,22 @@ extends Node
 
 @export var player_group_name: String = "player"
 
+
+## Configuração do inimigo instanciado.
 @export_group("Enemy")
 
 @export_file("*.tscn") var enemy_scene_path: String = "res://gameplay/enemies/EnemyBase.tscn"
 
 @export var enemy_definition: EnemyDefinition
 
+
+## Referências aos roots da cena onde objetos serão adicionados.
 @export_group("Scene Roots")
 
 @export var enemy_root_path: NodePath
 
+
+## Valores usados quando não há timeline ativa ou como fallback de spawn.
 @export_group("Spawn Fallback")
 
 @export var spawn_interval_seconds: float = 2.2
@@ -28,6 +47,8 @@ extends Node
 
 @export var spawn_max_distance: float = 620.0
 
+
+## Proteções para evitar spawn injusto ou duplicado.
 @export_group("Spawn Safety")
 
 @export var initial_spawn_delay_seconds: float = 0.45
@@ -40,6 +61,8 @@ extends Node
 
 @export var log_spawn_distance: bool = true
 
+
+## Configurações para spawn controlado por timeline do mapa.
 @export_group("Timeline")
 
 @export var use_map_spawn_timeline: bool = true
@@ -62,6 +85,8 @@ var last_spawn_frame: int = -1
 
 var initial_spawn_delay_completed: bool = false
 
+
+## Resolve referências iniciais, timeline e delay de spawn.
 func _ready() -> void:
 	enemy_root = _resolve_enemy_root()
 	player_node = _resolve_player()
@@ -75,6 +100,8 @@ func _ready() -> void:
 	if not GameEvents.run_finished.is_connected(_on_run_finished):
 		GameEvents.run_finished.connect(_on_run_finished)
 
+
+## Atualiza timer de spawn e instancia inimigos quando permitido.
 func _process(delta: float) -> void:
 	if not spawner_enabled:
 		return
@@ -117,6 +144,8 @@ func _process(delta: float) -> void:
 		else:
 			spawn_timer = min(0.5, spawn_interval_seconds)
 
+
+## Recebe explicitamente o player instanciado pela cena.
 func configure_player(player: Node2D) -> void:
 	player_node = player
 
@@ -129,6 +158,8 @@ func configure_player(player: Node2D) -> void:
 			}
 		)
 
+
+## Recebe explicitamente o root onde inimigos serão adicionados.
 func configure_enemy_root(root: Node2D) -> void:
 	enemy_root = root
 
@@ -141,6 +172,8 @@ func configure_enemy_root(root: Node2D) -> void:
 			}
 		)
 
+
+## Cria um inimigo imediatamente para testes ou fluxo normal de spawn.
 func force_spawn_enemy() -> bool:
 	if RunQuery.is_gameplay_blocked(get_tree()):
 		return false
@@ -224,6 +257,8 @@ func force_spawn_enemy() -> bool:
 
 	return true
 
+
+## Atualiza configurações atuais com base na entry ativa da timeline.
 func _update_timeline_values() -> void:
 	if spawn_timeline_definition == null:
 		_resolve_spawn_timeline_from_map()
@@ -247,6 +282,8 @@ func _update_timeline_values() -> void:
 	else:
 		_apply_timeline_entry(active_entry, false)
 
+
+## Aplica dados da SpawnTimelineEntryDefinition ativa.
 func _apply_timeline_entry(entry: SpawnTimelineEntryDefinition, changed: bool) -> void:
 	if entry == null:
 		return
@@ -300,6 +337,7 @@ func _apply_timeline_entry(entry: SpawnTimelineEntryDefinition, changed: bool) -
 	if spawned:
 		spawn_timer = spawn_interval_seconds
 
+## Obtém timeline a partir do MapDefinition/RunController quando configurado.
 func _resolve_spawn_timeline_from_map() -> void:
 	if spawn_timeline_definition != null:
 		return
@@ -331,6 +369,7 @@ func _resolve_spawn_timeline_from_map() -> void:
 				}
 			)
 
+## Tenta gerar posição segura ao redor do player respeitando distância mínima.
 func _get_safe_spawn_position_around_player() -> Vector2:
 	var safe_min_distance: float = max(minimum_safe_spawn_distance_from_player, spawn_min_distance)
 	var safe_max_distance: float = max(safe_min_distance + 1.0, spawn_max_distance)
@@ -351,6 +390,7 @@ func _get_safe_spawn_position_around_player() -> Vector2:
 
 	return best_position
 
+## Gera posição aleatória em anel ao redor da Gaia.
 func _get_spawn_position_around_player(min_distance: float, max_distance: float) -> Vector2:
 	var safe_min_distance: float = max(0.0, min_distance)
 	var safe_max_distance: float = max(safe_min_distance, max_distance)
@@ -360,6 +400,7 @@ func _get_spawn_position_around_player(min_distance: float, max_distance: float)
 
 	return player_node.global_position + Vector2(cos(angle), sin(angle)) * distance
 
+## Conta inimigos vivos no EnemyRoot/grupo.
 func _get_alive_enemy_count() -> int:
 	var enemies: Array[Node] = get_tree().get_nodes_in_group("enemy")
 	var count: int = 0
@@ -375,6 +416,7 @@ func _get_alive_enemy_count() -> int:
 
 	return count
 
+## Localiza root de inimigos por path ou fallback.
 func _resolve_enemy_root() -> Node2D:
 	if enemy_root_path != NodePath():
 		var configured_root: Node = get_node_or_null(enemy_root_path)
@@ -399,6 +441,7 @@ func _resolve_enemy_root() -> Node2D:
 
 	return null
 
+## Localiza player por referência explícita ou grupo.
 func _resolve_player() -> Node2D:
 	var players: Array[Node] = get_tree().get_nodes_in_group(player_group_name)
 
@@ -408,6 +451,7 @@ func _resolve_player() -> Node2D:
 
 	return null
 
+## Desativa spawn quando a run termina.
 func _on_run_finished(_result_payload: RunResultPayload) -> void:
 	spawner_enabled = false
 
@@ -416,6 +460,7 @@ func _on_run_finished(_result_payload: RunResultPayload) -> void:
 		"EnemySpawner"
 	)
 
+## Configuração em lote usada pela cena para player/root.
 func configure_spawner(player: Node2D, root: Node2D) -> void:
 	configure_player(player)
 	configure_enemy_root(root)

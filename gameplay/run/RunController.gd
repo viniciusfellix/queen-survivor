@@ -1,31 +1,36 @@
+## Controller central da run atual.
+##
+## Responsabilidades:
+## - inicializar RunState a partir do MapDefinition;
+## - controlar timer da run;
+## - receber eventos de inimigo, XP, moeda, dano e morte;
+## - abrir e concluir level-up;
+## - aplicar upgrades escolhidos;
+## - finalizar vitória/derrota;
+## - construir RunResultPayload;
+## - emitir eventos para UI e SaveManager.
+##
+## Importante:
+## Este script coordena a run temporária. Progresso permanente pertence ao SaveManager.
 extends Node
 
 @export var run_state: RunState
-
 @export var map_definition: MapDefinition
-
 @export var upgrade_pool_definition: UpgradePoolDefinition
-
 @export var finish_run_pauses_tree: bool = true
-
 @export var defeat_result_delay_seconds: float = 0.75
 
 @export_group("Debug Tools")
-
 @export var allow_debug_force_finish: bool = false
 
 var pending_level_ups: int = 0
-
 var current_level_up_options: Array[UpgradeDefinition] = []
-
 var is_level_up_active: bool = false
-
 var result_payload: RunResultPayload = null
-
 var selected_upgrade_counts: Dictionary = {}
-
 var previous_upgrade_option_ids: Array[String] = []
 
+## Inicializa RunState, resolve definições e conecta sinais globais.
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	add_to_group("run_controller")
@@ -52,6 +57,7 @@ func _ready() -> void:
 		}
 	)
 
+## Atualiza timer da run e verifica condição de vitória por tempo.
 func _process(delta: float) -> void:
 	if run_state == null:
 		return
@@ -73,18 +79,23 @@ func _process(delta: float) -> void:
 	if run_state.elapsed_seconds >= run_state.map_duration_seconds:
 		_finish_victory()
 
+## Expõe o RunState atual para outros sistemas.
 func get_run_state() -> RunState:
 	return run_state
 
+## Retorna MapDefinition da run atual.
 func get_map_definition() -> MapDefinition:
 	return map_definition
 
+## Retorna pool de upgrades resolvida para a run.
 func get_upgrade_pool_definition() -> UpgradePoolDefinition:
 	return upgrade_pool_definition
 
+## Retorna último payload de resultado gerado.
 func get_result_payload() -> RunResultPayload:
 	return result_payload
 
+## Retorna dados técnicos da run para overlays/ferramentas.
 func get_debug_data() -> Dictionary:
 	if run_state == null:
 		return {
@@ -124,6 +135,7 @@ func get_debug_data() -> Dictionary:
 		"death_cause": run_state.death_cause
 	}
 
+## Conecta RunController aos signals globais relevantes.
 func _connect_events() -> void:
 	if not GameEvents.enemy_died.is_connected(_on_enemy_died):
 		GameEvents.enemy_died.connect(_on_enemy_died)
@@ -143,6 +155,7 @@ func _connect_events() -> void:
 	if not GameEvents.enemy_damaged.is_connected(_on_enemy_damaged):
 		GameEvents.enemy_damaged.connect(_on_enemy_damaged)
 
+## Processa morte de inimigo: XP, kill count e dados de drop.
 func _on_enemy_died(
 	enemy_id: String,
 	source_id: String,
@@ -203,6 +216,7 @@ func _on_enemy_died(
 	if pending_level_ups > 0 and not is_level_up_active:
 		_start_next_level_up()
 
+## Registra moeda coletada no RunState.
 func _on_run_coin_collected(value: int, coin_global_position: Vector2) -> void:
 	if run_state == null:
 		return
@@ -236,6 +250,7 @@ func _on_run_coin_collected(value: int, coin_global_position: Vector2) -> void:
 		}
 	)
 
+## Registra dano recebido para estatísticas da run.
 func _on_player_damaged(
 	_raw_damage: int,
 	final_damage: int,
@@ -251,6 +266,7 @@ func _on_player_damaged(
 
 	run_state.add_damage_taken(final_damage)
 
+## Registra dano causado para estatísticas da run.
 func _on_enemy_damaged(
 	_enemy_id: String,
 	_raw_damage: int,
@@ -267,6 +283,7 @@ func _on_enemy_damaged(
 
 	run_state.add_damage_dealt(final_damage)
 
+## Inicia fluxo de derrota quando a Gaia morre.
 func _on_player_died(source_id: String) -> void:
 	if run_state == null:
 		return
@@ -307,6 +324,7 @@ func _on_player_died(source_id: String) -> void:
 		_finish_defeat(source_id)
 	)
 
+## Inicia encerramento vitorioso da run.
 func _finish_victory() -> void:
 	if run_state == null:
 		return
@@ -319,6 +337,7 @@ func _finish_victory() -> void:
 
 	_finish_run()
 
+## Inicia encerramento por derrota.
 func _finish_defeat(source_id: String = "") -> void:
 	if run_state == null:
 		return
@@ -330,6 +349,7 @@ func _finish_defeat(source_id: String = "") -> void:
 
 	_finish_run()
 
+## Finaliza run, cria resultado, emite eventos e opcionalmente pausa a árvore.
 func _finish_run() -> void:
 	if run_state == null:
 		return
@@ -370,6 +390,7 @@ func _finish_run() -> void:
 	if finish_run_pauses_tree:
 		get_tree().paused = true
 
+## Monta RunResultPayload a partir do RunState e MapDefinition.
 func _build_result_payload() -> RunResultPayload:
 	var payload: RunResultPayload = RunResultPayload.new()
 
@@ -412,6 +433,7 @@ func _build_result_payload() -> RunResultPayload:
 
 	return payload
 
+## Abre próximo level-up pendente com opções geradas.
 func _start_next_level_up() -> void:
 	if run_state == null:
 		return
@@ -463,6 +485,7 @@ func _start_next_level_up() -> void:
 
 	GameEvents.run_level_up_started.emit(run_state.current_level, current_level_up_options)
 
+## Recebe escolha do jogador, aplica upgrade e conclui level-up.
 func _on_level_up_option_selected(upgrade: UpgradeDefinition) -> void:
 	if not is_level_up_active:
 		return
@@ -518,6 +541,7 @@ func _on_level_up_option_selected(upgrade: UpgradeDefinition) -> void:
 
 	get_tree().paused = false
 
+## Aplica upgrade no player/arma conforme tipo.
 func _apply_upgrade(upgrade: UpgradeDefinition) -> bool:
 	var player: Node = _get_player()
 
@@ -537,6 +561,7 @@ func _apply_upgrade(upgrade: UpgradeDefinition) -> bool:
 	push_warning("[RunController] apply_run_upgrade precisa retornar bool: %s" % upgrade.id)
 	return false
 
+## Localiza a Gaia/player atual pelo grupo player.
 func _get_player() -> Node:
 	var players: Array[Node] = get_tree().get_nodes_in_group("player")
 
@@ -545,6 +570,7 @@ func _get_player() -> Node:
 
 	return players[0]
 
+## Retorna IDs das opções atuais para logs/debug.
 func _get_option_ids(options: Array[UpgradeDefinition]) -> String:
 	var ids: Array[String] = []
 
@@ -556,6 +582,7 @@ func _get_option_ids(options: Array[UpgradeDefinition]) -> String:
 
 	return ", ".join(ids)
 
+## Resolve pool de upgrades a partir do mapa ou fallback configurado.
 func _resolve_upgrade_pool() -> void:
 	if upgrade_pool_definition != null:
 		DeveloperAuditLogger.log_upgrade(
@@ -588,6 +615,7 @@ func _resolve_upgrade_pool() -> void:
 		}
 	)
 
+## Gera opções de level-up respeitando pool e escolhas anteriores.
 func _generate_level_up_options() -> Array[UpgradeDefinition]:
 	if upgrade_pool_definition == null:
 		return []
@@ -598,6 +626,7 @@ func _generate_level_up_options() -> Array[UpgradeDefinition]:
 		previous_upgrade_option_ids
 	)
 
+## Incrementa contador de stacks do upgrade selecionado.
 func _register_selected_upgrade(upgrade: UpgradeDefinition) -> void:
 	if upgrade == null:
 		return
@@ -605,6 +634,7 @@ func _register_selected_upgrade(upgrade: UpgradeDefinition) -> void:
 	var current_count: int = int(selected_upgrade_counts.get(upgrade.id, 0))
 	selected_upgrade_counts[upgrade.id] = current_count + 1
 
+## Fecha level-up quando não há opção válida disponível.
 func _complete_level_up_without_option() -> void:
 	pending_level_ups = max(0, pending_level_ups - 1)
 
@@ -620,12 +650,14 @@ func _complete_level_up_without_option() -> void:
 
 	get_tree().paused = false
 
+## Retorna ID textual da pool atual para logs/debug.
 func _get_upgrade_pool_id() -> String:
 	if upgrade_pool_definition == null:
 		return "none"
 
 	return upgrade_pool_definition.id
 
+## Converte lista de UpgradeDefinition em array de IDs.
 func _get_option_id_array(options: Array[UpgradeDefinition]) -> Array[String]:
 	var ids: Array[String] = []
 
@@ -637,15 +669,18 @@ func _get_option_id_array(options: Array[UpgradeDefinition]) -> Array[String]:
 
 	return ids
 
+## Consulta quantas vezes um upgrade já foi escolhido na run.
 func get_selected_upgrade_count(upgrade_id: String) -> int:
 	if upgrade_id.strip_edges() == "":
 		return 0
 
 	return int(selected_upgrade_counts.get(upgrade_id, 0))
 
+## Calcula nível/stack que será exibido no próximo card do upgrade.
 func get_next_upgrade_level(upgrade_id: String) -> int:
 	return get_selected_upgrade_count(upgrade_id) + 1
 
+## Ferramenta técnica para forçar vitória quando permitido.
 func debug_force_victory() -> bool:
 	if not allow_debug_force_finish:
 		DeveloperAuditLogger.log_audit(
@@ -668,6 +703,7 @@ func debug_force_victory() -> bool:
 
 	return true
 
+## Ferramenta técnica para forçar derrota quando permitido.
 func debug_force_defeat() -> bool:
 	if not allow_debug_force_finish:
 		DeveloperAuditLogger.log_audit(

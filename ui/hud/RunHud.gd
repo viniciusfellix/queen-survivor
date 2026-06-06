@@ -1,77 +1,113 @@
+## HUD principal da run.
+##
+## Responsabilidades:
+## - exibir HP, XP, timer, moedas, level, kills e cooldown da arma;
+## - consultar dados atuais do player e da run;
+## - responder a eventos globais;
+## - atualizar visual periodicamente;
+## - usar LocalizationManager para textos exibidos.
+##
+## Observação:
+## Este HUD apenas exibe dados.
+## Ele não altera HP, XP, moeda, cooldown ou estado da run.
 extends CanvasLayer
 
 @export_group("Visibility")
 
+## Exibe/oculta bloco de HP.
 @export var show_hp: bool = true
 
+## Exibe/oculta bloco de XP.
 @export var show_xp: bool = true
 
+## Exibe/oculta timer.
 @export var show_timer: bool = true
 
+## Exibe/oculta moedas.
 @export var show_coins: bool = true
 
+## Exibe/oculta level.
 @export var show_level: bool = true
 
+## Exibe/oculta kills.
 @export var show_kills: bool = true
 
+## Exibe/oculta mensagem de estado da run.
 @export var show_message: bool = true
 
 @export_group("Behavior")
 
+## Intervalo entre atualizações completas do HUD.
 @export var update_interval_seconds: float = 0.10
 
+## Se true, mostra tempo restante; se false, mostra tempo decorrido.
 @export var show_remaining_time: bool = true
 
+## Se true, oculta o HUD quando o painel de resultado abre.
 @export var hide_when_result_panel_opens: bool = false
 
 @export_group("Node Paths")
 
+## Caminhos configuráveis dos nodes de HP.
 @export var hp_box_path: NodePath
 @export var hp_label_path: NodePath
 @export var hp_bar_path: NodePath
 
+## Caminhos configuráveis dos nodes de XP.
 @export var xp_box_path: NodePath
 @export var xp_label_path: NodePath
 @export var xp_bar_path: NodePath
 
+## Caminhos configuráveis dos labels gerais.
 @export var timer_label_path: NodePath
 @export var coins_label_path: NodePath
 @export var level_label_path: NodePath
 @export var kills_label_path: NodePath
 @export var message_label_path: NodePath
 
+## Caminhos configuráveis dos nodes de cooldown da arma.
 @export var cooldown_box_path: NodePath
 @export var cooldown_label_path: NodePath
 @export var cooldown_bar_path: NodePath
 
+## Exibe/oculta cooldown da arma.
 @export var show_cooldown: bool = true
 
+## Referências resolvidas de HP.
 @onready var hp_box: Control = get_node_or_null(hp_box_path) as Control
 @onready var hp_label: Label = get_node_or_null(hp_label_path) as Label
 @onready var hp_bar: ProgressBar = get_node_or_null(hp_bar_path) as ProgressBar
 
+## Referências resolvidas de XP.
 @onready var xp_box: Control = get_node_or_null(xp_box_path) as Control
 @onready var xp_label: Label = get_node_or_null(xp_label_path) as Label
 @onready var xp_bar: ProgressBar = get_node_or_null(xp_bar_path) as ProgressBar
 
+## Referências resolvidas de cooldown.
 @onready var cooldown_box: Control = get_node_or_null(cooldown_box_path) as Control
 @onready var cooldown_label: Label = get_node_or_null(cooldown_label_path) as Label
 @onready var cooldown_bar: ProgressBar = get_node_or_null(cooldown_bar_path) as ProgressBar
 
+## Referências resolvidas de labels gerais.
 @onready var timer_label: Label = get_node_or_null(timer_label_path) as Label
 @onready var coins_label: Label = get_node_or_null(coins_label_path) as Label
 @onready var level_label: Label = get_node_or_null(level_label_path) as Label
 @onready var kills_label: Label = get_node_or_null(kills_label_path) as Label
 @onready var message_label: Label = get_node_or_null(message_label_path) as Label
 
+## Acumulador usado para limitar frequência de refresh.
 var refresh_timer: float = 0.0
 
+## Último tipo de resultado recebido.
 var latest_result_type: String = ""
 
+## Último tempo restante de cooldown da arma.
 var latest_cooldown_timer: float = 0.0
 
+## Último progresso do cooldown da arma, de 0 a 1.
 var latest_cooldown_progress_ratio: float = 1.0
 
+## Inicializa HUD, resolve nodes, conecta eventos e faz primeiro refresh.
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 
@@ -95,6 +131,7 @@ func _ready() -> void:
 		}
 	)
 
+## Atualiza HUD periodicamente.
 func _process(delta: float) -> void:
 	refresh_timer += delta
 
@@ -104,6 +141,7 @@ func _process(delta: float) -> void:
 	refresh_timer = 0.0
 	_refresh_all()
 
+## Conecta HUD aos eventos globais relevantes.
 func _connect_events() -> void:
 	if not GameEvents.player_damaged.is_connected(_on_player_damaged):
 		GameEvents.player_damaged.connect(_on_player_damaged)
@@ -129,6 +167,7 @@ func _connect_events() -> void:
 	if not GameEvents.weapon_cooldown_changed.is_connected(_on_weapon_cooldown_changed):
 		GameEvents.weapon_cooldown_changed.connect(_on_weapon_cooldown_changed)
 
+## Atualiza todos os blocos do HUD.
 func _refresh_all() -> void:
 	_apply_visibility()
 
@@ -144,6 +183,7 @@ func _refresh_all() -> void:
 	_update_cooldown()
 	_update_message(run_data)
 
+## Atualiza visual do cooldown da arma.
 func _update_cooldown() -> void:
 	if not show_cooldown:
 		return
@@ -166,6 +206,7 @@ func _update_cooldown() -> void:
 		cooldown_bar.max_value = 100.0
 		cooldown_bar.value = cooldown_percent
 
+## Atualiza HP.
 func _update_hp(player_data: Dictionary) -> void:
 	if not show_hp:
 		return
@@ -186,6 +227,7 @@ func _update_hp(player_data: Dictionary) -> void:
 		hp_bar.max_value = max_hp
 		hp_bar.value = clamp(current_hp, 0, max_hp)
 
+## Atualiza XP do level atual.
 func _update_xp(run_data: Dictionary) -> void:
 	if not show_xp:
 		return
@@ -206,6 +248,7 @@ func _update_xp(run_data: Dictionary) -> void:
 		xp_bar.max_value = required_xp
 		xp_bar.value = clamp(current_level_xp, 0, required_xp)
 
+## Atualiza timer.
 func _update_timer(run_data: Dictionary) -> void:
 	if not show_timer:
 		return
@@ -221,6 +264,7 @@ func _update_timer(run_data: Dictionary) -> void:
 			_format_seconds(selected_time)
 		]
 
+## Atualiza moedas coletadas.
 func _update_coins(run_data: Dictionary) -> void:
 	if not show_coins:
 		return
@@ -233,6 +277,7 @@ func _update_coins(run_data: Dictionary) -> void:
 			str(coins)
 		]
 
+## Atualiza level atual.
 func _update_level(run_data: Dictionary) -> void:
 	if not show_level:
 		return
@@ -245,6 +290,7 @@ func _update_level(run_data: Dictionary) -> void:
 			str(level)
 		]
 
+## Atualiza quantidade de inimigos mortos.
 func _update_kills(run_data: Dictionary) -> void:
 	if not show_kills:
 		return
@@ -257,6 +303,7 @@ func _update_kills(run_data: Dictionary) -> void:
 			str(kills)
 		]
 
+## Atualiza mensagem geral da run.
 func _update_message(run_data: Dictionary) -> void:
 	if not show_message:
 		return
@@ -278,6 +325,7 @@ func _update_message(run_data: Dictionary) -> void:
 	else:
 		message_label.text = LocalizationManager.get_text("ui.hud.run_active")
 
+## Aplica visibilidade configurada nos elementos.
 func _apply_visibility() -> void:
 	if hp_box != null:
 		hp_box.visible = show_hp
@@ -303,6 +351,7 @@ func _apply_visibility() -> void:
 	if cooldown_box != null:
 		cooldown_box.visible = show_cooldown
 
+## Configura valores base das barras.
 func _configure_bars() -> void:
 	if hp_bar != null:
 		hp_bar.min_value = 0
@@ -322,6 +371,7 @@ func _configure_bars() -> void:
 		cooldown_bar.value = 100
 		cooldown_bar.show_percentage = false
 
+## Resolve nodes por caminhos padrão quando paths exportados não foram definidos.
 func _resolve_missing_nodes() -> void:
 	if hp_box == null:
 		hp_box = get_node_or_null("MarginContainer/VBoxContainer/TopRow/HpBox") as Control
@@ -365,6 +415,9 @@ func _resolve_missing_nodes() -> void:
 	if cooldown_bar == null:
 		cooldown_bar = get_node_or_null("MarginContainer/VBoxContainer/TopRow/CooldownBox/CooldownBar") as ProgressBar
 
+## Busca dados técnicos do player.
+##
+## O HUD usa get_debug_data() para evitar acoplamento direto com PlayerController.
 func _get_player_debug_data() -> Dictionary:
 	var players: Array[Node] = get_tree().get_nodes_in_group("player")
 
@@ -386,6 +439,7 @@ func _get_player_debug_data() -> Dictionary:
 
 	return {}
 
+## Busca dados técnicos da run.
 func _get_run_debug_data() -> Dictionary:
 	var run_controller: Node = RunQuery.get_run_controller(get_tree())
 
@@ -402,6 +456,7 @@ func _get_run_debug_data() -> Dictionary:
 
 	return {}
 
+## Formata segundos como MM:SS.
 func _format_seconds(seconds: float) -> String:
 	var total_seconds: int = int(floor(max(0.0, seconds)))
 	var minutes: int = int(floor(float(total_seconds) / 60.0))
@@ -409,6 +464,7 @@ func _format_seconds(seconds: float) -> String:
 
 	return "%02d:%02d" % [minutes, remaining_seconds]
 
+## Callbacks de eventos que forçam refresh imediato.
 func _on_player_damaged(
 	_raw_damage: int,
 	_final_damage: int,
@@ -442,6 +498,7 @@ func _on_run_timer_changed(
 ) -> void:
 	_refresh_all()
 
+## Callback de fim da run.
 func _on_run_finished(result_payload: RunResultPayload) -> void:
 	if result_payload == null:
 		return
@@ -453,6 +510,7 @@ func _on_run_finished(result_payload: RunResultPayload) -> void:
 	else:
 		_refresh_all()
 
+## Callback de atualização do cooldown da arma.
 func _on_weapon_cooldown_changed(
 	_weapon_id: String,
 	cooldown_timer: float,

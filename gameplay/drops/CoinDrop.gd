@@ -1,3 +1,15 @@
+## Moeda física coletável da run.
+##
+## Responsabilidades:
+## - representar uma moeda dropada no mundo;
+## - aguardar um pequeno tempo inicial;
+## - detectar player para magnetismo;
+## - acelerar em direção à Gaia;
+## - emitir coleta quando entra no raio final;
+## - impedir coleta após encerramento da run.
+##
+## Regra oficial:
+## XP entra direto, mas moeda é drop físico e só conta se for coletada.
 extends Node2D
 class_name CoinDrop
 
@@ -25,6 +37,7 @@ class_name CoinDrop
 
 @export var debug_outline_color: Color = Color(1.0, 1.0, 1.0, 0.95)
 
+## Referências e estado físico runtime da moeda.
 var player_node: Node2D = null
 
 var velocity: Vector2 = Vector2.ZERO
@@ -37,6 +50,7 @@ var is_magnetized: bool = false
 
 var collection_enabled: bool = true
 
+## Aplica definition, localiza player e conecta evento de fim da run.
 func _ready() -> void:
 	_apply_definition()
 	player_node = _resolve_player()
@@ -45,6 +59,7 @@ func _ready() -> void:
 	if not GameEvents.run_finished.is_connected(_on_run_finished):
 		GameEvents.run_finished.connect(_on_run_finished)
 
+## Atualiza magnetismo/coleta enquanto a moeda está ativa.
 func _physics_process(delta: float) -> void:
 	if is_collected:
 		return
@@ -87,6 +102,7 @@ func _physics_process(delta: float) -> void:
 	global_position += velocity * delta
 	queue_redraw()
 
+## Desenha visual técnico/placeholder da moeda quando habilitado.
 func _draw() -> void:
 	if not draw_debug_visual:
 		return
@@ -97,6 +113,7 @@ func _draw() -> void:
 	if is_magnetized:
 		draw_arc(Vector2.ZERO, _get_effective_magnet_radius(), 0.0, TAU, 48, Color(1.0, 0.9, 0.2, 0.18), 1.0)
 
+## Configura a moeda em runtime com definition, valor e player opcional.
 func setup(p_definition: CoinDropDefinition, p_value: int = 1, p_player: Node2D = null) -> void:
 	coin_definition = p_definition
 	value = max(1, p_value)
@@ -107,6 +124,7 @@ func setup(p_definition: CoinDropDefinition, p_value: int = 1, p_player: Node2D 
 	_apply_definition()
 	queue_redraw()
 
+## Copia dados da CoinDropDefinition para campos runtime.
 func _apply_definition() -> void:
 	if coin_definition == null:
 		return
@@ -122,6 +140,7 @@ func _apply_definition() -> void:
 	debug_color = coin_definition.debug_color
 	debug_outline_color = coin_definition.debug_outline_color
 
+## Calcula atração da moeda até o player e move sua posição.
 func _update_magnet_movement(delta: float) -> void:
 	var to_player: Vector2 = player_node.global_position - global_position
 
@@ -131,6 +150,7 @@ func _update_magnet_movement(delta: float) -> void:
 	var desired_velocity: Vector2 = to_player.normalized() * max_magnet_speed
 	velocity = velocity.move_toward(desired_velocity, magnet_acceleration * delta)
 
+## Marca como coletada, emite evento e remove a moeda.
 func _collect() -> void:
 	if not collection_enabled:
 		return
@@ -159,6 +179,7 @@ func _collect() -> void:
 
 	queue_free()
 
+## Localiza o primeiro Node2D no grupo de player.
 func _resolve_player() -> Node2D:
 	var players: Array[Node] = get_tree().get_nodes_in_group(player_group_name)
 
@@ -168,20 +189,24 @@ func _resolve_player() -> Node2D:
 
 	return null
 
+## Bloqueia coleta quando a run termina.
 func _on_run_finished(_result_payload: RunResultPayload) -> void:
 	collection_enabled = false
 	is_magnetized = false
 	velocity = Vector2.ZERO
 	queue_redraw()
 
+## Calcula raio de magnetismo com multiplicador do player, quando existir.
 func _get_effective_magnet_radius() -> float:
 	var multiplier: float = _get_player_collection_multiplier("coin_magnet_radius_multiplier")
 	return magnet_radius * multiplier
 
+## Calcula raio de coleta com multiplicador do player, quando existir.
 func _get_effective_collect_radius() -> float:
 	var multiplier: float = _get_player_collection_multiplier("coin_collect_radius_multiplier")
 	return collect_radius * multiplier
 
+## Consulta multiplicador de coleta/magnetismo no player, se disponível.
 func _get_player_collection_multiplier(key: String) -> float:
 	if player_node == null:
 		return 1.0

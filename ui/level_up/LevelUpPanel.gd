@@ -1,33 +1,56 @@
+## Painel de seleção de upgrade ao subir de level.
+##
+## Responsabilidades:
+## - abrir quando a run inicia level-up;
+## - exibir até 3 opções atuais;
+## - mostrar nome, descrição, ícone e badge de nível;
+## - emitir o upgrade escolhido;
+## - fechar quando o level-up é concluído.
+##
+## Importante:
+## Este painel não aplica upgrade diretamente.
+## Ele apenas envia a escolha via GameEvents.
 extends CanvasLayer
 
+## Ícone fallback usado quando o upgrade não possui ícone.
 const DEFAULT_ICON_PATH: String = "res://assets/placeholders/upgrades/upgrade_default.png"
 
 @export_group("Layout")
 
+## Se true, centraliza o painel por script.
 @export var center_panel_by_script: bool = true
 
+## Tamanho do painel central.
 @export var panel_size: Vector2 = Vector2(980.0, 460.0)
 
+## Offset vertical adicional.
 @export var panel_top_offset: float = 0.0
 
 @export_group("Icons")
 
+## Ícone padrão configurável pelo Inspector.
 @export var default_icon: Texture2D
 
+## Se true, esconde ícone quando não há textura disponível.
 @export var hide_icon_when_missing: bool = false
 
+## Referências principais do painel.
 @onready var panel: Panel = $Panel
 @onready var title_label: Label = $Panel/MarginContainer/VBoxContainer/TitleLabel
 @onready var subtitle_label: Label = $Panel/MarginContainer/VBoxContainer/SubtitleLabel
 
+## Cards/botões de opção.
 @onready var option_card_1: Button = $Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard1
 @onready var option_card_2: Button = $Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard2
 @onready var option_card_3: Button = $Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard3
 
+## Opções atualmente exibidas.
 var current_options: Array[UpgradeDefinition] = []
 
+## Cache do ícone padrão carregado por path.
 var cached_default_icon: Texture2D = null
 
+## Inicializa painel desligado e conecta eventos.
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	visible = false
@@ -45,6 +68,7 @@ func _ready() -> void:
 	if not GameEvents.run_level_up_completed.is_connected(_on_run_level_up_completed):
 		GameEvents.run_level_up_completed.connect(_on_run_level_up_completed)
 
+## Conecta os botões dos cards.
 func _connect_buttons() -> void:
 	if option_card_1 != null and not option_card_1.pressed.is_connected(_on_option_1_pressed):
 		option_card_1.pressed.connect(_on_option_1_pressed)
@@ -55,9 +79,11 @@ func _connect_buttons() -> void:
 	if option_card_3 != null and not option_card_3.pressed.is_connected(_on_option_3_pressed):
 		option_card_3.pressed.connect(_on_option_3_pressed)
 
+## Reposiciona painel quando a viewport muda.
 func _on_viewport_size_changed() -> void:
 	_configure_layout()
 
+## Centraliza e dimensiona o painel.
 func _configure_layout() -> void:
 	if panel == null:
 		return
@@ -74,6 +100,7 @@ func _configure_layout() -> void:
 		((viewport_size.y - panel_size.y) * 0.5) + panel_top_offset
 	)
 
+## Abre painel com opções recebidas pelo evento de level-up.
 func _on_run_level_up_started(current_level: int, options: Array) -> void:
 	current_options.clear()
 
@@ -107,10 +134,12 @@ func _on_run_level_up_started(current_level: int, options: Array) -> void:
 		}
 	)
 
+## Fecha painel após conclusão do level-up.
 func _on_run_level_up_completed(_current_level: int, _selected_upgrade_id: String) -> void:
 	visible = false
 	current_options.clear()
 
+## Preenche um card específico com os dados do upgrade.
 func _apply_option_to_card(card: Button, option_index: int) -> void:
 	if card == null:
 		return
@@ -134,6 +163,7 @@ func _apply_option_to_card(card: Button, option_index: int) -> void:
 	_set_card_text(card, upgrade_name, upgrade_description, badge_text)
 	_set_card_icon(card, upgrade.icon)
 
+## Atualiza labels internos do card.
 func _set_card_text(card: Button, upgrade_name: String, description: String, badge: String) -> void:
 	var name_label: Label = _find_label(card, "NameLabel")
 	var description_label: Label = _find_label(card, "DescriptionLabel")
@@ -148,6 +178,7 @@ func _set_card_text(card: Button, upgrade_name: String, description: String, bad
 	if badge_label != null:
 		badge_label.text = badge
 
+## Atualiza ícone do card, usando fallback quando necessário.
 func _set_card_icon(card: Button, texture: Texture2D) -> void:
 	var icon_texture: TextureRect = _find_texture_rect(card, "IconTexture")
 
@@ -170,6 +201,7 @@ func _set_card_icon(card: Button, texture: Texture2D) -> void:
 	icon_texture.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	icon_texture.custom_minimum_size = Vector2(56.0, 56.0)
 
+## Retorna ícone padrão, priorizando export e depois path fallback.
 func _get_default_icon() -> Texture2D:
 	if default_icon != null:
 		return default_icon
@@ -186,6 +218,7 @@ func _get_default_icon() -> Texture2D:
 
 	return null
 
+## Carrega ícone padrão no início, caso não esteja configurado por export.
 func _load_default_icon_if_needed() -> void:
 	if default_icon != null:
 		return
@@ -196,6 +229,7 @@ func _load_default_icon_if_needed() -> void:
 		if loaded_resource is Texture2D:
 			cached_default_icon = loaded_resource as Texture2D
 
+## Monta texto do badge de próximo nível/stack.
 func _get_badge_text(upgrade: UpgradeDefinition) -> String:
 	if upgrade == null:
 		return ""
@@ -210,6 +244,7 @@ func _get_badge_text(upgrade: UpgradeDefinition) -> String:
 		str(next_level)
 	]
 
+## Consulta no RunController qual será o próximo nível/stack do upgrade.
 func _get_next_upgrade_level(upgrade_id: String) -> int:
 	var run_controller: Node = RunQuery.get_run_controller(get_tree())
 
@@ -226,6 +261,7 @@ func _get_next_upgrade_level(upgrade_id: String) -> int:
 
 	return 1
 
+## Seleciona opção pelo índice e emite evento global.
 func _select_option(index: int) -> void:
 	if index < 0 or index >= current_options.size():
 		return
@@ -246,6 +282,7 @@ func _select_option(index: int) -> void:
 
 	GameEvents.run_level_up_option_selected.emit(upgrade)
 
+## Busca Label por nome dentro de um card.
 func _find_label(root: Node, node_name: String) -> Label:
 	var found_node: Node = root.find_child(node_name, true, false)
 
@@ -254,6 +291,7 @@ func _find_label(root: Node, node_name: String) -> Label:
 
 	return null
 
+## Busca TextureRect por nome dentro de um card.
 func _find_texture_rect(root: Node, node_name: String) -> TextureRect:
 	var found_node: Node = root.find_child(node_name, true, false)
 
@@ -262,6 +300,7 @@ func _find_texture_rect(root: Node, node_name: String) -> TextureRect:
 
 	return null
 
+## Callbacks dos três cards.
 func _on_option_1_pressed() -> void:
 	_select_option(0)
 

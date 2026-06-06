@@ -1,23 +1,55 @@
+## Utilitário para gerar uma captura textual da árvore runtime atual.
+##
+## Responsabilidades:
+## - percorrer a árvore de nodes em execução;
+## - listar nomes, classes, paths relativos, scripts e grupos;
+## - compactar subárvores internas do Spine para evitar overflow no console;
+## - limitar profundidade e quantidade de nodes impressos;
+## - gerar resumo de grupos importantes.
+##
+## Uso típico:
+## - acionado por ferramenta técnica/QA;
+## - copiado para área de transferência;
+## - usado para analisar se cenas, nodes e grupos foram montados corretamente.
+##
+## Este utilitário não altera gameplay.
 extends RefCounted
 
+## Limite máximo de nodes impressos no snapshot.
+##
+## Evita travar ou poluir o console em cenas com muitos nodes.
 const MAX_PRINTED_NODES: int = 220
 
+## Profundidade máxima de recursão exibida.
 const MAX_DEPTH: int = 16
 
+## Linha visual usada no cabeçalho.
 const HEADER_LINE: String = "=============================================================================================================="
 
+## Linha visual usada em seções de resumo.
 const SUMMARY_LINE: String = "--------------------------------------------------------------------------------------------------------------"
 
+## Contador de nodes efetivamente impressos.
 var printed_nodes: int = 0
 
+## Quantidade de subárvores Spine compactadas.
 var compacted_spine_subtrees: int = 0
 
+## Quantidade de nodes internos do Spine omitidos.
 var omitted_spine_nodes: int = 0
 
+## Quantidade de nodes omitidos por exceder limite máximo.
 var omitted_by_limit: int = 0
 
+## Quantidade de nodes omitidos por exceder profundidade máxima.
 var omitted_by_depth: int = 0
 
+## Gera snapshot textual da árvore a partir de um root.
+##
+## Parâmetros:
+## - root: node inicial da captura;
+## - include_scripts: se deve exibir script anexado;
+## - include_groups: se deve exibir grupos públicos do node.
 func build_snapshot(
 	root: Node,
 	include_scripts: bool = true,
@@ -61,6 +93,10 @@ func build_snapshot(
 
 	return "\n".join(lines)
 
+## Gera resumo quantitativo de grupos runtime importantes.
+##
+## Útil para saber rapidamente quantos players, inimigos, drops ou moedas
+## existem na cena em determinado momento.
 func build_group_summary(scene_tree: SceneTree) -> String:
 	if scene_tree == null:
 		return "QUEEN SURVIVORS - RUNTIME GROUP SUMMARY\nSceneTree ausente."
@@ -88,6 +124,7 @@ func build_group_summary(scene_tree: SceneTree) -> String:
 
 	return "\n".join(lines)
 
+## Reseta contadores antes de montar novo snapshot.
 func _reset_counters() -> void:
 	printed_nodes = 0
 	compacted_spine_subtrees = 0
@@ -95,6 +132,12 @@ func _reset_counters() -> void:
 	omitted_by_limit = 0
 	omitted_by_depth = 0
 
+## Adiciona um node e seus filhos ao snapshot.
+##
+## A função é recursiva e respeita:
+## - limite máximo de nodes impressos;
+## - profundidade máxima;
+## - compactação especial para SpineSprite.
 func _append_node(
 	node: Node,
 	root: Node,
@@ -142,6 +185,8 @@ func _append_node(
 
 	printed_nodes += 1
 
+	## SpineSprite costuma criar muitos nodes internos runtime.
+	## Compactar essa subárvore evita overflow do console e deixa a saída legível.
 	if node.get_class() == "SpineSprite":
 		_append_spine_summary(node, lines, indentation)
 		return
@@ -169,6 +214,7 @@ func _append_node(
 			include_groups
 		)
 
+## Adiciona uma linha compactada representando nodes internos do Spine.
 func _append_spine_summary(
 	spine_sprite: Node,
 	lines: Array[String],
@@ -189,6 +235,9 @@ func _append_spine_summary(
 	compacted_spine_subtrees += 1
 	omitted_spine_nodes += hidden_nodes
 
+## Conta descendentes de um node agrupando por classe.
+##
+## Usado principalmente para resumir o que existe dentro de SpineSprite.
 func _count_descendants_by_class(
 	root: Node,
 	class_counts: Dictionary
@@ -206,6 +255,7 @@ func _count_descendants_by_class(
 
 	return total
 
+## Formata a contagem de classes em texto legível.
 func _format_class_counts(class_counts: Dictionary) -> String:
 	if class_counts.is_empty():
 		return "sem nodes internos"
@@ -227,6 +277,9 @@ func _format_class_counts(class_counts: Dictionary) -> String:
 
 	return ", ".join(formatted_values)
 
+## Retorna caminho do script anexado ao node.
+##
+## Se não houver script, retorna string vazia.
 func _get_script_path(node: Node) -> String:
 	var attached_script: Variant = node.get_script()
 
@@ -237,6 +290,9 @@ func _get_script_path(node: Node) -> String:
 
 	return script_resource.resource_path
 
+## Retorna grupos públicos do node em formato textual.
+##
+## Grupos internos do Godot, iniciados por "_", são ignorados.
 func _get_groups_text(node: Node) -> String:
 	var group_names: Array[String] = []
 
@@ -250,6 +306,7 @@ func _get_groups_text(node: Node) -> String:
 
 	return ", ".join(group_names)
 
+## Conta recursivamente todos os nodes abaixo de um root, incluindo o próprio root.
 func _count_nodes(root: Node) -> int:
 	var total: int = 1
 

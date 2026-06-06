@@ -1,10 +1,24 @@
+## Área de impacto do dash da Gaia/player.
+##
+## Responsabilidades:
+## - construir shapes runtime a partir da QueenDashDefinition;
+## - detectar EnemyHurtbox durante o dash;
+## - aplicar dano opcional do dash;
+## - aplicar knockback opcional do dash;
+## - respeitar modo corridor para abrir caminho entre inimigos;
+## - impedir múltiplos impactos no mesmo inimigo quando configurado.
+##
+## Importante:
+## Esta Area2D é a área ofensiva do dash. Ela não usa BodyCollision como dano.
 extends Area2D
 class_name PlayerDashImpactArea
 
+## Layers/masks usados para detectar as hurtboxes corretas.
 @export_group("Collision Filter")
 @export_range(1, 32, 1) var impact_collision_layer_number: int = 4
 @export_range(1, 32, 1) var enemy_hurtbox_mask_number: int = 5
 
+## Configurações usadas apenas para visualização e diagnóstico.
 @export_group("Debug")
 @export var log_dash_impact_debug: bool = false
 
@@ -20,6 +34,8 @@ var already_impacted_instance_ids: Dictionary = {}
 var is_configured: bool = false
 var is_active: bool = false
 
+
+## Prepara filtro de colisão e conecta sinais de área.
 func _ready() -> void:
 	monitoring = false
 	monitorable = false
@@ -29,6 +45,8 @@ func _ready() -> void:
 	if not area_entered.is_connected(_on_area_entered):
 		area_entered.connect(_on_area_entered)
 
+
+## Recebe QueenDashDefinition e referências do dash para construir a área de impacto.
 func setup(
 	p_dash_definition: QueenDashDefinition,
 	p_source_node: Node,
@@ -63,6 +81,8 @@ func setup(
 
 	set_impact_active(false)
 
+
+## Ativa a área de impacto durante um dash específico.
 func activate_for_dash(direction: Vector2) -> void:
 	if not is_configured:
 		return
@@ -80,10 +100,14 @@ func activate_for_dash(direction: Vector2) -> void:
 	set_impact_active(true)
 	call_deferred("_process_current_overlaps")
 
+
+## Desativa a área e limpa alvos atingidos quando o dash termina/cancela.
 func deactivate() -> void:
 	set_impact_active(false)
 	already_impacted_instance_ids.clear()
 
+
+## Liga ou desliga processamento de impacto sem destruir a área.
 func set_impact_active(should_be_active: bool) -> void:
 	is_active = should_be_active
 	monitoring = should_be_active
@@ -94,6 +118,8 @@ func set_impact_active(should_be_active: bool) -> void:
 
 		shape_node.disabled = not should_be_active
 
+
+## Processa overlaps existentes enquanto o dash está ativo.
 func _physics_process(_delta: float) -> void:
 	if not is_active:
 		return
@@ -106,9 +132,13 @@ func _physics_process(_delta: float) -> void:
 
 	_process_current_overlaps()
 
+
+## Reage a novas hurtboxes que entram na área durante o dash.
 func _on_area_entered(area: Area2D) -> void:
 	_try_apply_dash_impact_to_hurtbox(area)
 
+
+## Varre hurtboxes já sobrepostas para não depender apenas do sinal de entrada.
 func _process_current_overlaps() -> void:
 	if not is_active:
 		return
@@ -116,6 +146,8 @@ func _process_current_overlaps() -> void:
 	for overlapping_area: Area2D in get_overlapping_areas():
 		_try_apply_dash_impact_to_hurtbox(overlapping_area)
 
+
+## Valida hurtbox/receiver e aplica dano/knockback conforme configuração.
 func _try_apply_dash_impact_to_hurtbox(area: Area2D) -> void:
 	if not is_active:
 		return
@@ -145,6 +177,8 @@ func _try_apply_dash_impact_to_hurtbox(area: Area2D) -> void:
 
 	already_impacted_instance_ids[receiver_instance_id] = true
 
+
+## Constrói DamagePayload e aplica dano opcional do dash.
 func _try_apply_dash_damage(receiver: Node) -> bool:
 	if not dash_definition.impact_damage_enabled:
 		return false
@@ -176,6 +210,8 @@ func _try_apply_dash_damage(receiver: Node) -> bool:
 
 	return false
 
+
+## Solicita knockback no receiver quando ele suporta esse método.
 func _try_apply_dash_knockback(receiver: Node) -> bool:
 	if not dash_definition.impact_enabled:
 		return false
@@ -200,6 +236,8 @@ func _try_apply_dash_knockback(receiver: Node) -> bool:
 
 	return false
 
+
+## Escolhe direção de knockback de acordo com o modo configurado.
 func _resolve_impact_direction_for_receiver(receiver: Node) -> Vector2:
 	if dash_definition == null:
 		return dash_direction.normalized()
@@ -220,6 +258,8 @@ func _resolve_impact_direction_for_receiver(receiver: Node) -> Vector2:
 
 	return _resolve_corridor_impact_direction(receiver)
 
+
+## Calcula empurrão lateral para abrir corredor durante o dash.
 func _resolve_corridor_impact_direction(receiver: Node) -> Vector2:
 	if not (receiver is Node2D):
 		return dash_direction.normalized()
@@ -267,6 +307,8 @@ func _resolve_corridor_impact_direction(receiver: Node) -> Vector2:
 
 	return corridor_direction.normalized()
 
+
+## Configura layer/mask da Area2D de impacto.
 func _configure_collision_filter() -> void:
 	collision_layer = 0
 	collision_mask = 0
@@ -274,6 +316,8 @@ func _configure_collision_filter() -> void:
 	set_collision_layer_value(impact_collision_layer_number, true)
 	set_collision_mask_value(enemy_hurtbox_mask_number, true)
 
+
+## Cria CollisionShape2D runtime a partir das impact_areas configuradas.
 func _build_runtime_shapes() -> void:
 	_clear_runtime_shapes()
 
@@ -303,6 +347,8 @@ func _build_runtime_shapes() -> void:
 		add_child(shape_node)
 		runtime_shape_nodes.append(shape_node)
 
+
+## Remove shapes runtime antigas antes de reconstruir/desativar.
 func _clear_runtime_shapes() -> void:
 	for shape_node: CollisionShape2D in runtime_shape_nodes:
 		if shape_node == null or not is_instance_valid(shape_node):
