@@ -71,6 +71,14 @@ extends Node
 
 @export var log_timeline_changes: bool = true
 
+
+## Pré-aquecimento do pool de inimigos.
+@export_group("Pooling")
+
+## Quantidade de inimigos pré-criados no pool no _ready, evitando hitch no início.
+## 0 desliga o pré-aquecimento.
+@export var prewarm_pool_count: int = 24
+
 var player_node: Node2D = null
 
 var enemy_root: Node2D = null
@@ -85,12 +93,20 @@ var last_spawn_frame: int = -1
 
 var initial_spawn_delay_completed: bool = false
 
+# Contador incremental de inimigos vivos (++ ao spawnar, -- no enemy_died).
+# Evita varrer o grupo "enemy" a cada spawn; leitura em O(1).
+var _alive_enemy_count: int = 0
+
 
 ## Resolve referências iniciais, timeline e delay de spawn.
 func _ready() -> void:
 	enemy_root = _resolve_enemy_root()
 	player_node = _resolve_player()
 	_resolve_spawn_timeline_from_map()
+
+	# Pré-aquece o pool de inimigos para evitar hitch nas primeiras waves.
+	if prewarm_pool_count > 0 and enemy_scene_path.strip_edges() != "":
+		PoolManager.prewarm_path(enemy_scene_path, prewarm_pool_count)
 
 	if spawn_on_ready:
 		spawn_timer = max(0.0, initial_spawn_delay_seconds)
@@ -100,13 +116,13 @@ func _ready() -> void:
 	if not GameEvents.run_finished.is_connected(_on_run_finished):
 		GameEvents.run_finished.connect(_on_run_finished)
 
+	if not GameEvents.enemy_died.is_connected(_on_enemy_died_count):
+		GameEvents.enemy_died.connect(_on_enemy_died_count)
+
 
 ## Atualiza timer de spawn e instancia inimigos quando permitido.
 func _process(delta: float) -> void:
 	if not spawner_enabled:
-		return
-
-	if RunQuery.is_gameplay_blocked(get_tree()):
 		return
 
 	elapsed_since_ready += delta
@@ -175,9 +191,6 @@ func configure_enemy_root(root: Node2D) -> void:
 
 ## Cria um inimigo imediatamente para testes ou fluxo normal de spawn.
 func force_spawn_enemy() -> bool:
-	if RunQuery.is_gameplay_blocked(get_tree()):
-		return false
-
 	if not spawner_enabled:
 		return false
 
@@ -210,31 +223,29 @@ func force_spawn_enemy() -> bool:
 		push_warning("[EnemySpawner] enemy_scene_path vazio.")
 		return false
 
-	var packed_enemy: PackedScene = load(enemy_scene_path) as PackedScene
+	# Calcula a posição antes do spawn para o inimigo já nascer no lugar certo
+	# (o pool aplica a posição antes do add_child, evitando 1 frame na origem).
+	var spawn_position: Vector2 = _get_safe_spawn_position_around_player()
 
-	if packed_enemy == null:
-		push_warning("[EnemySpawner] Não foi possível carregar enemy_scene_path: %s" % enemy_scene_path)
-		return false
-
-	var enemy_instance: Node = packed_enemy.instantiate()
+	# Adquire o inimigo do pool (reutiliza instância morta quando houver).
+	var enemy_instance: Node = PoolManager.spawn_path(enemy_scene_path, enemy_root, spawn_position)
 
 	if not enemy_instance is Node2D:
-		push_warning("[EnemySpawner] Enemy scene não é Node2D.")
-		enemy_instance.queue_free()
+		push_warning("[EnemySpawner] Enemy scene inválida ou não é Node2D: %s" % enemy_scene_path)
+
+		if enemy_instance != null:
+			PoolManager.despawn(enemy_instance)
+
 		return false
 
 	var enemy_node: Node2D = enemy_instance as Node2D
-	var spawn_position: Vector2 = _get_safe_spawn_position_around_player()
 	var distance_to_player: float = spawn_position.distance_to(player_node.global_position)
-
-	enemy_node.position = enemy_root.to_local(spawn_position)
-
-	enemy_root.add_child(enemy_node)
 
 	if enemy_node.has_method("setup"):
 		enemy_node.call("setup", enemy_definition, player_node)
 
 	last_spawn_frame = Engine.get_process_frames()
+	_alive_enemy_count += 1
 
 	distance_to_player = enemy_node.global_position.distance_to(player_node.global_position)
 
@@ -400,21 +411,20 @@ func _get_spawn_position_around_player(min_distance: float, max_distance: float)
 
 	return player_node.global_position + Vector2(cos(angle), sin(angle)) * distance
 
-## Conta inimigos vivos no EnemyRoot/grupo.
+## Retorna a contagem de inimigos vivos em O(1) (contador incremental).
 func _get_alive_enemy_count() -> int:
-	var enemies: Array[Node] = get_tree().get_nodes_in_group("enemy")
-	var count: int = 0
+	return _alive_enemy_count
 
-	for enemy: Node in enemies:
-		if enemy == null:
-			continue
-
-		if not is_instance_valid(enemy):
-			continue
-
-		count += 1
-
-	return count
+## Decrementa o contador quando um inimigo morre (signal global enemy_died).
+func _on_enemy_died_count(
+	_enemy_id: String,
+	_source_id: String,
+	_xp_reward: int,
+	_enemy_global_position: Vector2,
+	_coin_drop_chance: float,
+	_coin_drop_value: int
+) -> void:
+	_alive_enemy_count = max(0, _alive_enemy_count - 1)
 
 ## Localiza root de inimigos por path ou fallback.
 func _resolve_enemy_root() -> Node2D:

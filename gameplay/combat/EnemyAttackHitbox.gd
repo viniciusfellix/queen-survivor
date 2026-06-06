@@ -56,9 +56,6 @@ func _physics_process(delta: float) -> void:
 	if not is_configured or not is_active:
 		return
 
-	if RunQuery.is_gameplay_blocked(get_tree()):
-		return
-
 	elapsed_seconds += delta
 
 	_update_receiver_cooldowns(delta)
@@ -201,8 +198,12 @@ func _try_damage_overlapping_hurtboxes() -> void:
 			source_id
 		)
 
-		var final_damage_variant: Variant = receiver.call("receive_damage", payload)
-		var final_damage: int = _variant_to_damage(final_damage_variant)
+		var player_receiver: PlayerController = receiver as PlayerController
+
+		if player_receiver == null:
+			continue
+
+		var final_damage: int = player_receiver.receive_damage(payload)
 
 		if final_damage <= 0:
 			continue
@@ -260,16 +261,6 @@ func _clear_runtime_shapes() -> void:
 		shape_node.queue_free()
 
 	runtime_shape_nodes.clear()
-
-## Converte retorno do receiver em inteiro de dano confirmado.
-func _variant_to_damage(value: Variant) -> int:
-	if value is int:
-		return int(value)
-
-	if value is float:
-		return int(value)
-
-	return 0
 
 ## Retorna dados compactos para debug/auditoria.
 func get_debug_data() -> Dictionary:

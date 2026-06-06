@@ -26,3 +26,13 @@ attack_hitbox_offset: 160
 | `weapon_attack_area_scale_percent` | escala attack areas |
 
 O upgrade antigo `weapon_hitbox_radius_flat` foi eliminado.
+
+## Pooling do ataque
+
+A hitbox (`DirectionalAttackHitbox`) e o visual (`GaiaAttackVisualController`) do ataque são poolizados via `PoolManager`:
+
+- `GaiaInitialWeaponController._spawn_attack_hitbox` / `_spawn_attack_visual` usam `PoolManager.spawn_path`.
+- Ao expirar o `lifetime`, chamam `PoolManager.despawn(self)` em vez de `queue_free`.
+- `_on_pool_acquire()` reseta o estado (elapsed, alpha, hits) a cada reúso.
+
+`GaiaInitialWeaponController` tipou a referência `player_controller: PlayerController`.

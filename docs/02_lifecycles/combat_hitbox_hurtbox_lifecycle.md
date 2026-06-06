@@ -29,5 +29,5 @@ EnemyDefinition.contact_attack
 
 - Gaia morta desativa PlayerHurtbox.
 - Goblin morto desativa Hurtbox e ContactAttackHitbox.
-- `RunQuery.is_gameplay_blocked()` impede efeitos após encerramento.
+- A pausa nativa (`get_tree().paused`) impede efeitos durante level-up/encerramento: hitboxes e hurtboxes pausáveis param de processar sozinhas.
 - Alterações de shape durante física devem usar operação segura/deferred quando aplicável.

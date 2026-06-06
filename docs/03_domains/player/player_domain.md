@@ -1,6 +1,10 @@
 # Domínio — Player / Gaia
 
-`PlayerController` inicializa `PlayerRuntimeState`, lê input, move Gaia, encaminha mira, recebe dano pela `PlayerHurtbox`, aplica defesa/invencibilidade/morte e processa upgrades do player ou envia upgrades à arma.
+`PlayerController` (`class_name PlayerController`) inicializa `PlayerRuntimeState`, lê input do `InputManager` (que usa o Input Map nativo), move Gaia, encaminha mira, recebe dano pela `PlayerHurtbox`, aplica defesa/invencibilidade/morte e processa upgrades do player ou envia upgrades à arma.
+
+## Colisão one-way Gaia ↔ inimigo
+
+A Gaia **não colide** com `EnemyBody` (export `collide_with_enemy_bodies`, default `false`): `_configure_enemy_body_collision()` remove `EnemyBody` da máscara da Gaia no `_ready`, eliminando empurrão/teleporte em aglomerados. Os inimigos seguem colidindo com a Gaia e escorregando (`player_body_slide`).
 
 ## Dados editáveis
 

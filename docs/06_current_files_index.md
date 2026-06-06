@@ -27,6 +27,15 @@ gameplay/weapons/gaia/GaiaInitialWeaponController.gd
 visual/enemies/goblin_warrior/GoblinWarriorVisualController.gd
 ```
 
+## Infraestrutura atual
+
+```text
+autoloads/PoolManager.gd            (novo: pool central de objetos)
+data/localization/translation.csv   (tradução nativa, 7 locales)
+```
+
+Removidos: `autoloads/LocalizationManager.gd` e `data/localization/pt_br.json` (localização migrou para tradução nativa do Godot).
+
 ## Referências adicionais
 
 - Resources atuais: `06_reference/current_resources_index.md`.

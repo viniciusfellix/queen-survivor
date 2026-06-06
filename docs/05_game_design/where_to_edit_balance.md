@@ -15,7 +15,7 @@
 | Pool | `upgrade_pool_gaia_default.tres` |
 | Mapa/reward | `map_test_arena_10min.tres` |
 | Waves | spawn timeline correspondente |
-| Texto | `data/localization/pt_br.json` |
+| Texto | `data/localization/translation.csv` |
 | Flash Goblin | `GoblinWarriorVisualController`/Inspector |
 | Flash Gaia | `GaiaVisualController`/Inspector |
 

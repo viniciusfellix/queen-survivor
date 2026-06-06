@@ -33,9 +33,18 @@ final_total = 10
 
 O ataque corporal envia dano físico bruto 6, redutível por defesa. O `PlayerController` resolve defesa e assegura dano mínimo válido conforme implementação atual.
 
+## Aplicação de dano por cast tipado
+
+Os hitboxes aplicam dano por `cast` tipado e chamada direta (sem reflexão por `has_method`+`call`):
+
+- `DirectionalAttackHitbox` chama `(receiver as EnemyBase).receive_damage(...)` / `.apply_hit_knockback(...)`.
+- `EnemyAttackHitbox` chama `(receiver as PlayerController).receive_damage(...)`.
+
+`EnemyBase` e `PlayerController` agora expõem `class_name`. O `HurtboxComponent` mantém o duck-typing genérico (`has_method("receive_damage")`) de propósito — é componente de combate reutilizável e não acopla aos tipos do jogo.
+
 ## Invariantes
 
 - Dano só ocorre entre hitbox e hurtbox compatíveis.
 - `BodyCollision` nunca processa dano.
 - Entidade morta desativa regiões relevantes.
-- Gameplay bloqueado impede novos efeitos.
+- Pausa nativa (`get_tree().paused`) impede novos efeitos.

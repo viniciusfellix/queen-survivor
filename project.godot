@@ -19,6 +19,7 @@ config/icon="res://icon.svg"
 
 DeveloperAuditLogger="*uid://br5oa4kxekn2k"
 GameEvents="*uid://xinybba3obyo"
+PoolManager="*res://autoloads/PoolManager.gd"
 SaveManager="*uid://cbymq1sv1y3bj"
 InputManager="*uid://de2j17ep6ta1e"
 App="*uid://dpk11lg5lf1do"

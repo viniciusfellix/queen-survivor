@@ -14,6 +14,7 @@
 ## Este script executa regras de gameplay. A camada Spine/visual apenas representa
 ## os estados decididos aqui.
 extends CharacterBody2D
+class_name PlayerController
 
 @export var queen_definition: QueenDefinition
 @export var runtime_state: PlayerRuntimeState
@@ -21,6 +22,11 @@ extends CharacterBody2D
 @export var draw_debug_aim: bool = false
 @export var debug_aim_line_length: float = 96.0
 @export var base_defense_percent: float = 0.0
+
+## If enabled, Gaia's body is blocked by enemy bodies (EnemyBody layer).
+## Keep it OFF for hordes: with many enemies the physics depenetration pushes/ejects
+## Gaia. Enemies still detect her and slide around (player_body_slide) either way.
+@export var collide_with_enemy_bodies: bool = false
 
 
 ## Configurações runtime do dash da Gaia/player.
@@ -80,12 +86,13 @@ func _ready() -> void:
 	_configure_dash_impact_area()
 
 	_configure_player_hurtbox()
+	_configure_enemy_body_collision()
 
 	if visual_controller == null:
 		push_warning("[PlayerController] visual_controller não encontrado. Verifique visual_controller_path.")
 
 	_update_visual_state()
-	queue_redraw()
+	_queue_debug_redraw()
 
 
 ## Atualiza input, dash, invulnerabilidade, movimento físico e estado visual a cada frame físico.
@@ -107,19 +114,19 @@ func _physics_process(_delta: float) -> void:
 		velocity = Vector2.ZERO
 		move_and_slide()
 		_update_visual_state()
-		queue_redraw()
+		_queue_debug_redraw()
 		return
 
 	if is_dash_active:
 		_update_active_dash(_delta, move_direction, aim_direction)
 		_update_visual_state()
-		queue_redraw()
+		_queue_debug_redraw()
 		return
 
 	if _should_start_dash():
 		_start_dash(move_direction, aim_direction)
 		_update_visual_state()
-		queue_redraw()
+		_queue_debug_redraw()
 		return
 
 	runtime_state.apply_input(move_direction, aim_direction)
@@ -128,8 +135,15 @@ func _physics_process(_delta: float) -> void:
 	move_and_slide()
 
 	_update_visual_state()
-	queue_redraw()
+	_queue_debug_redraw()
 
+
+## Reagenda o _draw apenas quando a mira de debug está ligada.
+##
+# Evita marcar o canvas como "dirty" a cada frame quando o debug está desligado.
+func _queue_debug_redraw() -> void:
+	if draw_debug_aim:
+		queue_redraw()
 
 ## Desenha linha técnica de mira quando o debug visual está habilitado.
 func _draw() -> void:
@@ -164,9 +178,6 @@ func receive_damage(payload: DamagePayload) -> int:
 		return 0
 
 	if not payload.is_valid_payload():
-		return 0
-
-	if RunQuery.is_gameplay_blocked(get_tree()):
 		return 0
 
 	if not runtime_state.is_alive:
@@ -233,7 +244,7 @@ func receive_damage(payload: DamagePayload) -> int:
 		)
 
 	_update_visual_state()
-	queue_redraw()
+	_queue_debug_redraw()
 
 	return final_damage
 
@@ -273,9 +284,6 @@ func _should_start_dash() -> bool:
 		return false
 
 	if is_dash_active:
-		return false
-
-	if RunQuery.is_gameplay_blocked(get_tree()):
 		return false
 
 	return InputManager.was_dash_just_pressed()
@@ -689,7 +697,7 @@ func apply_run_upgrade(upgrade: UpgradeDefinition) -> bool:
 				return false
 
 	_update_visual_state()
-	queue_redraw()
+	_queue_debug_redraw()
 
 	return true
 
@@ -927,6 +935,13 @@ func _get_dash_animation_time_scale(effective_dash_duration: float) -> float:
 		dash_definition.dash_animation_source_duration_seconds / max(0.01, effective_dash_duration)
 	)
 
+
+## Configura se o corpo da Gaia colide com EnemyBody.
+##
+# Por padrão a Gaia atravessa os inimigos para nunca ser empurrada/teleportada por
+# aglomerados; os inimigos ainda a detectam e escorregam ao redor (player_body_slide).
+func _configure_enemy_body_collision() -> void:
+	set_collision_mask_value(enemy_body_collision_layer_number, collide_with_enemy_bodies)
 
 ## Ativa/restaura máscara de colisão para permitir atravessar EnemyBody durante dash.
 func _apply_dash_collision_mode(should_enable_dash_mode: bool) -> void:

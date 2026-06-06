@@ -27,7 +27,7 @@ Use inglês, minúsculas e `snake_case`.
 
 ## Localization
 
-Todo texto exibido deve ter chave em `res://data/localization/pt_br.json`. Padrões:
+Todo texto exibido deve ter chave em `res://data/localization/translation.csv` (tradução nativa do Godot, exibida com `tr(key)`). Padrões:
 
 ```text
 queen.gaia.name / queen.gaia.description

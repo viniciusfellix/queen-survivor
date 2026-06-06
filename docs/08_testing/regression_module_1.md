@@ -73,3 +73,12 @@
 - [ ] Run da Gaia continua normal.
 - [ ] Morte da Gaia interrompe blink.
 - [ ] Logs detalhados ficam desligados por padrão.
+
+## Etapa — Pooling, pausa nativa, colisão e plataforma
+
+- [ ] Pooling: inimigos reaparecem reutilizados com estado resetado (HP cheio, sem hits antigos).
+- [ ] Pooling: moedas reaparecem reutilizadas com estado limpo.
+- [ ] Pausa nativa: level-up congela inimigos enquanto a UI segue, e retoma ao escolher.
+- [ ] Colisão: a Gaia não é empurrada/teleportada em aglomerados de inimigos.
+- [ ] Localização: trocar locale com `TranslationServer.set_locale` reflete na UI.
+- [ ] Input: mover/mirar/dash pelo Input Map (teclado e gamepad).

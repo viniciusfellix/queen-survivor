@@ -25,8 +25,8 @@ O Módulo 1 está funcionalmente implementado e validado após auditoria, refato
 
 ### Arquitetura consolidada
 
-- `RunState.is_ending` bloqueia gameplay durante encerramento.
-- `RunQuery` centraliza consulta de bloqueio de gameplay.
+- `RunState.is_ending` marca o encerramento da run.
+- Pausa de gameplay é nativa (`get_tree().paused` + `process_mode = ALWAYS`); a antiga consulta `RunQuery.is_gameplay_blocked` por frame foi removida.
 - `RewardResolver` calcula dinheiro final.
 - `DamageResolver` calcula defesa/fraqueza/resistência.
 - `LevelUpOptionService` seleciona upgrades válidos.
@@ -52,8 +52,6 @@ O Módulo 1 está funcionalmente implementado e validado após auditoria, refato
 
 ## Pendências futuras fora do fechamento atual
 
-- movimentação orgânica de bando ao redor da Gaia;
-- possível migração para tradução nativa Godot;
 - proteção/assinatura/criptografia do save;
 - balanceamento definitivo entre dano geral, físico e mágico;
 - valores progressivos por stack de upgrade;
@@ -88,3 +86,16 @@ Foram implementados:
 A arquitetura modular Hitbox/Hurtbox foi preservada. BodyCollision continua sendo apenas colisão física/movimento e não causa dano.
 
 O Goblin permanece um perseguidor simples. A organicidade do bando vem da resposta física entre inimigos e dos impulsos externos, não de IA de cerco.
+
+## Etapa de performance e infraestrutura nativa
+
+Status: concluída funcionalmente.
+
+Foram implementados:
+
+- **Object pooling** via autoload `PoolManager`: inimigos, moedas, hitbox/visual de ataque e texto flutuante são reaproveitados em vez de criados/destruídos; instâncias inativas ficam fora da árvore; `EnemySpawner.prewarm_pool_count` (default `24`). Objetivo: milhares de entidades sem custo de criar/destruir (ADR 0011).
+- **Pausa de gameplay nativa**: `get_tree().paused` + `process_mode = ALWAYS` no level-up e fim de run; removida a checagem `is_gameplay_blocked` por frame (`get_nodes_in_group` + reflexão), cara em hordas (ADR 0012).
+- **Localização nativa**: `data/localization/translation.csv` + `[internationalization]` do projeto, textos por `tr(key)`, 7 idiomas (`pt_BR`, `en`, `es`, `zh`, `ja`, `ko`, `ru`); `LocalizationManager`/`pt_br.json` removidos (ADR 0013).
+- **Input Map nativo**: actions declaradas no `project.godot [input]` (não mais criadas por código); `InputManager` apenas lê (ADR 0014).
+- **Colisão one-way player↔inimigo**: a Gaia não colide com `EnemyBody` (`collide_with_enemy_bodies` default `false`), eliminando empurrão/teleporte em aglomerados; inimigos seguem colidindo e escorregando (ADR 0015).
+- Contagem de inimigos vivos O(1) (contador incremental no `EnemySpawner`), uso de `class_name` + chamadas tipadas no caminho de dano, e `queue_redraw` só com debug ligado.

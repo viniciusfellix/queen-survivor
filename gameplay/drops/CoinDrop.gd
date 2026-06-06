@@ -54,7 +54,7 @@ var collection_enabled: bool = true
 func _ready() -> void:
 	_apply_definition()
 	player_node = _resolve_player()
-	queue_redraw()
+	_queue_debug_redraw()
 
 	if not GameEvents.run_finished.is_connected(_on_run_finished):
 		GameEvents.run_finished.connect(_on_run_finished)
@@ -67,12 +67,6 @@ func _physics_process(delta: float) -> void:
 	elapsed_seconds += delta
 
 	if not collection_enabled:
-		return
-
-	if RunQuery.is_gameplay_blocked(get_tree()):
-		is_magnetized = false
-		velocity = Vector2.ZERO
-		queue_redraw()
 		return
 
 	if player_node == null:
@@ -100,7 +94,14 @@ func _physics_process(delta: float) -> void:
 		velocity = velocity.move_toward(Vector2.ZERO, magnet_acceleration * delta)
 
 	global_position += velocity * delta
-	queue_redraw()
+	_queue_debug_redraw()
+
+## Reagenda o _draw apenas quando o visual de debug está ligado.
+##
+# Evita marcar o canvas como "dirty" a cada frame em muitas moedas com debug desligado.
+func _queue_debug_redraw() -> void:
+	if draw_debug_visual:
+		queue_redraw()
 
 ## Desenha visual técnico/placeholder da moeda quando habilitado.
 func _draw() -> void:
@@ -122,7 +123,7 @@ func setup(p_definition: CoinDropDefinition, p_value: int = 1, p_player: Node2D 
 		player_node = p_player
 
 	_apply_definition()
-	queue_redraw()
+	_queue_debug_redraw()
 
 ## Copia dados da CoinDropDefinition para campos runtime.
 func _apply_definition() -> void:
@@ -155,9 +156,6 @@ func _collect() -> void:
 	if not collection_enabled:
 		return
 
-	if RunQuery.is_gameplay_blocked(get_tree()):
-		return
-
 	if is_collected:
 		return
 
@@ -177,7 +175,18 @@ func _collect() -> void:
 		}
 	)
 
-	queue_free()
+	# Devolve a moeda ao pool (fallback para queue_free se não for poolada).
+	PoolManager.despawn(self)
+
+## Hook do pool: reseta o estado runtime antes de reusar a moeda.
+##
+## O setup() reaplica a definition e o valor logo em seguida.
+func _on_pool_acquire() -> void:
+	is_collected = false
+	is_magnetized = false
+	collection_enabled = true
+	velocity = Vector2.ZERO
+	elapsed_seconds = 0.0
 
 ## Localiza o primeiro Node2D no grupo de player.
 func _resolve_player() -> Node2D:
@@ -194,7 +203,7 @@ func _on_run_finished(_result_payload: RunResultPayload) -> void:
 	collection_enabled = false
 	is_magnetized = false
 	velocity = Vector2.ZERO
-	queue_redraw()
+	_queue_debug_redraw()
 
 ## Calcula raio de magnetismo com multiplicador do player, quando existir.
 func _get_effective_magnet_radius() -> float:

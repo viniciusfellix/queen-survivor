@@ -106,17 +106,20 @@ func spawn_floating_text(display_text: String, screen_position: Vector2, color: 
 		push_warning("[WorldFeedbackLayer] FloatingCombatText scene não configurada.")
 		return
 
-	var instance: Node = floating_combat_text_scene.instantiate()
+	# Adquire o texto flutuante do pool (reutiliza textos já finalizados).
+	var instance: Node = PoolManager.spawn(floating_combat_text_scene, feedback_root)
 
 	if not instance is Control:
 		push_warning("[WorldFeedbackLayer] FloatingCombatText precisa ter root do tipo Control ou Label.")
-		instance.queue_free()
+
+		if instance != null:
+			PoolManager.despawn(instance)
+
 		return
 
 	var text_control: Control = instance as Control
 
-	feedback_root.add_child(text_control)
-
+	# spawn já adicionou o texto ao feedback_root; aqui só posicionamos.
 	text_control.position = screen_position - (text_control.size * 0.5)
 	text_control.visible = true
 

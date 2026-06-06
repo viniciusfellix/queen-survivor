@@ -6,10 +6,10 @@ Use busca textual por termos como `visual`, `Gaia`, `ataque`, `hurtbox`, `upgrad
 
 | Arquivo | Responsabilidades |
 |---|---|
-| `App.gd` | título, versão e boot |
+| `App.gd` | título, versão, boot e `set_locale("pt_BR")` |
 | `GameEvents.gd` | Event Bus global |
-| `LocalizationManager.gd` | localization JSON/get_text |
-| `InputManager.gd` | movimento/mira/última direção |
+| `InputManager.gd` | lê input (movimento/mira/última direção); actions no Input Map do projeto |
+| `PoolManager.gd` | pool central de objetos: filas por cena, instâncias fora da árvore, `spawn`/`despawn`/`prewarm`/`get_scene` |
 | `SaveManager.gd` | save, resultado e reset |
 | `DeveloperLogChannels.gd` | nomes de canais |
 | `DeveloperAuditLogger.gd` | logs filtrados/buffer |
@@ -44,15 +44,15 @@ Use busca textual por termos como `visual`, `Gaia`, `ataque`, `hurtbox`, `upgrad
 | `HurtboxComponent.gd` | construir hurtboxes e expor receiver |
 | `DirectionalAttackHitbox.gd` | Detecta EnemyHurtbox, envia DamagePayload e solicita knockback pós-hit quando configurado. |
 | `EnemyAttackHitbox.gd` | atacar PlayerHurtbox pelo inimigo |
-| `PlayerController.gd` | Gaia: input, dano, upgrades, morte, hurtbox |
+| `PlayerController.gd` | `class_name PlayerController`; Gaia: input, dano, upgrades, morte, hurtbox; remove colisão com `EnemyBody` no `_ready` |
 | `PlayerRuntimeState.gd` | estado mutável da Gaia |
-| `EnemyBase.gd` | perseguição direta, velocidades externas temporárias, esbarrão físico, knockback recebido, dano, morte e comunicação visual.
-| `GaiaInitialWeaponController.gd` | disparo/cooldown/upgrades arma |
-| `EnemySpawner.gd` | waves/instâncias |
+| `EnemyBase.gd` | `class_name EnemyBase`; perseguição direta, velocidades externas temporárias, esbarrão físico, knockback recebido, dano, morte (via pool) e comunicação visual.
+| `GaiaInitialWeaponController.gd` | disparo/cooldown/upgrades arma; hitbox de ataque via pool |
+| `EnemySpawner.gd` | waves/instâncias via pool (`prewarm_pool_count`); contador O(1) de inimigos vivos (`_alive_enemy_count`) |
 | `DropController.gd` | chance/criação de coin drop |
 | `CoinDrop.gd` | moeda runtime |
 | `RunState.gd` | estado da run |
-| `RunQuery.gd` | bloqueio de gameplay |
+| `RunQuery.gd` | consulta da run (`get_run_controller`/`get_run_state`/`is_run_ending`/`is_run_finished`); pausa de gameplay agora é nativa (`get_tree().paused`), sem `is_gameplay_blocked` |
 | `RunController.gd` | orquestração/resultado |
 | `RewardResolver.gd` | reward monetário |
 | `LevelUpOptionService.gd` | opções válidas de upgrade |

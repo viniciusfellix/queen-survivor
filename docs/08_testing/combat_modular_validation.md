@@ -14,6 +14,7 @@
 - Ataque Gaia `physical:3 + magical:3` contra Goblin fraco retorna `final=10`.
 - Ataque Goblin atinge `PlayerGaia` por `PlayerHurtbox` com raw `6`.
 - Teste de defesa confirmou redução válida.
+- Dano por cast tipado (`EnemyBase`/`PlayerController`) mantém os mesmos resultados (dano/knockback) da resolução anterior por reflexão.
 - Morte desativa regiões ofensivas/vulneráveis necessárias.
 - Todos os testes finais informados passaram.
 

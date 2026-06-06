@@ -84,7 +84,16 @@ func _process(delta: float) -> void:
 		modulate.a = remaining_ratio
 
 	if auto_queue_free and lifetime_seconds > 0.0 and elapsed_seconds >= lifetime_seconds:
-		queue_free()
+		# Devolve o visual ao pool em vez de destruir (fallback: queue_free).
+		PoolManager.despawn(self)
+
+## Hook do pool: restaura visibilidade e alpha antes de reusar o visual.
+##
+## O setup() reaplica direção, lifetime e escala em seguida.
+func _on_pool_acquire() -> void:
+	elapsed_seconds = 0.0
+	modulate.a = 1.0
+	visible = true
 
 ## Configura direção, lifetime e escala do visual.
 ##

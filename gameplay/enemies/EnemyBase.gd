@@ -14,6 +14,7 @@
 ## Dano do inimigo é feito por EnemyAttackHitbox contra PlayerHurtbox.
 ## Dano recebido vem de PlayerAttackHitbox/DirectionalAttackHitbox contra EnemyHurtbox.
 extends CharacterBody2D
+class_name EnemyBase
 
 @export var enemy_definition: EnemyDefinition
 @export var target_path: NodePath
@@ -85,20 +86,10 @@ func _ready() -> void:
 		push_warning("[EnemyBase] Visual controller não encontrado.")
 
 	_update_visual_state()
-	queue_redraw()
+	_queue_debug_redraw()
 
 ## Atualiza movimento, forças físicas, perseguição e visual a cada frame.
 func _physics_process(_delta: float) -> void:
-	if RunQuery.is_gameplay_blocked(get_tree()):
-		velocity = Vector2.ZERO
-		body_bump_velocity = Vector2.ZERO
-		player_body_slide_velocity = Vector2.ZERO
-		_clear_received_knockback()
-		move_and_slide()
-		_update_visual_state()
-		queue_redraw()
-		return
-
 	if not is_alive:
 		velocity = Vector2.ZERO
 		body_bump_velocity = Vector2.ZERO
@@ -106,7 +97,7 @@ func _physics_process(_delta: float) -> void:
 		_clear_received_knockback()
 		move_and_slide()
 		_update_visual_state()
-		queue_redraw()
+		_queue_debug_redraw()
 		return
 
 	if target_node == null:
@@ -119,7 +110,7 @@ func _physics_process(_delta: float) -> void:
 		_clear_received_knockback()
 		move_and_slide()
 		_update_visual_state()
-		queue_redraw()
+		_queue_debug_redraw()
 		return
 
 	_update_body_bump_velocity(_delta)
@@ -150,7 +141,15 @@ func _physics_process(_delta: float) -> void:
 	_process_body_bump_collisions()
 
 	_update_visual_state()
-	queue_redraw()
+	_queue_debug_redraw()
+
+## Reagenda o _draw apenas quando o visual de debug está ligado.
+##
+# Evita marcar o canvas como "dirty" a cada frame em centenas de inimigos quando
+# o debug está desligado (caso comum); sem isso o _draw nem desenha nada.
+func _queue_debug_redraw() -> void:
+	if draw_debug_visual:
+		queue_redraw()
 
 ## Desenha placeholder/debug visual do inimigo e linha até o alvo.
 func _draw() -> void:
@@ -190,7 +189,7 @@ func setup(definition: EnemyDefinition, target: Node2D = null) -> void:
 		visual_controller = _resolve_visual_controller()
 
 	_update_visual_state()
-	queue_redraw()
+	_queue_debug_redraw()
 
 ## Recebe DamagePayload, calcula dano final, atualiza HP e dispara eventos.
 func receive_damage(payload: DamagePayload) -> int:
@@ -198,9 +197,6 @@ func receive_damage(payload: DamagePayload) -> int:
 		return 0
 
 	if not payload.is_valid_payload():
-		return 0
-
-	if RunQuery.is_gameplay_blocked(get_tree()):
 		return 0
 
 	if not is_alive:
@@ -255,7 +251,7 @@ func receive_damage(payload: DamagePayload) -> int:
 		die(payload.source_id)
 
 	_update_visual_state()
-	queue_redraw()
+	_queue_debug_redraw()
 
 	return final_damage
 
@@ -309,9 +305,38 @@ func die(source_id: String = "") -> void:
 	var death_timer: SceneTreeTimer = get_tree().create_timer(remove_after_death_seconds)
 	death_timer.timeout.connect(_on_death_timer_timeout)
 
-## Remove o node depois do pequeno delay de morte.
+## Devolve o inimigo ao pool depois do pequeno delay de morte.
+##
+## Se o inimigo não tiver vindo do pool, o PoolManager faz queue_free() como fallback.
 func _on_death_timer_timeout() -> void:
-	queue_free()
+	PoolManager.despawn(self)
+
+## Hook do pool: restaura o inimigo ao estado de "recém-nascido" antes de reusar.
+##
+## A configuração de HP/áreas é refeita logo depois pelo setup() do spawner;
+## aqui garantimos vida, grupo, velocidades e telemetria zerados.
+func _on_pool_acquire() -> void:
+	is_alive = true
+
+	velocity = Vector2.ZERO
+	body_bump_velocity = Vector2.ZERO
+	player_body_slide_velocity = Vector2.ZERO
+	_clear_received_knockback()
+
+	total_damage_taken = 0
+	last_damage_taken = 0
+	last_damage_source_id = ""
+
+	# A morte removeu do grupo; reinsere para voltar a contar como inimigo vivo.
+	if not is_in_group("enemy"):
+		add_to_group("enemy")
+
+	# Reativa as áreas de combate (o setup ajustará o valor final conforme a definition).
+	if hurtbox_component != null:
+		hurtbox_component.set_hurtbox_active(true)
+
+	if contact_attack_hitbox != null:
+		contact_attack_hitbox.set_attack_active(true)
 
 ## Copia dados do EnemyDefinition para estado runtime do inimigo.
 func _apply_definition() -> void:
@@ -735,9 +760,6 @@ func apply_hit_knockback(
 	chase_weight_override: float = -1.0
 ) -> bool:
 	if not is_alive:
-		return false
-
-	if RunQuery.is_gameplay_blocked(get_tree()):
 		return false
 
 	if knockback_pixels <= 0.0:

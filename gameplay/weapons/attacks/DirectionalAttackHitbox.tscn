@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://f301wqo5vajy"]
 
-[ext_resource type="Script" uid="uid://86cml1ily235" path="res://gameplay/weapons/attacks/DirectionalAttackHitbox.gd" id="1_tw1wm"]
+[ext_resource type="Script" uid="uid://r7sgvuih1krq" path="res://gameplay/weapons/attacks/DirectionalAttackHitbox.gd" id="1_tw1wm"]
 
 [node name="DirectionalAttackHitbox" type="Area2D" unique_id=104047366]
 script = ExtResource("1_tw1wm")

@@ -1,2 +1,15 @@
-res://scenes/Main.tscn
-res://scenes/Main.gd
+res://autoloads/PoolManager.gd
+res://gameplay/drops/DropController.gd
+res://gameplay/spawners/EnemySpawner.gd
+res://gameplay/weapons/gaia/GaiaInitialWeaponController.gd
+res://gameplay/combat/EnemyAttackHitbox.gd
+res://gameplay/drops/CoinDrop.gd
+res://gameplay/enemies/EnemyBase.gd
+res://gameplay/player/PlayerController.gd
+res://gameplay/player/PlayerDashImpactArea.gd
+res://gameplay/run/RunQuery.gd
+res://gameplay/weapons/attacks/DirectionalAttackHitbox.gd
+res://gameplay/test/TestGaiaScene.tscn
+res://data/enemies/attack_area_enemy_chaser_basic_contact.tres
+res://data/enemies/hurtbox_area_enemy_chaser_basic_body.tres
+res://data/spawn_timelines/test_arena_10min/spawn_timeline_test_arena_10min.tres

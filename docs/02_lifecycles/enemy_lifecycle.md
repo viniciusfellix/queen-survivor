@@ -4,12 +4,16 @@
 
 ```text
 EnemySpawner seleciona SpawnTimelineEntryDefinition
-→ instancia EnemyBase
+→ PoolManager.spawn (reusa instância da fila ou cria nova)
+→ posição aplicada antes do add_child
+→ _on_pool_acquire reseta o estado da instância reusada
 → setup(enemy_definition, player)
 → EnemyBase lê enemy_chaser_basic.tres
 → configura Hurtbox e ContactAttackHitbox
 → visual inicia idle/run
 ```
+
+O `EnemySpawner` pré-aquece o pool no `_ready` (`prewarm_pool_count`, default 24). Instâncias inativas ficam fora da árvore.
 
 ## Perseguição
 
@@ -34,5 +38,7 @@ DirectionalAttackHitbox detecta Hurtbox
 → EnemyBase.receive_damage
 → DamageResolver processa fraquezas
 → flash claro
-→ se HP zerar: desativa hurtbox e attack hitbox, emite reward, toca death e agenda remoção
+→ se HP zerar: desativa hurtbox e attack hitbox, emite reward, sai do grupo `enemy`, toca death e agenda remoção
 ```
+
+Ao zerar HP, `die()` desativa as áreas, emite `enemy_died`, sai do grupo `enemy` e, após `remove_after_death_seconds`, chama `PoolManager.despawn(self)` (não `queue_free`). Quando a instância é readquirida do pool, `_on_pool_acquire()` restaura vida, grupo e velocidades e reativa as áreas; o `setup()` reaplica a `EnemyDefinition`.

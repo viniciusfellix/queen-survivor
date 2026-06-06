@@ -72,19 +72,19 @@ func _ready() -> void:
 	if not area_entered.is_connected(_on_area_entered):
 		area_entered.connect(_on_area_entered)
 
-	if RunQuery.is_gameplay_blocked(get_tree()):
-		queue_free()
-		return
-
 	queue_redraw()
+
+## Hook do pool: zera o estado de hit antes de reusar a hitbox.
+##
+## O setup() reconfigura direção, dano, áreas e lifetime em seguida.
+func _on_pool_acquire() -> void:
+	elapsed_seconds = 0.0
+	is_configured = false
+	already_hit_instance_ids.clear()
 
 ## Controla lifetime e processa overlaps enquanto a hitbox está ativa.
 func _physics_process(delta: float) -> void:
 	if not is_configured:
-		return
-
-	if RunQuery.is_gameplay_blocked(get_tree()):
-		queue_free()
 		return
 
 	elapsed_seconds += delta
@@ -92,7 +92,7 @@ func _physics_process(delta: float) -> void:
 	_process_current_overlaps()
 
 	if elapsed_seconds >= lifetime_seconds:
-		queue_free()
+		PoolManager.despawn(self)
 
 ## Desenha shapes de debug quando habilitado.
 func _draw() -> void:
@@ -280,7 +280,7 @@ func _try_apply_damage_to_hurtbox(area: Area2D) -> void:
 	if not hurtbox.can_receive_damage():
 		return
 
-	var damage_receiver: Node = hurtbox.get_damage_receiver()
+	var damage_receiver: EnemyBase = hurtbox.get_damage_receiver() as EnemyBase
 
 	if damage_receiver == null or not is_instance_valid(damage_receiver):
 		return
@@ -288,9 +288,6 @@ func _try_apply_damage_to_hurtbox(area: Area2D) -> void:
 	var receiver_instance_id: int = int(damage_receiver.get_instance_id())
 
 	if already_hit_instance_ids.has(receiver_instance_id):
-		return
-
-	if not damage_receiver.has_method("receive_damage"):
 		return
 
 	var payload: DamagePayload = DamagePayload.new(
@@ -304,12 +301,7 @@ func _try_apply_damage_to_hurtbox(area: Area2D) -> void:
 	if not damage_components.is_empty():
 		payload.set_components(damage_components)
 
-	var final_damage_variant: Variant = damage_receiver.call(
-		"receive_damage",
-		payload
-	)
-
-	var final_damage: int = _variant_to_damage(final_damage_variant)
+	var final_damage: int = damage_receiver.receive_damage(payload)
 
 	if final_damage <= 0:
 		return
@@ -345,7 +337,7 @@ func _try_apply_damage_to_hurtbox(area: Area2D) -> void:
 	)
 
 ## Solicita knockback pós-hit quando configurado e dano válido foi confirmado.
-func _try_apply_hit_knockback_to_receiver(damage_receiver: Node) -> bool:
+func _try_apply_hit_knockback_to_receiver(damage_receiver: EnemyBase) -> bool:
 	if not hit_knockback_enabled:
 		return false
 
@@ -355,31 +347,12 @@ func _try_apply_hit_knockback_to_receiver(damage_receiver: Node) -> bool:
 	if damage_receiver == null or not is_instance_valid(damage_receiver):
 		return false
 
-	if not damage_receiver.has_method("apply_hit_knockback"):
-		return false
-
-	var result_variant: Variant = damage_receiver.call(
-		"apply_hit_knockback",
+	return damage_receiver.apply_hit_knockback(
 		hit_knockback_pixels,
 		hit_knockback_duration_seconds,
 		source_node,
 		attack_direction
 	)
-
-	if result_variant is bool:
-		return bool(result_variant)
-
-	return false
-
-## Converte retorno genérico de receive_damage em valor inteiro seguro.
-func _variant_to_damage(value: Variant) -> int:
-	if value is int:
-		return int(value)
-
-	if value is float:
-		return int(value)
-
-	return 0
 
 ## Gera resumo dos componentes de dano para logs.
 func _get_component_debug_string() -> String:

@@ -67,7 +67,7 @@ extends Node
 var cooldown_timer: float = 0.0
 var was_player_dashing: bool = false
 var attack_area_scale_multiplier: float = 1.0
-var player_controller: Node = null
+var player_controller: PlayerController = null
 var attack_visual_root: Node2D = null
 var attack_hitbox_root: Node2D = null
 
@@ -100,9 +100,6 @@ func _ready() -> void:
 ## Atualiza cooldown, respeita dash/regras da run e dispara automaticamente.
 func _process(delta: float) -> void:
 	if not weapon_enabled:
-		return
-
-	if RunQuery.is_gameplay_blocked(get_tree()):
 		return
 
 	if player_controller == null:
@@ -140,9 +137,6 @@ func _process(delta: float) -> void:
 
 ## Dispara manualmente a arma para testes ou futuras mecânicas.
 func force_fire() -> void:
-	if RunQuery.is_gameplay_blocked(get_tree()):
-		return
-
 	var runtime_state: PlayerRuntimeState = _get_player_runtime_state()
 
 	if runtime_state == null or not runtime_state.is_alive:
@@ -181,28 +175,27 @@ func _fire_attack(runtime_state: PlayerRuntimeState) -> void:
 
 ## Instancia somente o efeito visual do ataque.
 func _spawn_attack_visual(direction: Vector2) -> void:
-	var packed_visual: PackedScene = load(attack_visual_scene_path) as PackedScene
+	# Posição final do visual, aplicada já no spawn (antes do add_child).
+	var visual_spawn_position: Vector2 = (
+		_get_player_global_position() + direction * attack_visual_offset
+	)
 
-	if packed_visual == null:
-		push_warning(
-			"[GaiaInitialWeaponController] Não foi possível carregar attack_visual_scene_path: %s"
-			% attack_visual_scene_path
-		)
-		return
-
-	var visual_instance: Node = packed_visual.instantiate()
+	# Adquire o visual de ataque do pool (reutiliza visuais já expirados).
+	var visual_instance: Node = PoolManager.spawn_path(
+		attack_visual_scene_path,
+		attack_visual_root,
+		visual_spawn_position
+	)
 
 	if not visual_instance is Node2D:
-		push_warning("[GaiaInitialWeaponController] Attack visual não é Node2D.")
-		visual_instance.queue_free()
+		push_warning("[GaiaInitialWeaponController] Attack visual inválido ou não é Node2D.")
+
+		if visual_instance != null:
+			PoolManager.despawn(visual_instance)
+
 		return
 
 	var visual_node: Node2D = visual_instance as Node2D
-
-	attack_visual_root.add_child(visual_node)
-	visual_node.global_position = (
-		_get_player_global_position() + direction * attack_visual_offset
-	)
 
 	if visual_node.has_method("setup"):
 		visual_node.call(
@@ -214,29 +207,27 @@ func _spawn_attack_visual(direction: Vector2) -> void:
 
 ## Instancia DirectionalAttackHitbox configurada com dano, áreas e knockback.
 func _spawn_attack_hitbox(direction: Vector2) -> void:
-	var packed_hitbox: PackedScene = load(attack_hitbox_scene_path) as PackedScene
+	# Posição final da hitbox, aplicada já no spawn (antes do add_child).
+	var hitbox_spawn_position: Vector2 = (
+		_get_player_global_position() + direction * attack_hitbox_offset
+	)
 
-	if packed_hitbox == null:
-		push_warning(
-			"[GaiaInitialWeaponController] Não foi possível carregar attack_hitbox_scene_path: %s"
-			% attack_hitbox_scene_path
-		)
-		return
-
-	var hitbox_instance: Node = packed_hitbox.instantiate()
+	# Adquire a hitbox de ataque do pool (reutiliza hitboxes já expiradas).
+	var hitbox_instance: Node = PoolManager.spawn_path(
+		attack_hitbox_scene_path,
+		attack_hitbox_root,
+		hitbox_spawn_position
+	)
 
 	if not hitbox_instance is Node2D:
-		push_warning("[GaiaInitialWeaponController] Attack hitbox não é Node2D.")
-		hitbox_instance.queue_free()
+		push_warning("[GaiaInitialWeaponController] Attack hitbox inválida ou não é Node2D.")
+
+		if hitbox_instance != null:
+			PoolManager.despawn(hitbox_instance)
+
 		return
 
 	var hitbox_node: Node2D = hitbox_instance as Node2D
-
-	attack_hitbox_root.add_child(hitbox_node)
-
-	hitbox_node.global_position = (
-		_get_player_global_position() + direction * attack_hitbox_offset
-	)
 
 	if hitbox_node.has_method("setup"):
 		hitbox_node.call(
@@ -413,33 +404,23 @@ func _get_player_runtime_state() -> PlayerRuntimeState:
 	if player_controller == null:
 		return null
 
-	if not player_controller.has_method("get_runtime_state"):
-		return null
-
-	var runtime_state_variant: Variant = player_controller.call(
-		"get_runtime_state"
-	)
-
-	if runtime_state_variant is PlayerRuntimeState:
-		return runtime_state_variant as PlayerRuntimeState
-
-	return null
+	return player_controller.get_runtime_state()
 
 ## Localiza o PlayerController na hierarquia ou grupo player.
-func _resolve_player_controller() -> Node:
+func _resolve_player_controller() -> PlayerController:
 	var current: Node = self
 
 	while current != null:
-		if current.has_method("get_runtime_state"):
-			return current
+		if current is PlayerController:
+			return current as PlayerController
 
 		current = current.get_parent()
 
 	var players: Array[Node] = get_tree().get_nodes_in_group("player")
 
 	for player: Node in players:
-		if player.has_method("get_runtime_state"):
-			return player
+		if player is PlayerController:
+			return player as PlayerController
 
 	return null
 
@@ -827,31 +808,31 @@ func _is_player_dashing(runtime_state: PlayerRuntimeState) -> bool:
 
 ## Consulta QueenDashDefinition para saber se arma pode atacar durante dash.
 func _can_weapon_attack_while_dashing() -> bool:
-	if player_controller != null and player_controller.has_method("can_weapon_attack_while_dashing"):
-		return bool(player_controller.call("can_weapon_attack_while_dashing"))
+	if player_controller != null:
+		return player_controller.can_weapon_attack_while_dashing()
 
 	return false
 
 
 ## Consulta se cooldown deve pausar durante dash.
 func _should_pause_weapon_cooldown_while_dashing() -> bool:
-	if player_controller != null and player_controller.has_method("should_pause_weapon_cooldown_while_dashing"):
-		return bool(player_controller.call("should_pause_weapon_cooldown_while_dashing"))
+	if player_controller != null:
+		return player_controller.should_pause_weapon_cooldown_while_dashing()
 
 	return true
 
 
 ## Consulta se cooldown deve resetar ao iniciar dash.
 func _should_reset_weapon_cooldown_when_dash_starts() -> bool:
-	if player_controller != null and player_controller.has_method("should_reset_weapon_cooldown_when_dash_starts"):
-		return bool(player_controller.call("should_reset_weapon_cooldown_when_dash_starts"))
+	if player_controller != null:
+		return player_controller.should_reset_weapon_cooldown_when_dash_starts()
 
 	return false
 
 
 ## Consulta se cooldown deve resetar ao finalizar dash.
 func _should_reset_weapon_cooldown_when_dash_ends() -> bool:
-	if player_controller != null and player_controller.has_method("should_reset_weapon_cooldown_when_dash_ends"):
-		return bool(player_controller.call("should_reset_weapon_cooldown_when_dash_ends"))
+	if player_controller != null:
+		return player_controller.should_reset_weapon_cooldown_when_dash_ends()
 
 	return true

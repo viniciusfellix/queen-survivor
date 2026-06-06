@@ -12,7 +12,11 @@ TestGaiaScene._spawn_player()
 
 ## Movimento e mira
 
-Movimento controla posição e facing visual horizontal. Mira controla ataque direcional e pode vir do mouse ou analógico; não existe auto-target do inimigo mais próximo.
+Movimento controla posição e facing visual horizontal. As actions vêm do Input Map nativo (`project.godot [input]`); o `InputManager` apenas lê o input, não cria actions por código. Mira controla ataque direcional e pode vir do mouse ou analógico; não existe auto-target do inimigo mais próximo.
+
+## Colisão com inimigos (one-way)
+
+A Gaia **não colide** mais com `EnemyBody`, então não é empurrada nem teleportada em aglomerados; os inimigos continuam colidindo com ela e escorregando. Isso é configurado em `PlayerController._configure_enemy_body_collision()` no `_ready` (export `collide_with_enemy_bodies`, default `false`).
 
 ## Recebendo dano
 

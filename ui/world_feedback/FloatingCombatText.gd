@@ -129,5 +129,15 @@ func _play_animation() -> void:
 	).set_delay(fade_delay)
 
 	fade_tween.finished.connect(func() -> void:
-		queue_free()
+		# Devolve o texto ao pool em vez de destruir (fallback: queue_free).
+		PoolManager.despawn(self)
 	)
+
+## Hook do pool: libera a animação para rodar de novo ao reusar o texto.
+##
+## O setup() reaplica texto, cor, escala e modulate em seguida.
+func _on_pool_acquire() -> void:
+	animation_started = false
+	visible = true
+	self_modulate = Color.WHITE
+	scale = start_scale

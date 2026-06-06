@@ -34,6 +34,14 @@ EnemyAttackHitbox: layer 6, mask 7
 PlayerHurtbox: layer 7
 ```
 
+## Colisão de corpo one-way (Gaia ↔ inimigos)
+
+A Gaia **não** colide com `EnemyBody` (o corpo dos inimigos). Em aglomerados a depenetração da física a ejetava, causando empurrão/teleporte; remover essa colisão eliminou o bug.
+
+- `PlayerController._configure_enemy_body_collision()` remove o bit `EnemyBody` da `collision_mask` da Gaia no `_ready` (export `collide_with_enemy_bodies`, default `false`).
+- Resultado prático: a máscara do corpo da Gaia passa a ser só `World` (não mais `World + EnemyBody`).
+- Os inimigos **continuam** colidindo com a Gaia e escorregando ao redor dela (`player_body_slide`).
+
 ## Geometria configurável
 
 `CombatShapeDefinition` armazena ID, enabled, shape, offset e rotação, e constrói a shape runtime. `AttackAreaDefinition` e `HurtboxAreaDefinition` herdam a geometria e diferenciam semanticamente ataque e vulnerabilidade.

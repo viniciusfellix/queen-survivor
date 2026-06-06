@@ -127,9 +127,6 @@ func _physics_process(_delta: float) -> void:
 	if not is_configured:
 		return
 
-	if RunQuery.is_gameplay_blocked(get_tree()):
-		return
-
 	_process_current_overlaps()
 
 
@@ -186,7 +183,9 @@ func _try_apply_dash_damage(receiver: Node) -> bool:
 	if not dash_definition.has_valid_impact_damage():
 		return false
 
-	if not receiver.has_method("receive_damage"):
+	var enemy_receiver: EnemyBase = receiver as EnemyBase
+
+	if enemy_receiver == null:
 		return false
 
 	var payload: DamagePayload = DamagePayload.new(
@@ -200,15 +199,7 @@ func _try_apply_dash_damage(receiver: Node) -> bool:
 	if not dash_definition.impact_damage_components.is_empty():
 		payload.set_components(dash_definition.impact_damage_components)
 
-	var result_variant: Variant = receiver.call("receive_damage", payload)
-
-	if result_variant is int:
-		return int(result_variant) > 0
-
-	if result_variant is float:
-		return int(result_variant) > 0
-
-	return false
+	return enemy_receiver.receive_damage(payload) > 0
 
 
 ## Solicita knockback no receiver quando ele suporta esse método.
@@ -216,13 +207,14 @@ func _try_apply_dash_knockback(receiver: Node) -> bool:
 	if not dash_definition.impact_enabled:
 		return false
 
-	if not receiver.has_method("apply_hit_knockback"):
+	var enemy_receiver: EnemyBase = receiver as EnemyBase
+
+	if enemy_receiver == null:
 		return false
 
 	var impact_direction: Vector2 = _resolve_impact_direction_for_receiver(receiver)
 
-	var result_variant: Variant = receiver.call(
-		"apply_hit_knockback",
+	return enemy_receiver.apply_hit_knockback(
 		dash_definition.impact_knockback_pixels,
 		dash_definition.impact_knockback_duration_seconds,
 		null,
@@ -230,11 +222,6 @@ func _try_apply_dash_knockback(receiver: Node) -> bool:
 		dash_definition.impact_knockback_max_velocity_override,
 		dash_definition.impact_chase_weight_override
 	)
-
-	if result_variant is bool:
-		return bool(result_variant)
-
-	return false
 
 
 ## Escolhe direção de knockback de acordo com o modo configurado.

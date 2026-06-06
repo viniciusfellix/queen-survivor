@@ -6,7 +6,9 @@ O Goblin perseguidor básico é configurado por `enemy_chaser_basic.tres`.
 
 ## `EnemyBase`
 
-Responsável por aplicar definition, perseguir Gaia, configurar hitbox/hurtbox, receber dano, acionar feedback, emitir recompensas e morrer.
+`class_name EnemyBase`. Responsável por aplicar definition, perseguir Gaia, configurar hitbox/hurtbox, receber dano (via cast tipado, sem `has_method`/`call`), acionar feedback, emitir recompensas e morrer.
+
+É **poolizado**: a morte devolve o inimigo ao `PoolManager` com `PoolManager.despawn(self)` em vez de `queue_free`, e o reset de estado acontece em `_on_pool_acquire()` ao ser reutilizado.
 
 ## Definition
 

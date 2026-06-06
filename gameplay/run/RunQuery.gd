@@ -3,11 +3,13 @@
 ## Responsabilidades:
 ## - localizar RunController pelo grupo `run_controller`;
 ## - acessar RunState com segurança;
-## - responder se a run está pausada, encerrando ou finalizada;
-## - centralizar a pergunta "o gameplay está bloqueado?".
+## - responder se a run está encerrando ou finalizada.
 ##
-## Usado por hitboxes, inimigos, drops e sistemas runtime para evitar processamento
-## indevido após vitória, derrota, pausa ou início do encerramento.
+## Observação:
+## A pausa de gameplay (level-up, fim de run) é feita pela pausa nativa do Godot
+## (`get_tree().paused` + `process_mode = ALWAYS` na UI), não mais por uma checagem
+## "is_gameplay_blocked" lida a cada frame. Estas funções servem a callbacks de
+## evento (ex.: não dropar moeda durante o encerramento), não a `_process`.
 extends RefCounted
 class_name RunQuery
 
@@ -57,34 +59,3 @@ static func is_run_finished(scene_tree: SceneTree) -> bool:
 		return false
 
 	return run_state.is_finished or run_state.is_victory or run_state.is_defeat
-
-## Indica se a árvore ou o RunState estão pausados.
-static func is_run_paused(scene_tree: SceneTree) -> bool:
-	if scene_tree == null:
-		return false
-
-	if scene_tree.paused:
-		return true
-
-	var run_state: RunState = get_run_state(scene_tree)
-
-	if run_state == null:
-		return false
-
-	return run_state.is_paused
-
-## Centraliza a regra de bloqueio de gameplay para sistemas runtime.
-static func is_gameplay_blocked(scene_tree: SceneTree) -> bool:
-	if scene_tree == null:
-		return false
-
-	if is_run_ending(scene_tree):
-		return true
-
-	if is_run_finished(scene_tree):
-		return true
-
-	if is_run_paused(scene_tree):
-		return true
-
-	return false

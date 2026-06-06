@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://imubpqpdu5kc"]
 
-[ext_resource type="Script" uid="uid://bpq01ugbtl2xx" path="res://gameplay/drops/CoinDrop.gd" id="1_wjvt6"]
+[ext_resource type="Script" uid="uid://bt61yabvjl8ho" path="res://gameplay/drops/CoinDrop.gd" id="1_wjvt6"]
 [ext_resource type="Resource" uid="uid://bcfegd6d7xccr" path="res://data/drops/coin_default.tres" id="2_1k4t7"]
 
 [node name="CoinDrop" type="Node2D" unique_id=333999507]

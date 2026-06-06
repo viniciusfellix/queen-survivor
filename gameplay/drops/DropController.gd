@@ -131,23 +131,21 @@ func _spawn_coin(spawn_position: Vector2, value: int, enemy_id: String, source_i
 		push_warning("[DropController] Não foi possível criar moeda: DropRoot ausente.")
 		return
 
-	var packed_coin: PackedScene = load(coin_drop_scene_path) as PackedScene
+	# Calcula a posição final antes do spawn para a moeda já nascer no lugar certo.
+	var coin_spawn_position: Vector2 = spawn_position + _get_random_jitter()
 
-	if packed_coin == null:
-		push_warning("[DropController] Não foi possível carregar CoinDrop: %s" % coin_drop_scene_path)
-		return
-
-	var coin_instance: Node = packed_coin.instantiate()
+	# Adquire a moeda do pool (reutiliza moedas já coletadas quando houver).
+	var coin_instance: Node = PoolManager.spawn_path(coin_drop_scene_path, drop_root, coin_spawn_position)
 
 	if not coin_instance is Node2D:
-		push_warning("[DropController] CoinDrop não é Node2D.")
-		coin_instance.queue_free()
+		push_warning("[DropController] CoinDrop inválida ou não é Node2D: %s" % coin_drop_scene_path)
+
+		if coin_instance != null:
+			PoolManager.despawn(coin_instance)
+
 		return
 
 	var coin_node: Node2D = coin_instance as Node2D
-
-	drop_root.add_child(coin_node)
-	coin_node.global_position = spawn_position + _get_random_jitter()
 
 	if coin_node.has_method("setup"):
 		coin_node.call("setup", coin_definition, value, player_node)

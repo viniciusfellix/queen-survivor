@@ -34,7 +34,11 @@ Esta documentação é a referência técnica do protótipo funcional atual. Ela
 - A arma inicial da Gaia aponta pela mira do mouse ou analógico, não pelo inimigo mais próximo.
 - A arma da Gaia possui dano híbrido físico e mágico.
 - O Goblin atual é fraco a dano físico e mágico, com bônus de fraqueza de 50%.
-- Textos visíveis devem nascer preparados para localização.
+- Textos visíveis usam tradução nativa do Godot via `tr(key)` (CSV + Input Map nativos); 7 idiomas: `pt_BR`, `en`, `es`, `zh`, `ja`, `ko`, `ru`.
+- Input é declarado no Input Map nativo do projeto; o código apenas lê as actions.
+- Entidades em massa (inimigos, moedas, hitbox/visual de ataque, texto flutuante) usam `PoolManager` (object pooling), não `instantiate()`/`queue_free()` no caminho quente.
+- Pausa de gameplay é nativa: `get_tree().paused` + `process_mode = ALWAYS`, sem checagem de bloqueio por frame.
+- A Gaia não colide com `EnemyBody` (não é empurrada); os inimigos colidem com ela e escorregam ao redor.
 - Antes de encerrar qualquer módulo: auditar, limpar, comentar, testar e documentar.
 
 ## Combate modular oficial
@@ -75,3 +79,18 @@ EnemyBase/ContactAttackHitbox <Area2D>
 ## Termos removidos
 
 Documentação ou código novo não deve voltar a usar `hit_radius`, `attack_hitbox_radius`, `weapon_hitbox_radius_flat`, `contact_damage_radius`, dano manual por distância ou `contains_local_point` para resolver impactos atuais.
+
+Também removidos e proibidos em código/doc novos:
+
+- `is_gameplay_blocked` / `RunQuery.is_run_paused` — pausa agora é `get_tree().paused` + `process_mode = ALWAYS` (ver ADR 0012).
+- `LocalizationManager` e `pt_br.json` — localização agora é nativa via `tr(key)` + CSV (ver ADR 0013).
+- função própria de obtenção de texto (`get_text`) — usar `tr(key)`.
+- criação de actions de input por código — actions vivem no Input Map nativo (ver ADR 0014).
+
+## Decisões (ADRs) recentes
+
+- [`04_decisions/adr_0011_object_pooling_para_entidades.md`](04_decisions/adr_0011_object_pooling_para_entidades.md) — object pooling via `PoolManager`.
+- [`04_decisions/adr_0012_pausa_de_gameplay_nativa.md`](04_decisions/adr_0012_pausa_de_gameplay_nativa.md) — pausa nativa.
+- [`04_decisions/adr_0013_localizacao_nativa_godot.md`](04_decisions/adr_0013_localizacao_nativa_godot.md) — localização nativa.
+- [`04_decisions/adr_0014_input_map_nativo.md`](04_decisions/adr_0014_input_map_nativo.md) — Input Map nativo.
+- [`04_decisions/adr_0015_colisao_one_way_player_inimigo.md`](04_decisions/adr_0015_colisao_one_way_player_inimigo.md) — colisão one-way player↔inimigo.

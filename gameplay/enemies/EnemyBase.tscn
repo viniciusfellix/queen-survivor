@@ -1,9 +1,9 @@
 [gd_scene format=3 uid="uid://dg1wr6dv8jxxi"]
 
-[ext_resource type="Script" uid="uid://ca4qagknswd3k" path="res://gameplay/enemies/EnemyBase.gd" id="1_ffmcr"]
+[ext_resource type="Script" uid="uid://b6jgbhwoc2gnj" path="res://gameplay/enemies/EnemyBase.gd" id="1_ffmcr"]
 [ext_resource type="PackedScene" uid="uid://bal0n2h0w1ovu" path="res://visual/enemies/goblin_warrior/GoblinWarriorVisual.tscn" id="3_d5hmo"]
-[ext_resource type="Script" uid="uid://cjkci1xnnmduu" path="res://gameplay/combat/EnemyAttackHitbox.gd" id="3_o5f70"]
-[ext_resource type="Script" uid="uid://dq4yjwxealkr7" path="res://gameplay/combat/HurtboxComponent.gd" id="3_vrnya"]
+[ext_resource type="Script" uid="uid://plist0qhvo47" path="res://gameplay/combat/EnemyAttackHitbox.gd" id="3_o5f70"]
+[ext_resource type="Script" uid="uid://ckwjyep0lbn5a" path="res://gameplay/combat/HurtboxComponent.gd" id="3_vrnya"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_vrnya"]
 radius = 27.166155
