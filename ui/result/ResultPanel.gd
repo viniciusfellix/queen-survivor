@@ -56,21 +56,21 @@ func _on_run_finished(result_payload: RunResultPayload) -> void:
 
 	visible = true
 
-	title_label.text = LocalizationManager.get_text("ui.result.title")
+	title_label.text = tr("ui.result.title")
 
 	if result_payload.victory:
-		result_type_label.text = LocalizationManager.get_text("ui.result.victory")
+		result_type_label.text = tr("ui.result.victory")
 	else:
-		result_type_label.text = LocalizationManager.get_text("ui.result.defeat")
+		result_type_label.text = tr("ui.result.defeat")
 
 	summary_label.text = _build_summary_text(result_payload)
 
 	_update_save_status_label()
 
-	hint_label.text = LocalizationManager.get_text("ui.result.close_hint")
+	hint_label.text = tr("ui.result.close_hint")
 
 	if restart_button != null:
-		restart_button.text = LocalizationManager.get_text("ui.result.restart")
+		restart_button.text = tr("ui.result.restart")
 		restart_button.disabled = false
 
 	DeveloperAuditLogger.log_ui(
@@ -105,13 +105,13 @@ func _update_save_status_label() -> void:
 		return
 
 	if persisted_result_payload != latest_result_payload:
-		save_status_label.text = LocalizationManager.get_text("ui.result.saving")
+		save_status_label.text = tr("ui.result.saving")
 		return
 
 	if persisted_result_succeeded:
-		save_status_label.text = LocalizationManager.get_text("ui.result.save_applied")
+		save_status_label.text = tr("ui.result.save_applied")
 	else:
-		save_status_label.text = LocalizationManager.get_text("ui.result.save_failed")
+		save_status_label.text = tr("ui.result.save_failed")
 
 ## Reinicia a cena atual.
 func _on_restart_button_pressed() -> void:
@@ -128,69 +128,69 @@ func _build_summary_text(payload: RunResultPayload) -> String:
 	var lines: Array[String] = []
 
 	lines.append("%s: %s" % [
-		LocalizationManager.get_text("ui.result.map"),
+		tr("ui.result.map"),
 		payload.map_id
 	])
 
 	lines.append("%s: %s" % [
-		LocalizationManager.get_text("ui.result.queen"),
+		tr("ui.result.queen"),
 		payload.queen_id
 	])
 
 	lines.append("%s: %s" % [
-		LocalizationManager.get_text("ui.result.time_survived"),
+		tr("ui.result.time_survived"),
 		_format_seconds(payload.survived_seconds)
 	])
 
 	lines.append("%s: %s" % [
-		LocalizationManager.get_text("ui.result.coins_collected"),
+		tr("ui.result.coins_collected"),
 		str(payload.run_coins_collected)
 	])
 
 	if payload.victory:
 		lines.append("%s: x%s" % [
-			LocalizationManager.get_text("ui.result.victory_multiplier"),
+			tr("ui.result.victory_multiplier"),
 			str(payload.victory_multiplier)
 		])
 
 		lines.append("%s: %s" % [
-			LocalizationManager.get_text("ui.result.victory_bonus"),
+			tr("ui.result.victory_bonus"),
 			str(payload.victory_bonus)
 		])
 
 	lines.append("%s: %s" % [
-		LocalizationManager.get_text("ui.result.final_money"),
+		tr("ui.result.final_money"),
 		str(payload.final_money_reward)
 	])
 
 	lines.append("%s: %s" % [
-		LocalizationManager.get_text("ui.result.xp_gained"),
+		tr("ui.result.xp_gained"),
 		str(payload.run_xp_gained)
 	])
 
 	lines.append("%s: %s" % [
-		LocalizationManager.get_text("ui.result.enemies_killed"),
+		tr("ui.result.enemies_killed"),
 		str(payload.enemies_killed)
 	])
 
 	lines.append("%s: %s" % [
-		LocalizationManager.get_text("ui.result.level_reached"),
+		tr("ui.result.level_reached"),
 		str(payload.level_reached)
 	])
 
 	lines.append("%s: %s" % [
-		LocalizationManager.get_text("ui.result.damage_dealt"),
+		tr("ui.result.damage_dealt"),
 		str(payload.damage_dealt)
 	])
 
 	lines.append("%s: %s" % [
-		LocalizationManager.get_text("ui.result.damage_taken"),
+		tr("ui.result.damage_taken"),
 		str(payload.damage_taken)
 	])
 
 	if payload.defeat:
 		lines.append("%s: %s" % [
-			LocalizationManager.get_text("ui.result.death_cause"),
+			tr("ui.result.death_cause"),
 			payload.death_cause
 		])
 

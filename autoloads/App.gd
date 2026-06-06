@@ -20,6 +20,10 @@ const GAME_VERSION: String = "0.1.0-module-1"
 ##
 ## Registra no DeveloperAuditLogger que o boot da aplicação começou.
 func _ready() -> void:
+	# Define a locale do projeto usando o sistema nativo de tradução do Godot.
+	# Futuramente a locale pode vir de SaveData.settings; por ora mantém pt_BR.
+	TranslationServer.set_locale("pt_BR")
+
 	DeveloperAuditLogger.log_lifecycle(
 		"Boot iniciado: %s v%s" % [GAME_TITLE, GAME_VERSION],
 		"App"

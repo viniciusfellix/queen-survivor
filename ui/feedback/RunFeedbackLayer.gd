@@ -121,7 +121,7 @@ func _on_player_damaged(
 		return
 
 	show_feedback("%s: -%s" % [
-		LocalizationManager.get_text("ui.feedback.damage_taken"),
+		tr("ui.feedback.damage_taken"),
 		str(final_damage)
 	])
 
@@ -131,7 +131,7 @@ func _on_run_coin_collected(value: int, _global_position: Vector2) -> void:
 		return
 
 	show_feedback("%s: +%s" % [
-		LocalizationManager.get_text("ui.feedback.coin_collected"),
+		tr("ui.feedback.coin_collected"),
 		str(value)
 	])
 
@@ -141,7 +141,7 @@ func _on_run_level_up_started(current_level: int, _options: Array) -> void:
 		return
 
 	show_feedback("%s %s" % [
-		LocalizationManager.get_text("ui.feedback.level_up"),
+		tr("ui.feedback.level_up"),
 		str(current_level)
 	])
 
@@ -154,6 +154,6 @@ func _on_run_finished(result_payload: RunResultPayload) -> void:
 		return
 
 	if result_payload.victory:
-		show_feedback(LocalizationManager.get_text("ui.feedback.victory"))
+		show_feedback(tr("ui.feedback.victory"))
 	else:
-		show_feedback(LocalizationManager.get_text("ui.feedback.defeat"))
+		show_feedback(tr("ui.feedback.defeat"))

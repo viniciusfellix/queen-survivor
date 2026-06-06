@@ -5,7 +5,7 @@
 ## - consultar dados atuais do player e da run;
 ## - responder a eventos globais;
 ## - atualizar visual periodicamente;
-## - usar LocalizationManager para textos exibidos.
+## - usar tradução nativa (tr) para textos exibidos.
 ##
 ## Observação:
 ## Este HUD apenas exibe dados.
@@ -193,12 +193,12 @@ func _update_cooldown() -> void:
 	if cooldown_label != null:
 		if latest_cooldown_timer <= 0.0:
 			cooldown_label.text = "%s: %s" % [
-				LocalizationManager.get_text("ui.hud.attack"),
-				LocalizationManager.get_text("ui.hud.attack_ready")
+				tr("ui.hud.attack"),
+				tr("ui.hud.attack_ready")
 			]
 		else:
 			cooldown_label.text = "%s: %.1fs" % [
-				LocalizationManager.get_text("ui.hud.attack"),
+				tr("ui.hud.attack"),
 				latest_cooldown_timer
 			]
 
@@ -218,7 +218,7 @@ func _update_hp(player_data: Dictionary) -> void:
 
 	if hp_label != null:
 		hp_label.text = "%s: %s / %s" % [
-			LocalizationManager.get_text("ui.hud.hp"),
+			tr("ui.hud.hp"),
 			str(current_hp),
 			str(max_hp)
 		]
@@ -239,7 +239,7 @@ func _update_xp(run_data: Dictionary) -> void:
 
 	if xp_label != null:
 		xp_label.text = "%s: %s / %s" % [
-			LocalizationManager.get_text("ui.hud.xp"),
+			tr("ui.hud.xp"),
 			str(current_level_xp),
 			str(required_xp)
 		]
@@ -260,7 +260,7 @@ func _update_timer(run_data: Dictionary) -> void:
 
 	if timer_label != null:
 		timer_label.text = "%s: %s" % [
-			LocalizationManager.get_text("ui.hud.timer"),
+			tr("ui.hud.timer"),
 			_format_seconds(selected_time)
 		]
 
@@ -273,7 +273,7 @@ func _update_coins(run_data: Dictionary) -> void:
 
 	if coins_label != null:
 		coins_label.text = "%s: %s" % [
-			LocalizationManager.get_text("ui.hud.coins"),
+			tr("ui.hud.coins"),
 			str(coins)
 		]
 
@@ -286,7 +286,7 @@ func _update_level(run_data: Dictionary) -> void:
 
 	if level_label != null:
 		level_label.text = "%s: %s" % [
-			LocalizationManager.get_text("ui.hud.level"),
+			tr("ui.hud.level"),
 			str(level)
 		]
 
@@ -299,7 +299,7 @@ func _update_kills(run_data: Dictionary) -> void:
 
 	if kills_label != null:
 		kills_label.text = "%s: %s" % [
-			LocalizationManager.get_text("ui.hud.kills"),
+			tr("ui.hud.kills"),
 			str(kills)
 		]
 
@@ -317,13 +317,13 @@ func _update_message(run_data: Dictionary) -> void:
 
 	if is_finished:
 		if is_victory:
-			message_label.text = LocalizationManager.get_text("ui.hud.victory")
+			message_label.text = tr("ui.hud.victory")
 		elif is_defeat:
-			message_label.text = LocalizationManager.get_text("ui.hud.defeat")
+			message_label.text = tr("ui.hud.defeat")
 		else:
 			message_label.text = latest_result_type
 	else:
-		message_label.text = LocalizationManager.get_text("ui.hud.run_active")
+		message_label.text = tr("ui.hud.run_active")
 
 ## Aplica visibilidade configurada nos elementos.
 func _apply_visibility() -> void:

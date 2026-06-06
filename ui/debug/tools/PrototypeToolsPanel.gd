@@ -149,17 +149,17 @@ func _configure_layout() -> void:
 	margin_container.add_theme_constant_override("margin_bottom", 16)
 
 func _configure_static_texts() -> void:
-	title_label.text = LocalizationManager.get_text("ui.debug_tools.title")
-	hint_label.text = LocalizationManager.get_text("ui.debug_tools.toggle_hint")
+	title_label.text = tr("ui.debug_tools.title")
+	hint_label.text = tr("ui.debug_tools.toggle_hint")
 
-	force_victory_button.text = LocalizationManager.get_text("ui.debug_tools.force_victory")
-	force_defeat_button.text = LocalizationManager.get_text("ui.debug_tools.force_defeat")
-	reset_progress_button.text = LocalizationManager.get_text("ui.debug_tools.reset_progression")
+	force_victory_button.text = tr("ui.debug_tools.force_victory")
+	force_defeat_button.text = tr("ui.debug_tools.force_defeat")
+	reset_progress_button.text = tr("ui.debug_tools.reset_progression")
 
-	confirm_reset_button.text = LocalizationManager.get_text("ui.debug_tools.confirm_reset")
-	cancel_reset_button.text = LocalizationManager.get_text("ui.debug_tools.cancel")
+	confirm_reset_button.text = tr("ui.debug_tools.confirm_reset")
+	cancel_reset_button.text = tr("ui.debug_tools.cancel")
 
-	warning_label.text = LocalizationManager.get_text("ui.debug_tools.force_result_warning")
+	warning_label.text = tr("ui.debug_tools.force_result_warning")
 	status_label.text = ""
 
 	force_victory_button.disabled = not allow_force_result_actions
@@ -199,17 +199,17 @@ func _refresh_save_info() -> void:
 	var save_debug: Dictionary = SaveManager.get_debug_data()
 
 	if not bool(save_debug.get("has_save_data", false)):
-		save_info_label.text = LocalizationManager.get_text("ui.debug_tools.save_unavailable")
+		save_info_label.text = tr("ui.debug_tools.save_unavailable")
 		return
 
 	var completed_maps: Array = save_debug.get("completed_maps", []) as Array
 
 	save_info_label.text = "%s: %s\n%s: %s\n%s: %s" % [
-		LocalizationManager.get_text("ui.debug_tools.total_xp"),
+		tr("ui.debug_tools.total_xp"),
 		str(save_debug.get("total_xp", 0)),
-		LocalizationManager.get_text("ui.debug_tools.total_money"),
+		tr("ui.debug_tools.total_money"),
 		str(save_debug.get("total_money", 0)),
-		LocalizationManager.get_text("ui.debug_tools.completed_maps"),
+		tr("ui.debug_tools.completed_maps"),
 		_format_completed_maps(completed_maps)
 	]
 
@@ -217,22 +217,22 @@ func _refresh_current_run_info() -> void:
 	var run_controller: Node = _get_run_controller()
 
 	if run_controller == null or not run_controller.has_method("get_debug_data"):
-		current_run_label.text = "%s: -" % LocalizationManager.get_text("ui.debug_tools.current_run")
+		current_run_label.text = "%s: -" % tr("ui.debug_tools.current_run")
 		return
 
 	var run_data_variant: Variant = run_controller.call("get_debug_data")
 
 	if not run_data_variant is Dictionary:
-		current_run_label.text = "%s: -" % LocalizationManager.get_text("ui.debug_tools.current_run")
+		current_run_label.text = "%s: -" % tr("ui.debug_tools.current_run")
 		return
 
 	var run_data: Dictionary = run_data_variant as Dictionary
 	var is_finished: bool = bool(run_data.get("is_finished", false))
 
-	var run_status: String = LocalizationManager.get_text("ui.debug_tools.finished") if is_finished else LocalizationManager.get_text("ui.debug_tools.active")
+	var run_status: String = tr("ui.debug_tools.finished") if is_finished else tr("ui.debug_tools.active")
 
 	current_run_label.text = "%s: %s | XP: %s | Coins: %s | Level: %s" % [
-		LocalizationManager.get_text("ui.debug_tools.current_run"),
+		tr("ui.debug_tools.current_run"),
 		run_status,
 		str(run_data.get("run_xp_gained", 0)),
 		str(run_data.get("run_coins_collected", 0)),
@@ -245,8 +245,8 @@ func _refresh_last_run_info() -> void:
 
 	if not last_run_variant is Dictionary:
 		last_run_label.text = "%s: %s" % [
-			LocalizationManager.get_text("ui.debug_tools.last_run"),
-			LocalizationManager.get_text("ui.debug_tools.no_last_run")
+			tr("ui.debug_tools.last_run"),
+			tr("ui.debug_tools.no_last_run")
 		]
 		return
 
@@ -254,13 +254,13 @@ func _refresh_last_run_info() -> void:
 
 	if last_run.is_empty():
 		last_run_label.text = "%s: %s" % [
-			LocalizationManager.get_text("ui.debug_tools.last_run"),
-			LocalizationManager.get_text("ui.debug_tools.no_last_run")
+			tr("ui.debug_tools.last_run"),
+			tr("ui.debug_tools.no_last_run")
 		]
 		return
 
 	last_run_label.text = "%s: %s | XP: %s | Money: %s | Kills: %s" % [
-		LocalizationManager.get_text("ui.debug_tools.last_run"),
+		tr("ui.debug_tools.last_run"),
 		str(last_run.get("result_type", "-")),
 		str(last_run.get("run_xp_gained", 0)),
 		str(last_run.get("final_money_reward", 0)),
@@ -274,16 +274,16 @@ func _on_force_victory_pressed() -> void:
 	var run_controller: Node = _get_run_controller()
 
 	if run_controller == null or not run_controller.has_method("debug_force_victory"):
-		status_label.text = LocalizationManager.get_text("ui.debug_tools.force_disabled")
+		status_label.text = tr("ui.debug_tools.force_disabled")
 		return
 
 	var result_variant: Variant = run_controller.call("debug_force_victory")
 	var succeeded: bool = bool(result_variant)
 
 	if succeeded:
-		status_label.text = LocalizationManager.get_text("ui.debug_tools.force_victory_done")
+		status_label.text = tr("ui.debug_tools.force_victory_done")
 	else:
-		status_label.text = LocalizationManager.get_text("ui.debug_tools.force_disabled")
+		status_label.text = tr("ui.debug_tools.force_disabled")
 
 	_refresh_panel()
 
@@ -294,16 +294,16 @@ func _on_force_defeat_pressed() -> void:
 	var run_controller: Node = _get_run_controller()
 
 	if run_controller == null or not run_controller.has_method("debug_force_defeat"):
-		status_label.text = LocalizationManager.get_text("ui.debug_tools.force_disabled")
+		status_label.text = tr("ui.debug_tools.force_disabled")
 		return
 
 	var result_variant: Variant = run_controller.call("debug_force_defeat")
 	var succeeded: bool = bool(result_variant)
 
 	if succeeded:
-		status_label.text = LocalizationManager.get_text("ui.debug_tools.force_defeat_done")
+		status_label.text = tr("ui.debug_tools.force_defeat_done")
 	else:
-		status_label.text = LocalizationManager.get_text("ui.debug_tools.force_disabled")
+		status_label.text = tr("ui.debug_tools.force_disabled")
 
 	_refresh_panel()
 
@@ -312,7 +312,7 @@ func _on_reset_progress_pressed() -> void:
 		return
 
 	reset_confirmation_active = true
-	status_label.text = LocalizationManager.get_text("ui.debug_tools.reset_warning")
+	status_label.text = tr("ui.debug_tools.reset_warning")
 	_set_reset_confirmation_visible(true)
 
 func _on_confirm_reset_pressed() -> void:
@@ -324,14 +324,14 @@ func _on_confirm_reset_pressed() -> void:
 	reset_confirmation_active = false
 	_set_reset_confirmation_visible(false)
 
-	status_label.text = LocalizationManager.get_text("ui.debug_tools.reset_done")
+	status_label.text = tr("ui.debug_tools.reset_done")
 	_refresh_panel()
 
 func _on_cancel_reset_pressed() -> void:
 	reset_confirmation_active = false
 	_set_reset_confirmation_visible(false)
 
-	status_label.text = LocalizationManager.get_text("ui.debug_tools.reset_cancelled")
+	status_label.text = tr("ui.debug_tools.reset_cancelled")
 
 func _set_reset_confirmation_visible(should_show: bool) -> void:
 	if confirmation_row == null:
@@ -352,7 +352,7 @@ func _get_run_controller() -> Node:
 
 func _format_completed_maps(completed_maps: Array) -> String:
 	if completed_maps.is_empty():
-		return LocalizationManager.get_text("ui.debug_tools.none")
+		return tr("ui.debug_tools.none")
 
 	var map_names: Array[String] = []
 
@@ -365,13 +365,13 @@ func _export_runtime_tree_snapshot() -> void:
 	var current_scene: Node = get_tree().current_scene
 
 	if current_scene == null:
-		status_label.text = LocalizationManager.get_text("ui.debug_tools.runtime_tree_failed")
+		status_label.text = tr("ui.debug_tools.runtime_tree_failed")
 		return
 
 	var snapshot_builder: RefCounted = RUNTIME_TREE_SNAPSHOT_SCRIPT.new()
 
 	if snapshot_builder == null:
-		status_label.text = LocalizationManager.get_text("ui.debug_tools.runtime_tree_failed")
+		status_label.text = tr("ui.debug_tools.runtime_tree_failed")
 		return
 
 	var tree_snapshot_variant: Variant = snapshot_builder.call(
@@ -400,7 +400,7 @@ func _export_runtime_tree_snapshot() -> void:
 
 	DisplayServer.clipboard_set(complete_snapshot)
 
-	status_label.text = LocalizationManager.get_text("ui.debug_tools.runtime_tree_exported")
+	status_label.text = tr("ui.debug_tools.runtime_tree_exported")
 
 	DeveloperAuditLogger.log_audit(
 		"Arvore runtime exportada para console e area de transferencia.",

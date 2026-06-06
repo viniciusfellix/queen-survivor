@@ -112,11 +112,11 @@ func _on_run_level_up_started(current_level: int, options: Array) -> void:
 	_configure_layout()
 
 	title_label.text = "%s %s" % [
-		LocalizationManager.get_text("ui.level_up.title"),
+		tr("ui.level_up.title"),
 		str(current_level)
 	]
 
-	subtitle_label.text = LocalizationManager.get_text("ui.level_up.subtitle")
+	subtitle_label.text = tr("ui.level_up.subtitle")
 
 	_apply_option_to_card(option_card_1, 0)
 	_apply_option_to_card(option_card_2, 1)
@@ -148,7 +148,7 @@ func _apply_option_to_card(card: Button, option_index: int) -> void:
 
 	if option_index >= current_options.size():
 		card.disabled = true
-		_set_card_text(card, LocalizationManager.get_text("ui.level_up.option_missing"), "", "")
+		_set_card_text(card, tr("ui.level_up.option_missing"), "", "")
 		_set_card_icon(card, null)
 		return
 
@@ -156,8 +156,8 @@ func _apply_option_to_card(card: Button, option_index: int) -> void:
 
 	card.disabled = false
 
-	var upgrade_name: String = LocalizationManager.get_text(upgrade.display_name_key)
-	var upgrade_description: String = LocalizationManager.get_text(upgrade.description_key)
+	var upgrade_name: String = tr(upgrade.display_name_key)
+	var upgrade_description: String = tr(upgrade.description_key)
 	var badge_text: String = _get_badge_text(upgrade)
 
 	_set_card_text(card, upgrade_name, upgrade_description, badge_text)
@@ -240,7 +240,7 @@ func _get_badge_text(upgrade: UpgradeDefinition) -> String:
 	var next_level: int = _get_next_upgrade_level(upgrade.id)
 
 	return "%s %s" % [
-		LocalizationManager.get_text("ui.level_up.badge_level"),
+		tr("ui.level_up.badge_level"),
 		str(next_level)
 	]
 

@@ -120,7 +120,7 @@ func _process(_delta: float) -> void:
 	var save_data: Dictionary = SaveManager.get_debug_data()
 
 	if show_title:
-		lines.append(LocalizationManager.get_text("ui.debug.title"))
+		lines.append(tr("ui.debug.title"))
 
 	if show_input_section:
 		_append_separator(lines)

@@ -1,7 +1,6 @@
 ## Gerenciador central de input do protótipo.
 ##
 ## Responsabilidades:
-## - garantir que as actions mínimas existam no InputMap;
 ## - ler direção de movimento;
 ## - ler direção de mira por analógico direito;
 ## - ler direção de mira por mouse;
@@ -36,10 +35,11 @@ var last_valid_aim_direction: Vector2 = Vector2.RIGHT
 ## Deve ser lido pelo PlayerController e consumido dentro do fluxo de dash.
 var dash_just_pressed: bool = false
 
-## Inicializa o gerenciador de input e garante actions básicas.
+## Inicializa o gerenciador de input.
+##
+## As actions (move_*, aim_*, dash) são definidas no Input Map do projeto
+## (Project Settings > Input Map), não mais criadas por código.
 func _ready() -> void:
-	_ensure_default_input_actions()
-
 	DeveloperAuditLogger.log_lifecycle(
 		"Input inicializado.",
 		"InputManager"
@@ -130,57 +130,3 @@ func _get_aim_direction(player_global_position: Vector2) -> Vector2:
 		return move_direction.normalized()
 
 	return last_valid_aim_direction
-
-## Garante que as actions mínimas existam no InputMap.
-##
-## Isso permite que o protótipo funcione mesmo se o Input Map ainda não
-## estiver totalmente configurado manualmente no Project Settings.
-func _ensure_default_input_actions() -> void:
-	_add_action_if_missing("move_left")
-	_add_action_if_missing("move_right")
-	_add_action_if_missing("move_up")
-	_add_action_if_missing("move_down")
-
-	## `_add_key_event()` já cria a action caso ela não exista.
-	_add_key_event("dash", KEY_SPACE)
-
-	_add_action_if_missing("aim_left")
-	_add_action_if_missing("aim_right")
-	_add_action_if_missing("aim_up")
-	_add_action_if_missing("aim_down")
-
-	_add_action_if_missing("dash")
-
-	_add_key_event("move_left", KEY_A)
-	_add_key_event("move_left", KEY_LEFT)
-
-	_add_key_event("move_right", KEY_D)
-	_add_key_event("move_right", KEY_RIGHT)
-
-	_add_key_event("move_up", KEY_W)
-	_add_key_event("move_up", KEY_UP)
-
-	_add_key_event("move_down", KEY_S)
-	_add_key_event("move_down", KEY_DOWN)
-
-## Cria uma action no InputMap caso ela ainda não exista.
-func _add_action_if_missing(action_name: String) -> void:
-	if not InputMap.has_action(action_name):
-		InputMap.add_action(action_name)
-
-## Adiciona uma tecla física a uma action.
-##
-## A função evita duplicar o mesmo keycode caso ela seja chamada mais de
-## uma vez durante o lifecycle do projeto.
-func _add_key_event(action_name: String, keycode: Key) -> void:
-	if not InputMap.has_action(action_name):
-		InputMap.add_action(action_name)
-
-	var event: InputEventKey = InputEventKey.new()
-	event.physical_keycode = keycode
-
-	for existing_event: InputEvent in InputMap.action_get_events(action_name):
-		if existing_event is InputEventKey and existing_event.physical_keycode == keycode:
-			return
-
-	InputMap.action_add_event(action_name, event)

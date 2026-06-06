@@ -1,0 +1,112 @@
+keys,pt_BR,en,es,zh,ja,ko,ru
+game.title,Queen Survivors,Queen Survivors,Queen Survivors,Queen Survivors,Queen Survivors,Queen Survivors,Queen Survivors
+queen.gaia.name,Gaia,Gaia,Gaia,盖亚,ガイア,가이아,Гайя
+queen.gaia.description,A primeira Queen jogável do protótipo.,The first playable Queen of the prototype.,La primera Queen jugable del prototipo.,原型中第一个可操作的女王。,プロトタイプ初の操作可能なクイーン。,프로토타입의 첫 번째 플레이 가능한 퀸.,Первая играбельная Королева в прототипе.
+drop.coin.default.name,Moeda,Coin,Moneda,金币,コイン,코인,Монета
+enemy.chaser_basic.name,Perseguidor Básico,Basic Chaser,Perseguidor Básico,基础追击者,ベーシックチェイサー,기본 추적자,Базовый преследователь
+enemy.chaser_basic.description,Um inimigo simples que persegue a Gaia.,A simple enemy that chases Gaia.,Un enemigo simple que persigue a Gaia.,追逐盖亚的简单敌人。,ガイアを追いかける単純な敵。,가이아를 쫓는 단순한 적.,"Простой враг, преследующий Гайю."
+map.test_arena_10min.name,Arena de Teste,Test Arena,Arena de Prueba,测试竞技场,テストアリーナ,테스트 아레나,Тестовая арена
+map.test_arena_10min.description,Arena infinita simples de 10 minutos.,Simple infinite 10-minute arena.,Arena infinita simple de 10 minutos.,简单的10分钟无限竞技场。,シンプルな10分間の無限アリーナ。,단순한 10분 무한 아레나.,Простая бесконечная 10-минутная арена.
+ui.debug.title,Debug,Debug,Depuración,调试,デバッグ,디버그,Отладка
+ui.debug.move_direction,Direção de movimento,Move direction,Dirección de movimiento,移动方向,移動方向,이동 방향,Направление движения
+ui.debug.aim_direction,Direção de mira,Aim direction,Dirección de apuntado,瞄准方向,照準方向,조준 방향,Направление прицеливания
+ui.debug.state,Estado,State,Estado,状态,状態,상태,Состояние
+ui.debug.animation,Animação,Animation,Animación,动画,アニメーション,애니메이션,Анимация
+ui.debug.spine_ready,Spine pronto,Spine ready,Spine listo,Spine 就绪,Spine 準備完了,Spine 준비됨,Spine готов
+ui.test.gaia_scene.title,Teste da Gaia,Gaia Test,Prueba de Gaia,盖亚测试,ガイアテスト,가이아 테스트,Тест Гайи
+ui.level_up.title,Escolha uma melhoria,Choose an upgrade,Elige una mejora,选择一项升级,アップグレードを選択,업그레이드를 선택하세요,Выберите улучшение
+ui.level_up.subtitle,A Gaia subiu de nível. Escolha uma opção para continuar.,Gaia leveled up. Choose an option to continue.,Gaia subió de nivel. Elige una opción para continuar.,盖亚升级了。选择一个选项以继续。,ガイアがレベルアップしました。続けるには選択肢を選んでください。,가이아가 레벨업했습니다. 계속하려면 옵션을 선택하세요.,"Гайя повысила уровень. Выберите вариант, чтобы продолжить."
+ui.level_up.option_missing,Opção indisponível,Option unavailable,Opción no disponible,选项不可用,選択肢は利用できません,사용할 수 없는 옵션,Вариант недоступен
+ui.hud.hp,HP,HP,HP,HP,HP,HP,HP
+ui.hud.xp,XP,XP,XP,XP,XP,XP,XP
+ui.hud.level,Nível,Level,Nivel,等级,レベル,레벨,Уровень
+ui.hud.timer,Tempo,Time,Tiempo,时间,時間,시간,Время
+ui.hud.coins,Moedas,Coins,Monedas,金币,コイン,코인,Монеты
+ui.hud.kills,Abates,Kills,Bajas,击杀,撃破,처치,Убийства
+ui.hud.victory,Vitória!,Victory!,¡Victoria!,胜利！,勝利！,승리!,Победа!
+ui.hud.defeat,Derrota,Defeat,Derrota,失败,敗北,패배,Поражение
+ui.hud.run_active,Sobreviva até o fim da run,Survive until the end of the run,Sobrevive hasta el final de la run,坚持到本局结束,ランの終わりまで生き延びろ,런이 끝날 때까지 살아남으세요,Выживите до конца забега
+ui.hud.attack,Ataque,Attack,Ataque,攻击,攻撃,공격,Атака
+ui.hud.attack_ready,pronto,ready,listo,就绪,準備完了,준비됨,готово
+ui.feedback.damage_taken,Dano recebido,Damage taken,Daño recibido,受到伤害,被ダメージ,받은 피해,Полученный урон
+ui.feedback.coin_collected,Moeda coletada,Coin collected,Moneda recogida,已收集金币,コイン獲得,코인 획득,Монета собрана
+ui.feedback.level_up,Level Up!,Level Up!,¡Subida de nivel!,升级！,レベルアップ！,레벨 업!,Новый уровень!
+ui.feedback.victory,Vitória!,Victory!,¡Victoria!,胜利！,勝利！,승리!,Победа!
+ui.feedback.defeat,Derrota,Defeat,Derrota,失败,敗北,패배,Поражение
+ui.level_up.badge_level,Nv.,Lv.,Nv.,等级,Lv.,Lv.,Ур.
+ui.level_up.badge_use,Uso,Use,Uso,使用,使用,사용,Исп.
+ui.level_up.no_icon,?,?,?,?,?,?,?
+ui.result.save_failed,Falha ao salvar o resultado.,Failed to save the result.,Error al guardar el resultado.,保存结果失败。,結果の保存に失敗しました。,결과 저장에 실패했습니다.,Не удалось сохранить результат.
+ui.result.victory,Vitória,Victory,Victoria,胜利,勝利,승리,Победа
+ui.result.defeat,Derrota,Defeat,Derrota,失败,敗北,패배,Поражение
+ui.result.title,Resultado da Run,Run Result,Resultado de la Run,本局结果,ランの結果,런 결과,Результат забега
+ui.result.map,Mapa,Map,Mapa,地图,マップ,맵,Карта
+ui.result.queen,Queen,Queen,Queen,女王,クイーン,퀸,Королева
+ui.result.time_survived,Tempo sobrevivido,Time survived,Tiempo sobrevivido,存活时间,生存時間,생존 시간,Время выживания
+ui.result.coins_collected,Moedas coletadas,Coins collected,Monedas recogidas,收集的金币,獲得コイン,획득한 코인,Собрано монет
+ui.result.final_money,Dinheiro final,Final money,Dinero final,最终金钱,最終マネー,최종 자금,Итоговые деньги
+ui.result.xp_gained,XP obtida,XP gained,XP obtenida,获得经验,獲得XP,획득 XP,Получено XP
+ui.result.enemies_killed,Inimigos derrotados,Enemies defeated,Enemigos derrotados,击败的敌人,倒した敵,처치한 적,Убито врагов
+ui.result.level_reached,Nível alcançado,Level reached,Nivel alcanzado,达到等级,到達レベル,도달 레벨,Достигнут уровень
+ui.result.death_cause,Causa da derrota,Cause of defeat,Causa de la derrota,失败原因,敗北の原因,패배 원인,Причина поражения
+ui.result.close_hint,Resultado básico do protótipo. Clique em Testar novamente para reiniciar a cena.,Basic prototype result. Click Test again to restart the scene.,Resultado básico del prototipo. Haz clic en Probar de nuevo para reiniciar la escena.,原型的基础结果。点击“再次测试”以重启场景。,プロトタイプの基本結果です。「再テスト」をクリックしてシーンを再開してください。,프로토타입의 기본 결과입니다. 장면을 다시 시작하려면 “다시 테스트”를 클릭하세요.,"Базовый результат прототипа. Нажмите «Тест снова», чтобы перезапустить сцену."
+ui.result.restart,Testar novamente,Test again,Probar de nuevo,再次测试,再テスト,다시 테스트,Тест снова
+ui.result.save_applied,Resultado salvo no progresso permanente.,Result saved to permanent progress.,Resultado guardado en el progreso permanente.,结果已保存到永久进度。,結果が永続的な進行状況に保存されました。,결과가 영구 진행 상황에 저장되었습니다.,Результат сохранён в постоянном прогрессе.
+ui.result.saving,Salvando resultado...,Saving result...,Guardando resultado...,正在保存结果...,結果を保存中...,결과 저장 중...,Сохранение результата...
+ui.result.victory_multiplier,Multiplicador,Multiplier,Multiplicador,倍率,倍率,배율,Множитель
+ui.result.victory_bonus,Bônus,Bonus,Bono,奖励,ボーナス,보너스,Бонус
+ui.result.damage_dealt,Dano causado,Damage dealt,Daño causado,造成伤害,与ダメージ,가한 피해,Нанесённый урон
+ui.result.damage_taken,Dano recebido,Damage taken,Daño recibido,受到伤害,被ダメージ,받은 피해,Полученный урон
+ui.debug_tools.title,Ferramentas do Protótipo,Prototype Tools,Herramientas del Prototipo,原型工具,プロトタイプツール,프로토타입 도구,Инструменты прототипа
+ui.debug_tools.toggle_hint,F3: mostrar ou ocultar | F4: exportar árvore runtime,F3: show or hide | F4: export runtime tree,F3: mostrar u ocultar | F4: exportar árbol de runtime,F3：显示或隐藏 | F4：导出运行时树,F3：表示/非表示 | F4：ランタイムツリーをエクスポート,F3: 표시/숨기기 | F4: 런타임 트리 내보내기,F3: показать или скрыть | F4: экспорт дерева среды выполнения
+ui.debug_tools.runtime_tree_exported,Árvore runtime exportada para o console e copiada.,Runtime tree exported to console and copied.,Árbol de runtime exportado a la consola y copiado.,运行时树已导出到控制台并复制。,ランタイムツリーをコンソールに出力してコピーしました。,런타임 트리를 콘솔로 내보내고 복사했습니다.,Дерево среды выполнения экспортировано в консоль и скопировано.
+ui.debug_tools.runtime_tree_failed,Não foi possível exportar a árvore runtime.,Could not export the runtime tree.,No se pudo exportar el árbol de runtime.,无法导出运行时树。,ランタイムツリーをエクスポートできませんでした。,런타임 트리를 내보낼 수 없습니다.,Не удалось экспортировать дерево среды выполнения.
+ui.debug_tools.total_xp,XP Total,Total XP,XP Total,总经验,合計XP,총 XP,Всего XP
+ui.debug_tools.total_money,Dinheiro Total,Total Money,Dinero Total,总金钱,合計マネー,총 자금,Всего денег
+ui.debug_tools.completed_maps,Mapas concluídos,Completed maps,Mapas completados,已完成地图,クリアしたマップ,완료한 맵,Пройденные карты
+ui.debug_tools.last_run,Última Run,Last Run,Última Run,上一局,前回のラン,마지막 런,Последний забег
+ui.debug_tools.current_run,Run Atual,Current Run,Run Actual,当前局,現在のラン,현재 런,Текущий забег
+ui.debug_tools.none,Nenhum,None,Ninguno,无,なし,없음,Нет
+ui.debug_tools.no_last_run,Nenhuma run registrada,No run recorded,Ninguna run registrada,没有记录的对局,記録されたランがありません,기록된 런이 없습니다,Нет записанных забегов
+ui.debug_tools.active,Ativa,Active,Activa,进行中,アクティブ,활성,Активен
+ui.debug_tools.finished,Finalizada,Finished,Finalizada,已结束,終了,종료됨,Завершён
+ui.debug_tools.reset_progression,Resetar progressão,Reset progression,Reiniciar progresión,重置进度,進行状況をリセット,진행 상황 초기화,Сбросить прогресс
+ui.debug_tools.force_victory,Forçar vitória,Force victory,Forzar victoria,强制胜利,勝利を強制,승리 강제,Форсировать победу
+ui.debug_tools.force_defeat,Forçar derrota,Force defeat,Forzar derrota,强制失败,敗北を強制,패배 강제,Форсировать поражение
+ui.debug_tools.confirm_reset,Confirmar reset,Confirm reset,Confirmar reinicio,确认重置,リセットを確認,초기화 확인,Подтвердить сброс
+ui.debug_tools.cancel,Cancelar,Cancel,Cancelar,取消,キャンセル,취소,Отмена
+ui.debug_tools.reset_warning,"O reset zerará XP, dinheiro, mapas concluídos e recordes permanentes.","The reset will clear XP, money, completed maps and permanent records.","El reinicio borrará XP, dinero, mapas completados y récords permanentes.",重置将清空经验、金钱、已完成地图和永久记录。,リセットするとXP、マネー、クリアしたマップ、永続記録が消去されます。,"초기화하면 XP, 자금, 완료한 맵, 영구 기록이 삭제됩니다.","Сброс обнулит XP, деньги, пройденные карты и постоянные рекорды."
+ui.debug_tools.reset_done,Progressão permanente resetada. A run atual continua normalmente.,Permanent progression reset. The current run continues normally.,Progresión permanente reiniciada. La run actual continúa normalmente.,永久进度已重置。当前对局正常继续。,永続的な進行状況をリセットしました。現在のランは通常どおり続行します。,영구 진행 상황이 초기화되었습니다. 현재 런은 정상적으로 계속됩니다.,Постоянный прогресс сброшен. Текущий забег продолжается нормально.
+ui.debug_tools.reset_cancelled,Reset cancelado.,Reset cancelled.,Reinicio cancelado.,重置已取消。,リセットをキャンセルしました。,초기화가 취소되었습니다.,Сброс отменён.
+ui.debug_tools.force_result_warning,Vitórias ou derrotas forçadas também serão aplicadas ao save.,Forced victories or defeats will also be applied to the save.,Las victorias o derrotas forzadas también se aplicarán al guardado.,强制的胜利或失败也会应用到存档。,強制した勝敗もセーブに適用されます。,강제한 승리나 패배도 저장에 적용됩니다.,Форсированные победы или поражения также применятся к сохранению.
+ui.debug_tools.force_victory_done,Vitória forçada para teste.,Victory forced for testing.,Victoria forzada para prueba.,已强制胜利用于测试。,テスト用に勝利を強制しました。,테스트용으로 승리를 강제했습니다.,Победа форсирована для теста.
+ui.debug_tools.force_defeat_done,Derrota forçada para teste.,Defeat forced for testing.,Derrota forzada para prueba.,已强制失败用于测试。,テスト用に敗北を強制しました。,테스트용으로 패배를 강제했습니다.,Поражение форсировано для теста.
+ui.debug_tools.force_disabled,Ação de debug desabilitada no RunController.,Debug action disabled in RunController.,Acción de depuración deshabilitada en RunController.,RunController 中已禁用调试操作。,RunControllerでデバッグ操作が無効になっています。,RunController에서 디버그 작업이 비활성화되었습니다.,Действие отладки отключено в RunController.
+ui.debug_tools.save_unavailable,Save: -,Save: -,Guardado: -,存档：-,セーブ：-,저장: -,Сохранение: -
+upgrade.weapon_damage_flat.name,Dano da arma +1,Weapon damage +1,Daño de arma +1,武器伤害 +1,武器ダメージ +1,무기 피해 +1,Урон оружия +1
+upgrade.weapon_damage_flat.description,Aumenta em +1 o dano de cada componente da arma atual.,Increases each component's damage of the current weapon by +1.,Aumenta en +1 el daño de cada componente del arma actual.,将当前武器每个组件的伤害提高 +1。,現在の武器の各コンポーネントのダメージを +1 増加させます。,현재 무기의 각 구성 요소 피해를 +1 증가시킵니다.,Увеличивает урон каждого компонента текущего оружия на +1.
+upgrade.weapon_cooldown_percent.name,Recarga mais rápida,Faster reload,Recarga más rápida,更快冷却,リロード高速化,더 빠른 재장전,Быстрее перезарядка
+upgrade.weapon_cooldown_percent.description,Reduz o cooldown da arma atual em 1.5%.,Reduces the current weapon's cooldown by 1.5%.,Reduce el cooldown del arma actual en 1.5%.,将当前武器的冷却时间降低 1.5%。,現在の武器のクールダウンを 1.5% 短縮します。,현재 무기의 쿨다운을 1.5% 줄입니다.,Снижает перезарядку текущего оружия на 1.5%.
+upgrade.player_move_speed_percent.name,Velocidade +8%,Speed +8%,Velocidad +8%,速度 +8%,速度 +8%,속도 +8%,Скорость +8%
+upgrade.player_move_speed_percent.description,Aumenta a velocidade de movimento da Gaia em 10%.,Increases Gaia's movement speed by 10%.,Aumenta la velocidad de movimiento de Gaia en 10%.,将盖亚的移动速度提高 10%。,ガイアの移動速度を 10% 増加させます。,가이아의 이동 속도를 10% 증가시킵니다.,Увеличивает скорость передвижения Гайи на 10%.
+upgrade.player_max_hp_flat.name,Vida máxima +10,Max health +10,Vida máxima +10,最大生命 +10,最大HP +10,최대 체력 +10,Макс. здоровье +10
+upgrade.player_max_hp_flat.description,Aumenta a vida máxima da Gaia em 10 e recupera 10 de HP.,Increases Gaia's max health by 10 and restores 10 HP.,Aumenta la vida máxima de Gaia en 10 y restaura 10 de HP.,将盖亚的最大生命提高 10 并恢复 10 点 HP。,ガイアの最大HPを 10 増やし、HPを 10 回復します。,가이아의 최대 체력을 10 늘리고 HP를 10 회복합니다.,Увеличивает макс. здоровье Гайи на 10 и восстанавливает 10 HP.
+upgrade_pool.gaia_default.name,Pool padrão da Gaia,Gaia default pool,Pool predeterminado de Gaia,盖亚默认池,ガイアのデフォルトプール,가이아 기본 풀,Стандартный пул Гайи
+upgrade.weapon_physical_damage_flat.name,Dano físico +1,Physical damage +1,Daño físico +1,物理伤害 +1,物理ダメージ +1,물리 피해 +1,Физический урон +1
+upgrade.weapon_physical_damage_flat.description,Aumenta em +1 o dano físico da arma atual.,Increases the current weapon's physical damage by +1.,Aumenta en +1 el daño físico del arma actual.,将当前武器的物理伤害提高 +1。,現在の武器の物理ダメージを +1 増加させます。,현재 무기의 물리 피해를 +1 증가시킵니다.,Увеличивает физический урон текущего оружия на +1.
+upgrade.weapon_magical_damage_flat.name,Dano mágico +1,Magical damage +1,Daño mágico +1,魔法伤害 +1,魔法ダメージ +1,마법 피해 +1,Магический урон +1
+upgrade.weapon_magical_damage_flat.description,Aumenta em +1 o dano mágico da arma atual.,Increases the current weapon's magical damage by +1.,Aumenta en +1 el daño mágico del arma actual.,将当前武器的魔法伤害提高 +1。,現在の武器の魔法ダメージを +1 増加させます。,현재 무기의 마법 피해를 +1 증가시킵니다.,Увеличивает магический урон текущего оружия на +1.
+upgrade.weapon_attack_area_scale_percent.name,Área do ataque +10%,Attack area +10%,Área de ataque +10%,攻击范围 +10%,攻撃範囲 +10%,공격 범위 +10%,Зона атаки +10%
+upgrade.weapon_attack_area_scale_percent.description,Aumenta em 10% o tamanho da área de acerto da arma atual.,Increases the current weapon's hit area size by 10%.,Aumenta en 10% el tamaño del área de impacto del arma actual.,将当前武器的命中范围大小提高 10%。,現在の武器の命中範囲のサイズを 10% 拡大します。,현재 무기의 명중 범위 크기를 10% 늘립니다.,Увеличивает размер зоны поражения текущего оружия на 10%.
+upgrade.weapon_hitbox_lifetime_percent.name,Golpe mais duradouro,Longer-lasting strike,Golpe más duradero,更持久的攻击,より長く持続する攻撃,더 오래 지속되는 공격,Более долгий удар
+upgrade.weapon_hitbox_lifetime_percent.description,Aumenta em 10% o tempo ativo da hitbox do ataque.,Increases the attack hitbox active time by 10%.,Aumenta en 10% el tiempo activo de la hitbox del ataque.,将攻击命中框的激活时间提高 10%。,攻撃ヒットボックスの有効時間を 10% 増加させます。,공격 히트박스의 활성 시간을 10% 증가시킵니다.,Увеличивает время активности хитбокса атаки на 10%.
+upgrade.player_defense_percent.name,Defesa +5%,Defense +5%,Defensa +5%,防御 +5%,防御 +5%,방어 +5%,Защита +5%
+upgrade.player_defense_percent.description,Reduz o dano recebido pela Gaia em mais 5%.,Reduces the damage Gaia takes by an additional 5%.,Reduce el daño que recibe Gaia en un 5% adicional.,将盖亚受到的伤害额外降低 5%。,ガイアが受けるダメージをさらに 5% 軽減します。,가이아가 받는 피해를 추가로 5% 줄입니다.,Снижает получаемый Гайей урон ещё на 5%.
+upgrade.player_heal_flat.name,Cura +20,Heal +20,Cura +20,治疗 +20,回復 +20,치유 +20,Лечение +20
+upgrade.player_heal_flat.description,Recupera 20 pontos de HP imediatamente.,Instantly restores 20 HP.,Restaura 20 de HP al instante.,立即恢复 20 点 HP。,HPを 20 即座に回復します。,즉시 HP를 20 회복합니다.,Мгновенно восстанавливает 20 HP.
+upgrade.coin_magnet_radius_percent.name,Magnetismo +20%,Magnetism +20%,Magnetismo +20%,磁力 +20%,磁力 +20%,자력 +20%,Магнетизм +20%
+upgrade.coin_magnet_radius_percent.description,Aumenta em 20% a distância em que moedas são atraídas.,Increases the distance at which coins are attracted by 20%.,Aumenta en 20% la distancia a la que se atraen las monedas.,将吸引金币的距离提高 20%。,コインを引き寄せる距離を 20% 増加させます。,코인을 끌어당기는 거리를 20% 증가시킵니다.,Увеличивает дистанцию притяжения монет на 20%.
+upgrade.coin_collect_radius_percent.name,Coleta +15%,Collection +15%,Recolección +15%,收集 +15%,収集 +15%,수집 +15%,Сбор +15%
+upgrade.coin_collect_radius_percent.description,Aumenta em 15% o raio de coleta das moedas.,Increases the coin collection radius by 15%.,Aumenta en 15% el radio de recolección de monedas.,将金币的收集半径提高 15%。,コインの収集半径を 15% 増加させます。,코인 수집 반경을 15% 증가시킵니다.,Увеличивает радиус сбора монет на 15%.
+weapon.gaia_initial.name,Arma Inicial da Gaia,Gaia's Initial Weapon,Arma Inicial de Gaia,盖亚的初始武器,ガイアの初期武器,가이아의 초기 무기,Начальное оружие Гайи
+weapon.gaia_initial.description,Ataque direcional híbrido da Gaia. Usa a direção da mira.,Gaia's hybrid directional attack. Uses the aim direction.,Ataque direccional híbrido de Gaia. Usa la dirección de apuntado.,盖亚的混合定向攻击。使用瞄准方向。,ガイアのハイブリッド方向攻撃。照準方向を使用します。,가이아의 하이브리드 방향 공격. 조준 방향을 사용합니다.,Гибридная направленная атака Гайи. Использует направление прицела.
