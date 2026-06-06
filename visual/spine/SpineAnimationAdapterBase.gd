@@ -1,53 +1,26 @@
-## Adapter base responsável por conversar diretamente com o plugin Spine.
-##
-## Responsabilidades:
-## - localizar o `SpineSprite` associado ao visual;
-## - executar animações pela API exposta pelo plugin;
-## - evitar reiniciar uma animação base que já está ativa;
-## - permitir animações em tracks superiores, como blink sobre idle/run;
-## - limpar tracks temporárias quando o efeito visual termina;
-## - disponibilizar hooks para adapters específicos publicarem events.
-##
-## Controllers visuais não devem acessar diretamente o plugin Spine;
-## eles solicitam animações por meio deste adapter.
 extends Node
 class_name SpineAnimationAdapterBase
 
 @export_group("Spine")
 
-## Caminho opcional para o SpineSprite controlado por este adapter.
-##
-## Quando não configurado, o adapter procura:
-## 1. um sibling chamado `SpineSprite`;
-## 2. o primeiro SpineSprite encontrado dentro do node pai.
 @export var spine_sprite_path: NodePath
 
 @export_group("Diagnostics")
 
-## Define se a localização bem-sucedida do SpineSprite gera log técnico.
 @export var log_ready_status: bool = true
 
-## Define se cada troca de animação gera log técnico.
 @export var log_animation_changes: bool = false
 
-## Referência ao SpineSprite resolvida na inicialização do node.
 @onready var spine_sprite: Node = _resolve_spine_sprite()
 
-## Nome da animação base atualmente enviada ao SpineSprite.
-##
-## Este valor representa a track principal, normalmente track 0.
 var current_animation_name: String = ""
 
-## Animação ativa conhecida por track.
-##
-## Usado para impedir reinício desnecessário em tracks temporárias,
-## sem confundir a animação base com overlays como blink.
 var current_animation_by_track: Dictionary = {}
 
-## Indica se o adapter localizou corretamente o SpineSprite necessário.
 var is_spine_ready: bool = false
 
-## Valida a disponibilidade do SpineSprite ao iniciar o adapter.
+var current_time_scale_by_track: Dictionary = {}
+
 func _ready() -> void:
 	is_spine_ready = spine_sprite != null
 
@@ -64,32 +37,25 @@ func _ready() -> void:
 			}
 		)
 
-## Solicita a reprodução de uma animação base no SpineSprite.
-##
-## Por padrão, esta função toca na track 0 e atualiza `current_animation_name`.
-## Para overlays temporários, como blink de olhos, use `play_animation_on_track`.
-func play_animation(animation_name: String, loop: bool = true) -> bool:
-	return play_animation_on_track(animation_name, loop, 0, true)
-
-## Solicita a reprodução de uma animação em uma track específica.
-##
-## Uso esperado:
-## - track 0: animações base, como idle/run/dash/death;
-## - track 1+: overlays temporários, como blink.
-##
-## Quando `updates_base_animation` for false, a animação não altera
-## `current_animation_name`, evitando que um blink temporário substitua
-## conceitualmente o estado visual base.
+func play_animation(
+	animation_name: String,
+	loop: bool = true,
+	time_scale: float = 1.0
+) -> bool:
+	return play_animation_on_track(animation_name, loop, 0, true, time_scale)
+	
 func play_animation_on_track(
 	animation_name: String,
 	loop: bool = true,
 	track_index: int = 0,
-	updates_base_animation: bool = false
+	updates_base_animation: bool = false,
+	time_scale: float = 1.0
 ) -> bool:
 	if animation_name.strip_edges() == "":
 		return false
 
 	var safe_track_index: int = max(0, track_index)
+	var safe_time_scale: float = max(0.01, time_scale)
 
 	if not is_spine_ready:
 		push_warning("[%s] Não foi possível tocar animação; SpineSprite ausente: %s" % [
@@ -102,13 +68,21 @@ func play_animation_on_track(
 		current_animation_by_track.get(safe_track_index, "")
 	)
 
-	if current_track_animation == animation_name:
+	var current_track_time_scale: float = float(
+		current_time_scale_by_track.get(safe_track_index, 1.0)
+	)
+
+	if (
+		current_track_animation == animation_name
+		and is_equal_approx(current_track_time_scale, safe_time_scale)
+	):
 		return true
 
 	var played_successfully: bool = _try_play_with_animation_state(
 		animation_name,
 		loop,
-		safe_track_index
+		safe_track_index,
+		safe_time_scale
 	)
 
 	if not played_successfully:
@@ -120,6 +94,7 @@ func play_animation_on_track(
 		return false
 
 	current_animation_by_track[safe_track_index] = animation_name
+	current_time_scale_by_track[safe_track_index] = safe_time_scale
 
 	if updates_base_animation or safe_track_index == 0:
 		current_animation_name = animation_name
@@ -129,31 +104,30 @@ func play_animation_on_track(
 
 	if log_animation_changes:
 		DeveloperAuditLogger.log_animation(
-			"Animação executada: %s | loop=%s | track=%s | updates_base=%s" % [
+			"Animação executada: %s | loop=%s | track=%s | updates_base=%s | time_scale=%s" % [
 				animation_name,
 				str(loop),
 				str(safe_track_index),
-				str(updates_base_animation)
+				str(updates_base_animation),
+				str(safe_time_scale)
 			],
 			_get_adapter_log_name(),
 			{
 				"animation_name": animation_name,
 				"loop": loop,
 				"track_index": safe_track_index,
-				"updates_base_animation": updates_base_animation
+				"updates_base_animation": updates_base_animation,
+				"time_scale": safe_time_scale
 			}
 		)
 
 	return true
-
-## Limpa uma track temporária do Spine, quando a API do plugin permitir.
-##
-## Isso é importante para overlays como blink, pois evita que a última pose
-## da track superior continue influenciando o esqueleto depois da animação.
+	
 func clear_animation_track(track_index: int) -> bool:
 	var safe_track_index: int = max(0, track_index)
 
 	current_animation_by_track.erase(safe_track_index)
+	current_time_scale_by_track.erase(safe_track_index)
 
 	if safe_track_index == 0:
 		current_animation_name = ""
@@ -178,29 +152,18 @@ func clear_animation_track(track_index: int) -> bool:
 
 	return cleared_successfully
 
-## Retorna o nome da animação base atualmente ativa neste adapter.
 func get_current_animation_name() -> String:
 	return current_animation_name
 
-## Informa se o adapter possui um SpineSprite pronto para uso.
 func is_ready_for_animation() -> bool:
 	return is_spine_ready
 
-## Hook sobrescrevível que define se trocas de animação serão publicadas.
-##
-## No protótipo atual, apenas a Gaia publica este signal,
-## pois o DebugOverlay apresenta a animação atual do player.
 func _should_publish_animation_changed() -> bool:
 	return false
 
-## Retorna o nome utilizado nos logs deste adapter.
-##
-## Adapters específicos sobrescrevem este método para produzir
-## identificação estável no console.
 func _get_adapter_log_name() -> String:
 	return name
 
-## Localiza o SpineSprite controlado por este adapter.
 func _resolve_spine_sprite() -> Node:
 	if spine_sprite_path != NodePath():
 		var configured_node: Node = get_node_or_null(spine_sprite_path)
@@ -220,9 +183,6 @@ func _resolve_spine_sprite() -> Node:
 
 	return _find_first_spine_sprite(parent_node)
 
-## Procura recursivamente o primeiro node SpineSprite dentro de uma árvore.
-##
-## Este helper elimina repetição de busca entre visuals de Queens e inimigos.
 func _find_first_spine_sprite(root: Node) -> Node:
 	if root == null:
 		return null
@@ -238,14 +198,11 @@ func _find_first_spine_sprite(root: Node) -> Node:
 
 	return null
 
-## Executa a chamada efetiva à API do plugin Spine.
-##
-## A assinatura usada preserva o padrão já funcional no projeto:
-## `set_animation(animation_name, loop, track_index)`.
 func _try_play_with_animation_state(
 	animation_name: String,
 	loop: bool,
-	track_index: int
+	track_index: int,
+	time_scale: float = 1.0
 ) -> bool:
 	if spine_sprite == null:
 		return false
@@ -266,16 +223,17 @@ func _try_play_with_animation_state(
 	if not animation_state.has_method("set_animation"):
 		return false
 
-	animation_state.call("set_animation", animation_name, loop, track_index)
+	var track_entry_variant: Variant = animation_state.call(
+		"set_animation",
+		animation_name,
+		loop,
+		track_index
+	)
+
+	_try_apply_time_scale_to_track_entry(track_entry_variant, time_scale)
 
 	return true
 
-## Tenta limpar uma track pela API do plugin Spine.
-##
-## Alguns plugins expõem `clear_track(track)`.
-## Caso não exista, tentamos `set_empty_animation(track, mix_duration)`.
-## Se nenhuma API existir, retornamos false; nesse caso, a animação não-loop
-## pode ainda encerrar sozinha, dependendo do runtime Spine.
 func _try_clear_animation_track(track_index: int) -> bool:
 	if spine_sprite == null:
 		return false
@@ -302,3 +260,35 @@ func _try_clear_animation_track(track_index: int) -> bool:
 		return true
 
 	return false
+
+func _try_apply_time_scale_to_track_entry(
+	track_entry_variant: Variant,
+	time_scale: float
+) -> void:
+	if track_entry_variant == null:
+		return
+
+	if not track_entry_variant is Object:
+		return
+
+	var track_entry: Object = track_entry_variant as Object
+	var safe_time_scale: float = max(0.01, time_scale)
+
+	if track_entry.has_method("set_time_scale"):
+		track_entry.call("set_time_scale", safe_time_scale)
+		return
+
+	if track_entry.has_method("setTimeScale"):
+		track_entry.call("setTimeScale", safe_time_scale)
+		return
+
+	for property_info: Dictionary in track_entry.get_property_list():
+		var property_name: String = str(property_info.get("name", ""))
+
+		if property_name == "time_scale":
+			track_entry.set("time_scale", safe_time_scale)
+			return
+
+		if property_name == "timeScale":
+			track_entry.set("timeScale", safe_time_scale)
+			return

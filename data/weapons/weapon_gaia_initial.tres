@@ -1,11 +1,11 @@
 [gd_resource type="Resource" script_class="WeaponDefinition" format=3 uid="uid://rysi500pe7yh"]
 
-[ext_resource type="Script" uid="uid://eagwh5a4kuew" path="res://definitions/DamageComponentDefinition.gd" id="1_lob5k"]
-[ext_resource type="Script" uid="uid://dvk8ne584ljjf" path="res://definitions/AttackAreaDefinition.gd" id="1_mud5m"]
 [ext_resource type="Script" uid="uid://qe50xi38krmo" path="res://definitions/WeaponDefinition.gd" id="1_qxo0q"]
+[ext_resource type="Script" uid="uid://dvk8ne584ljjf" path="res://definitions/AttackAreaDefinition.gd" id="1_sf3oo"]
 [ext_resource type="Resource" uid="uid://g88tg6a7i70u" path="res://data/weapons/components/gaia_initial_physical.tres" id="2_dpeut"]
 [ext_resource type="Resource" uid="uid://dhoryvrcjt82m" path="res://data/weapons/attack_areas/attack_area_gaia_initial_primary.tres.tres" id="2_sf3oo"]
 [ext_resource type="Resource" uid="uid://cdn2rbe8fc4i" path="res://data/weapons/components/gaia_initial_magical.tres" id="3_dpeut"]
+[ext_resource type="Script" uid="uid://eagwh5a4kuew" path="res://definitions/DamageComponentDefinition.gd" id="3_n5x3p"]
 
 [resource]
 script = ExtResource("1_qxo0q")
@@ -15,9 +15,9 @@ description_key = "weapon.gaia_initial.description"
 attack_visual_scene_path = "uid://dpikvdhhe37hy"
 attack_hitbox_offset = 160.0
 attack_hitbox_lifetime = 0.18
-attack_areas = Array[ExtResource("1_mud5m")]([ExtResource("2_sf3oo")])
+attack_areas = Array[ExtResource("1_sf3oo")]([ExtResource("2_sf3oo")])
 hit_knockback_enabled = true
 hit_knockback_pixels = 60.0
 hit_knockback_duration_seconds = 0.18
-damage_components = Array[ExtResource("1_lob5k")]([ExtResource("2_dpeut"), ExtResource("3_dpeut")])
+damage_components = Array[ExtResource("3_n5x3p")]([ExtResource("2_dpeut"), ExtResource("3_dpeut")])
 metadata/_custom_type_script = "uid://qe50xi38krmo"

@@ -1,37 +1,19 @@
-## Controller responsável por transformar mortes de inimigos em drops físicos.
-##
-## No Módulo 1, administra exclusivamente moedas:
-## - escuta morte de inimigos;
-## - realiza sorteio de drop;
-## - instancia `CoinDrop`;
-## - posiciona a moeda com pequeno deslocamento visual;
-## - injeta referências necessárias para magnetismo e coleta.
 extends Node
 
-## Cena utilizada para instanciar uma moeda física.
 @export_file("*.tscn") var coin_drop_scene_path: String = "res://gameplay/drops/CoinDrop.tscn"
 
-## Definition com valores base de magnetismo, coleta e aparência da moeda.
 @export var coin_definition: CoinDropDefinition
 
-## Caminho opcional para o container onde drops serão inseridos.
 @export var drop_root_path: NodePath
 
-## Grupo utilizado para localizar a Queen que atrairá as moedas.
 @export var player_group_name: String = "player"
 
-## Variação aleatória aplicada à posição de nascimento da moeda.
-##
-## Evita que múltiplos drops fiquem visualmente perfeitamente sobrepostos.
 @export var random_position_jitter: float = 18.0
 
-## Container runtime dos drops físicos.
 var drop_root: Node2D = null
 
-## Referência runtime da Queen.
 var player_node: Node2D = null
 
-## Resolve dependências iniciais e conecta o evento de morte de inimigos.
 func _ready() -> void:
 	drop_root = _resolve_drop_root()
 	player_node = _resolve_player()
@@ -60,15 +42,10 @@ func _ready() -> void:
 	else:
 		push_warning("[DropController] CoinDefinition não configurada.")
 
-## Conecta os sinais necessários para criar drops após mortes.
 func _connect_events() -> void:
 	if not GameEvents.enemy_died.is_connected(_on_enemy_died):
 		GameEvents.enemy_died.connect(_on_enemy_died)
 
-## Processa a chance de drop de moeda após a morte de um inimigo.
-##
-## Não cria novas moedas depois que a run entrou em encerramento
-## ou já exibiu resultado final.
 func _on_enemy_died(
 	enemy_id: String,
 	source_id: String,
@@ -106,10 +83,6 @@ func _on_enemy_died(
 
 	_spawn_coin(enemy_global_position, coin_drop_value, enemy_id, source_id)
 
-## Instancia uma moeda física na posição da morte do inimigo.
-##
-## A moeda recebe definition, valor e player atual.
-## O saldo da run somente será atualizado depois da coleta efetiva.
 func _spawn_coin(spawn_position: Vector2, value: int, enemy_id: String, source_id: String) -> void:
 	if drop_root == null:
 		drop_root = _resolve_drop_root()
@@ -158,7 +131,6 @@ func _spawn_coin(spawn_position: Vector2, value: int, enemy_id: String, source_i
 		}
 	)
 
-## Gera pequeno deslocamento aleatório para a posição visual do drop.
 func _get_random_jitter() -> Vector2:
 	if random_position_jitter <= 0.0:
 		return Vector2.ZERO
@@ -168,12 +140,6 @@ func _get_random_jitter() -> Vector2:
 
 	return Vector2(cos(angle), sin(angle)) * distance
 
-## Resolve o container de drops da cena atual.
-##
-## Prioridade:
-## 1. caminho configurado;
-## 2. irmão direto chamado `DropRoot`;
-## 3. container encontrado um nível acima.
 func _resolve_drop_root() -> Node2D:
 	if drop_root_path != NodePath():
 		var configured_root: Node = get_node_or_null(drop_root_path)
@@ -199,7 +165,6 @@ func _resolve_drop_root() -> Node2D:
 
 	return null
 
-## Resolve a Queen responsável por atrair e coletar moedas.
 func _resolve_player() -> Node2D:
 	var players: Array[Node] = get_tree().get_nodes_in_group(player_group_name)
 

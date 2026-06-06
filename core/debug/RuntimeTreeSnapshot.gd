@@ -1,52 +1,23 @@
-## Utilitário técnico responsável por exportar uma visão compacta
-## da árvore runtime atual do projeto.
-##
-## Responsabilidades:
-## - percorrer nodes instanciados durante a execução;
-## - informar scripts e grupos relevantes;
-## - compactar subárvores internas geradas pelo Spine;
-## - limitar quantidade e profundidade impressa;
-## - gerar resumo dos principais grupos utilizados no protótipo.
-##
-## Este script é instanciado dinamicamente pelo PrototypeToolsPanel
-## ao pressionar F4 e não altera nenhum node da cena.
 extends RefCounted
 
-## Quantidade máxima de nodes exibidos diretamente no snapshot.
 const MAX_PRINTED_NODES: int = 220
 
-## Profundidade máxima percorrida antes de compactar uma subárvore.
 const MAX_DEPTH: int = 16
 
-## Linha visual utilizada nos cabeçalhos principais do relatório.
 const HEADER_LINE: String = "=============================================================================================================="
 
-## Linha visual utilizada antes do resumo final dos filtros.
 const SUMMARY_LINE: String = "--------------------------------------------------------------------------------------------------------------"
 
-## Quantidade de nodes efetivamente impressos no snapshot atual.
 var printed_nodes: int = 0
 
-## Quantidade de subárvores Spine resumidas em uma única linha.
 var compacted_spine_subtrees: int = 0
 
-## Quantidade de nodes internos do Spine omitidos da impressão detalhada.
 var omitted_spine_nodes: int = 0
 
-## Quantidade de nodes omitidos após atingir o limite máximo de impressão.
 var omitted_by_limit: int = 0
 
-## Quantidade de nodes omitidos após atingir profundidade máxima.
 var omitted_by_depth: int = 0
 
-## Constrói o relatório textual da árvore runtime iniciando em determinado root.
-##
-## Parâmetros:
-## - `root`: node inicial a partir do qual a árvore será percorrida;
-## - `include_scripts`: define se paths dos scripts serão exibidos;
-## - `include_groups`: define se grupos públicos dos nodes serão exibidos.
-##
-## Retorna texto pronto para impressão no console ou cópia para clipboard.
 func build_snapshot(
 	root: Node,
 	include_scripts: bool = true,
@@ -90,10 +61,6 @@ func build_snapshot(
 
 	return "\n".join(lines)
 
-## Constrói um resumo quantitativo dos grupos runtime mais relevantes.
-##
-## Este resumo ajuda a verificar rapidamente se player, inimigos,
-## drops e controller principal estão sendo instanciados corretamente.
 func build_group_summary(scene_tree: SceneTree) -> String:
 	if scene_tree == null:
 		return "QUEEN SURVIVORS - RUNTIME GROUP SUMMARY\nSceneTree ausente."
@@ -121,7 +88,6 @@ func build_group_summary(scene_tree: SceneTree) -> String:
 
 	return "\n".join(lines)
 
-## Zera contadores antes da geração de cada novo snapshot.
 func _reset_counters() -> void:
 	printed_nodes = 0
 	compacted_spine_subtrees = 0
@@ -129,12 +95,6 @@ func _reset_counters() -> void:
 	omitted_by_limit = 0
 	omitted_by_depth = 0
 
-## Adiciona um node e seus descendentes ao relatório textual.
-##
-## O método respeita:
-## - limite máximo de nodes impressos;
-## - profundidade máxima;
-## - compactação automática de subárvores iniciadas por SpineSprite.
 func _append_node(
 	node: Node,
 	root: Node,
@@ -182,14 +142,10 @@ func _append_node(
 
 	printed_nodes += 1
 
-	# O plugin Spine instancia grande quantidade de nodes internos.
-	# Em vez de imprimi-los individualmente, produz um resumo compacto.
 	if node.get_class() == "SpineSprite":
 		_append_spine_summary(node, lines, indentation)
 		return
 
-	# Interrompe expansão de subárvores excessivamente profundas,
-	# preservando apenas a quantidade de nodes omitidos.
 	if depth >= MAX_DEPTH:
 		var hidden_nodes: int = _count_nodes(node) - 1
 
@@ -213,7 +169,6 @@ func _append_node(
 			include_groups
 		)
 
-## Insere no relatório um resumo da estrutura interna de um SpineSprite.
 func _append_spine_summary(
 	spine_sprite: Node,
 	lines: Array[String],
@@ -234,10 +189,6 @@ func _append_spine_summary(
 	compacted_spine_subtrees += 1
 	omitted_spine_nodes += hidden_nodes
 
-## Conta recursivamente descendentes de um node agrupando-os por classe.
-##
-## Utilizado para informar quantos nodes internos do Spine
-## foram ocultados sem perder visibilidade sobre seu tipo.
 func _count_descendants_by_class(
 	root: Node,
 	class_counts: Dictionary
@@ -255,7 +206,6 @@ func _count_descendants_by_class(
 
 	return total
 
-## Converte o dicionário de classes encontradas em texto ordenado.
 func _format_class_counts(class_counts: Dictionary) -> String:
 	if class_counts.is_empty():
 		return "sem nodes internos"
@@ -277,7 +227,6 @@ func _format_class_counts(class_counts: Dictionary) -> String:
 
 	return ", ".join(formatted_values)
 
-## Retorna o path do script associado a um node, quando disponível.
 func _get_script_path(node: Node) -> String:
 	var attached_script: Variant = node.get_script()
 
@@ -288,10 +237,6 @@ func _get_script_path(node: Node) -> String:
 
 	return script_resource.resource_path
 
-## Retorna grupos públicos associados ao node.
-##
-## Grupos internos iniciados com `_` são ignorados para manter
-## o relatório focado na arquitetura funcional do projeto.
 func _get_groups_text(node: Node) -> String:
 	var group_names: Array[String] = []
 
@@ -305,7 +250,6 @@ func _get_groups_text(node: Node) -> String:
 
 	return ", ".join(group_names)
 
-## Conta recursivamente todos os nodes existentes em uma subárvore.
 func _count_nodes(root: Node) -> int:
 	var total: int = 1
 

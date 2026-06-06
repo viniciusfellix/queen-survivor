@@ -1,41 +1,16 @@
-## Definição geométrica base compartilhada por hitboxes e hurtboxes.
-##
-## Responsabilidades:
-## - armazenar formato, offset e rotação local;
-## - validar shapes suportadas;
-## - construir cópias runtime escaladas;
-## - fornecer resumo técnico para logs.
-##
-## Este resource não aplica dano e não detecta colisões sozinho.
 extends Resource
 class_name CombatShapeDefinition
 
-## Identificador técnico da área.
-##
-## Exemplos:
-## - attack_area_gaia_initial_primary
-## - hurtbox_area_enemy_chaser_basic_body
 @export var id: String = ""
 
-## Permite desabilitar temporariamente a área sem removê-la do resource.
 @export var enabled: bool = true
 
-## Geometria da área.
-##
-## Formatos suportados:
-## - CircleShape2D;
-## - RectangleShape2D;
-## - CapsuleShape2D;
-## - ConvexPolygonShape2D.
 @export var shape: Shape2D
 
-## Deslocamento da shape em relação ao centro do Area2D dono.
 @export var local_offset: Vector2 = Vector2.ZERO
 
-## Rotação adicional da shape dentro da área.
 @export_range(-180.0, 180.0, 0.1) var local_rotation_degrees: float = 0.0
 
-## Verifica se a definição possui identificação e shape utilizável.
 func is_valid_definition() -> bool:
 	return (
 		id.strip_edges() != ""
@@ -44,7 +19,6 @@ func is_valid_definition() -> bool:
 		and is_shape_supported()
 	)
 
-## Indica se a shape configurada já possui suporte runtime no projeto.
 func is_shape_supported() -> bool:
 	return (
 		shape is CircleShape2D
@@ -53,10 +27,6 @@ func is_shape_supported() -> bool:
 		or shape is ConvexPolygonShape2D
 	)
 
-## Cria uma cópia da shape para utilização runtime.
-##
-## O multiplicador é aplicado às dimensões da cópia, sem alterar
-## o resource original salvo no projeto.
 func build_runtime_shape(scale_multiplier: float = 1.0) -> Shape2D:
 	if not is_valid_definition():
 		return null
@@ -88,7 +58,6 @@ func build_runtime_shape(scale_multiplier: float = 1.0) -> Shape2D:
 
 	return runtime_shape
 
-## Retorna o raio escalado quando a shape for circular.
 func get_scaled_circle_radius(scale_multiplier: float = 1.0) -> float:
 	if not shape is CircleShape2D:
 		return 0.0
@@ -97,7 +66,6 @@ func get_scaled_circle_radius(scale_multiplier: float = 1.0) -> float:
 
 	return circle_shape.radius * max(0.01, scale_multiplier)
 
-## Retorna o tamanho escalado quando a shape for retangular.
 func get_scaled_rectangle_size(scale_multiplier: float = 1.0) -> Vector2:
 	if not shape is RectangleShape2D:
 		return Vector2.ZERO
@@ -106,7 +74,6 @@ func get_scaled_rectangle_size(scale_multiplier: float = 1.0) -> Vector2:
 
 	return rectangle_shape.size * max(0.01, scale_multiplier)
 
-## Retorna nome compacto da geometria para logs.
 func get_shape_debug_name() -> String:
 	if shape is CircleShape2D:
 		return "circle"
@@ -127,7 +94,6 @@ func get_shape_debug_name() -> String:
 
 	return "unsupported"
 
-## Retorna resumo técnico da área para logs de debug/audit.
 func get_debug_summary(scale_multiplier: float = 1.0) -> String:
 	var runtime_shape: Shape2D = build_runtime_shape(scale_multiplier)
 
@@ -177,19 +143,6 @@ func get_debug_summary(scale_multiplier: float = 1.0) -> String:
 
 	return "%s:unsupported" % id
 
-## Cria os pontos de um formato em D voltado para a direita.
-##
-## O lado reto fica em x = 0.
-## A curva frontal avança até x = width.
-##
-## Exemplo visual:
-## x=0
-##  |
-##  |\
-##  | )
-##  |/
-##
-## Este formato é compatível com ConvexPolygonShape2D porque é convexo.
 static func build_d_shape_points(
 	width: float,
 	height: float,
@@ -214,8 +167,6 @@ static func build_d_shape_points(
 
 	return points
 
-
-## Cria uma ConvexPolygonShape2D em formato de D.
 static func create_d_shape(
 	width: float,
 	height: float,

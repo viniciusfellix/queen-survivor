@@ -1,16 +1,3 @@
-## Controller runtime da arma inicial da Gaia.
-##
-## Responsabilidades:
-## - carregar a WeaponDefinition configurada;
-## - controlar cooldown dos ataques;
-## - utilizar a direção de mira da Gaia;
-## - instanciar visual e hitbox do golpe;
-## - manter cópias runtime dos componentes de dano;
-## - aplicar upgrades da arma durante a run;
-## - publicar progresso do cooldown para a HUD.
-##
-## A geometria da hitbox vem da WeaponDefinition por meio de
-## `Array[AttackAreaDefinition]`, permitindo configuração no Inspector.
 extends Node
 
 @export_group("Definition")
@@ -31,23 +18,11 @@ extends Node
 
 @export var weapon_enabled: bool = true
 
-## Se verdadeiro, a arma dispara imediatamente ao iniciar a cena.
-## Para gameplay normal, manter falso.
 @export var attack_on_ready: bool = false
 
-## Delay inicial antes do primeiro ataque.
-## Quando menor ou igual a zero, utiliza o cooldown atual.
 @export var initial_attack_delay_seconds: float = -1.0
 
 @export var emit_cooldown_updates: bool = true
-
-## Se verdadeiro, a arma não dispara enquanto a Queen está em dash.
-@export var block_attacks_while_player_dashing: bool = true
-
-## Se verdadeiro, ao iniciar dash o cooldown da arma volta para o valor cheio.
-##
-## O cooldown só volta a contar quando o dash terminar.
-@export var reset_cooldown_when_dash_starts: bool = true
 
 @export_group("Cooldown")
 
@@ -61,47 +36,34 @@ extends Node
 
 @export_group("Attack Hitbox")
 
-## Distância base entre Gaia e o ponto de origem da hitbox.
 @export var attack_hitbox_offset: float = 86.0
 
-## Tempo ativo da hitbox.
 @export var attack_hitbox_lifetime: float = 0.12
 
-## Fallback para testes sem WeaponDefinition.
-## Quando uma WeaponDefinition estiver configurada, suas áreas prevalecem.
 @export var attack_areas: Array[AttackAreaDefinition] = []
 
 @export_group("On Hit Effects")
 
-## Define se a arma atual aplica knockback em inimigos atingidos.
 @export var hit_knockback_enabled: bool = false
 
-## Distância aproximada, em pixels, repassada à hitbox de ataque.
 @export var hit_knockback_pixels: float = 0.0
 
-## Duração do knockback aplicado pela hitbox.
 @export var hit_knockback_duration_seconds: float = 0.12
 
 @export_group("Damage")
 
-## Dano simples usado somente caso não existam componentes cadastrados.
 @export var base_damage: int = 5
 
 @export var damage_type: String = DamageTypes.PHYSICAL
 
-## Componentes runtime da arma.
-## São duplicados a partir do resource para permitir upgrades durante a run.
 @export var damage_components: Array[DamageComponentDefinition] = []
 
 @export var weapon_source_id: String = "gaia_initial_weapon"
 
 var cooldown_timer: float = 0.0
 
-## Guarda se o player estava em dash no frame anterior.
 var was_player_dashing: bool = false
 
-## Multiplicador runtime das áreas ofensivas.
-## Inicia em 1.0 e pode crescer por upgrades durante a run.
 var attack_area_scale_multiplier: float = 1.0
 
 var player_controller: Node = null
@@ -156,20 +118,23 @@ func _process(delta: float) -> void:
 
 	if runtime_state == null or not runtime_state.is_alive:
 		return
-	
-	if _handle_dash_attack_block(runtime_state):
+
+	if _handle_dash_attack_rules(runtime_state, delta):
 		return
 
 	cooldown_timer = max(0.0, cooldown_timer - delta)
-
 	_emit_cooldown_update()
 
-	if cooldown_timer <= 0.0:
-		_fire_attack(runtime_state)
-		cooldown_timer = cooldown_seconds
+	if cooldown_timer > 0.0:
+		return
 
-## Dispara manualmente a arma em ferramentas técnicas,
-## respeitando bloqueio de gameplay e estado de vida da Gaia.
+	if not _can_fire_while_player_state_allows(runtime_state):
+		return
+
+	_fire_attack(runtime_state)
+	cooldown_timer = cooldown_seconds
+	_emit_cooldown_update()
+
 func force_fire() -> void:
 	if RunQuery.is_gameplay_blocked(get_tree()):
 		return
@@ -178,49 +143,14 @@ func force_fire() -> void:
 
 	if runtime_state == null or not runtime_state.is_alive:
 		return
-	
-	if _is_player_dashing(runtime_state):
+
+	if not _can_fire_while_player_state_allows(runtime_state):
 		return
 
 	_fire_attack(runtime_state)
 	cooldown_timer = cooldown_seconds
+	_emit_cooldown_update()
 
-## Bloqueia disparos durante dash e controla o reset do cooldown.
-##
-## Regra:
-## - ao iniciar dash, cooldown volta para cheio;
-## - enquanto está em dash, cooldown não conta;
-## - ao terminar dash, cooldown começa a contar do valor cheio.
-func _handle_dash_attack_block(runtime_state: PlayerRuntimeState) -> bool:
-	if not block_attacks_while_player_dashing:
-		was_player_dashing = false
-		return false
-
-	var is_dashing: bool = _is_player_dashing(runtime_state)
-
-	if not is_dashing:
-		was_player_dashing = false
-		return false
-
-	if not was_player_dashing and reset_cooldown_when_dash_starts:
-		cooldown_timer = cooldown_seconds
-		_emit_cooldown_update()
-
-	was_player_dashing = true
-
-	return true
-
-## Indica se o player está no estado de dash.
-func _is_player_dashing(runtime_state: PlayerRuntimeState) -> bool:
-	if runtime_state == null:
-		return false
-
-	return (
-		runtime_state.is_dashing
-		or runtime_state.current_gameplay_state == GameplayStateTypes.DASHING
-	)
-
-## Executa um ataque completo na direção atual da mira.
 func _fire_attack(runtime_state: PlayerRuntimeState) -> void:
 	var direction: Vector2 = _resolve_attack_direction(runtime_state)
 
@@ -244,7 +174,6 @@ func _fire_attack(runtime_state: PlayerRuntimeState) -> void:
 		}
 	)
 
-## Instancia somente a representação visual do golpe.
 func _spawn_attack_visual(direction: Vector2) -> void:
 	var packed_visual: PackedScene = load(attack_visual_scene_path) as PackedScene
 
@@ -277,7 +206,6 @@ func _spawn_attack_visual(direction: Vector2) -> void:
 			attack_visual_scale
 		)
 
-## Instancia a hitbox ofensiva e repassa áreas, dano e escala runtime.
 func _spawn_attack_hitbox(direction: Vector2) -> void:
 	var packed_hitbox: PackedScene = load(attack_hitbox_scene_path) as PackedScene
 
@@ -320,7 +248,6 @@ func _spawn_attack_hitbox(direction: Vector2) -> void:
 			hit_knockback_duration_seconds
 		)
 
-## Retorna direção normalizada de mira usada pelo ataque.
 func _resolve_attack_direction(runtime_state: PlayerRuntimeState) -> Vector2:
 	var direction: Vector2 = runtime_state.aim_direction
 
@@ -332,11 +259,6 @@ func _resolve_attack_direction(runtime_state: PlayerRuntimeState) -> Vector2:
 
 	return direction.normalized()
 
-## Copia configuração base do resource para o controller runtime.
-##
-## Damage components são duplicados porque upgrades os modificam
-## durante a run. As áreas não são modificadas diretamente:
-## upgrades utilizam `attack_area_scale_multiplier`.
 func _apply_weapon_definition() -> void:
 	if weapon_definition == null:
 		return
@@ -354,14 +276,14 @@ func _apply_weapon_definition() -> void:
 
 	attack_hitbox_offset = weapon_definition.attack_hitbox_offset
 	attack_hitbox_lifetime = weapon_definition.attack_hitbox_lifetime
-	
+
 	hit_knockback_enabled = weapon_definition.hit_knockback_enabled
 	hit_knockback_pixels = max(0.0, weapon_definition.hit_knockback_pixels)
 	hit_knockback_duration_seconds = max(
 		0.01,
 		weapon_definition.hit_knockback_duration_seconds
 	)
-	
+
 	attack_areas.clear()
 
 	for attack_area: AttackAreaDefinition in weapon_definition.attack_areas:
@@ -426,7 +348,6 @@ func _apply_weapon_definition() -> void:
 		}
 	)
 
-## Retorna dano bruto total atual, considerando componentes compostos.
 func _get_total_raw_damage() -> int:
 	if damage_components.is_empty():
 		return base_damage
@@ -439,7 +360,6 @@ func _get_total_raw_damage() -> int:
 
 	return total
 
-## Retorna componentes de dano em formato compacto para logs.
 func _get_component_debug_string() -> String:
 	if damage_components.is_empty():
 		return "%s:%s" % [damage_type, str(base_damage)]
@@ -457,7 +377,6 @@ func _get_component_debug_string() -> String:
 
 	return ", ".join(parts)
 
-## Retorna áreas ofensivas ativas em formato compacto para logs.
 func _get_attack_area_debug_string() -> String:
 	var parts: Array[String] = []
 
@@ -477,7 +396,6 @@ func _get_attack_area_debug_string() -> String:
 
 	return ", ".join(parts)
 
-## Consulta o runtime state atual da Gaia.
 func _get_player_runtime_state() -> PlayerRuntimeState:
 	if player_controller == null:
 		return null
@@ -494,7 +412,6 @@ func _get_player_runtime_state() -> PlayerRuntimeState:
 
 	return null
 
-## Localiza o controller da Gaia pelo parent chain ou pelo grupo player.
 func _resolve_player_controller() -> Node:
 	var current: Node = self
 
@@ -512,7 +429,6 @@ func _resolve_player_controller() -> Node:
 
 	return null
 
-## Localiza o root onde os visuais temporários da arma são instanciados.
 func _resolve_attack_visual_root() -> Node2D:
 	if attack_visual_root_path != NodePath():
 		var configured_root: Node = get_node_or_null(attack_visual_root_path)
@@ -527,7 +443,6 @@ func _resolve_attack_visual_root() -> Node2D:
 
 	return null
 
-## Localiza o root onde as hitboxes temporárias são instanciadas.
 func _resolve_attack_hitbox_root() -> Node2D:
 	if attack_hitbox_root_path != NodePath():
 		var configured_root: Node = get_node_or_null(attack_hitbox_root_path)
@@ -542,7 +457,6 @@ func _resolve_attack_hitbox_root() -> Node2D:
 
 	return null
 
-## Retorna a posição mundial atual da Gaia.
 func _get_player_global_position() -> Vector2:
 	if player_controller is Node2D:
 		var player_node: Node2D = player_controller as Node2D
@@ -551,11 +465,6 @@ func _get_player_global_position() -> Vector2:
 
 	return Vector2.ZERO
 
-## Recebe um upgrade encaminhado pelo PlayerController.
-##
-## O retorno booleano é obrigatório:
-## - true: o upgrade foi aplicado;
-## - false: nenhuma alteração foi realizada.
 func apply_run_upgrade(upgrade: UpgradeDefinition) -> bool:
 	if upgrade == null:
 		return false
@@ -607,10 +516,6 @@ func apply_run_upgrade(upgrade: UpgradeDefinition) -> bool:
 
 			return false
 
-## Aumenta o dano geral da arma.
-##
-## Na regra provisória atual, armas compostas recebem o valor
-## em cada componente existente.
 func _apply_damage_flat_upgrade(
 	upgrade_id: String,
 	amount: int
@@ -666,7 +571,6 @@ func _apply_damage_flat_upgrade(
 
 	return true
 
-## Reduz percentualmente o cooldown atual da arma.
 func _apply_cooldown_percent_upgrade(
 	upgrade_id: String,
 	percent: float
@@ -705,7 +609,6 @@ func _apply_cooldown_percent_upgrade(
 
 	return true
 
-## Aumenta somente componentes do tipo solicitado.
 func _apply_component_damage_flat_upgrade(
 	upgrade_id: String,
 	damage_type_to_match: String,
@@ -750,7 +653,6 @@ func _apply_component_damage_flat_upgrade(
 
 	return true
 
-## Aumenta uniformemente todas as áreas ofensivas da arma.
 func _apply_attack_area_scale_percent_upgrade(
 	upgrade_id: String,
 	percent: float
@@ -783,7 +685,6 @@ func _apply_attack_area_scale_percent_upgrade(
 
 	return true
 
-## Aumenta percentualmente o tempo ativo da hitbox.
 func _apply_hitbox_lifetime_percent_upgrade(
 	upgrade_id: String,
 	percent: float
@@ -818,15 +719,13 @@ func _apply_hitbox_lifetime_percent_upgrade(
 	)
 
 	return true
-	
-## Calcula o delay inicial antes do primeiro ataque automático.
+
 func _get_initial_attack_delay() -> float:
 	if initial_attack_delay_seconds > 0.0:
 		return initial_attack_delay_seconds
 
 	return cooldown_seconds
 
-## Emite o progresso atual de cooldown para HUD e ferramentas técnicas.
 func _emit_cooldown_update() -> void:
 	if not emit_cooldown_updates:
 		return
@@ -846,3 +745,74 @@ func _emit_cooldown_update() -> void:
 		cooldown_seconds,
 		progress_ratio
 	)
+
+func _handle_dash_attack_rules(
+	runtime_state: PlayerRuntimeState,
+	delta: float
+) -> bool:
+	var is_dashing: bool = _is_player_dashing(runtime_state)
+
+	if not is_dashing:
+		if was_player_dashing:
+			if _should_reset_weapon_cooldown_when_dash_ends():
+				cooldown_timer = cooldown_seconds
+				_emit_cooldown_update()
+
+		was_player_dashing = false
+		return false
+
+	if not was_player_dashing:
+		if _should_reset_weapon_cooldown_when_dash_starts():
+			cooldown_timer = cooldown_seconds
+			_emit_cooldown_update()
+
+	was_player_dashing = true
+
+	if _can_weapon_attack_while_dashing():
+		return false
+
+	if _should_pause_weapon_cooldown_while_dashing():
+		return true
+
+	cooldown_timer = max(0.0, cooldown_timer - delta)
+	_emit_cooldown_update()
+	return true
+
+func _can_fire_while_player_state_allows(runtime_state: PlayerRuntimeState) -> bool:
+	if not _is_player_dashing(runtime_state):
+		return true
+
+	return _can_weapon_attack_while_dashing()
+
+func _is_player_dashing(runtime_state: PlayerRuntimeState) -> bool:
+	if runtime_state == null:
+		return false
+
+	return (
+		runtime_state.is_dashing
+		or runtime_state.current_gameplay_state == GameplayStateTypes.DASHING
+	)
+
+func _can_weapon_attack_while_dashing() -> bool:
+	if player_controller != null and player_controller.has_method("can_weapon_attack_while_dashing"):
+		return bool(player_controller.call("can_weapon_attack_while_dashing"))
+
+	return false
+
+func _should_pause_weapon_cooldown_while_dashing() -> bool:
+	if player_controller != null and player_controller.has_method("should_pause_weapon_cooldown_while_dashing"):
+		return bool(player_controller.call("should_pause_weapon_cooldown_while_dashing"))
+
+	return true
+
+func _should_reset_weapon_cooldown_when_dash_starts() -> bool:
+	if player_controller != null and player_controller.has_method("should_reset_weapon_cooldown_when_dash_starts"):
+		return bool(player_controller.call("should_reset_weapon_cooldown_when_dash_starts"))
+
+	return false
+
+func _should_reset_weapon_cooldown_when_dash_ends() -> bool:
+	if player_controller != null and player_controller.has_method("should_reset_weapon_cooldown_when_dash_ends"):
+		return bool(player_controller.call("should_reset_weapon_cooldown_when_dash_ends"))
+
+	return true
