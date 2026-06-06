@@ -1,57 +1,46 @@
-## Controller principal da Queen controlada pelo jogador.
-##
-## Responsabilidades:
-## - registrar a entidade no grupo `player`;
-## - criar e inicializar seu `PlayerRuntimeState`;
-## - ler movimento e mira do `InputManager`;
-## - movimentar a personagem;
-## - receber dano e aplicar feedback visual;
-## - controlar invencibilidade temporária após impacto;
-## - aplicar upgrades próprios da Queen;
-## - encaminhar upgrades de arma para controllers compatíveis;
-## - expor informações para moedas, HUD e ferramentas técnicas.
 extends CharacterBody2D
 
-## Dados base da Queen utilizada nesta cena.
 @export var queen_definition: QueenDefinition
-
-## Estado mutável da Queen durante a run atual.
 @export var runtime_state: PlayerRuntimeState
-
-## Caminho opcional para o controller visual da personagem.
 @export var visual_controller_path: NodePath
-
-## Exibe a linha técnica da direção atual de mira.
 @export var draw_debug_aim: bool = false
-
-## Comprimento visual da linha técnica de mira.
 @export var debug_aim_line_length: float = 96.0
-
-## Defesa percentual inicial aplicada ao começar a run.
-##
-## Pode ser utilizada em testes e posteriormente ampliada por upgrades.
 @export var base_defense_percent: float = 0.0
 
-## Controller visual responsável pelas animações e flash de dano.
-@onready var visual_controller: Node = _resolve_visual_controller()
+@export_group("Dash")
+@export var dash_impact_area_path: NodePath
+@export var dash_disable_enemy_body_collision: bool = true
+@export_range(1, 32, 1) var enemy_body_collision_layer_number: int = 3
+@export_range(0.0, 1.0, 0.05) var dash_lateral_control_strength: float = 0.35
+@export var dash_lateral_control_max_speed: float = 120.0
 
-## Hurtbox responsável por receber ataques de inimigos.
+@onready var visual_controller: Node = _resolve_visual_controller()
 @onready var player_hurtbox: HurtboxComponent = (
 	get_node_or_null("PlayerHurtbox") as HurtboxComponent
 )
 
+@onready var dash_impact_area: PlayerDashImpactArea = (
+	_resolve_dash_impact_area()
+)
+
 @export_group("Damage Feedback")
-
-## Ativa a pequena janela de invencibilidade após receber dano.
 @export var enable_hit_invincibility: bool = true
-
-## Duração, em segundos, da invencibilidade após impacto.
 @export var invincibility_duration_after_hit: float = 0.5
-
-## Define se o visual da Queen pisca ao receber dano.
 @export var play_visual_damage_flash: bool = true
 
-## Inicializa a Queen, aplica sua definition e prepara o visual inicial.
+var dash_definition: QueenDashDefinition = null
+var dash_timer: float = 0.0
+var dash_cooldown_timer: float = 0.0
+var active_dash_direction: Vector2 = Vector2.ZERO
+var active_dash_speed: float = 0.0
+var active_dash_animation_time_scale: float = 1.0
+var is_dash_active: bool = false
+var collision_mask_before_dash: int = 0
+var has_collision_mask_before_dash: bool = false
+var dash_distance_multiplier: float = 1.0
+var dash_duration_multiplier: float = 1.0
+var dash_impact_area_scale_multiplier: float = 1.0
+
 func _ready() -> void:
 	add_to_group("player")
 
@@ -65,6 +54,9 @@ func _ready() -> void:
 
 	runtime_state.defense_percent = clamp(base_defense_percent, 0.0, 95.0)
 
+	_apply_dash_definition()
+	_configure_dash_impact_area()
+
 	_configure_player_hurtbox()
 
 	if visual_controller == null:
@@ -73,16 +65,9 @@ func _ready() -> void:
 	_update_visual_state()
 	queue_redraw()
 
-## Executa o ciclo físico da personagem.
-##
-## Fluxo normal:
-## - reduz tempo restante de invencibilidade;
-## - obtém movimento e mira atuais;
-## - bloqueia movimento quando a Queen morreu;
-## - movimenta a personagem enquanto viva;
-## - sincroniza animações e desenho técnico.
 func _physics_process(_delta: float) -> void:
 	_update_invincibility(_delta)
+	_update_dash_cooldown(_delta)
 
 	if runtime_state == null:
 		return
@@ -93,9 +78,22 @@ func _physics_process(_delta: float) -> void:
 	var aim_direction: Vector2 = InputManager.get_aim_direction()
 
 	if not runtime_state.is_alive:
+		_cancel_active_dash()
 		runtime_state.apply_input(Vector2.ZERO, aim_direction)
 		velocity = Vector2.ZERO
 		move_and_slide()
+		_update_visual_state()
+		queue_redraw()
+		return
+
+	if is_dash_active:
+		_update_active_dash(_delta, move_direction, aim_direction)
+		_update_visual_state()
+		queue_redraw()
+		return
+
+	if _should_start_dash():
+		_start_dash(move_direction, aim_direction)
 		_update_visual_state()
 		queue_redraw()
 		return
@@ -108,9 +106,6 @@ func _physics_process(_delta: float) -> void:
 	_update_visual_state()
 	queue_redraw()
 
-## Desenha a direção de mira quando o modo técnico correspondente está ativo.
-##
-## Este desenho é apenas diagnóstico e não interfere na direção real da arma.
 func _draw() -> void:
 	if not draw_debug_aim:
 		return
@@ -129,17 +124,10 @@ func _draw() -> void:
 	draw_circle(Vector2.ZERO, 5.0, Color.WHITE)
 	draw_circle(end_position, 5.0, Color.ORANGE)
 
-## Recebe um ataque e retorna o dano final efetivamente aplicado.
-##
-## Fluxo:
-## - valida payload e estado atual do gameplay;
-## - ignora impacto durante invencibilidade;
-## - calcula dano após defesa;
-## - atualiza o estado runtime;
-## - inicia invencibilidade e flash visual;
-## - publica eventos de dano e morte;
-## - atualiza animação da Queen.
 func receive_damage(payload: DamagePayload) -> int:
+	if _should_ignore_damage_during_dash():
+		return 0
+		
 	if runtime_state == null:
 		return 0
 
@@ -220,10 +208,153 @@ func receive_damage(payload: DamagePayload) -> int:
 
 	return final_damage
 
-## Configura a área vulnerável da Queen com base em sua definition.
-##
-## Mantém a BodyCollision responsável por movimento separada da região
-## utilizada para receber ataques inimigos.
+func _should_ignore_damage_during_dash() -> bool:
+	if runtime_state == null:
+		return false
+
+	if not runtime_state.is_dashing:
+		return false
+
+	if dash_definition == null:
+		return false
+
+	return dash_definition.ignore_damage_while_dashing
+
+func _update_dash_cooldown(delta: float) -> void:
+	if dash_cooldown_timer <= 0.0:
+		dash_cooldown_timer = 0.0
+		return
+
+	dash_cooldown_timer = max(0.0, dash_cooldown_timer - delta)
+
+func _should_start_dash() -> bool:
+	if dash_definition == null:
+		return false
+
+	if not dash_definition.dash_enabled:
+		return false
+
+	if dash_cooldown_timer > 0.0:
+		return false
+
+	if is_dash_active:
+		return false
+
+	if RunQuery.is_gameplay_blocked(get_tree()):
+		return false
+
+	return InputManager.was_dash_just_pressed()
+
+func _start_dash(move_direction: Vector2, aim_direction: Vector2) -> void:
+	if dash_definition == null:
+		return
+
+	var dash_direction: Vector2 = _resolve_dash_direction(
+		move_direction,
+		aim_direction
+	)
+
+	if dash_direction.length() <= 0.001:
+		return
+
+	var effective_dash_duration: float = _get_effective_dash_duration_seconds()
+	var effective_dash_distance: float = _get_effective_dash_distance_pixels()
+
+	is_dash_active = true
+	_apply_dash_collision_mode(true)
+
+	active_dash_direction = dash_direction.normalized()
+	dash_timer = effective_dash_duration
+	dash_cooldown_timer = max(0.0, dash_definition.dash_cooldown_seconds)
+	active_dash_speed = effective_dash_distance / max(0.01, dash_timer)
+	active_dash_animation_time_scale = _get_dash_animation_time_scale(effective_dash_duration)
+
+	runtime_state.start_dash(
+		active_dash_direction,
+		aim_direction,
+		active_dash_animation_time_scale
+	)
+
+	if dash_impact_area != null:
+		dash_impact_area.activate_for_dash(active_dash_direction)
+
+	_update_visual_state()
+	
+func _update_active_dash(
+	delta: float,
+	move_direction: Vector2,
+	aim_direction: Vector2
+) -> void:
+	if dash_definition == null:
+		_finish_dash(move_direction, aim_direction)
+		return
+
+	dash_timer -= delta
+
+	runtime_state.update_dash(
+		active_dash_direction,
+		aim_direction,
+		active_dash_animation_time_scale
+	)
+
+	var dash_velocity: Vector2 = active_dash_direction * active_dash_speed
+	var lateral_velocity: Vector2 = _get_dash_lateral_control_velocity(move_direction)
+
+	velocity = dash_velocity + lateral_velocity
+	move_and_slide()
+
+	if dash_timer <= 0.0:
+		_finish_dash(move_direction, aim_direction)
+		
+func _finish_dash(move_direction: Vector2, aim_direction: Vector2) -> void:
+	is_dash_active = false
+	dash_timer = 0.0
+	active_dash_direction = Vector2.ZERO
+	active_dash_speed = 0.0
+	active_dash_animation_time_scale = 1.0
+
+	_apply_dash_collision_mode(false)
+
+	if dash_impact_area != null:
+		dash_impact_area.deactivate()
+
+	runtime_state.finish_dash(move_direction, aim_direction)
+	
+func _cancel_active_dash() -> void:
+	is_dash_active = false
+	dash_timer = 0.0
+	active_dash_direction = Vector2.ZERO
+	active_dash_speed = 0.0
+	active_dash_animation_time_scale = 1.0
+
+	_apply_dash_collision_mode(false)
+
+	if dash_impact_area != null:
+		dash_impact_area.deactivate()
+
+	if runtime_state != null:
+		runtime_state.is_dashing = false
+		runtime_state.dash_direction = Vector2.ZERO
+		runtime_state.dash_animation_time_scale = 1.0
+
+func _resolve_dash_direction(
+	move_direction: Vector2,
+	aim_direction: Vector2
+) -> Vector2:
+	if move_direction.length() > 0.001:
+		return move_direction.normalized()
+
+	if runtime_state != null and runtime_state.move_direction.length() > 0.001:
+		return runtime_state.move_direction.normalized()
+
+	if aim_direction.length() > 0.001:
+		return aim_direction.normalized()
+
+	if runtime_state != null and runtime_state.last_valid_aim_direction.length() > 0.001:
+		return runtime_state.last_valid_aim_direction.normalized()
+
+	return Vector2.RIGHT
+
 func _configure_player_hurtbox() -> void:
 	if player_hurtbox == null:
 		player_hurtbox = get_node_or_null("PlayerHurtbox") as HurtboxComponent
@@ -246,9 +377,6 @@ func _configure_player_hurtbox() -> void:
 		self
 	)
 
-## Encaminha o estado runtime atual para o controller visual da Queen.
-##
-## O visual decide qual animação executar com base no estado recebido.
 func _update_visual_state() -> void:
 	if visual_controller == null:
 		visual_controller = _resolve_visual_controller()
@@ -259,12 +387,6 @@ func _update_visual_state() -> void:
 	if visual_controller.has_method("apply_runtime_state"):
 		visual_controller.call("apply_runtime_state", runtime_state)
 
-## Resolve o controller visual da Queen.
-##
-## Prioridade:
-## 1. caminho informado no Inspector;
-## 2. node conhecido `VisualRoot/GaiaVisual`;
-## 3. busca recursiva por método `apply_runtime_state`.
 func _resolve_visual_controller() -> Node:
 	if visual_controller_path != NodePath():
 		var configured_visual: Node = get_node_or_null(visual_controller_path)
@@ -287,9 +409,35 @@ func _resolve_visual_controller() -> Node:
 
 	return null
 
-## Procura recursivamente um node que implemente determinado método.
-##
-## Utilizado como fallback desacoplado para controllers visuais.
+func _resolve_dash_impact_area() -> PlayerDashImpactArea:
+	if dash_impact_area_path != NodePath():
+		var configured_area: Node = get_node_or_null(dash_impact_area_path)
+
+		if configured_area is PlayerDashImpactArea:
+			return configured_area as PlayerDashImpactArea
+
+	var direct_area: Node = get_node_or_null("DashImpactArea")
+
+	if direct_area is PlayerDashImpactArea:
+		return direct_area as PlayerDashImpactArea
+
+	return _find_first_dash_impact_area(self)
+
+func _find_first_dash_impact_area(root: Node) -> PlayerDashImpactArea:
+	if root == null:
+		return null
+
+	if root is PlayerDashImpactArea:
+		return root as PlayerDashImpactArea
+
+	for child: Node in root.get_children():
+		var found: PlayerDashImpactArea = _find_first_dash_impact_area(child)
+
+		if found != null:
+			return found
+
+	return null
+
 func _find_node_with_method(root: Node, method_name: String) -> Node:
 	if root == null:
 		return null
@@ -305,14 +453,6 @@ func _find_node_with_method(root: Node, method_name: String) -> Node:
 
 	return null
 
-## Aplica um upgrade selecionado durante a run.
-##
-## Upgrades próprios do player são tratados diretamente neste controller.
-## Upgrades pertencentes a armas são encaminhados para nodes do grupo
-## `player_weapon`.
-##
-## Retorna `true` somente quando o upgrade foi efetivamente aplicado,
-## permitindo ao `RunController` consumir a escolha de forma segura.
 func apply_run_upgrade(upgrade: UpgradeDefinition) -> bool:
 	if upgrade == null:
 		return false
@@ -467,6 +607,18 @@ func apply_run_upgrade(upgrade: UpgradeDefinition) -> bool:
 					"multiplier": runtime_state.coin_collect_radius_multiplier
 				}
 			)
+		
+		UpgradeTypes.PLAYER_DASH_DISTANCE_PERCENT:
+			apply_dash_distance_percent(upgrade.value_float)
+			return true
+
+		UpgradeTypes.PLAYER_DASH_SPEED_PERCENT:
+			apply_dash_speed_percent(upgrade.value_float)
+			return true
+
+		UpgradeTypes.PLAYER_DASH_IMPACT_AREA_SCALE_PERCENT:
+			apply_dash_impact_area_scale_percent(upgrade.value_float)
+			return true
 
 		_:
 			if not UpgradeTypes.is_weapon_upgrade(upgrade.upgrade_type):
@@ -481,9 +633,6 @@ func apply_run_upgrade(upgrade: UpgradeDefinition) -> bool:
 
 	return true
 
-## Encaminha um upgrade de arma para todos os controllers de arma ativos.
-##
-## Retorna sucesso quando ao menos uma arma aceitou e aplicou a melhoria.
 func _forward_upgrade_to_weapons(upgrade: UpgradeDefinition) -> bool:
 	var weapon_nodes: Array[Node] = get_tree().get_nodes_in_group("player_weapon")
 	var applied_count: int = 0
@@ -503,13 +652,9 @@ func _forward_upgrade_to_weapons(upgrade: UpgradeDefinition) -> bool:
 
 	return true
 
-## Retorna o estado runtime atual da Queen.
-##
-## Utilizado por arma, inimigos, moedas e sistemas de diagnóstico.
 func get_runtime_state() -> PlayerRuntimeState:
 	return runtime_state
 
-## Retorna informações técnicas do player para overlay e auditoria.
 func get_debug_data() -> Dictionary:
 	if runtime_state == null:
 		return {
@@ -529,6 +674,12 @@ func get_debug_data() -> Dictionary:
 		"facing_direction": runtime_state.facing_direction,
 		"is_moving": runtime_state.is_moving,
 		"is_alive": runtime_state.is_alive,
+		"has_dash_definition": dash_definition != null,
+		"is_dash_active": is_dash_active,
+		"dash_timer": dash_timer,
+		"dash_cooldown_timer": dash_cooldown_timer,
+		"active_dash_direction": active_dash_direction,
+		"has_dash_impact_area": dash_impact_area != null,
 		"has_player_hurtbox": player_hurtbox != null,
 		"current_gameplay_state": runtime_state.current_gameplay_state,
 		"current_visual_state": runtime_state.current_visual_state,
@@ -541,10 +692,6 @@ func get_debug_data() -> Dictionary:
 		"coin_collect_radius_multiplier": runtime_state.coin_collect_radius_multiplier
 	}
 
-## Retorna modificadores utilizados pelos drops físicos de moeda.
-##
-## O `CoinDrop` consulta esta estrutura para calcular seus raios
-## efetivos de magnetismo e coleta.
 func get_drop_collection_modifiers() -> Dictionary:
 	if runtime_state == null:
 		return {
@@ -557,7 +704,6 @@ func get_drop_collection_modifiers() -> Dictionary:
 		"coin_collect_radius_multiplier": runtime_state.coin_collect_radius_multiplier
 	}
 
-## Atualiza o tempo restante da invencibilidade temporária após dano.
 func _update_invincibility(delta: float) -> void:
 	if runtime_state == null:
 		return
@@ -571,10 +717,6 @@ func _update_invincibility(delta: float) -> void:
 		runtime_state.invincibility_timer = 0.0
 		runtime_state.is_invincible = false
 
-## Inicia uma nova janela de invencibilidade após dano válido.
-##
-## Quando a duração configurada for inválida, garante que a Queen
-## permaneça imediatamente vulnerável.
 func _start_hit_invincibility() -> void:
 	if runtime_state == null:
 		return
@@ -590,9 +732,6 @@ func _start_hit_invincibility() -> void:
 	runtime_state.is_invincible = true
 	runtime_state.invincibility_timer = invincibility_duration_after_hit
 
-## Solicita ao controller visual o feedback de impacto recebido.
-##
-## Atualmente dispara o flash vermelho temporário da Gaia.
 func _play_damage_feedback() -> void:
 	if not play_visual_damage_flash:
 		return
@@ -602,3 +741,166 @@ func _play_damage_feedback() -> void:
 
 	if visual_controller.has_method("play_damage_flash"):
 		visual_controller.call("play_damage_flash")
+
+func _get_dash_lateral_control_velocity(move_direction: Vector2) -> Vector2:
+	if move_direction.length() <= 0.001:
+		return Vector2.ZERO
+
+	if active_dash_direction.length() <= 0.001:
+		return Vector2.ZERO
+
+	if dash_lateral_control_strength <= 0.0:
+		return Vector2.ZERO
+
+	var dash_forward: Vector2 = active_dash_direction.normalized()
+	var dash_lateral: Vector2 = Vector2(
+		-dash_forward.y,
+		dash_forward.x
+	).normalized()
+
+	var lateral_input_amount: float = move_direction.dot(dash_lateral)
+
+	if abs(lateral_input_amount) <= 0.001:
+		return Vector2.ZERO
+
+	var lateral_speed: float = min(
+		dash_lateral_control_max_speed,
+		active_dash_speed * dash_lateral_control_strength
+	)
+
+	return dash_lateral * lateral_input_amount * lateral_speed
+
+func _apply_dash_definition() -> void:
+	dash_definition = null
+	dash_impact_area_scale_multiplier = 1.0
+
+	if queen_definition == null:
+		return
+
+	if queen_definition.dash_definition == null:
+		return
+
+	if not queen_definition.dash_definition.is_valid_definition():
+		push_warning("[PlayerController] DashDefinition inválida para Queen: %s" % queen_definition.id)
+		return
+
+	dash_definition = queen_definition.dash_definition
+	dash_impact_area_scale_multiplier = max(
+		0.01,
+		dash_definition.impact_area_scale_multiplier
+	)
+
+func _configure_dash_impact_area() -> void:
+	if dash_impact_area == null:
+		dash_impact_area = _resolve_dash_impact_area()
+
+	if dash_impact_area == null:
+		return
+
+	if dash_definition == null:
+		dash_impact_area.deactivate()
+		return
+
+	dash_impact_area.setup(
+		dash_definition,
+		self,
+		dash_definition.impact_source_id,
+		dash_impact_area_scale_multiplier
+	)
+
+func _get_effective_dash_distance_pixels() -> float:
+	if dash_definition == null:
+		return 0.0
+
+	return max(
+		0.0,
+		dash_definition.dash_distance_pixels * dash_distance_multiplier
+	)
+
+func _get_effective_dash_duration_seconds() -> float:
+	if dash_definition == null:
+		return 0.01
+
+	return max(
+		0.01,
+		dash_definition.dash_duration_seconds * dash_duration_multiplier
+	)
+
+func _get_dash_animation_time_scale(effective_dash_duration: float) -> float:
+	if dash_definition == null:
+		return 1.0
+
+	if not dash_definition.match_animation_speed_to_dash_duration:
+		return 1.0
+
+	if dash_definition.dash_animation_source_duration_seconds <= 0.0:
+		return 1.0
+
+	return max(
+		0.01,
+		dash_definition.dash_animation_source_duration_seconds / max(0.01, effective_dash_duration)
+	)
+
+func _apply_dash_collision_mode(should_enable_dash_mode: bool) -> void:
+	if not dash_disable_enemy_body_collision:
+		return
+
+	if should_enable_dash_mode:
+		if not has_collision_mask_before_dash:
+			collision_mask_before_dash = collision_mask
+			has_collision_mask_before_dash = true
+
+		set_collision_mask_value(enemy_body_collision_layer_number, false)
+		return
+
+	if has_collision_mask_before_dash:
+		collision_mask = collision_mask_before_dash
+		has_collision_mask_before_dash = false
+
+func apply_dash_distance_percent(percent: float) -> void:
+	var multiplier: float = 1.0 + max(0.0, percent) * 0.01
+	dash_distance_multiplier *= multiplier
+
+func apply_dash_speed_percent(percent: float) -> void:
+	var multiplier: float = 1.0 + max(0.0, percent) * 0.01
+
+	if multiplier <= 0.0:
+		return
+
+	dash_duration_multiplier /= multiplier
+
+func apply_dash_impact_area_scale_percent(percent: float) -> void:
+	var multiplier: float = 1.0 + max(0.0, percent) * 0.01
+	dash_impact_area_scale_multiplier *= multiplier
+
+	if dash_impact_area != null and dash_definition != null:
+		dash_impact_area.setup(
+			dash_definition,
+			self,
+			dash_definition.impact_source_id,
+			dash_impact_area_scale_multiplier
+		)
+
+func can_weapon_attack_while_dashing() -> bool:
+	if dash_definition == null:
+		return false
+
+	return dash_definition.allow_weapon_attacks_while_dashing
+
+func should_pause_weapon_cooldown_while_dashing() -> bool:
+	if dash_definition == null:
+		return true
+
+	return dash_definition.pause_weapon_cooldown_while_dashing
+
+func should_reset_weapon_cooldown_when_dash_starts() -> bool:
+	if dash_definition == null:
+		return false
+
+	return dash_definition.reset_weapon_cooldown_when_dash_starts
+
+func should_reset_weapon_cooldown_when_dash_ends() -> bool:
+	if dash_definition == null:
+		return true
+
+	return dash_definition.reset_weapon_cooldown_when_dash_ends

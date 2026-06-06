@@ -11,13 +11,14 @@ skeleton_file_res = ExtResource("3_7e06i")
 
 [node name="GaiaVisual" type="Node2D" unique_id=337840]
 script = ExtResource("1_r0svc")
+blink_animation_duration_seconds = 0.28
 spine_adapter_path = NodePath("GaiaSpineAdapter")
 
 [node name="SpineSprite" type="SpineSprite" parent="." unique_id=131457128]
 position = Vector2(0, 94)
 skeleton_data_res = SubResource("SpineSkeletonDataResource_0the6")
 preview_skin = "default"
-preview_animation = "-Test-Pose1"
+preview_animation = "Dash1_Pose3"
 preview_frame = false
 preview_time = 0.0
 

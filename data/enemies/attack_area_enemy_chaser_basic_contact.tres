@@ -2,13 +2,12 @@
 
 [ext_resource type="Script" uid="uid://dvk8ne584ljjf" path="res://definitions/AttackAreaDefinition.gd" id="1_ny0ts"]
 
-[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_ny0ts"]
-radius = 25.0
-height = 88.0
+[sub_resource type="CircleShape2D" id="CircleShape2D_ny0ts"]
+radius = 27.17
 
 [resource]
 script = ExtResource("1_ny0ts")
 id = "attack_area_enemy_chaser_basic_contact"
-shape = SubResource("CapsuleShape2D_ny0ts")
+shape = SubResource("CircleShape2D_ny0ts")
 local_offset = Vector2(0, 2)
 metadata/_custom_type_script = "uid://dvk8ne584ljjf"

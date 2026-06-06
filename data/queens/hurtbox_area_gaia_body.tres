@@ -2,13 +2,11 @@
 
 [ext_resource type="Script" uid="uid://dbnkbm8ijaa0r" path="res://definitions/HurtboxAreaDefinition.gd" id="1_qe822"]
 
-[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_qe822"]
-radius = 23.0
-height = 102.0
+[sub_resource type="CircleShape2D" id="CircleShape2D_qe822"]
+radius = 30.02
 
 [resource]
 script = ExtResource("1_qe822")
-id = "hurtbox_area_gaia_body"
-shape = SubResource("CapsuleShape2D_qe822")
-local_offset = Vector2(0, 41)
+id = "hurtbox_area_gaia_basic_body"
+shape = SubResource("CircleShape2D_qe822")
 metadata/_custom_type_script = "uid://dbnkbm8ijaa0r"

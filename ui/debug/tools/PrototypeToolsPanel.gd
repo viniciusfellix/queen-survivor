@@ -1,83 +1,54 @@
-## Painel técnico de ferramentas manuais do protótipo.
-##
-## Responsabilidades:
-## - permitir mostrar ou ocultar ferramentas pela tecla F3;
-## - exportar a árvore runtime compactada pela tecla F4;
-## - visualizar dados resumidos do save e da run;
-## - forçar vitória ou derrota em testes controlados;
-## - resetar progressão permanente mediante confirmação explícita.
-##
-## Este painel é destinado exclusivamente ao desenvolvimento.
-## Ele não representa uma funcionalidade disponível ao jogador final.
 extends CanvasLayer
 
-## Script responsável por montar snapshots compactados da árvore runtime.
 const RUNTIME_TREE_SNAPSHOT_SCRIPT = preload("res://core/debug/RuntimeTreeSnapshot.gd")
 
-## Tecla utilizada para mostrar ou ocultar o painel.
 const TOGGLE_KEY: Key = KEY_F3
 
-## Tecla utilizada para exportar a árvore runtime para console e clipboard.
 const RUNTIME_SNAPSHOT_KEY: Key = KEY_F4
 
 @export_group("Availability")
 
-## Habilita ou desabilita completamente as ferramentas do painel.
 @export var tools_enabled: bool = true
 
-## Define se o painel começa visível ao iniciar a cena.
 @export var visible_on_start: bool = false
 
-## Autoriza o botão de reset permanente do save.
 @export var allow_save_reset: bool = true
 
-## Autoriza os botões que forçam vitória ou derrota.
 @export var allow_force_result_actions: bool = true
 
 @export_group("Layout")
 
-## Tamanho desejado do painel técnico.
 @export var panel_size: Vector2 = Vector2(680.0, 520.0)
 
-## Margem mínima em relação aos limites da viewport.
 @export var panel_margin: float = 16.0
 
 @export_group("Refresh")
 
-## Intervalo de atualização dos dados mostrados enquanto o painel estiver aberto.
 @export var refresh_interval_seconds: float = 0.20
 
-## Referências estruturais do painel.
 @onready var panel: Panel = $Panel
 @onready var title_label: Label = $Panel/MarginContainer/VBoxContainer/TitleLabel
 @onready var hint_label: Label = $Panel/MarginContainer/VBoxContainer/HintLabel
 
-## Labels de informações persistentes e da run atual.
 @onready var save_info_label: Label = $Panel/MarginContainer/VBoxContainer/SaveInfoLabel
 @onready var current_run_label: Label = $Panel/MarginContainer/VBoxContainer/CurrentRunLabel
 @onready var last_run_label: Label = $Panel/MarginContainer/VBoxContainer/LastRunLabel
 
-## Labels utilizados para avisos e resultados das ações técnicas.
 @onready var warning_label: Label = $Panel/MarginContainer/VBoxContainer/WarningLabel
 @onready var status_label: Label = $Panel/MarginContainer/VBoxContainer/StatusLabel
 
-## Botões de ações destrutivas ou de encerramento forçado.
 @onready var force_victory_button: Button = $Panel/MarginContainer/VBoxContainer/ActionsRow/ForceVictoryButton
 @onready var force_defeat_button: Button = $Panel/MarginContainer/VBoxContainer/ActionsRow/ForceDefeatButton
 @onready var reset_progress_button: Button = $Panel/MarginContainer/VBoxContainer/ActionsRow/ResetProgressButton
 
-## Linha de confirmação exigida antes de apagar progressão permanente.
 @onready var confirmation_row: HBoxContainer = $Panel/MarginContainer/VBoxContainer/ConfirmationRow
 @onready var confirm_reset_button: Button = $Panel/MarginContainer/VBoxContainer/ConfirmationRow/ConfirmResetButton
 @onready var cancel_reset_button: Button = $Panel/MarginContainer/VBoxContainer/ConfirmationRow/CancelResetButton
 
-## Acumulador para atualização periódica das informações do painel.
 var refresh_timer: float = 0.0
 
-## Indica se o painel está aguardando confirmação explícita de reset.
 var reset_confirmation_active: bool = false
 
-## Inicializa o painel, configura textos, events e visibilidade inicial.
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	layer = 100
@@ -102,7 +73,6 @@ func _ready() -> void:
 		}
 	)
 
-## Atualiza periodicamente dados do painel enquanto estiver visível.
 func _process(delta: float) -> void:
 	if not tools_enabled:
 		visible = false
@@ -119,11 +89,6 @@ func _process(delta: float) -> void:
 	refresh_timer = 0.0
 	_refresh_panel()
 
-## Trata atalhos técnicos de teclado sem interferir no input do gameplay.
-##
-## Atalhos:
-## - F3: mostra ou oculta o painel;
-## - F4: exporta snapshot runtime.
 func _unhandled_input(event: InputEvent) -> void:
 	if not tools_enabled:
 		return
@@ -152,10 +117,6 @@ func _unhandled_input(event: InputEvent) -> void:
 		_export_runtime_tree_snapshot()
 		get_viewport().set_input_as_handled()
 
-## Posiciona o painel no canto superior direito respeitando a viewport.
-##
-## O tamanho final é limitado à área disponível para evitar que
-## ferramentas técnicas fiquem inacessíveis em resoluções menores.
 func _configure_layout() -> void:
 	if panel == null:
 		return
@@ -187,7 +148,6 @@ func _configure_layout() -> void:
 	margin_container.add_theme_constant_override("margin_right", 16)
 	margin_container.add_theme_constant_override("margin_bottom", 16)
 
-## Define todos os textos estáticos e disponibilidade inicial dos botões.
 func _configure_static_texts() -> void:
 	title_label.text = LocalizationManager.get_text("ui.debug_tools.title")
 	hint_label.text = LocalizationManager.get_text("ui.debug_tools.toggle_hint")
@@ -206,7 +166,6 @@ func _configure_static_texts() -> void:
 	force_defeat_button.disabled = not allow_force_result_actions
 	reset_progress_button.disabled = not allow_save_reset
 
-## Conecta botões do painel às ações técnicas correspondentes.
 func _connect_buttons() -> void:
 	if not force_victory_button.pressed.is_connected(_on_force_victory_pressed):
 		force_victory_button.pressed.connect(_on_force_victory_pressed)
@@ -223,7 +182,6 @@ func _connect_buttons() -> void:
 	if not cancel_reset_button.pressed.is_connected(_on_cancel_reset_pressed):
 		cancel_reset_button.pressed.connect(_on_cancel_reset_pressed)
 
-## Conecta alterações de save e encerramento de run à atualização do painel.
 func _connect_events() -> void:
 	if not GameEvents.save_updated.is_connected(_on_save_updated):
 		GameEvents.save_updated.connect(_on_save_updated)
@@ -231,14 +189,12 @@ func _connect_events() -> void:
 	if not GameEvents.run_finished.is_connected(_on_run_finished):
 		GameEvents.run_finished.connect(_on_run_finished)
 
-## Recalcula layout e atualiza todas as seções informativas.
 func _refresh_panel() -> void:
 	_configure_layout()
 	_refresh_save_info()
 	_refresh_current_run_info()
 	_refresh_last_run_info()
 
-## Atualiza informações permanentes armazenadas no save.
 func _refresh_save_info() -> void:
 	var save_debug: Dictionary = SaveManager.get_debug_data()
 
@@ -257,7 +213,6 @@ func _refresh_save_info() -> void:
 		_format_completed_maps(completed_maps)
 	]
 
-## Atualiza resumo da run que está ativa ou acabou de ser finalizada.
 func _refresh_current_run_info() -> void:
 	var run_controller: Node = _get_run_controller()
 
@@ -284,7 +239,6 @@ func _refresh_current_run_info() -> void:
 		str(run_data.get("current_level", 1))
 	]
 
-## Atualiza o resumo persistido da última run salva.
 func _refresh_last_run_info() -> void:
 	var save_debug: Dictionary = SaveManager.get_debug_data()
 	var last_run_variant: Variant = save_debug.get("last_run_summary", {})
@@ -313,7 +267,6 @@ func _refresh_last_run_info() -> void:
 		str(last_run.get("enemies_killed", 0))
 	]
 
-## Solicita vitória imediata ao RunController para fins de teste.
 func _on_force_victory_pressed() -> void:
 	if not allow_force_result_actions:
 		return
@@ -334,7 +287,6 @@ func _on_force_victory_pressed() -> void:
 
 	_refresh_panel()
 
-## Solicita derrota imediata ao RunController para fins de teste.
 func _on_force_defeat_pressed() -> void:
 	if not allow_force_result_actions:
 		return
@@ -355,7 +307,6 @@ func _on_force_defeat_pressed() -> void:
 
 	_refresh_panel()
 
-## Abre a confirmação visual antes de permitir apagar progressão.
 func _on_reset_progress_pressed() -> void:
 	if not allow_save_reset:
 		return
@@ -364,10 +315,6 @@ func _on_reset_progress_pressed() -> void:
 	status_label.text = LocalizationManager.get_text("ui.debug_tools.reset_warning")
 	_set_reset_confirmation_visible(true)
 
-## Executa o reset permanente depois da confirmação explícita.
-##
-## A run atual continua normalmente; apenas dados persistentes
-## controlados pelo SaveManager são zerados.
 func _on_confirm_reset_pressed() -> void:
 	if not reset_confirmation_active:
 		return
@@ -380,17 +327,12 @@ func _on_confirm_reset_pressed() -> void:
 	status_label.text = LocalizationManager.get_text("ui.debug_tools.reset_done")
 	_refresh_panel()
 
-## Cancela a solicitação de reset sem alterar o save.
 func _on_cancel_reset_pressed() -> void:
 	reset_confirmation_active = false
 	_set_reset_confirmation_visible(false)
 
 	status_label.text = LocalizationManager.get_text("ui.debug_tools.reset_cancelled")
 
-## Mostra ou oculta os botões de confirmação do reset.
-##
-## Enquanto a confirmação estiver aberta, desabilita o botão
-## inicial de reset para impedir múltiplas solicitações simultâneas.
 func _set_reset_confirmation_visible(should_show: bool) -> void:
 	if confirmation_row == null:
 		push_warning("[PrototypeToolsPanel] ConfirmationRow não encontrado.")
@@ -399,19 +341,15 @@ func _set_reset_confirmation_visible(should_show: bool) -> void:
 	confirmation_row.visible = should_show
 	reset_progress_button.disabled = should_show or not allow_save_reset
 
-## Atualiza o painel quando os dados persistentes forem alterados.
 func _on_save_updated(_save_data: SaveData) -> void:
 	_refresh_panel()
 
-## Atualiza o painel quando a run chegar ao resultado final.
 func _on_run_finished(_result_payload: RunResultPayload) -> void:
 	_refresh_panel()
 
-## Retorna o RunController atualmente registrado na árvore.
 func _get_run_controller() -> Node:
 	return RunQuery.get_run_controller(get_tree())
 
-## Converte a lista de mapas concluídos em texto amigável.
 func _format_completed_maps(completed_maps: Array) -> String:
 	if completed_maps.is_empty():
 		return LocalizationManager.get_text("ui.debug_tools.none")
@@ -423,12 +361,6 @@ func _format_completed_maps(completed_maps: Array) -> String:
 
 	return ", ".join(map_names)
 
-## Exporta um snapshot compacto da árvore runtime atual.
-##
-## O resultado:
-## - é impresso no console;
-## - é copiado para a área de transferência;
-## - inclui também um resumo dos grupos relevantes.
 func _export_runtime_tree_snapshot() -> void:
 	var current_scene: Node = get_tree().current_scene
 

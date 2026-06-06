@@ -27,8 +27,10 @@ player_scene_path = "uid://d3b8gxr3tu0p7"
 [node name="RuntimeRoot" type="Node2D" parent="." unique_id=1278207903]
 
 [node name="PlayerRoot" type="Node2D" parent="RuntimeRoot" unique_id=1719150669]
+y_sort_enabled = true
 
 [node name="EnemyRoot" type="Node2D" parent="RuntimeRoot" unique_id=1513150753]
+y_sort_enabled = true
 
 [node name="DropRoot" type="Node2D" parent="RuntimeRoot" unique_id=660049363]
 
@@ -61,14 +63,16 @@ script = ExtResource("3_38slv")
 
 [node name="DebugOverlay" parent="." unique_id=1878947059 instance=ExtResource("2_jgi7i")]
 debug_enabled = false
+show_input_section = false
+show_animation_section = false
+show_player_core_section = false
+show_player_combat_section = false
 show_player_direction_section = false
 show_run_timer_section = false
 show_run_progression_section = false
 show_run_economy_section = false
 show_run_result_section = false
-show_save_section = false
 show_technical_section = false
-show_enemy_links = true
 show_enemy_link_markers = true
 
 [node name="PrototypeToolsPanel" parent="." unique_id=531935299 instance=ExtResource("13_qxn1m")]

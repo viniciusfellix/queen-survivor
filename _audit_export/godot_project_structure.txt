@@ -1,6 +1,6 @@
 GODOT PROJECT STRUCTURE EXPORT
 ==============================================================================================================
-Gerado em: 2026-05-25 23:52:48
+Gerado em: 2026-06-05 19:50:43
 Projeto: C:/Users/acer/Documents/Godot/Projects/queen-survivor/
 Total de cenas encontradas: 19
 Inclui conteúdo dos scripts: true
@@ -23,14 +23,18 @@ CENA: res://gameplay/drops/CoinDrop.tscn
 CENA: res://gameplay/enemies/EnemyBase.tscn
 --------------------------------------------------------------------------------------------------------------
 - EnemyBase <CharacterBody2D> [path: .] | script: res://gameplay/enemies/EnemyBase.gd
-	- CollisionShape2D <CollisionShape2D> [path: ./CollisionShape2D]
+	- BodyCollision <CollisionShape2D> [path: ./BodyCollision]
+	- ContactAttackHitbox <Area2D> [path: ./ContactAttackHitbox] | script: res://gameplay/combat/EnemyAttackHitbox.gd
+	- Hurtbox <Area2D> [path: ./Hurtbox] | script: res://gameplay/combat/HurtboxComponent.gd
 	- VisualRoot <Node2D> [path: ./VisualRoot]
 	  - GoblinWarriorVisual <Node2D [instanced root]> [path: ./VisualRoot/GoblinWarriorVisual] | instance: res://visual/enemies/goblin_warrior/GoblinWarriorVisual.tscn
 
 CENA: res://gameplay/player/PlayerGaia.tscn
 --------------------------------------------------------------------------------------------------------------
 - PlayerGaia <CharacterBody2D> [path: .] | script: res://gameplay/player/PlayerController.gd
-	- CollisionShape2D <CollisionShape2D> [path: ./CollisionShape2D]
+	- BodyCollision <CollisionShape2D> [path: ./BodyCollision]
+	- PlayerHurtbox <Area2D> [path: ./PlayerHurtbox] | script: res://gameplay/combat/HurtboxComponent.gd
+	- DashImpactArea <Area2D> [path: ./DashImpactArea] | script: res://gameplay/player/PlayerDashImpactArea.gd
 	- VisualRoot <Node2D> [path: ./VisualRoot]
 	  - GaiaVisual <Node2D [instanced root]> [path: ./VisualRoot/GaiaVisual] | instance: res://visual/characters/gaia/GaiaVisual.tscn
 	- WeaponRoot <Node2D> [path: ./WeaponRoot]
@@ -68,7 +72,7 @@ CENA: res://gameplay/test/TestGaiaScene.tscn
 
 CENA: res://gameplay/weapons/attacks/DirectionalAttackHitbox.tscn
 --------------------------------------------------------------------------------------------------------------
-- DirectionalAttackHitbox <Node2D> [path: .] | script: res://gameplay/weapons/attacks/DirectionalAttackHitbox.gd
+- DirectionalAttackHitbox <Area2D> [path: .] | script: res://gameplay/weapons/attacks/DirectionalAttackHitbox.gd
 
 CENA: res://scenes/Main.tscn
 --------------------------------------------------------------------------------------------------------------
@@ -81,6 +85,7 @@ CENA: res://ui/debug/DebugOverlay.tscn
 	- Panel <Panel> [path: ./Panel]
 	  - MarginContainer <MarginContainer> [path: ./Panel/MarginContainer]
 		- Label <Label> [path: ./Panel/MarginContainer/Label]
+	- EnemyLinkDrawer <Node2D> [path: ./EnemyLinkDrawer] | script: res://ui/debug/DebugEnemyLinkDrawer.gd
 
 CENA: res://ui/debug/tools/PrototypeToolsPanel.tscn
 --------------------------------------------------------------------------------------------------------------
@@ -208,34 +213,22 @@ CENA: res://visual/weapons/gaia_initial_weapon/GaiaAttackVisual.tscn
 
 SCRIPTS ANEXADOS AOS NÓS
 ==============================================================================================================
-Total de scripts únicos encontrados: 25
+Total de scripts únicos encontrados: 29
 
 SCRIPT: res://gameplay/arena/TestArena.gd
 --------------------------------------------------------------------------------------------------------------
-## Visual técnico da arena infinita utilizada no protótipo.
-##
-## Desenha uma grade de referência e um marcador de origem para facilitar
-## testes de movimentação, spawn, câmera, alcance e orientação de ataques.
-##
-## Este script não define colisões, limites de mapa ou regras de gameplay.
 extends Node2D
 
-## Define se a grade técnica deve ser desenhada.
 @export var draw_debug_grid: bool = true
 
-## Distância em pixels entre linhas consecutivas da grade.
 @export var grid_size: int = 128
 
-## Extensão desenhada da grade para cada direção a partir da origem.
 @export var grid_extent: int = 4096
 
-## Define se o marcador circular da origem do mapa deve ser exibido.
 @export var draw_origin_marker: bool = true
 
-## Raio visual do marcador desenhado na coordenada `(0, 0)`.
 @export var origin_marker_radius: float = 10.0
 
-## Valida configurações visuais básicas e agenda o desenho inicial da arena.
 func _ready() -> void:
 	if draw_debug_grid and grid_size <= 0:
 		push_warning("[TestArena] grid_size precisa ser maior que zero para desenhar a grade.")
@@ -248,10 +241,6 @@ func _ready() -> void:
 
 	queue_redraw()
 
-## Desenha os elementos técnicos habilitados independentemente.
-##
-## A grade e o marcador possuem toggles separados para permitir testes
-## com a arena visualmente limpa sem perder referência da origem.
 func _draw() -> void:
 	if draw_debug_grid:
 		_draw_grid()
@@ -259,10 +248,6 @@ func _draw() -> void:
 	if draw_origin_marker:
 		_draw_origin_marker()
 
-## Desenha a grade técnica da arena e destaca seus eixos centrais.
-##
-## Linhas principais aparecem a cada quatro células para facilitar
-## leitura visual de distâncias maiores durante os testes.
 func _draw_grid() -> void:
 	if grid_size <= 0 or grid_extent <= 0:
 		return
@@ -316,7 +301,6 @@ func _draw_grid() -> void:
 		3.0
 	)
 
-## Desenha o marcador circular da origem absoluta da arena.
 func _draw_origin_marker() -> void:
 	if origin_marker_radius <= 0.0:
 		return
@@ -328,11 +312,18 @@ SCRIPT: res://gameplay/camera/FollowCamera.gd
 --------------------------------------------------------------------------------------------------------------
 extends Camera2D
 
+@export_group("Target")
+
 @export var follow_enabled: bool = true
+
 @export var target_path: NodePath
+
 @export var target_group_name: String = "player"
 
+@export_group("Movement")
+
 @export var follow_smoothing: float = 12.0
+
 @export var position_offset: Vector2 = Vector2.ZERO
 
 @export var snap_to_target_on_ready: bool = true
@@ -420,74 +411,480 @@ func _find_first_node2d_in_group(group_name: String) -> Node2D:
 	return null
 
 
+SCRIPT: res://gameplay/combat/EnemyAttackHitbox.gd
+--------------------------------------------------------------------------------------------------------------
+extends Area2D
+class_name EnemyAttackHitbox
+
+@export_group("Collision Filter")
+
+@export_range(1, 32, 1) var collision_layer_number: int = 6
+
+@export_range(1, 32, 1) var target_hurtbox_layer_number: int = 7
+
+@export var configure_collision_filter_on_ready: bool = true
+
+@export_group("Diagnostics")
+
+@export var log_configuration: bool = false
+
+@export var log_successful_hits: bool = true
+
+var runtime_definition: EnemyAttackDefinition = null
+var source_node: Node = null
+var source_id: String = ""
+
+var runtime_shape_nodes: Array[CollisionShape2D] = []
+var receiver_cooldowns: Dictionary = {}
+
+var elapsed_seconds: float = 0.0
+var is_active: bool = false
+var is_configured: bool = false
+
+func _ready() -> void:
+	add_to_group("enemy_attack_hitbox")
+
+	monitoring = false
+	monitorable = false
+
+	if configure_collision_filter_on_ready:
+		_configure_collision_filter()
+
+func _physics_process(delta: float) -> void:
+	if not is_configured or not is_active:
+		return
+
+	if RunQuery.is_gameplay_blocked(get_tree()):
+		return
+
+	elapsed_seconds += delta
+
+	_update_receiver_cooldowns(delta)
+
+	if runtime_definition == null:
+		return
+
+	if elapsed_seconds < runtime_definition.start_delay_seconds:
+		return
+
+	_try_damage_overlapping_hurtboxes()
+
+func setup(
+	p_attack_definition: EnemyAttackDefinition,
+	p_source_node: Node,
+	p_source_id: String = ""
+) -> void:
+	source_node = p_source_node
+
+	if p_attack_definition == null or not p_attack_definition.is_valid_definition():
+		runtime_definition = null
+		source_id = ""
+		is_configured = false
+		_clear_runtime_shapes()
+		set_attack_active(false)
+		push_warning("[EnemyAttackHitbox] Definition de ataque ausente ou inválida.")
+		return
+
+	runtime_definition = p_attack_definition.duplicate(true) as EnemyAttackDefinition
+
+	if p_source_id.strip_edges() != "":
+		source_id = p_source_id
+	else:
+		source_id = runtime_definition.id
+
+	elapsed_seconds = 0.0
+	receiver_cooldowns.clear()
+
+	rebuild_runtime_shapes()
+
+	is_configured = not runtime_shape_nodes.is_empty()
+	set_attack_active(is_configured)
+
+	if log_configuration:
+		DeveloperAuditLogger.log_combat(
+			"Hitbox configurada: source=%s attack=%s damage=%s type=%s interval=%s delay=%s areas=%s" % [
+				source_id,
+				runtime_definition.id,
+				str(runtime_definition.raw_damage),
+				runtime_definition.damage_type,
+				str(runtime_definition.hit_interval_seconds),
+				str(runtime_definition.start_delay_seconds),
+				runtime_definition.get_areas_debug_summary()
+			],
+			"EnemyAttackHitbox",
+			{
+				"source_id": source_id,
+				"attack_id": runtime_definition.id,
+				"raw_damage": runtime_definition.raw_damage,
+				"damage_type": runtime_definition.damage_type,
+				"hit_interval_seconds": runtime_definition.hit_interval_seconds,
+				"start_delay_seconds": runtime_definition.start_delay_seconds,
+				"areas": runtime_definition.get_areas_debug_summary()
+			}
+		)
+
+func rebuild_runtime_shapes() -> void:
+	_clear_runtime_shapes()
+
+	if runtime_definition == null:
+		return
+
+	for attack_area: AttackAreaDefinition in runtime_definition.attack_areas:
+		if attack_area == null or not attack_area.is_valid_definition():
+			continue
+
+		var runtime_shape: Shape2D = attack_area.build_runtime_shape()
+
+		if runtime_shape == null:
+			continue
+
+		var shape_node: CollisionShape2D = CollisionShape2D.new()
+		shape_node.name = "RuntimeEnemyAttackShape_%s" % str(runtime_shape_nodes.size())
+		shape_node.shape = runtime_shape
+		shape_node.position = attack_area.local_offset
+		shape_node.rotation_degrees = attack_area.local_rotation_degrees
+
+		add_child(shape_node)
+		runtime_shape_nodes.append(shape_node)
+
+	if runtime_shape_nodes.is_empty():
+		push_warning("[EnemyAttackHitbox] Nenhuma shape ofensiva válida foi construída.")
+
+func set_attack_active(should_be_active: bool) -> void:
+	is_active = should_be_active
+
+	set_deferred("monitoring", should_be_active)
+
+	for shape_node: CollisionShape2D in runtime_shape_nodes:
+		if shape_node == null or not is_instance_valid(shape_node):
+			continue
+
+		shape_node.set_deferred("disabled", not should_be_active)
+
+	if not should_be_active:
+		receiver_cooldowns.clear()
+
+func _try_damage_overlapping_hurtboxes() -> void:
+	if runtime_definition == null:
+		return
+
+	for overlapping_area: Area2D in get_overlapping_areas():
+		if not overlapping_area is HurtboxComponent:
+			continue
+
+		var hurtbox: HurtboxComponent = overlapping_area as HurtboxComponent
+
+		if not hurtbox.can_receive_damage():
+			continue
+
+		var receiver: Node = hurtbox.get_damage_receiver()
+
+		if receiver == null or receiver == source_node:
+			continue
+
+		var receiver_instance_id: int = int(receiver.get_instance_id())
+		var remaining_cooldown: float = float(
+			receiver_cooldowns.get(receiver_instance_id, 0.0)
+		)
+
+		if remaining_cooldown > 0.0:
+			continue
+
+		var payload: DamagePayload = runtime_definition.build_damage_payload(
+			source_node,
+			source_id
+		)
+
+		var final_damage_variant: Variant = receiver.call("receive_damage", payload)
+		var final_damage: int = _variant_to_damage(final_damage_variant)
+
+		if final_damage <= 0:
+			continue
+
+		receiver_cooldowns[receiver_instance_id] = (
+			runtime_definition.hit_interval_seconds
+		)
+
+		if log_successful_hits:
+			DeveloperAuditLogger.log_combat(
+				"PlayerHurtbox atingida: receiver=%s attack=%s raw=%s final=%s areas=%s" % [
+					receiver.name,
+					runtime_definition.id,
+					str(runtime_definition.raw_damage),
+					str(final_damage),
+					runtime_definition.get_areas_debug_summary()
+				],
+				"EnemyAttackHitbox",
+				{
+					"receiver": receiver.name,
+					"attack_id": runtime_definition.id,
+					"raw_damage": runtime_definition.raw_damage,
+					"final_damage": final_damage,
+					"areas": runtime_definition.get_areas_debug_summary()
+				}
+			)
+
+func _update_receiver_cooldowns(delta: float) -> void:
+	for receiver_id_variant: Variant in receiver_cooldowns.keys():
+		var remaining_seconds: float = (
+			float(receiver_cooldowns.get(receiver_id_variant, 0.0)) - delta
+		)
+
+		if remaining_seconds <= 0.0:
+			receiver_cooldowns.erase(receiver_id_variant)
+		else:
+			receiver_cooldowns[receiver_id_variant] = remaining_seconds
+
+func _configure_collision_filter() -> void:
+	collision_layer = 0
+	collision_mask = 0
+
+	set_collision_layer_value(collision_layer_number, true)
+	set_collision_mask_value(target_hurtbox_layer_number, true)
+
+func _clear_runtime_shapes() -> void:
+	for shape_node: CollisionShape2D in runtime_shape_nodes:
+		if shape_node == null or not is_instance_valid(shape_node):
+			continue
+
+		remove_child(shape_node)
+		shape_node.queue_free()
+
+	runtime_shape_nodes.clear()
+
+func _variant_to_damage(value: Variant) -> int:
+	if value is int:
+		return int(value)
+
+	if value is float:
+		return int(value)
+
+	return 0
+
+func get_debug_data() -> Dictionary:
+	return {
+		"is_configured": is_configured,
+		"is_active": is_active,
+		"source_id": source_id,
+		"has_runtime_definition": runtime_definition != null,
+		"attack_id": runtime_definition.id if runtime_definition != null else "",
+		"areas": runtime_definition.get_areas_debug_summary() if runtime_definition != null else "none",
+		"elapsed_seconds": elapsed_seconds,
+		"runtime_shape_count": runtime_shape_nodes.size()
+	}
+
+
+SCRIPT: res://gameplay/combat/HurtboxComponent.gd
+--------------------------------------------------------------------------------------------------------------
+extends Area2D
+class_name HurtboxComponent
+
+@export_group("Definition")
+
+@export var hurtbox_areas: Array[HurtboxAreaDefinition] = []
+
+@export var damage_receiver_path: NodePath = NodePath("..")
+
+@export_group("Collision Filter")
+
+@export_range(1, 32, 1) var collision_layer_number: int = 5
+
+@export var configure_collision_filter_on_ready: bool = true
+
+@export_group("Diagnostics")
+
+@export var log_configuration: bool = false
+
+var damage_receiver: Node = null
+var runtime_shape_nodes: Array[CollisionShape2D] = []
+var is_active: bool = true
+
+func _ready() -> void:
+	add_to_group("hurtbox")
+
+	monitoring = false
+	monitorable = true
+
+	if configure_collision_filter_on_ready:
+		_configure_collision_filter()
+
+	damage_receiver = _resolve_damage_receiver()
+
+	if not hurtbox_areas.is_empty():
+		rebuild_runtime_shapes()
+
+func setup(
+	p_hurtbox_areas: Array[HurtboxAreaDefinition],
+	p_damage_receiver: Node = null
+) -> void:
+	if p_damage_receiver != null:
+		damage_receiver = p_damage_receiver
+	else:
+		damage_receiver = _resolve_damage_receiver()
+
+	hurtbox_areas.clear()
+
+	for hurtbox_area: HurtboxAreaDefinition in p_hurtbox_areas:
+		if hurtbox_area == null:
+			continue
+
+		if not hurtbox_area.is_valid_definition():
+			continue
+
+		var duplicated_area: HurtboxAreaDefinition = (
+			hurtbox_area.duplicate(true) as HurtboxAreaDefinition
+		)
+
+		hurtbox_areas.append(duplicated_area)
+
+	rebuild_runtime_shapes()
+	set_hurtbox_active(true)
+
+	if log_configuration:
+		DeveloperAuditLogger.log_combat(
+			"Hurtbox configurada: receiver=%s areas=%s" % [
+				_get_receiver_debug_name(),
+				_get_areas_debug_summary()
+			],
+			"HurtboxComponent",
+			{
+				"receiver": _get_receiver_debug_name(),
+				"areas": _get_areas_debug_summary()
+			}
+		)
+
+func rebuild_runtime_shapes() -> void:
+	_clear_runtime_shapes()
+
+	for hurtbox_area: HurtboxAreaDefinition in hurtbox_areas:
+		if hurtbox_area == null or not hurtbox_area.is_valid_definition():
+			continue
+
+		var runtime_shape: Shape2D = hurtbox_area.build_runtime_shape()
+
+		if runtime_shape == null:
+			continue
+
+		var shape_node: CollisionShape2D = CollisionShape2D.new()
+		shape_node.name = "RuntimeHurtboxShape_%s" % str(runtime_shape_nodes.size())
+		shape_node.shape = runtime_shape
+		shape_node.position = hurtbox_area.local_offset
+		shape_node.rotation_degrees = hurtbox_area.local_rotation_degrees
+
+		add_child(shape_node)
+		runtime_shape_nodes.append(shape_node)
+
+	if runtime_shape_nodes.is_empty() and log_configuration:
+		push_warning("[HurtboxComponent] Nenhuma shape válida foi construída.")
+
+func get_damage_receiver() -> Node:
+	return damage_receiver
+
+func can_receive_damage() -> bool:
+	return (
+		is_active
+		and damage_receiver != null
+		and is_instance_valid(damage_receiver)
+		and damage_receiver.has_method("receive_damage")
+	)
+
+func set_hurtbox_active(should_be_active: bool) -> void:
+	is_active = should_be_active
+	set_deferred("monitorable", should_be_active)
+
+	for shape_node: CollisionShape2D in runtime_shape_nodes:
+		if shape_node == null or not is_instance_valid(shape_node):
+			continue
+
+		shape_node.set_deferred("disabled", not should_be_active)
+
+func _configure_collision_filter() -> void:
+	collision_layer = 0
+	collision_mask = 0
+
+	set_collision_layer_value(collision_layer_number, true)
+
+func _resolve_damage_receiver() -> Node:
+	if damage_receiver_path != NodePath():
+		var configured_receiver: Node = get_node_or_null(damage_receiver_path)
+
+		if configured_receiver != null:
+			return configured_receiver
+
+	return get_parent()
+
+func _clear_runtime_shapes() -> void:
+	for shape_node: CollisionShape2D in runtime_shape_nodes:
+		if shape_node == null or not is_instance_valid(shape_node):
+			continue
+
+		remove_child(shape_node)
+		shape_node.queue_free()
+
+	runtime_shape_nodes.clear()
+
+func _get_receiver_debug_name() -> String:
+	if damage_receiver == null:
+		return "none"
+
+	return damage_receiver.name
+
+func _get_areas_debug_summary() -> String:
+	var summaries: Array[String] = []
+
+	for hurtbox_area: HurtboxAreaDefinition in hurtbox_areas:
+		if hurtbox_area == null:
+			continue
+
+		summaries.append(hurtbox_area.get_debug_summary())
+
+	if summaries.is_empty():
+		return "none"
+
+	return ", ".join(summaries)
+
+
 SCRIPT: res://gameplay/drops/CoinDrop.gd
 --------------------------------------------------------------------------------------------------------------
-## Moeda física dropada durante a run.
-##
-## Regras atuais:
-## - nasce no mundo após morte válida de inimigo;
-## - aguarda pequeno tempo inicial;
-## - é atraída ao entrar no raio de magnetismo;
-## - é contabilizada somente ao entrar no raio de coleta;
-## - deixa de ser coletável após o fim da run.
 extends Node2D
 class_name CoinDrop
 
-## Definition com parâmetros base desta moeda.
 @export var coin_definition: CoinDropDefinition
 
-## Quantidade adicionada ao saldo quando esta moeda for coletada.
 @export var value: int = 1
 
-## Grupo utilizado para localizar automaticamente a Queen.
 @export var player_group_name: String = "player"
 
-## Distância base para iniciar atração magnética.
 @export var magnet_radius: float = 150.0
 
-## Distância base para concluir a coleta.
 @export var collect_radius: float = 24.0
 
-## Tempo inicial em que a moeda permanece parada antes do magnetismo.
 @export var initial_idle_seconds: float = 0.15
 
-## Aceleração utilizada durante movimento magnético.
 @export var magnet_acceleration: float = 900.0
 
-## Velocidade máxima atingida durante atração.
 @export var max_magnet_speed: float = 520.0
 
-## Exibe visual técnico temporário da moeda.
 @export var draw_debug_visual: bool = true
 
-## Raio do placeholder desenhado.
 @export var debug_radius: float = 8.0
 
-## Cor principal do placeholder.
 @export var debug_color: Color = Color(1.0, 0.78, 0.18, 1.0)
 
-## Cor de contorno do placeholder.
 @export var debug_outline_color: Color = Color(1.0, 1.0, 1.0, 0.95)
 
-## Referência atual da Queen que pode coletar a moeda.
 var player_node: Node2D = null
 
-## Velocidade runtime atual da moeda.
 var velocity: Vector2 = Vector2.ZERO
 
-## Tempo transcorrido desde o nascimento da moeda.
 var elapsed_seconds: float = 0.0
 
-## Define se a moeda já foi coletada e não pode emitir novamente.
 var is_collected: bool = false
 
-## Define se a moeda está atualmente sendo atraída.
 var is_magnetized: bool = false
 
-## Define se esta moeda ainda pode entrar no saldo da run.
 var collection_enabled: bool = true
 
-## Inicializa parâmetros, localiza o player e escuta o fim da run.
 func _ready() -> void:
 	_apply_definition()
 	player_node = _resolve_player()
@@ -496,10 +893,6 @@ func _ready() -> void:
 	if not GameEvents.run_finished.is_connected(_on_run_finished):
 		GameEvents.run_finished.connect(_on_run_finished)
 
-## Atualiza magnetismo e coleta física da moeda.
-##
-## Durante pausas ou após encerramento do gameplay, interrompe movimento
-## e impede que a moeda seja coletada indevidamente.
 func _physics_process(delta: float) -> void:
 	if is_collected:
 		return
@@ -542,7 +935,6 @@ func _physics_process(delta: float) -> void:
 	global_position += velocity * delta
 	queue_redraw()
 
-## Desenha placeholder técnico e raio magnético quando aplicável.
 func _draw() -> void:
 	if not draw_debug_visual:
 		return
@@ -553,10 +945,6 @@ func _draw() -> void:
 	if is_magnetized:
 		draw_arc(Vector2.ZERO, _get_effective_magnet_radius(), 0.0, TAU, 48, Color(1.0, 0.9, 0.2, 0.18), 1.0)
 
-## Configura a moeda criada pelo `DropController`.
-##
-## Permite fornecer definition, valor específico e referência direta
-## da Queen que participará do magnetismo.
 func setup(p_definition: CoinDropDefinition, p_value: int = 1, p_player: Node2D = null) -> void:
 	coin_definition = p_definition
 	value = max(1, p_value)
@@ -567,7 +955,6 @@ func setup(p_definition: CoinDropDefinition, p_value: int = 1, p_player: Node2D 
 	_apply_definition()
 	queue_redraw()
 
-## Copia parâmetros editáveis da definition para esta instância runtime.
 func _apply_definition() -> void:
 	if coin_definition == null:
 		return
@@ -583,7 +970,6 @@ func _apply_definition() -> void:
 	debug_color = coin_definition.debug_color
 	debug_outline_color = coin_definition.debug_outline_color
 
-## Acelera a moeda em direção ao player enquanto estiver magnetizada.
 func _update_magnet_movement(delta: float) -> void:
 	var to_player: Vector2 = player_node.global_position - global_position
 
@@ -593,9 +979,6 @@ func _update_magnet_movement(delta: float) -> void:
 	var desired_velocity: Vector2 = to_player.normalized() * max_magnet_speed
 	velocity = velocity.move_toward(desired_velocity, magnet_acceleration * delta)
 
-## Conclui a coleta física e informa o saldo à run.
-##
-## A moeda só é removida depois de emitir `run_coin_collected`.
 func _collect() -> void:
 	if not collection_enabled:
 		return
@@ -624,7 +1007,6 @@ func _collect() -> void:
 
 	queue_free()
 
-## Resolve automaticamente a Queen pelo grupo configurado.
 func _resolve_player() -> Node2D:
 	var players: Array[Node] = get_tree().get_nodes_in_group(player_group_name)
 
@@ -634,29 +1016,20 @@ func _resolve_player() -> Node2D:
 
 	return null
 
-## Interrompe permanentemente coleta e magnetismo quando a run termina.
-##
-## Isso garante que moedas deixadas no chão sejam perdidas conforme
-## a regra oficial do jogo.
 func _on_run_finished(_result_payload: RunResultPayload) -> void:
 	collection_enabled = false
 	is_magnetized = false
 	velocity = Vector2.ZERO
 	queue_redraw()
 
-## Calcula o raio magnético efetivo considerando upgrades do player.
 func _get_effective_magnet_radius() -> float:
 	var multiplier: float = _get_player_collection_multiplier("coin_magnet_radius_multiplier")
 	return magnet_radius * multiplier
 
-## Calcula o raio de coleta efetivo considerando upgrades do player.
 func _get_effective_collect_radius() -> float:
 	var multiplier: float = _get_player_collection_multiplier("coin_collect_radius_multiplier")
 	return collect_radius * multiplier
 
-## Obtém do player um multiplicador de coleta por chave.
-##
-## Em ausência de contrato compatível, utiliza multiplicador neutro.
 func _get_player_collection_multiplier(key: String) -> float:
 	if player_node == null:
 		return 1.0
@@ -677,40 +1050,22 @@ func _get_player_collection_multiplier(key: String) -> float:
 
 SCRIPT: res://gameplay/drops/DropController.gd
 --------------------------------------------------------------------------------------------------------------
-## Controller responsável por transformar mortes de inimigos em drops físicos.
-##
-## No Módulo 1, administra exclusivamente moedas:
-## - escuta morte de inimigos;
-## - realiza sorteio de drop;
-## - instancia `CoinDrop`;
-## - posiciona a moeda com pequeno deslocamento visual;
-## - injeta referências necessárias para magnetismo e coleta.
 extends Node
 
-## Cena utilizada para instanciar uma moeda física.
 @export_file("*.tscn") var coin_drop_scene_path: String = "res://gameplay/drops/CoinDrop.tscn"
 
-## Definition com valores base de magnetismo, coleta e aparência da moeda.
 @export var coin_definition: CoinDropDefinition
 
-## Caminho opcional para o container onde drops serão inseridos.
 @export var drop_root_path: NodePath
 
-## Grupo utilizado para localizar a Queen que atrairá as moedas.
 @export var player_group_name: String = "player"
 
-## Variação aleatória aplicada à posição de nascimento da moeda.
-##
-## Evita que múltiplos drops fiquem visualmente perfeitamente sobrepostos.
 @export var random_position_jitter: float = 18.0
 
-## Container runtime dos drops físicos.
 var drop_root: Node2D = null
 
-## Referência runtime da Queen.
 var player_node: Node2D = null
 
-## Resolve dependências iniciais e conecta o evento de morte de inimigos.
 func _ready() -> void:
 	drop_root = _resolve_drop_root()
 	player_node = _resolve_player()
@@ -739,15 +1094,10 @@ func _ready() -> void:
 	else:
 		push_warning("[DropController] CoinDefinition não configurada.")
 
-## Conecta os sinais necessários para criar drops após mortes.
 func _connect_events() -> void:
 	if not GameEvents.enemy_died.is_connected(_on_enemy_died):
 		GameEvents.enemy_died.connect(_on_enemy_died)
 
-## Processa a chance de drop de moeda após a morte de um inimigo.
-##
-## Não cria novas moedas depois que a run entrou em encerramento
-## ou já exibiu resultado final.
 func _on_enemy_died(
 	enemy_id: String,
 	source_id: String,
@@ -785,10 +1135,6 @@ func _on_enemy_died(
 
 	_spawn_coin(enemy_global_position, coin_drop_value, enemy_id, source_id)
 
-## Instancia uma moeda física na posição da morte do inimigo.
-##
-## A moeda recebe definition, valor e player atual.
-## O saldo da run somente será atualizado depois da coleta efetiva.
 func _spawn_coin(spawn_position: Vector2, value: int, enemy_id: String, source_id: String) -> void:
 	if drop_root == null:
 		drop_root = _resolve_drop_root()
@@ -837,7 +1183,6 @@ func _spawn_coin(spawn_position: Vector2, value: int, enemy_id: String, source_i
 		}
 	)
 
-## Gera pequeno deslocamento aleatório para a posição visual do drop.
 func _get_random_jitter() -> Vector2:
 	if random_position_jitter <= 0.0:
 		return Vector2.ZERO
@@ -847,12 +1192,6 @@ func _get_random_jitter() -> Vector2:
 
 	return Vector2(cos(angle), sin(angle)) * distance
 
-## Resolve o container de drops da cena atual.
-##
-## Prioridade:
-## 1. caminho configurado;
-## 2. irmão direto chamado `DropRoot`;
-## 3. container encontrado um nível acima.
 func _resolve_drop_root() -> Node2D:
 	if drop_root_path != NodePath():
 		var configured_root: Node = get_node_or_null(drop_root_path)
@@ -878,7 +1217,6 @@ func _resolve_drop_root() -> Node2D:
 
 	return null
 
-## Resolve a Queen responsável por atrair e coletar moedas.
 func _resolve_player() -> Node2D:
 	var players: Array[Node] = get_tree().get_nodes_in_group(player_group_name)
 
@@ -891,122 +1229,94 @@ func _resolve_player() -> Node2D:
 
 SCRIPT: res://gameplay/enemies/EnemyBase.gd
 --------------------------------------------------------------------------------------------------------------
-## Controller base do inimigo perseguidor utilizado no Módulo 1.
-##
-## Responsabilidades:
-## - aplicar atributos a partir de `EnemyDefinition`;
-## - localizar e perseguir a Queen;
-## - aplicar dano de contato;
-## - receber dano composto da arma;
-## - emitir XP e chance de moeda ao morrer;
-## - coordenar animação e remoção visual após a morte.
-##
-## O inimigo atual é simples e persegue diretamente o player.
-## Melhorias futuras, como distribuição orgânica ao redor da Queen,
-## poderão substituir especificamente a lógica de perseguição.
 extends CharacterBody2D
 
-## Dados de balanceamento utilizados por esta instância.
 @export var enemy_definition: EnemyDefinition
 
-## Caminho opcional para um alvo específico.
 @export var target_path: NodePath
 
-## Grupo utilizado para localizar automaticamente a Queen.
 @export var target_group_name: String = "player"
 
-## Caminho opcional para o controller visual do inimigo.
 @export var visual_controller_path: NodePath
 
-## Distância mínima na qual o inimigo interrompe o deslocamento.
 @export var stopping_distance: float = 8.0
 
-## Exibe o placeholder técnico do corpo do inimigo.
 @export var draw_debug_visual: bool = false
 
-## Exibe linha técnica conectando inimigo ao alvo atual.
 @export var draw_debug_target_line: bool = false
 
-## Exibe o raio utilizado para dano de contato.
-@export var draw_contact_radius: bool = false
+@onready var hurtbox_component: HurtboxComponent = get_node_or_null("Hurtbox") as HurtboxComponent
 
-@export_group("Spawn Safety")
+@onready var contact_attack_hitbox: EnemyAttackHitbox = (
+	get_node_or_null("ContactAttackHitbox") as EnemyAttackHitbox
+)
 
-## Tempo mínimo após nascer antes que o inimigo possa causar contato.
-##
-## Evita dano imediato caso a instância surja próxima demais do player.
-@export var contact_damage_start_delay_seconds: float = 0.75
-
-## Ativa logs detalhados das verificações de distância de contato.
-@export var debug_contact_distance: bool = false
-
-## Tempo em que o corpo morto permanece visível antes de ser removido.
 @export var remove_after_death_seconds: float = 0.45
 
-## Vida máxima atual desta instância.
 var max_hp: int = 10
 
-## Vida restante desta instância.
 var current_hp: int = 10
 
-## Velocidade atual de perseguição.
 var move_speed: float = 90.0
 
-## Dano bruto causado ao tocar a Queen.
-var contact_damage: int = 5
+var body_bump_enabled: bool = true
 
-## Distância necessária para atingir a Queen por contato.
-var contact_damage_radius: float = 32.0
+var body_bump_power: float = 2.0
 
-## Intervalo mínimo entre impactos consecutivos.
-var contact_damage_interval_seconds: float = 1.0
+var body_bump_velocity_per_power: float = 24.0
 
-## Tipo do dano de contato.
-var contact_damage_type: String = DamageTypes.PHYSICAL
+var body_bump_max_velocity: float = 140.0
 
-## XP concedida ao morrer.
+var body_bump_decay_per_second: float = 280.0
+
+var body_bump_lateral_influence: float = 0.35
+
+var body_bump_velocity: Vector2 = Vector2.ZERO
+
+var player_body_slide_enabled: bool = true
+var player_body_slide_power: float = 2.0
+var player_body_slide_velocity_per_power: float = 36.0
+var player_body_slide_max_velocity: float = 160.0
+var player_body_slide_away_influence: float = 0.30
+
+var received_knockback_multiplier: float = 1.0
+
+var received_knockback_max_velocity: float = 520.0
+
+var received_knockback_decay_per_second: float = 1800.0
+
+var received_knockback_chase_weight: float = 0.15
+
+var received_knockback_velocity: Vector2 = Vector2.ZERO
+
 var xp_reward: int = 1
 
-## Chance de gerar moeda física ao morrer.
 var coin_drop_chance: float = 0.25
 
-## Valor da moeda gerada, quando houver drop.
 var coin_drop_value: int = 1
 
-## Tempo restante antes de um novo dano de contato ser permitido.
-var contact_damage_timer: float = 0.0
-
-## Referência da Queen perseguida.
 var target_node: Node2D = null
 
-## Referência do controller visual desta instância.
+var visual_chase_direction: Vector2 = Vector2.RIGHT
+
 var visual_controller: Node = null
 
-## ID técnico do inimigo configurado.
 var enemy_id: String = ""
 
-## Cor utilizada pelo placeholder técnico.
 var debug_color: Color = Color(0.9, 0.15, 0.15, 1.0)
 
-## Raio utilizado pelo placeholder técnico.
 var debug_radius: float = 18.0
 
-## Informa se o inimigo ainda está ativo em gameplay.
 var is_alive: bool = true
 
-## Soma do dano efetivamente recebido por esta instância.
 var total_damage_taken: int = 0
 
-## Último valor de dano efetivamente recebido.
 var last_damage_taken: int = 0
 
-## Fonte responsável pelo último dano recebido.
 var last_damage_source_id: String = ""
 
-## Tempo transcorrido desde que esta instância entrou na árvore.
-var alive_seconds: float = 0.0
+var active_knockback_chase_weight: float = -1.0
 
-## Inicializa o inimigo, aplica sua definition e tenta resolver alvo e visual.
 func _ready() -> void:
 	add_to_group("enemy")
 
@@ -1021,15 +1331,11 @@ func _ready() -> void:
 	_update_visual_state()
 	queue_redraw()
 
-## Executa perseguição e dano de contato enquanto o gameplay estiver ativo.
-##
-## Em pausas, level-up ou encerramento da run, o inimigo permanece imóvel
-## e apenas atualiza sua representação visual.
-func _physics_process(delta: float) -> void:
-	alive_seconds += delta
-
+func _physics_process(_delta: float) -> void:
 	if RunQuery.is_gameplay_blocked(get_tree()):
 		velocity = Vector2.ZERO
+		body_bump_velocity = Vector2.ZERO
+		_clear_received_knockback()
 		move_and_slide()
 		_update_visual_state()
 		queue_redraw()
@@ -1037,32 +1343,53 @@ func _physics_process(delta: float) -> void:
 
 	if not is_alive:
 		velocity = Vector2.ZERO
+		body_bump_velocity = Vector2.ZERO
+		_clear_received_knockback()
 		move_and_slide()
 		_update_visual_state()
 		queue_redraw()
 		return
-
-	_update_contact_damage_timer(delta)
 
 	if target_node == null:
 		target_node = _resolve_target()
 
 	if target_node == null:
 		velocity = Vector2.ZERO
+		body_bump_velocity = Vector2.ZERO
+		_clear_received_knockback()
 		move_and_slide()
 		_update_visual_state()
 		queue_redraw()
 		return
 
-	_follow_target()
-	move_and_slide()
+	_update_body_bump_velocity(_delta)
+	_update_received_knockback_velocity(_delta)
 
-	_try_apply_contact_damage()
+	_follow_target()
+
+	if _is_received_knockback_active():
+		var current_knockback_chase_weight: float = received_knockback_chase_weight
+
+		if active_knockback_chase_weight >= 0.0:
+			current_knockback_chase_weight = active_knockback_chase_weight
+
+		current_knockback_chase_weight = clamp(
+			current_knockback_chase_weight,
+			0.0,
+			1.0
+		)
+
+		velocity *= current_knockback_chase_weight
+
+	velocity += body_bump_velocity
+	velocity += received_knockback_velocity
+
+	move_and_slide()
+	_process_body_bump_collisions()
 
 	_update_visual_state()
 	queue_redraw()
 
-## Desenha representação técnica do inimigo quando habilitada.
 func _draw() -> void:
 	if not draw_debug_visual:
 		return
@@ -1075,25 +1402,18 @@ func _draw() -> void:
 	draw_circle(Vector2.ZERO, debug_radius, body_color)
 	draw_arc(Vector2.ZERO, debug_radius + 2.0, 0.0, TAU, 24, Color.WHITE, 2.0)
 
-	if draw_contact_radius and is_alive:
-		draw_arc(Vector2.ZERO, contact_damage_radius, 0.0, TAU, 32, Color(1.0, 0.5, 0.1, 0.85), 1.0)
+	var forward_direction: Vector2 = visual_chase_direction
 
-	var forward_direction: Vector2 = Vector2.RIGHT
+	if forward_direction.length() <= 0.001:
+		forward_direction = Vector2.RIGHT
 
-	if velocity.length() > 0.001:
-		forward_direction = velocity.normalized()
-
-	var nose_position: Vector2 = forward_direction * (debug_radius + 8.0)
+	var nose_position: Vector2 = forward_direction.normalized() * (debug_radius + 8.0)
 	draw_circle(nose_position, 4.0, Color.WHITE)
 
 	if draw_debug_target_line and target_node != null:
 		var local_target_position: Vector2 = to_local(target_node.global_position)
 		draw_line(Vector2.ZERO, local_target_position, Color.YELLOW, 1.0)
 
-## Configura uma instância criada pelo `EnemySpawner`.
-##
-## Recebe a definition correspondente à wave ativa e, quando disponível,
-## recebe diretamente o player como alvo para evitar buscas adicionais.
 func setup(definition: EnemyDefinition, target: Node2D = null) -> void:
 	enemy_definition = definition
 
@@ -1108,10 +1428,6 @@ func setup(definition: EnemyDefinition, target: Node2D = null) -> void:
 	_update_visual_state()
 	queue_redraw()
 
-## Recebe um payload de ataque da Queen e retorna o dano final aplicado.
-##
-## O `DamageResolver` calcula individualmente cada componente do ataque
-## considerando fraquezas e resistências cadastradas na definition.
 func receive_damage(payload: DamagePayload) -> int:
 	if payload == null:
 		return 0
@@ -1168,6 +1484,8 @@ func receive_damage(payload: DamagePayload) -> int:
 		}
 	)
 
+	_play_damage_feedback()
+
 	if current_hp <= 0:
 		die(payload.source_id)
 
@@ -1176,20 +1494,20 @@ func receive_damage(payload: DamagePayload) -> int:
 
 	return final_damage
 
-## Consolida a morte desta instância.
-##
-## Fluxo:
-## - bloqueia novas ações;
-## - emite recompensa de XP e dados de moeda;
-## - atualiza animação de morte;
-## - remove o inimigo do grupo ativo;
-## - agenda sua remoção visual após breve delay.
 func die(source_id: String = "") -> void:
 	if not is_alive:
 		return
 
 	is_alive = false
 	velocity = Vector2.ZERO
+	body_bump_velocity = Vector2.ZERO
+	_clear_received_knockback()
+
+	if hurtbox_component != null:
+		hurtbox_component.set_hurtbox_active(false)
+
+	if contact_attack_hitbox != null:
+		contact_attack_hitbox.set_attack_active(false)
 
 	GameEvents.enemy_died.emit(
 		enemy_id,
@@ -1225,14 +1543,9 @@ func die(source_id: String = "") -> void:
 	var death_timer: SceneTreeTimer = get_tree().create_timer(remove_after_death_seconds)
 	death_timer.timeout.connect(_on_death_timer_timeout)
 
-## Remove definitivamente o inimigo após concluir seu tempo visual de morte.
 func _on_death_timer_timeout() -> void:
 	queue_free()
 
-## Aplica atributos da `EnemyDefinition` à instância runtime.
-##
-## Quando nenhuma definition existe, utiliza valores fallback seguros
-## para manter a cena executável durante testes.
 func _apply_definition() -> void:
 	if enemy_definition == null:
 		enemy_id = "enemy_undefined"
@@ -1240,17 +1553,34 @@ func _apply_definition() -> void:
 		current_hp = max_hp
 		move_speed = 90.0
 
+		body_bump_enabled = true
+		body_bump_power = 2.0
+		body_bump_velocity_per_power = 24.0
+		body_bump_max_velocity = 140.0
+		body_bump_decay_per_second = 280.0
+		body_bump_lateral_influence = 0.35
+		body_bump_velocity = Vector2.ZERO
+
+		player_body_slide_enabled = true
+		player_body_slide_power = 2.0
+		player_body_slide_velocity_per_power = 36.0
+		player_body_slide_max_velocity = 160.0
+		player_body_slide_away_influence = 0.30
+
+		received_knockback_multiplier = 1.0
+		received_knockback_max_velocity = 520.0
+		received_knockback_decay_per_second = 1800.0
+		received_knockback_chase_weight = 0.15
+		_clear_received_knockback()
+
+		xp_reward = 1
 		coin_drop_chance = 0.25
 		coin_drop_value = 1
 
-		contact_damage = 5
-		contact_damage_radius = 32.0
-		contact_damage_interval_seconds = 1.0
-		contact_damage_type = DamageTypes.PHYSICAL
-		xp_reward = 1
-
 		debug_color = Color(0.9, 0.15, 0.15, 1.0)
 		debug_radius = 18.0
+
+		_disable_combat_areas()
 		return
 
 	enemy_id = enemy_definition.id
@@ -1258,10 +1588,33 @@ func _apply_definition() -> void:
 	current_hp = max_hp
 	move_speed = enemy_definition.base_move_speed
 
-	contact_damage = enemy_definition.contact_damage
-	contact_damage_radius = enemy_definition.contact_damage_radius
-	contact_damage_interval_seconds = enemy_definition.contact_damage_interval_seconds
-	contact_damage_type = enemy_definition.contact_damage_type
+	body_bump_enabled = enemy_definition.body_bump_enabled
+	body_bump_power = max(0.0, enemy_definition.body_bump_power)
+	body_bump_velocity_per_power = max(0.0, enemy_definition.body_bump_velocity_per_power)
+	body_bump_max_velocity = max(0.0, enemy_definition.body_bump_max_velocity)
+	body_bump_decay_per_second = max(0.0, enemy_definition.body_bump_decay_per_second)
+	body_bump_lateral_influence = clamp(enemy_definition.body_bump_lateral_influence, 0.0, 1.0)
+	body_bump_velocity = Vector2.ZERO
+	
+	player_body_slide_enabled = enemy_definition.player_body_slide_enabled
+	player_body_slide_power = max(0.0, enemy_definition.player_body_slide_power)
+	player_body_slide_velocity_per_power = max(0.0, enemy_definition.player_body_slide_velocity_per_power)
+	player_body_slide_max_velocity = max(0.0, enemy_definition.player_body_slide_max_velocity)
+	player_body_slide_away_influence = clamp(
+		enemy_definition.player_body_slide_away_influence,
+		0.0,
+		1.0
+	)
+
+	received_knockback_multiplier = max(0.0, enemy_definition.received_knockback_multiplier)
+	received_knockback_max_velocity = max(0.0, enemy_definition.received_knockback_max_velocity)
+	received_knockback_decay_per_second = max(0.0, enemy_definition.received_knockback_decay_per_second)
+	received_knockback_chase_weight = clamp(
+		enemy_definition.received_knockback_chase_weight,
+		0.0,
+		1.0
+	)
+	_clear_received_knockback()
 
 	xp_reward = enemy_definition.xp_reward
 	coin_drop_chance = enemy_definition.coin_drop_chance
@@ -1270,122 +1623,427 @@ func _apply_definition() -> void:
 	debug_color = enemy_definition.debug_color
 	debug_radius = enemy_definition.debug_radius
 
-## Atualiza a velocidade de perseguição direta em direção ao player.
-##
-## A lógica atual desloca cada inimigo diretamente ao centro da Queen.
-## O refinamento futuro de ocupação ao redor do player deverá evoluir
-## este ponto sem alterar o contrato externo do inimigo.
+	_configure_hurtbox()
+	_configure_contact_attack_hitbox()
+
+func _configure_hurtbox() -> void:
+	if hurtbox_component == null:
+		hurtbox_component = get_node_or_null("Hurtbox") as HurtboxComponent
+
+	if hurtbox_component == null:
+		push_warning("[EnemyBase] HurtboxComponent não encontrado para: %s" % enemy_id)
+		return
+
+	if enemy_definition == null:
+		return
+
+	hurtbox_component.setup(
+		enemy_definition.hurtbox_areas,
+		self
+	)
+
+func _configure_contact_attack_hitbox() -> void:
+	if contact_attack_hitbox == null:
+		contact_attack_hitbox = (
+			get_node_or_null("ContactAttackHitbox") as EnemyAttackHitbox
+		)
+
+	if contact_attack_hitbox == null:
+		push_warning("[EnemyBase] ContactAttackHitbox não encontrada para: %s" % enemy_id)
+		return
+
+	if enemy_definition == null or not enemy_definition.has_valid_contact_attack():
+		contact_attack_hitbox.set_attack_active(false)
+		push_warning("[EnemyBase] Ataque de contato inválido para: %s" % enemy_id)
+		return
+
+	contact_attack_hitbox.setup(
+		enemy_definition.contact_attack,
+		self,
+		enemy_id
+	)
+
+func _disable_combat_areas() -> void:
+	if hurtbox_component != null:
+		hurtbox_component.set_hurtbox_active(false)
+
+	if contact_attack_hitbox != null:
+		contact_attack_hitbox.set_attack_active(false)
+
 func _follow_target() -> void:
 	var to_target: Vector2 = target_node.global_position - global_position
 	var distance_to_target: float = to_target.length()
+
+	if distance_to_target > 0.001:
+		visual_chase_direction = to_target.normalized()
 
 	if distance_to_target <= stopping_distance:
 		velocity = Vector2.ZERO
 		return
 
-	var direction: Vector2 = to_target.normalized()
-	velocity = direction * move_speed
+	velocity = visual_chase_direction * move_speed
 
-## Reduz o cooldown interno do dano de contato.
-func _update_contact_damage_timer(delta: float) -> void:
-	if contact_damage_timer > 0.0:
-		contact_damage_timer = max(0.0, contact_damage_timer - delta)
-
-## Tenta aplicar dano de contato à Queen.
-##
-## O impacto só ocorre quando:
-## - a run permite gameplay;
-## - o tempo seguro após spawn terminou;
-## - o alvo está vivo;
-## - o cooldown de contato acabou;
-## - a distância está dentro do raio configurado.
-func _try_apply_contact_damage() -> void:
-	if RunQuery.is_gameplay_blocked(get_tree()):
+func _update_body_bump_velocity(delta: float) -> void:
+	if body_bump_velocity.length() <= 0.001:
+		body_bump_velocity = Vector2.ZERO
 		return
 
-	if alive_seconds < contact_damage_start_delay_seconds:
-		return
+	var decay_amount: float = body_bump_decay_per_second * delta
+	body_bump_velocity = body_bump_velocity.move_toward(Vector2.ZERO, decay_amount)
 
-	if target_node == null:
-		return
+func _process_body_bump_collisions() -> void:
+	var processed_colliders: Dictionary = {}
 
-	if not _is_target_alive():
-		return
+	for collision_index: int in range(get_slide_collision_count()):
+		var collision: KinematicCollision2D = get_slide_collision(collision_index)
 
-	if contact_damage_timer > 0.0:
-		return
+		if collision == null:
+			continue
 
-	if contact_damage <= 0:
-		return
+		var collider_object: Object = collision.get_collider()
 
-	var distance_to_target: float = global_position.distance_to(target_node.global_position)
+		if not collider_object is Node2D:
+			continue
 
-	if debug_contact_distance:
-		DeveloperAuditLogger.log_combat(
-			"Contact check: enemy=%s distance=%s radius=%s enemy_pos=%s target_pos=%s alive_seconds=%s" % [
-				enemy_id,
-				str(distance_to_target),
-				str(contact_damage_radius),
-				str(global_position),
-				str(target_node.global_position),
-				str(alive_seconds)
-			],
-			"EnemyBase",
-			{
-				"enemy_id": enemy_id,
-				"distance": distance_to_target,
-				"contact_radius": contact_damage_radius,
-				"enemy_position": global_position,
-				"target_position": target_node.global_position,
-				"alive_seconds": alive_seconds
-			}
+		var collider_node: Node2D = collider_object as Node2D
+		var collider_instance_id: int = int(collider_node.get_instance_id())
+
+		if processed_colliders.has(collider_instance_id):
+			continue
+
+		processed_colliders[collider_instance_id] = true
+
+		if _is_player_body_collider(collider_node):
+			_process_player_body_slide_collision(collider_node)
+			continue
+
+		if not body_bump_enabled:
+			continue
+
+		if body_bump_power <= 0.0:
+			continue
+
+		var other_enemy: Node2D = collider_node
+
+		if other_enemy == self:
+			continue
+
+		if not other_enemy.is_in_group("enemy"):
+			continue
+
+		if other_enemy.has_method("is_enemy_alive"):
+			var other_alive_variant: Variant = other_enemy.call("is_enemy_alive")
+
+			if other_alive_variant is bool and not bool(other_alive_variant):
+				continue
+
+		var other_body_bump_power: float = body_bump_power
+
+		if other_enemy.has_method("get_body_bump_power"):
+			var other_power_variant: Variant = other_enemy.call("get_body_bump_power")
+
+			if other_power_variant is float or other_power_variant is int:
+				other_body_bump_power = float(other_power_variant)
+
+		var received_bump_power: float = _calculate_received_body_bump_power(
+			other_body_bump_power
 		)
 
-	if distance_to_target > contact_damage_radius:
-		return
+		if received_bump_power <= 0.0:
+			continue
 
-	if not target_node.has_method("receive_damage"):
-		return
+		var bump_direction: Vector2 = _get_body_bump_direction_from(other_enemy)
 
-	var payload: DamagePayload = DamagePayload.new(
-		contact_damage,
-		contact_damage_type,
-		self,
-		enemy_id,
-		enemy_id
+		if bump_direction.length() <= 0.001:
+			continue
+
+		_add_body_bump_velocity(bump_direction, received_bump_power)
+
+func _calculate_received_body_bump_power(other_body_bump_power: float) -> float:
+	var own_power: float = max(0.0, body_bump_power)
+	var other_power: float = max(0.0, other_body_bump_power)
+
+	if own_power <= 0.0 and other_power <= 0.0:
+		return 0.0
+
+	if is_equal_approx(own_power, other_power):
+		return own_power
+
+	if own_power < other_power:
+		return other_power - own_power
+
+	return 0.0
+
+func _get_body_bump_direction_from(other_enemy: Node2D) -> Vector2:
+	if other_enemy == null:
+		return Vector2.ZERO
+
+	var away_direction: Vector2 = global_position - other_enemy.global_position
+
+	if away_direction.length() <= 0.001:
+		if velocity.length() > 0.001:
+			away_direction = -velocity.normalized()
+		else:
+			away_direction = Vector2.RIGHT
+
+	away_direction = away_direction.normalized()
+
+	if body_bump_lateral_influence <= 0.0:
+		return away_direction
+
+	var lateral_direction: Vector2 = Vector2(
+		-away_direction.y,
+		away_direction.x
 	)
 
-	if contact_damage_type == DamageTypes.TRUE_DAMAGE:
-		payload.can_be_reduced_by_defense = false
+	var lateral_sign: float = 1.0
 
-	var final_damage_variant: Variant = target_node.call("receive_damage", payload)
-	var final_damage: int = 0
+	if int(get_instance_id()) % 2 == 0:
+		lateral_sign = -1.0
 
-	if final_damage_variant is int:
-		final_damage = int(final_damage_variant)
-	elif final_damage_variant is float:
-		final_damage = int(final_damage_variant)
-
-	if final_damage <= 0:
-		return
-
-	contact_damage_timer = contact_damage_interval_seconds
-
-	DeveloperAuditLogger.log_combat(
-		"Dano de contato aplicado: enemy=%s raw=%s final=%s" % [
-			enemy_id,
-			str(contact_damage),
-			str(final_damage)
-		],
-		"EnemyBase",
-		{
-			"enemy_id": enemy_id,
-			"raw_damage": contact_damage,
-			"final_damage": final_damage
-		}
+	var mixed_direction: Vector2 = (
+		away_direction
+		+ lateral_direction * lateral_sign * body_bump_lateral_influence
 	)
 
-## Encaminha estado de movimento e vida ao controller visual do inimigo.
+	if mixed_direction.length() <= 0.001:
+		return away_direction
+
+	return mixed_direction.normalized()
+
+func _add_body_bump_velocity(
+	bump_direction: Vector2,
+	received_bump_power: float
+) -> void:
+	if bump_direction.length() <= 0.001:
+		return
+
+	if received_bump_power <= 0.0:
+		return
+
+	var impulse_velocity: Vector2 = (
+		bump_direction.normalized()
+		* received_bump_power
+		* body_bump_velocity_per_power
+	)
+
+	body_bump_velocity += impulse_velocity
+
+	if body_bump_max_velocity > 0.0 and body_bump_velocity.length() > body_bump_max_velocity:
+		body_bump_velocity = body_bump_velocity.normalized() * body_bump_max_velocity
+
+func _is_player_body_collider(collider_node: Node2D) -> bool:
+	if collider_node == null:
+		return false
+
+	if target_node != null and collider_node == target_node:
+		return true
+
+	if target_group_name.strip_edges() != "" and collider_node.is_in_group(target_group_name):
+		return true
+
+	if collider_node.is_in_group("player"):
+		return true
+
+	return false
+
+func _process_player_body_slide_collision(player_body: Node2D) -> void:
+	if not player_body_slide_enabled:
+		return
+
+	if player_body_slide_power <= 0.0:
+		return
+
+	if player_body_slide_velocity_per_power <= 0.0:
+		return
+
+	var slide_direction: Vector2 = _get_player_body_slide_direction(player_body)
+
+	if slide_direction.length() <= 0.001:
+		return
+
+	_add_player_body_slide_velocity(slide_direction)
+
+func _get_player_body_slide_direction(player_body: Node2D) -> Vector2:
+	if player_body == null:
+		return Vector2.ZERO
+
+	var away_direction: Vector2 = global_position - player_body.global_position
+
+	if away_direction.length() <= 0.001:
+		if visual_chase_direction.length() > 0.001:
+			away_direction = -visual_chase_direction.normalized()
+		elif velocity.length() > 0.001:
+			away_direction = -velocity.normalized()
+		else:
+			away_direction = Vector2.RIGHT
+
+	away_direction = away_direction.normalized()
+
+	var lateral_direction: Vector2 = Vector2(
+		-away_direction.y,
+		away_direction.x
+	).normalized()
+
+	var lateral_sign: float = _get_player_body_slide_lateral_sign(lateral_direction)
+	var slide_direction: Vector2 = lateral_direction * lateral_sign
+
+	if player_body_slide_away_influence > 0.0:
+		slide_direction += away_direction * player_body_slide_away_influence
+
+	if slide_direction.length() <= 0.001:
+		return away_direction
+
+	return slide_direction.normalized()
+
+func _get_player_body_slide_lateral_sign(lateral_direction: Vector2) -> float:
+	if velocity.length() > 0.001:
+		var velocity_side: float = velocity.normalized().dot(lateral_direction)
+
+		if velocity_side < -0.05:
+			return -1.0
+
+		if velocity_side > 0.05:
+			return 1.0
+
+	if int(get_instance_id()) % 2 == 0:
+		return -1.0
+
+	return 1.0
+
+func _add_player_body_slide_velocity(slide_direction: Vector2) -> void:
+	if slide_direction.length() <= 0.001:
+		return
+
+	var impulse_velocity: Vector2 = (
+		slide_direction.normalized()
+		* player_body_slide_power
+		* player_body_slide_velocity_per_power
+	)
+
+	body_bump_velocity += impulse_velocity
+
+	var max_velocity_to_use: float = max(
+		body_bump_max_velocity,
+		player_body_slide_max_velocity
+	)
+
+	if max_velocity_to_use > 0.0 and body_bump_velocity.length() > max_velocity_to_use:
+		body_bump_velocity = body_bump_velocity.normalized() * max_velocity_to_use
+
+func get_body_bump_power() -> float:
+	return body_bump_power
+
+func apply_hit_knockback(
+	knockback_pixels: float,
+	duration_seconds: float,
+	source_node: Node = null,
+	fallback_direction: Vector2 = Vector2.ZERO,
+	max_velocity_override: float = 0.0,
+	chase_weight_override: float = -1.0
+) -> bool:
+	if not is_alive:
+		return false
+
+	if RunQuery.is_gameplay_blocked(get_tree()):
+		return false
+
+	if knockback_pixels <= 0.0:
+		return false
+
+	if duration_seconds <= 0.0:
+		return false
+
+	if received_knockback_multiplier <= 0.0:
+		return false
+
+	var knockback_direction: Vector2 = _resolve_received_knockback_direction(
+		source_node,
+		fallback_direction
+	)
+
+	if knockback_direction.length() <= 0.001:
+		return false
+
+	var effective_pixels: float = knockback_pixels * received_knockback_multiplier
+	var impulse_speed: float = effective_pixels / max(0.01, duration_seconds)
+	var impulse_velocity: Vector2 = knockback_direction.normalized() * impulse_speed
+
+	received_knockback_velocity += impulse_velocity
+	active_knockback_chase_weight = chase_weight_override
+
+	var max_velocity_to_use: float = received_knockback_max_velocity
+
+	if max_velocity_override > 0.0:
+		max_velocity_to_use = max_velocity_override
+
+	if (
+		max_velocity_to_use > 0.0
+		and received_knockback_velocity.length() > max_velocity_to_use
+	):
+		received_knockback_velocity = (
+			received_knockback_velocity.normalized()
+			* max_velocity_to_use
+		)
+
+	return true
+
+func _update_received_knockback_velocity(delta: float) -> void:
+	if received_knockback_velocity.length() <= 0.001:
+		received_knockback_velocity = Vector2.ZERO
+		return
+
+	var decay_amount: float = received_knockback_decay_per_second * delta
+	received_knockback_velocity = received_knockback_velocity.move_toward(
+		Vector2.ZERO,
+		decay_amount
+	)
+
+func _is_received_knockback_active() -> bool:
+	return received_knockback_velocity.length() > 0.001
+
+func _clear_received_knockback() -> void:
+	received_knockback_velocity = Vector2.ZERO
+	active_knockback_chase_weight = -1.0
+
+func _resolve_received_knockback_direction(
+	source_node: Node = null,
+	fallback_direction: Vector2 = Vector2.ZERO
+) -> Vector2:
+	if source_node == null and fallback_direction.length() > 0.001:
+		return fallback_direction.normalized()
+
+	if source_node is Node2D:
+		var source_node_2d: Node2D = source_node as Node2D
+		var away_from_source: Vector2 = global_position - source_node_2d.global_position
+
+		if away_from_source.length() > 0.001:
+			return away_from_source.normalized()
+
+	if visual_chase_direction.length() > 0.001:
+		return -visual_chase_direction.normalized()
+
+	if velocity.length() > 0.001:
+		return -velocity.normalized()
+
+	if fallback_direction.length() > 0.001:
+		return fallback_direction.normalized()
+
+	return Vector2.ZERO
+
+func is_enemy_alive() -> bool:
+	return is_alive
+
+func _play_damage_feedback() -> void:
+	if visual_controller == null:
+		visual_controller = _resolve_visual_controller()
+
+	if visual_controller == null:
+		return
+
+	if visual_controller.has_method("play_damage_flash"):
+		visual_controller.call("play_damage_flash")
+
 func _update_visual_state() -> void:
 	if visual_controller == null:
 		visual_controller = _resolve_visual_controller()
@@ -1393,21 +2051,37 @@ func _update_visual_state() -> void:
 	if visual_controller == null:
 		return
 
-	var is_moving: bool = is_alive and velocity.length() > 0.001
+	var is_moving: bool = (
+		is_alive
+		and (
+			velocity.length() > 0.001
+			or body_bump_velocity.length() > 0.001
+			or received_knockback_velocity.length() > 0.001
+		)
+	)
+
 	var movement_direction: Vector2 = Vector2.ZERO
 
 	if is_moving:
-		movement_direction = velocity.normalized()
+		movement_direction = _get_visual_movement_direction()
 
 	if visual_controller.has_method("apply_enemy_runtime_state"):
-		visual_controller.call("apply_enemy_runtime_state", is_moving, movement_direction, is_alive)
+		visual_controller.call(
+			"apply_enemy_runtime_state",
+			is_moving,
+			movement_direction,
+			is_alive
+		)
 
-## Resolve o controller visual associado ao inimigo.
-##
-## Prioridade:
-## 1. caminho configurado;
-## 2. node padrão do Goblin;
-## 3. busca por método compatível dentro de `VisualRoot`.
+func _get_visual_movement_direction() -> Vector2:
+	if target_node != null and is_instance_valid(target_node):
+		var to_target: Vector2 = target_node.global_position - global_position
+
+		if to_target.length() > 0.001:
+			visual_chase_direction = to_target.normalized()
+
+	return visual_chase_direction
+
 func _resolve_visual_controller() -> Node:
 	if visual_controller_path != NodePath():
 		var configured_visual: Node = get_node_or_null(visual_controller_path)
@@ -1430,7 +2104,6 @@ func _resolve_visual_controller() -> Node:
 
 	return null
 
-## Busca recursivamente um node que implemente determinado método.
 func _find_node_with_method(root: Node, method_name: String) -> Node:
 	if root == null:
 		return null
@@ -1446,11 +2119,6 @@ func _find_node_with_method(root: Node, method_name: String) -> Node:
 
 	return null
 
-## Resolve o alvo atual do inimigo.
-##
-## Prioridade:
-## 1. caminho explícito;
-## 2. primeiro Node2D encontrado no grupo configurado.
 func _resolve_target() -> Node2D:
 	if target_path != NodePath():
 		var configured_target: Node = get_node_or_null(target_path)
@@ -1465,7 +2133,6 @@ func _resolve_target() -> Node2D:
 
 	return null
 
-## Retorna o primeiro `Node2D` registrado em determinado grupo.
 func _find_first_node2d_in_group(group_name: String) -> Node2D:
 	if group_name.strip_edges() == "":
 		return null
@@ -1478,7 +2145,6 @@ func _find_first_node2d_in_group(group_name: String) -> Node2D:
 
 	return null
 
-## Converte o breakdown calculado pelo resolver em texto legível para logs.
 func _format_damage_breakdown(damage_result: Dictionary) -> String:
 	var breakdown_variant: Variant = damage_result.get("breakdown", [])
 
@@ -1505,96 +2171,83 @@ func _format_damage_breakdown(damage_result: Dictionary) -> String:
 
 	return " | ".join(parts)
 
-## Retorna informações técnicas da instância para o overlay de debug.
 func get_debug_data() -> Dictionary:
 	return {
 		"enemy_id": enemy_id,
 		"current_hp": current_hp,
 		"max_hp": max_hp,
 		"move_speed": move_speed,
-		"contact_damage": contact_damage,
-		"contact_damage_radius": contact_damage_radius,
 		"global_position": global_position,
 		"has_target": target_node != null,
 		"has_visual": visual_controller != null,
+		"has_hurtbox": hurtbox_component != null,
+		"has_contact_attack_hitbox": contact_attack_hitbox != null,
+		"has_valid_contact_attack": (
+			enemy_definition != null
+			and enemy_definition.has_valid_contact_attack()
+		),
 		"is_alive": is_alive,
 		"total_damage_taken": total_damage_taken,
 		"last_damage_taken": last_damage_taken,
 		"last_damage_source_id": last_damage_source_id,
-		"xp_reward": xp_reward
+		"xp_reward": xp_reward,
+		"body_bump_velocity": body_bump_velocity,
+		"received_knockback_velocity": received_knockback_velocity,
+		"received_knockback_multiplier": received_knockback_multiplier,
+		"received_knockback_chase_weight": received_knockback_chase_weight,
+		"player_body_slide_enabled": player_body_slide_enabled,
+		"player_body_slide_power": player_body_slide_power,
+		"player_body_slide_velocity_per_power": player_body_slide_velocity_per_power,
+		"player_body_slide_max_velocity": player_body_slide_max_velocity,
+		"player_body_slide_away_influence": player_body_slide_away_influence
 	}
-
-## Verifica se o alvo continua apto a receber dano.
-##
-## Players que expõem `get_runtime_state()` são verificados pelo estado
-## `is_alive`; alvos genéricos sem esse contrato são considerados ativos.
-func _is_target_alive() -> bool:
-	if target_node == null:
-		return false
-
-	if not target_node.has_method("get_runtime_state"):
-		return true
-
-	var runtime_state_variant: Variant = target_node.call("get_runtime_state")
-
-	if runtime_state_variant is PlayerRuntimeState:
-		var player_runtime_state: PlayerRuntimeState = runtime_state_variant as PlayerRuntimeState
-		return player_runtime_state.is_alive
-
-	return true
 
 
 SCRIPT: res://gameplay/player/PlayerController.gd
 --------------------------------------------------------------------------------------------------------------
-## Controller principal da Queen controlada pelo jogador.
-##
-## Responsabilidades:
-## - registrar a entidade no grupo `player`;
-## - criar e inicializar seu `PlayerRuntimeState`;
-## - ler movimento e mira do `InputManager`;
-## - movimentar a personagem;
-## - receber dano e aplicar feedback visual;
-## - controlar invencibilidade temporária após impacto;
-## - aplicar upgrades próprios da Queen;
-## - encaminhar upgrades de arma para controllers compatíveis;
-## - expor informações para moedas, HUD e ferramentas técnicas.
 extends CharacterBody2D
 
-## Dados base da Queen utilizada nesta cena.
 @export var queen_definition: QueenDefinition
-
-## Estado mutável da Queen durante a run atual.
 @export var runtime_state: PlayerRuntimeState
-
-## Caminho opcional para o controller visual da personagem.
 @export var visual_controller_path: NodePath
-
-## Exibe a linha técnica da direção atual de mira.
 @export var draw_debug_aim: bool = false
-
-## Comprimento visual da linha técnica de mira.
 @export var debug_aim_line_length: float = 96.0
-
-## Defesa percentual inicial aplicada ao começar a run.
-##
-## Pode ser utilizada em testes e posteriormente ampliada por upgrades.
 @export var base_defense_percent: float = 0.0
 
-## Controller visual responsável pelas animações e flash de dano.
+@export_group("Dash")
+@export var dash_impact_area_path: NodePath
+@export var dash_disable_enemy_body_collision: bool = true
+@export_range(1, 32, 1) var enemy_body_collision_layer_number: int = 3
+@export_range(0.0, 1.0, 0.05) var dash_lateral_control_strength: float = 0.35
+@export var dash_lateral_control_max_speed: float = 120.0
+
 @onready var visual_controller: Node = _resolve_visual_controller()
+@onready var player_hurtbox: HurtboxComponent = (
+	get_node_or_null("PlayerHurtbox") as HurtboxComponent
+)
+
+@onready var dash_impact_area: PlayerDashImpactArea = (
+	_resolve_dash_impact_area()
+)
 
 @export_group("Damage Feedback")
-
-## Ativa a pequena janela de invencibilidade após receber dano.
 @export var enable_hit_invincibility: bool = true
-
-## Duração, em segundos, da invencibilidade após impacto.
 @export var invincibility_duration_after_hit: float = 0.5
-
-## Define se o visual da Queen pisca ao receber dano.
 @export var play_visual_damage_flash: bool = true
 
-## Inicializa a Queen, aplica sua definition e prepara o visual inicial.
+var dash_definition: QueenDashDefinition = null
+var dash_timer: float = 0.0
+var dash_cooldown_timer: float = 0.0
+var active_dash_direction: Vector2 = Vector2.ZERO
+var active_dash_speed: float = 0.0
+var active_dash_animation_time_scale: float = 1.0
+var is_dash_active: bool = false
+var collision_mask_before_dash: int = 0
+var has_collision_mask_before_dash: bool = false
+var dash_distance_multiplier: float = 1.0
+var dash_duration_multiplier: float = 1.0
+var dash_impact_area_scale_multiplier: float = 1.0
+
 func _ready() -> void:
 	add_to_group("player")
 
@@ -1608,22 +2261,20 @@ func _ready() -> void:
 
 	runtime_state.defense_percent = clamp(base_defense_percent, 0.0, 95.0)
 
+	_apply_dash_definition()
+	_configure_dash_impact_area()
+
+	_configure_player_hurtbox()
+
 	if visual_controller == null:
 		push_warning("[PlayerController] visual_controller não encontrado. Verifique visual_controller_path.")
 
 	_update_visual_state()
 	queue_redraw()
 
-## Executa o ciclo físico da personagem.
-##
-## Fluxo normal:
-## - reduz tempo restante de invencibilidade;
-## - obtém movimento e mira atuais;
-## - bloqueia movimento quando a Queen morreu;
-## - movimenta a personagem enquanto viva;
-## - sincroniza animações e desenho técnico.
 func _physics_process(_delta: float) -> void:
 	_update_invincibility(_delta)
+	_update_dash_cooldown(_delta)
 
 	if runtime_state == null:
 		return
@@ -1634,9 +2285,22 @@ func _physics_process(_delta: float) -> void:
 	var aim_direction: Vector2 = InputManager.get_aim_direction()
 
 	if not runtime_state.is_alive:
+		_cancel_active_dash()
 		runtime_state.apply_input(Vector2.ZERO, aim_direction)
 		velocity = Vector2.ZERO
 		move_and_slide()
+		_update_visual_state()
+		queue_redraw()
+		return
+
+	if is_dash_active:
+		_update_active_dash(_delta, move_direction, aim_direction)
+		_update_visual_state()
+		queue_redraw()
+		return
+
+	if _should_start_dash():
+		_start_dash(move_direction, aim_direction)
 		_update_visual_state()
 		queue_redraw()
 		return
@@ -1649,9 +2313,6 @@ func _physics_process(_delta: float) -> void:
 	_update_visual_state()
 	queue_redraw()
 
-## Desenha a direção de mira quando o modo técnico correspondente está ativo.
-##
-## Este desenho é apenas diagnóstico e não interfere na direção real da arma.
 func _draw() -> void:
 	if not draw_debug_aim:
 		return
@@ -1670,17 +2331,10 @@ func _draw() -> void:
 	draw_circle(Vector2.ZERO, 5.0, Color.WHITE)
 	draw_circle(end_position, 5.0, Color.ORANGE)
 
-## Recebe um ataque e retorna o dano final efetivamente aplicado.
-##
-## Fluxo:
-## - valida payload e estado atual do gameplay;
-## - ignora impacto durante invencibilidade;
-## - calcula dano após defesa;
-## - atualiza o estado runtime;
-## - inicia invencibilidade e flash visual;
-## - publica eventos de dano e morte;
-## - atualiza animação da Queen.
 func receive_damage(payload: DamagePayload) -> int:
+	if _should_ignore_damage_during_dash():
+		return 0
+		
 	if runtime_state == null:
 		return 0
 
@@ -1742,6 +2396,9 @@ func receive_damage(payload: DamagePayload) -> int:
 	)
 
 	if not runtime_state.is_alive:
+		if player_hurtbox != null:
+			player_hurtbox.set_hurtbox_active(false)
+
 		GameEvents.player_died.emit(payload.source_id)
 
 		DeveloperAuditLogger.log_combat(
@@ -1758,9 +2415,175 @@ func receive_damage(payload: DamagePayload) -> int:
 
 	return final_damage
 
-## Encaminha o estado runtime atual para o controller visual da Queen.
-##
-## O visual decide qual animação executar com base no estado recebido.
+func _should_ignore_damage_during_dash() -> bool:
+	if runtime_state == null:
+		return false
+
+	if not runtime_state.is_dashing:
+		return false
+
+	if dash_definition == null:
+		return false
+
+	return dash_definition.ignore_damage_while_dashing
+
+func _update_dash_cooldown(delta: float) -> void:
+	if dash_cooldown_timer <= 0.0:
+		dash_cooldown_timer = 0.0
+		return
+
+	dash_cooldown_timer = max(0.0, dash_cooldown_timer - delta)
+
+func _should_start_dash() -> bool:
+	if dash_definition == null:
+		return false
+
+	if not dash_definition.dash_enabled:
+		return false
+
+	if dash_cooldown_timer > 0.0:
+		return false
+
+	if is_dash_active:
+		return false
+
+	if RunQuery.is_gameplay_blocked(get_tree()):
+		return false
+
+	return InputManager.was_dash_just_pressed()
+
+func _start_dash(move_direction: Vector2, aim_direction: Vector2) -> void:
+	if dash_definition == null:
+		return
+
+	var dash_direction: Vector2 = _resolve_dash_direction(
+		move_direction,
+		aim_direction
+	)
+
+	if dash_direction.length() <= 0.001:
+		return
+
+	var effective_dash_duration: float = _get_effective_dash_duration_seconds()
+	var effective_dash_distance: float = _get_effective_dash_distance_pixels()
+
+	is_dash_active = true
+	_apply_dash_collision_mode(true)
+
+	active_dash_direction = dash_direction.normalized()
+	dash_timer = effective_dash_duration
+	dash_cooldown_timer = max(0.0, dash_definition.dash_cooldown_seconds)
+	active_dash_speed = effective_dash_distance / max(0.01, dash_timer)
+	active_dash_animation_time_scale = _get_dash_animation_time_scale(effective_dash_duration)
+
+	runtime_state.start_dash(
+		active_dash_direction,
+		aim_direction,
+		active_dash_animation_time_scale
+	)
+
+	if dash_impact_area != null:
+		dash_impact_area.activate_for_dash(active_dash_direction)
+
+	_update_visual_state()
+	
+func _update_active_dash(
+	delta: float,
+	move_direction: Vector2,
+	aim_direction: Vector2
+) -> void:
+	if dash_definition == null:
+		_finish_dash(move_direction, aim_direction)
+		return
+
+	dash_timer -= delta
+
+	runtime_state.update_dash(
+		active_dash_direction,
+		aim_direction,
+		active_dash_animation_time_scale
+	)
+
+	var dash_velocity: Vector2 = active_dash_direction * active_dash_speed
+	var lateral_velocity: Vector2 = _get_dash_lateral_control_velocity(move_direction)
+
+	velocity = dash_velocity + lateral_velocity
+	move_and_slide()
+
+	if dash_timer <= 0.0:
+		_finish_dash(move_direction, aim_direction)
+		
+func _finish_dash(move_direction: Vector2, aim_direction: Vector2) -> void:
+	is_dash_active = false
+	dash_timer = 0.0
+	active_dash_direction = Vector2.ZERO
+	active_dash_speed = 0.0
+	active_dash_animation_time_scale = 1.0
+
+	_apply_dash_collision_mode(false)
+
+	if dash_impact_area != null:
+		dash_impact_area.deactivate()
+
+	runtime_state.finish_dash(move_direction, aim_direction)
+	
+func _cancel_active_dash() -> void:
+	is_dash_active = false
+	dash_timer = 0.0
+	active_dash_direction = Vector2.ZERO
+	active_dash_speed = 0.0
+	active_dash_animation_time_scale = 1.0
+
+	_apply_dash_collision_mode(false)
+
+	if dash_impact_area != null:
+		dash_impact_area.deactivate()
+
+	if runtime_state != null:
+		runtime_state.is_dashing = false
+		runtime_state.dash_direction = Vector2.ZERO
+		runtime_state.dash_animation_time_scale = 1.0
+
+func _resolve_dash_direction(
+	move_direction: Vector2,
+	aim_direction: Vector2
+) -> Vector2:
+	if move_direction.length() > 0.001:
+		return move_direction.normalized()
+
+	if runtime_state != null and runtime_state.move_direction.length() > 0.001:
+		return runtime_state.move_direction.normalized()
+
+	if aim_direction.length() > 0.001:
+		return aim_direction.normalized()
+
+	if runtime_state != null and runtime_state.last_valid_aim_direction.length() > 0.001:
+		return runtime_state.last_valid_aim_direction.normalized()
+
+	return Vector2.RIGHT
+
+func _configure_player_hurtbox() -> void:
+	if player_hurtbox == null:
+		player_hurtbox = get_node_or_null("PlayerHurtbox") as HurtboxComponent
+
+	if player_hurtbox == null:
+		push_warning("[PlayerController] PlayerHurtbox não encontrada.")
+		return
+
+	if queen_definition == null:
+		player_hurtbox.set_hurtbox_active(false)
+		return
+
+	if not queen_definition.has_valid_hurtbox_areas():
+		player_hurtbox.set_hurtbox_active(false)
+		push_warning("[PlayerController] Queen sem hurtbox válida: %s" % queen_definition.id)
+		return
+
+	player_hurtbox.setup(
+		queen_definition.hurtbox_areas,
+		self
+	)
+
 func _update_visual_state() -> void:
 	if visual_controller == null:
 		visual_controller = _resolve_visual_controller()
@@ -1771,12 +2594,6 @@ func _update_visual_state() -> void:
 	if visual_controller.has_method("apply_runtime_state"):
 		visual_controller.call("apply_runtime_state", runtime_state)
 
-## Resolve o controller visual da Queen.
-##
-## Prioridade:
-## 1. caminho informado no Inspector;
-## 2. node conhecido `VisualRoot/GaiaVisual`;
-## 3. busca recursiva por método `apply_runtime_state`.
 func _resolve_visual_controller() -> Node:
 	if visual_controller_path != NodePath():
 		var configured_visual: Node = get_node_or_null(visual_controller_path)
@@ -1799,9 +2616,35 @@ func _resolve_visual_controller() -> Node:
 
 	return null
 
-## Procura recursivamente um node que implemente determinado método.
-##
-## Utilizado como fallback desacoplado para controllers visuais.
+func _resolve_dash_impact_area() -> PlayerDashImpactArea:
+	if dash_impact_area_path != NodePath():
+		var configured_area: Node = get_node_or_null(dash_impact_area_path)
+
+		if configured_area is PlayerDashImpactArea:
+			return configured_area as PlayerDashImpactArea
+
+	var direct_area: Node = get_node_or_null("DashImpactArea")
+
+	if direct_area is PlayerDashImpactArea:
+		return direct_area as PlayerDashImpactArea
+
+	return _find_first_dash_impact_area(self)
+
+func _find_first_dash_impact_area(root: Node) -> PlayerDashImpactArea:
+	if root == null:
+		return null
+
+	if root is PlayerDashImpactArea:
+		return root as PlayerDashImpactArea
+
+	for child: Node in root.get_children():
+		var found: PlayerDashImpactArea = _find_first_dash_impact_area(child)
+
+		if found != null:
+			return found
+
+	return null
+
 func _find_node_with_method(root: Node, method_name: String) -> Node:
 	if root == null:
 		return null
@@ -1817,14 +2660,6 @@ func _find_node_with_method(root: Node, method_name: String) -> Node:
 
 	return null
 
-## Aplica um upgrade selecionado durante a run.
-##
-## Upgrades próprios do player são tratados diretamente neste controller.
-## Upgrades pertencentes a armas são encaminhados para nodes do grupo
-## `player_weapon`.
-##
-## Retorna `true` somente quando o upgrade foi efetivamente aplicado,
-## permitindo ao `RunController` consumir a escolha de forma segura.
 func apply_run_upgrade(upgrade: UpgradeDefinition) -> bool:
 	if upgrade == null:
 		return false
@@ -1979,6 +2814,18 @@ func apply_run_upgrade(upgrade: UpgradeDefinition) -> bool:
 					"multiplier": runtime_state.coin_collect_radius_multiplier
 				}
 			)
+		
+		UpgradeTypes.PLAYER_DASH_DISTANCE_PERCENT:
+			apply_dash_distance_percent(upgrade.value_float)
+			return true
+
+		UpgradeTypes.PLAYER_DASH_SPEED_PERCENT:
+			apply_dash_speed_percent(upgrade.value_float)
+			return true
+
+		UpgradeTypes.PLAYER_DASH_IMPACT_AREA_SCALE_PERCENT:
+			apply_dash_impact_area_scale_percent(upgrade.value_float)
+			return true
 
 		_:
 			if not UpgradeTypes.is_weapon_upgrade(upgrade.upgrade_type):
@@ -1993,9 +2840,6 @@ func apply_run_upgrade(upgrade: UpgradeDefinition) -> bool:
 
 	return true
 
-## Encaminha um upgrade de arma para todos os controllers de arma ativos.
-##
-## Retorna sucesso quando ao menos uma arma aceitou e aplicou a melhoria.
 func _forward_upgrade_to_weapons(upgrade: UpgradeDefinition) -> bool:
 	var weapon_nodes: Array[Node] = get_tree().get_nodes_in_group("player_weapon")
 	var applied_count: int = 0
@@ -2015,13 +2859,9 @@ func _forward_upgrade_to_weapons(upgrade: UpgradeDefinition) -> bool:
 
 	return true
 
-## Retorna o estado runtime atual da Queen.
-##
-## Utilizado por arma, inimigos, moedas e sistemas de diagnóstico.
 func get_runtime_state() -> PlayerRuntimeState:
 	return runtime_state
 
-## Retorna informações técnicas do player para overlay e auditoria.
 func get_debug_data() -> Dictionary:
 	if runtime_state == null:
 		return {
@@ -2041,6 +2881,13 @@ func get_debug_data() -> Dictionary:
 		"facing_direction": runtime_state.facing_direction,
 		"is_moving": runtime_state.is_moving,
 		"is_alive": runtime_state.is_alive,
+		"has_dash_definition": dash_definition != null,
+		"is_dash_active": is_dash_active,
+		"dash_timer": dash_timer,
+		"dash_cooldown_timer": dash_cooldown_timer,
+		"active_dash_direction": active_dash_direction,
+		"has_dash_impact_area": dash_impact_area != null,
+		"has_player_hurtbox": player_hurtbox != null,
 		"current_gameplay_state": runtime_state.current_gameplay_state,
 		"current_visual_state": runtime_state.current_visual_state,
 		"global_position": global_position,
@@ -2052,10 +2899,6 @@ func get_debug_data() -> Dictionary:
 		"coin_collect_radius_multiplier": runtime_state.coin_collect_radius_multiplier
 	}
 
-## Retorna modificadores utilizados pelos drops físicos de moeda.
-##
-## O `CoinDrop` consulta esta estrutura para calcular seus raios
-## efetivos de magnetismo e coleta.
 func get_drop_collection_modifiers() -> Dictionary:
 	if runtime_state == null:
 		return {
@@ -2068,7 +2911,6 @@ func get_drop_collection_modifiers() -> Dictionary:
 		"coin_collect_radius_multiplier": runtime_state.coin_collect_radius_multiplier
 	}
 
-## Atualiza o tempo restante da invencibilidade temporária após dano.
 func _update_invincibility(delta: float) -> void:
 	if runtime_state == null:
 		return
@@ -2082,10 +2924,6 @@ func _update_invincibility(delta: float) -> void:
 		runtime_state.invincibility_timer = 0.0
 		runtime_state.is_invincible = false
 
-## Inicia uma nova janela de invencibilidade após dano válido.
-##
-## Quando a duração configurada for inválida, garante que a Queen
-## permaneça imediatamente vulnerável.
 func _start_hit_invincibility() -> void:
 	if runtime_state == null:
 		return
@@ -2101,9 +2939,6 @@ func _start_hit_invincibility() -> void:
 	runtime_state.is_invincible = true
 	runtime_state.invincibility_timer = invincibility_duration_after_hit
 
-## Solicita ao controller visual o feedback de impacto recebido.
-##
-## Atualmente dispara o flash vermelho temporário da Gaia.
 func _play_damage_feedback() -> void:
 	if not play_visual_damage_flash:
 		return
@@ -2114,82 +2949,518 @@ func _play_damage_feedback() -> void:
 	if visual_controller.has_method("play_damage_flash"):
 		visual_controller.call("play_damage_flash")
 
+func _get_dash_lateral_control_velocity(move_direction: Vector2) -> Vector2:
+	if move_direction.length() <= 0.001:
+		return Vector2.ZERO
+
+	if active_dash_direction.length() <= 0.001:
+		return Vector2.ZERO
+
+	if dash_lateral_control_strength <= 0.0:
+		return Vector2.ZERO
+
+	var dash_forward: Vector2 = active_dash_direction.normalized()
+	var dash_lateral: Vector2 = Vector2(
+		-dash_forward.y,
+		dash_forward.x
+	).normalized()
+
+	var lateral_input_amount: float = move_direction.dot(dash_lateral)
+
+	if abs(lateral_input_amount) <= 0.001:
+		return Vector2.ZERO
+
+	var lateral_speed: float = min(
+		dash_lateral_control_max_speed,
+		active_dash_speed * dash_lateral_control_strength
+	)
+
+	return dash_lateral * lateral_input_amount * lateral_speed
+
+func _apply_dash_definition() -> void:
+	dash_definition = null
+	dash_impact_area_scale_multiplier = 1.0
+
+	if queen_definition == null:
+		return
+
+	if queen_definition.dash_definition == null:
+		return
+
+	if not queen_definition.dash_definition.is_valid_definition():
+		push_warning("[PlayerController] DashDefinition inválida para Queen: %s" % queen_definition.id)
+		return
+
+	dash_definition = queen_definition.dash_definition
+	dash_impact_area_scale_multiplier = max(
+		0.01,
+		dash_definition.impact_area_scale_multiplier
+	)
+
+func _configure_dash_impact_area() -> void:
+	if dash_impact_area == null:
+		dash_impact_area = _resolve_dash_impact_area()
+
+	if dash_impact_area == null:
+		return
+
+	if dash_definition == null:
+		dash_impact_area.deactivate()
+		return
+
+	dash_impact_area.setup(
+		dash_definition,
+		self,
+		dash_definition.impact_source_id,
+		dash_impact_area_scale_multiplier
+	)
+
+func _get_effective_dash_distance_pixels() -> float:
+	if dash_definition == null:
+		return 0.0
+
+	return max(
+		0.0,
+		dash_definition.dash_distance_pixels * dash_distance_multiplier
+	)
+
+func _get_effective_dash_duration_seconds() -> float:
+	if dash_definition == null:
+		return 0.01
+
+	return max(
+		0.01,
+		dash_definition.dash_duration_seconds * dash_duration_multiplier
+	)
+
+func _get_dash_animation_time_scale(effective_dash_duration: float) -> float:
+	if dash_definition == null:
+		return 1.0
+
+	if not dash_definition.match_animation_speed_to_dash_duration:
+		return 1.0
+
+	if dash_definition.dash_animation_source_duration_seconds <= 0.0:
+		return 1.0
+
+	return max(
+		0.01,
+		dash_definition.dash_animation_source_duration_seconds / max(0.01, effective_dash_duration)
+	)
+
+func _apply_dash_collision_mode(should_enable_dash_mode: bool) -> void:
+	if not dash_disable_enemy_body_collision:
+		return
+
+	if should_enable_dash_mode:
+		if not has_collision_mask_before_dash:
+			collision_mask_before_dash = collision_mask
+			has_collision_mask_before_dash = true
+
+		set_collision_mask_value(enemy_body_collision_layer_number, false)
+		return
+
+	if has_collision_mask_before_dash:
+		collision_mask = collision_mask_before_dash
+		has_collision_mask_before_dash = false
+
+func apply_dash_distance_percent(percent: float) -> void:
+	var multiplier: float = 1.0 + max(0.0, percent) * 0.01
+	dash_distance_multiplier *= multiplier
+
+func apply_dash_speed_percent(percent: float) -> void:
+	var multiplier: float = 1.0 + max(0.0, percent) * 0.01
+
+	if multiplier <= 0.0:
+		return
+
+	dash_duration_multiplier /= multiplier
+
+func apply_dash_impact_area_scale_percent(percent: float) -> void:
+	var multiplier: float = 1.0 + max(0.0, percent) * 0.01
+	dash_impact_area_scale_multiplier *= multiplier
+
+	if dash_impact_area != null and dash_definition != null:
+		dash_impact_area.setup(
+			dash_definition,
+			self,
+			dash_definition.impact_source_id,
+			dash_impact_area_scale_multiplier
+		)
+
+func can_weapon_attack_while_dashing() -> bool:
+	if dash_definition == null:
+		return false
+
+	return dash_definition.allow_weapon_attacks_while_dashing
+
+func should_pause_weapon_cooldown_while_dashing() -> bool:
+	if dash_definition == null:
+		return true
+
+	return dash_definition.pause_weapon_cooldown_while_dashing
+
+func should_reset_weapon_cooldown_when_dash_starts() -> bool:
+	if dash_definition == null:
+		return false
+
+	return dash_definition.reset_weapon_cooldown_when_dash_starts
+
+func should_reset_weapon_cooldown_when_dash_ends() -> bool:
+	if dash_definition == null:
+		return true
+
+	return dash_definition.reset_weapon_cooldown_when_dash_ends
+
+
+SCRIPT: res://gameplay/player/PlayerDashImpactArea.gd
+--------------------------------------------------------------------------------------------------------------
+extends Area2D
+class_name PlayerDashImpactArea
+
+@export_group("Collision Filter")
+@export_range(1, 32, 1) var impact_collision_layer_number: int = 4
+@export_range(1, 32, 1) var enemy_hurtbox_mask_number: int = 5
+
+@export_group("Debug")
+@export var log_dash_impact_debug: bool = false
+
+var dash_definition: QueenDashDefinition = null
+var source_node: Node = null
+var source_id: String = ""
+var dash_direction: Vector2 = Vector2.RIGHT
+var impact_area_scale_multiplier: float = 1.0
+
+var runtime_shape_nodes: Array[CollisionShape2D] = []
+var already_impacted_instance_ids: Dictionary = {}
+
+var is_configured: bool = false
+var is_active: bool = false
+
+func _ready() -> void:
+	monitoring = false
+	monitorable = false
+
+	_configure_collision_filter()
+
+	if not area_entered.is_connected(_on_area_entered):
+		area_entered.connect(_on_area_entered)
+
+func setup(
+	p_dash_definition: QueenDashDefinition,
+	p_source_node: Node,
+	p_source_id: String = "",
+	p_impact_area_scale_multiplier: float = 1.0
+) -> void:
+	source_node = p_source_node
+	source_id = p_source_id
+	impact_area_scale_multiplier = max(0.01, p_impact_area_scale_multiplier)
+
+	if p_dash_definition == null or not p_dash_definition.is_valid_definition():
+		dash_definition = null
+		is_configured = false
+		set_impact_active(false)
+		_clear_runtime_shapes()
+		return
+
+	dash_definition = p_dash_definition.duplicate(true) as QueenDashDefinition
+
+	if source_id.strip_edges() == "":
+		source_id = dash_definition.impact_source_id
+
+	_build_runtime_shapes()
+
+	is_configured = (
+		not runtime_shape_nodes.is_empty()
+		and (
+			dash_definition.impact_enabled
+			or dash_definition.impact_damage_enabled
+		)
+	)
+
+	set_impact_active(false)
+
+func activate_for_dash(direction: Vector2) -> void:
+	if not is_configured:
+		return
+
+	if dash_definition == null:
+		return
+
+	if direction.length() > 0.001:
+		dash_direction = direction.normalized()
+	else:
+		dash_direction = Vector2.RIGHT
+
+	rotation = dash_direction.angle()
+	already_impacted_instance_ids.clear()
+	set_impact_active(true)
+	call_deferred("_process_current_overlaps")
+
+func deactivate() -> void:
+	set_impact_active(false)
+	already_impacted_instance_ids.clear()
+
+func set_impact_active(should_be_active: bool) -> void:
+	is_active = should_be_active
+	monitoring = should_be_active
+
+	for shape_node: CollisionShape2D in runtime_shape_nodes:
+		if shape_node == null or not is_instance_valid(shape_node):
+			continue
+
+		shape_node.disabled = not should_be_active
+
+func _physics_process(_delta: float) -> void:
+	if not is_active:
+		return
+
+	if not is_configured:
+		return
+
+	if RunQuery.is_gameplay_blocked(get_tree()):
+		return
+
+	_process_current_overlaps()
+
+func _on_area_entered(area: Area2D) -> void:
+	_try_apply_dash_impact_to_hurtbox(area)
+
+func _process_current_overlaps() -> void:
+	if not is_active:
+		return
+
+	for overlapping_area: Area2D in get_overlapping_areas():
+		_try_apply_dash_impact_to_hurtbox(overlapping_area)
+
+func _try_apply_dash_impact_to_hurtbox(area: Area2D) -> void:
+	if not is_active:
+		return
+
+	if dash_definition == null:
+		return
+
+	if not (area is HurtboxComponent):
+		return
+
+	var hurtbox: HurtboxComponent = area as HurtboxComponent
+	var receiver: Node = hurtbox.get_damage_receiver()
+
+	if receiver == null or not is_instance_valid(receiver):
+		return
+
+	var receiver_instance_id: int = int(receiver.get_instance_id())
+
+	if dash_definition.hit_once_per_enemy and already_impacted_instance_ids.has(receiver_instance_id):
+		return
+
+	var applied_damage: bool = _try_apply_dash_damage(receiver)
+	var applied_knockback: bool = _try_apply_dash_knockback(receiver)
+
+	if not applied_damage and not applied_knockback:
+		return
+
+	already_impacted_instance_ids[receiver_instance_id] = true
+
+func _try_apply_dash_damage(receiver: Node) -> bool:
+	if not dash_definition.impact_damage_enabled:
+		return false
+
+	if not dash_definition.has_valid_impact_damage():
+		return false
+
+	if not receiver.has_method("receive_damage"):
+		return false
+
+	var payload: DamagePayload = DamagePayload.new(
+		dash_definition.impact_raw_damage,
+		dash_definition.impact_damage_type,
+		source_node,
+		source_id,
+		source_id
+	)
+
+	if not dash_definition.impact_damage_components.is_empty():
+		payload.set_components(dash_definition.impact_damage_components)
+
+	var result_variant: Variant = receiver.call("receive_damage", payload)
+
+	if result_variant is int:
+		return int(result_variant) > 0
+
+	if result_variant is float:
+		return int(result_variant) > 0
+
+	return false
+
+func _try_apply_dash_knockback(receiver: Node) -> bool:
+	if not dash_definition.impact_enabled:
+		return false
+
+	if not receiver.has_method("apply_hit_knockback"):
+		return false
+
+	var impact_direction: Vector2 = _resolve_impact_direction_for_receiver(receiver)
+
+	var result_variant: Variant = receiver.call(
+		"apply_hit_knockback",
+		dash_definition.impact_knockback_pixels,
+		dash_definition.impact_knockback_duration_seconds,
+		null,
+		impact_direction,
+		dash_definition.impact_knockback_max_velocity_override,
+		dash_definition.impact_chase_weight_override
+	)
+
+	if result_variant is bool:
+		return bool(result_variant)
+
+	return false
+
+func _resolve_impact_direction_for_receiver(receiver: Node) -> Vector2:
+	if dash_definition == null:
+		return dash_direction.normalized()
+
+	if dash_definition.impact_direction_mode == "dash_direction":
+		return dash_direction.normalized()
+
+	if dash_definition.impact_direction_mode == "away_from_gaia":
+		if receiver is Node2D and source_node is Node2D:
+			var receiver_node: Node2D = receiver as Node2D
+			var source_node_2d: Node2D = source_node as Node2D
+			var away_from_gaia: Vector2 = receiver_node.global_position - source_node_2d.global_position
+
+			if away_from_gaia.length() > 0.001:
+				return away_from_gaia.normalized()
+
+		return dash_direction.normalized()
+
+	return _resolve_corridor_impact_direction(receiver)
+
+func _resolve_corridor_impact_direction(receiver: Node) -> Vector2:
+	if not (receiver is Node2D):
+		return dash_direction.normalized()
+
+	var receiver_node: Node2D = receiver as Node2D
+	var safe_dash_direction: Vector2 = dash_direction
+
+	if safe_dash_direction.length() <= 0.001:
+		safe_dash_direction = Vector2.RIGHT
+
+	safe_dash_direction = safe_dash_direction.normalized()
+
+	var lateral_direction: Vector2 = Vector2(
+		-safe_dash_direction.y,
+		safe_dash_direction.x
+	).normalized()
+
+	var reference_position: Vector2 = global_position
+
+	if source_node is Node2D:
+		var source_node_2d: Node2D = source_node as Node2D
+		reference_position = source_node_2d.global_position
+
+	var to_receiver: Vector2 = receiver_node.global_position - reference_position
+	var side_value: float = to_receiver.dot(lateral_direction)
+	var side_sign: float = 1.0
+
+	if side_value < -0.001:
+		side_sign = -1.0
+	elif side_value > 0.001:
+		side_sign = 1.0
+	else:
+		if int(receiver_node.get_instance_id()) % 2 == 0:
+			side_sign = -1.0
+		else:
+			side_sign = 1.0
+
+	var corridor_direction: Vector2 = lateral_direction * side_sign
+
+	if dash_definition.impact_forward_component > 0.0:
+		corridor_direction += safe_dash_direction * dash_definition.impact_forward_component
+
+	if corridor_direction.length() <= 0.001:
+		return safe_dash_direction
+
+	return corridor_direction.normalized()
+
+func _configure_collision_filter() -> void:
+	collision_layer = 0
+	collision_mask = 0
+
+	set_collision_layer_value(impact_collision_layer_number, true)
+	set_collision_mask_value(enemy_hurtbox_mask_number, true)
+
+func _build_runtime_shapes() -> void:
+	_clear_runtime_shapes()
+
+	if dash_definition == null:
+		return
+
+	for impact_area: AttackAreaDefinition in dash_definition.impact_areas:
+		if impact_area == null:
+			continue
+
+		if not impact_area.is_valid_definition():
+			continue
+
+		var duplicated_area: AttackAreaDefinition = impact_area.duplicate(true) as AttackAreaDefinition
+		var runtime_shape: Shape2D = duplicated_area.build_runtime_shape(impact_area_scale_multiplier)
+
+		if runtime_shape == null:
+			continue
+
+		var shape_node: CollisionShape2D = CollisionShape2D.new()
+		shape_node.name = "RuntimeDashImpactShape_%s" % str(runtime_shape_nodes.size())
+		shape_node.shape = runtime_shape
+		shape_node.position = duplicated_area.local_offset * impact_area_scale_multiplier
+		shape_node.rotation_degrees = duplicated_area.local_rotation_degrees
+		shape_node.disabled = true
+
+		add_child(shape_node)
+		runtime_shape_nodes.append(shape_node)
+
+func _clear_runtime_shapes() -> void:
+	for shape_node: CollisionShape2D in runtime_shape_nodes:
+		if shape_node == null or not is_instance_valid(shape_node):
+			continue
+
+		remove_child(shape_node)
+		shape_node.queue_free()
+
+	runtime_shape_nodes.clear()
+
 
 SCRIPT: res://gameplay/run/RunController.gd
 --------------------------------------------------------------------------------------------------------------
-## Controlador principal de uma run jogável.
-##
-## Responsabilidades:
-## - inicializar o `RunState` com o mapa atual;
-## - controlar tempo e condições de vitória/derrota;
-## - receber eventos de morte, dano e coleta;
-## - administrar XP, level-ups e aplicação transacional de upgrades;
-## - construir o `RunResultPayload`;
-## - emitir o encerramento da run para save e interfaces;
-## - expor ferramentas técnicas de vitória/derrota forçada.
-##
-## Este controller coordena sistemas, mas não implementa diretamente:
-## - combate da Queen;
-## - comportamento dos inimigos;
-## - criação visual de drops;
-## - persistência permanente.
 extends Node
 
-## Estado mutável da run atual.
-##
-## Pode ser configurado pelo Inspector ou criado automaticamente ao iniciar.
 @export var run_state: RunState
 
-## Configuração do mapa executado nesta run.
-##
-## Define duração, recompensa de vitória, timeline de spawn e pool padrão.
 @export var map_definition: MapDefinition
 
-## Override opcional da pool de upgrades para cenas de teste.
-##
-## No fluxo normal, a pool deve vir de `MapDefinition.upgrade_pool`.
 @export var upgrade_pool_definition: UpgradePoolDefinition
 
-## Define se a SceneTree deve permanecer pausada após o resultado final.
 @export var finish_run_pauses_tree: bool = true
 
-## Delay visual entre a morte do player e a exibição da derrota.
 @export var defeat_result_delay_seconds: float = 0.75
 
 @export_group("Debug Tools")
 
-## Permite que ferramentas do protótipo forcem vitória ou derrota.
-##
-## Deve permanecer desabilitado em cenas ou builds onde essa ação
-## não seja desejada.
 @export var allow_debug_force_finish: bool = false
 
-## Quantidade de level-ups conquistados ainda aguardando escolha.
 var pending_level_ups: int = 0
 
-## Opções atualmente apresentadas no painel de level-up.
 var current_level_up_options: Array[UpgradeDefinition] = []
 
-## Indica se existe uma escolha de level-up ativa neste momento.
 var is_level_up_active: bool = false
 
-## Resultado final construído ao encerrar a run.
 var result_payload: RunResultPayload = null
 
-## Quantidade de vezes que cada upgrade foi escolhido na run atual.
 var selected_upgrade_counts: Dictionary = {}
 
-## IDs das opções oferecidas no level-up anterior.
-##
-## Utilizado para reduzir repetição imediata de cards quando a pool permitir.
 var previous_upgrade_option_ids: Array[String] = []
 
-## Prepara a run ao entrar na árvore:
-## - mantém processamento durante pausas;
-## - registra o controller no grupo global;
-## - cria ou configura o estado da run;
-## - resolve a pool de upgrades;
-## - conecta eventos de gameplay.
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	add_to_group("run_controller")
@@ -2216,12 +3487,6 @@ func _ready() -> void:
 		}
 	)
 
-## Atualiza o tempo da run enquanto o gameplay estiver ativo.
-##
-## Durante pause, encerramento intermediário ou resultado final,
-## o tempo deixa de avançar.
-##
-## Quando o tempo alcança a duração do mapa, consolida vitória.
 func _process(delta: float) -> void:
 	if run_state == null:
 		return
@@ -2243,28 +3508,18 @@ func _process(delta: float) -> void:
 	if run_state.elapsed_seconds >= run_state.map_duration_seconds:
 		_finish_victory()
 
-## Retorna o estado mutável da run atual.
-##
-## Utilizado por `RunQuery`, HUD e ferramentas técnicas.
 func get_run_state() -> RunState:
 	return run_state
 
-## Retorna a definição do mapa executado nesta run.
 func get_map_definition() -> MapDefinition:
 	return map_definition
 
-## Retorna a pool de upgrades atualmente utilizada pela run.
 func get_upgrade_pool_definition() -> UpgradePoolDefinition:
 	return upgrade_pool_definition
 
-## Retorna o payload final após vitória ou derrota ser consolidada.
 func get_result_payload() -> RunResultPayload:
 	return result_payload
 
-## Retorna informações técnicas da run para overlay e ferramentas de debug.
-##
-## Este método não representa contrato definitivo de UI comercial;
-## sua finalidade é apoiar testes do protótipo.
 func get_debug_data() -> Dictionary:
 	if run_state == null:
 		return {
@@ -2304,13 +3559,6 @@ func get_debug_data() -> Dictionary:
 		"death_cause": run_state.death_cause
 	}
 
-## Conecta os sinais globais que alimentam estatísticas e fluxo da run.
-##
-## Emissores principais:
-## - `EnemyBase`: dano recebido e morte do inimigo;
-## - `CoinDrop`: moeda coletada;
-## - `PlayerController`: dano recebido e morte do player;
-## - `LevelUpPanel`: upgrade escolhido.
 func _connect_events() -> void:
 	if not GameEvents.enemy_died.is_connected(_on_enemy_died):
 		GameEvents.enemy_died.connect(_on_enemy_died)
@@ -2330,17 +3578,6 @@ func _connect_events() -> void:
 	if not GameEvents.enemy_damaged.is_connected(_on_enemy_damaged):
 		GameEvents.enemy_damaged.connect(_on_enemy_damaged)
 
-## Processa a morte válida de um inimigo durante a run.
-##
-## Fluxo:
-## - incrementa abates;
-## - adiciona XP direta;
-## - acumula level-ups pendentes;
-## - emite atualizações para HUD;
-## - inicia a próxima escolha de upgrade quando necessário.
-##
-## O drop físico da moeda é tratado separadamente pelo `DropController`,
-## que também escuta o evento `enemy_died`.
 func _on_enemy_died(
 	enemy_id: String,
 	source_id: String,
@@ -2401,10 +3638,6 @@ func _on_enemy_died(
 	if pending_level_ups > 0 and not is_level_up_active:
 		_start_next_level_up()
 
-## Processa uma moeda física efetivamente coletada pelo player.
-##
-## Apenas moedas coletadas antes do encerramento entram no saldo da run.
-## Moedas apenas dropadas ou ainda magnetizadas não geram recompensa.
 func _on_run_coin_collected(value: int, coin_global_position: Vector2) -> void:
 	if run_state == null:
 		return
@@ -2438,7 +3671,6 @@ func _on_run_coin_collected(value: int, coin_global_position: Vector2) -> void:
 		}
 	)
 
-## Registra nas estatísticas da run o dano efetivamente recebido pelo player.
 func _on_player_damaged(
 	_raw_damage: int,
 	final_damage: int,
@@ -2454,7 +3686,6 @@ func _on_player_damaged(
 
 	run_state.add_damage_taken(final_damage)
 
-## Registra nas estatísticas da run o dano efetivamente causado a inimigos.
 func _on_enemy_damaged(
 	_enemy_id: String,
 	_raw_damage: int,
@@ -2471,11 +3702,6 @@ func _on_enemy_damaged(
 
 	run_state.add_damage_dealt(final_damage)
 
-## Inicia o fluxo de derrota quando o player morre.
-##
-## O gameplay é bloqueado imediatamente por `begin_ending()`, evitando
-## novos danos, moedas ou ações durante o delay visual de morte.
-## Após o delay configurado, a derrota é consolidada.
 func _on_player_died(source_id: String) -> void:
 	if run_state == null:
 		return
@@ -2516,8 +3742,6 @@ func _on_player_died(source_id: String) -> void:
 		_finish_defeat(source_id)
 	)
 
-## Consolida vitória quando o tempo do mapa chega ao fim
-## ou quando uma ferramenta técnica força esse resultado.
 func _finish_victory() -> void:
 	if run_state == null:
 		return
@@ -2530,7 +3754,6 @@ func _finish_victory() -> void:
 
 	_finish_run()
 
-## Consolida derrota após a morte do player ou por ferramenta técnica.
 func _finish_defeat(source_id: String = "") -> void:
 	if run_state == null:
 		return
@@ -2542,15 +3765,6 @@ func _finish_defeat(source_id: String = "") -> void:
 
 	_finish_run()
 
-## Finaliza o fluxo comum de vitória ou derrota.
-##
-## Fluxo:
-## - encerra qualquer level-up pendente;
-## - pausa logicamente a run;
-## - constrói o payload final;
-## - registra o dinheiro obtido;
-## - emite `GameEvents.run_finished`, consumido por save e UI;
-## - opcionalmente pausa toda a SceneTree.
 func _finish_run() -> void:
 	if run_state == null:
 		return
@@ -2591,11 +3805,6 @@ func _finish_run() -> void:
 	if finish_run_pauses_tree:
 		get_tree().paused = true
 
-## Constrói o payload imutável por convenção utilizado no resultado e save.
-##
-## Regra monetária:
-## - derrota: entrega somente moedas coletadas;
-## - vitória: utiliza o multiplicador e bônus configurados no mapa.
 func _build_result_payload() -> RunResultPayload:
 	var payload: RunResultPayload = RunResultPayload.new()
 
@@ -2638,11 +3847,6 @@ func _build_result_payload() -> RunResultPayload:
 
 	return payload
 
-## Inicia a próxima escolha pendente de level-up.
-##
-## A run e a árvore são pausadas enquanto o painel aguarda seleção.
-## Caso a pool não possua opções válidas, o level-up é consumido
-## sem escolha para evitar travar a execução.
 func _start_next_level_up() -> void:
 	if run_state == null:
 		return
@@ -2694,14 +3898,6 @@ func _start_next_level_up() -> void:
 
 	GameEvents.run_level_up_started.emit(run_state.current_level, current_level_up_options)
 
-## Recebe a opção escolhida pelo painel de level-up.
-##
-## O upgrade é aplicado de forma transacional:
-## - primeiro o efeito deve ser aceito pelo player ou arma;
-## - somente depois o stack é registrado e a escolha consumida.
-##
-## Caso a aplicação falhe, o level-up permanece aberto para evitar
-## consumir uma escolha que não produziu efeito.
 func _on_level_up_option_selected(upgrade: UpgradeDefinition) -> void:
 	if not is_level_up_active:
 		return
@@ -2757,10 +3953,6 @@ func _on_level_up_option_selected(upgrade: UpgradeDefinition) -> void:
 
 	get_tree().paused = false
 
-## Encaminha o upgrade escolhido para o player atual.
-##
-## O player é responsável por aplicar melhorias próprias ou encaminhar
-## melhorias de arma. O retorno booleano informa se houve efeito real.
 func _apply_upgrade(upgrade: UpgradeDefinition) -> bool:
 	var player: Node = _get_player()
 
@@ -2780,7 +3972,6 @@ func _apply_upgrade(upgrade: UpgradeDefinition) -> bool:
 	push_warning("[RunController] apply_run_upgrade precisa retornar bool: %s" % upgrade.id)
 	return false
 
-## Localiza a Queen ativa por meio do grupo `player`.
 func _get_player() -> Node:
 	var players: Array[Node] = get_tree().get_nodes_in_group("player")
 
@@ -2789,7 +3980,6 @@ func _get_player() -> Node:
 
 	return players[0]
 
-## Converte a lista de opções em texto legível para logs técnicos.
 func _get_option_ids(options: Array[UpgradeDefinition]) -> String:
 	var ids: Array[String] = []
 
@@ -2801,11 +3991,6 @@ func _get_option_ids(options: Array[UpgradeDefinition]) -> String:
 
 	return ", ".join(ids)
 
-## Resolve qual pool de upgrades será utilizada nesta run.
-##
-## Prioridade:
-## 1. override configurado diretamente na cena;
-## 2. pool cadastrada no `MapDefinition`.
 func _resolve_upgrade_pool() -> void:
 	if upgrade_pool_definition != null:
 		DeveloperAuditLogger.log_upgrade(
@@ -2838,7 +4023,6 @@ func _resolve_upgrade_pool() -> void:
 		}
 	)
 
-## Solicita ao serviço de opções novos cards válidos para o level-up atual.
 func _generate_level_up_options() -> Array[UpgradeDefinition]:
 	if upgrade_pool_definition == null:
 		return []
@@ -2849,7 +4033,6 @@ func _generate_level_up_options() -> Array[UpgradeDefinition]:
 		previous_upgrade_option_ids
 	)
 
-## Registra que determinado upgrade foi aplicado com sucesso nesta run.
 func _register_selected_upgrade(upgrade: UpgradeDefinition) -> void:
 	if upgrade == null:
 		return
@@ -2857,10 +4040,6 @@ func _register_selected_upgrade(upgrade: UpgradeDefinition) -> void:
 	var current_count: int = int(selected_upgrade_counts.get(upgrade.id, 0))
 	selected_upgrade_counts[upgrade.id] = current_count + 1
 
-## Finaliza um level-up que não possuía nenhuma opção válida disponível.
-##
-## Evita que a run permaneça pausada indefinidamente quando a pool
-## estiver vazia ou todos os upgrades alcançarem seus limites.
 func _complete_level_up_without_option() -> void:
 	pending_level_ups = max(0, pending_level_ups - 1)
 
@@ -2876,14 +4055,12 @@ func _complete_level_up_without_option() -> void:
 
 	get_tree().paused = false
 
-## Retorna o ID da pool ativa ou `none` quando nenhuma pool foi resolvida.
 func _get_upgrade_pool_id() -> String:
 	if upgrade_pool_definition == null:
 		return "none"
 
 	return upgrade_pool_definition.id
 
-## Converte as opções atuais em uma lista de IDs utilizada para evitar repetição.
 func _get_option_id_array(options: Array[UpgradeDefinition]) -> Array[String]:
 	var ids: Array[String] = []
 
@@ -2895,22 +4072,15 @@ func _get_option_id_array(options: Array[UpgradeDefinition]) -> Array[String]:
 
 	return ids
 
-## Retorna quantas vezes um upgrade já foi escolhido na run atual.
 func get_selected_upgrade_count(upgrade_id: String) -> int:
 	if upgrade_id.strip_edges() == "":
 		return 0
 
 	return int(selected_upgrade_counts.get(upgrade_id, 0))
 
-## Retorna o nível/stack que um upgrade atingirá caso seja escolhido agora.
-##
-## Utilizado pelo painel para exibir badges como `Nv. 2`.
 func get_next_upgrade_level(upgrade_id: String) -> int:
 	return get_selected_upgrade_count(upgrade_id) + 1
 
-## Força vitória por meio das ferramentas técnicas do protótipo.
-##
-## Retorna `true` somente quando a ação é permitida e aplicada.
 func debug_force_victory() -> bool:
 	if not allow_debug_force_finish:
 		DeveloperAuditLogger.log_audit(
@@ -2933,10 +4103,6 @@ func debug_force_victory() -> bool:
 
 	return true
 
-## Força derrota por meio das ferramentas técnicas do protótipo.
-##
-## Utiliza a causa `debug_force_defeat` para deixar explícito no resultado
-## que a derrota não veio de uma interação normal de gameplay.
 func debug_force_defeat() -> bool:
 	if not allow_debug_force_finish:
 		DeveloperAuditLogger.log_audit(
@@ -2963,112 +4129,70 @@ func debug_force_defeat() -> bool:
 
 SCRIPT: res://gameplay/spawners/EnemySpawner.gd
 --------------------------------------------------------------------------------------------------------------
-## Spawner runtime responsável por criar inimigos ao redor da Queen.
-##
-## Responsabilidades:
-## - resolver player e EnemyRoot;
-## - consumir a timeline configurada no mapa;
-## - aplicar valores da wave ativa;
-## - criar inimigos fora de uma distância mínima segura;
-## - impedir spawn duplo no mesmo frame;
-## - interromper criação após o fim da run.
 extends Node
 
 @export_group("Base")
 
-## Ativa ou desativa toda criação de inimigos deste spawner.
 @export var spawner_enabled: bool = true
 
-## Define se o primeiro spawn deve ser liberado após o delay inicial,
-## em vez de aguardar um intervalo completo.
 @export var spawn_on_ready: bool = true
 
-## Grupo utilizado para localizar automaticamente a Queen.
 @export var player_group_name: String = "player"
 
 @export_group("Enemy")
 
-## Cena base instanciada para cada inimigo.
 @export_file("*.tscn") var enemy_scene_path: String = "res://gameplay/enemies/EnemyBase.tscn"
 
-## Definition fallback aplicada ao inimigo quando não houver timeline ativa.
 @export var enemy_definition: EnemyDefinition
 
 @export_group("Scene Roots")
 
-## Caminho opcional para o container que receberá inimigos criados.
 @export var enemy_root_path: NodePath
 
 @export_group("Spawn Fallback")
 
-## Intervalo padrão entre spawns quando não há wave substituindo o valor.
 @export var spawn_interval_seconds: float = 2.2
 
-## Limite padrão de inimigos vivos simultaneamente.
 @export var max_alive_enemies: int = 18
 
-## Distância mínima fallback para nascimento ao redor do player.
 @export var spawn_min_distance: float = 420.0
 
-## Distância máxima fallback para nascimento ao redor do player.
 @export var spawn_max_distance: float = 620.0
 
 @export_group("Spawn Safety")
 
-## Pequeno atraso inicial antes de liberar o primeiro spawn.
-##
-## Evita que um inimigo seja criado no primeiro frame da cena,
-## antes de player, câmera e posições runtime estarem estabilizados.
 @export var initial_spawn_delay_seconds: float = 0.45
 
-## Número máximo de posições aleatórias tentadas ao escolher um spawn seguro.
 @export var spawn_position_attempts: int = 16
 
-## Distância mínima absoluta exigida entre player e novo inimigo.
 @export var minimum_safe_spawn_distance_from_player: float = 360.0
 
-## Impede a criação de mais de um inimigo no mesmo frame de processamento.
 @export var prevent_multiple_spawns_same_frame: bool = true
 
-## Ativa logs de posição e distância de cada nascimento.
 @export var log_spawn_distance: bool = true
 
 @export_group("Timeline")
 
-## Define se a timeline deve ser obtida automaticamente do mapa atual.
 @export var use_map_spawn_timeline: bool = true
 
-## Timeline ativa utilizada para alterar comportamento ao longo da run.
 @export var spawn_timeline_definition: SpawnTimelineDefinition
 
-## Ativa logs sempre que uma nova wave entra em vigor.
 @export var log_timeline_changes: bool = true
 
-## Referência atual da Queen ao redor da qual os inimigos nascerão.
 var player_node: Node2D = null
 
-## Container onde inimigos instanciados serão adicionados.
 var enemy_root: Node2D = null
 
-## Tempo restante até a próxima tentativa de spawn.
 var spawn_timer: float = 0.0
 
-## ID da faixa/wave atualmente aplicada.
 var active_entry_id: String = ""
 
-## Tempo transcorrido desde a entrada do spawner na árvore.
 var elapsed_since_ready: float = 0.0
 
-## Último frame em que um spawn foi realizado.
 var last_spawn_frame: int = -1
 
-## Define se a trava inicial de segurança já foi liberada.
 var initial_spawn_delay_completed: bool = false
 
-## Inicializa referências, timeline e timer do primeiro spawn.
-##
-## A cena principal pode injetar player e EnemyRoot depois deste momento;
-## por isso a ausência inicial dessas referências não representa erro.
 func _ready() -> void:
 	enemy_root = _resolve_enemy_root()
 	player_node = _resolve_player()
@@ -3082,11 +4206,6 @@ func _ready() -> void:
 	if not GameEvents.run_finished.is_connected(_on_run_finished):
 		GameEvents.run_finished.connect(_on_run_finished)
 
-## Atualiza timeline e cria inimigos quando o timer permite.
-##
-## Nenhum spawn acontece enquanto gameplay estiver bloqueado,
-## enquanto referências obrigatórias estiverem ausentes
-## ou antes do delay inicial de segurança.
 func _process(delta: float) -> void:
 	if not spawner_enabled:
 		return
@@ -3129,7 +4248,6 @@ func _process(delta: float) -> void:
 		else:
 			spawn_timer = min(0.5, spawn_interval_seconds)
 
-## Injeta explicitamente a referência da Queen controlada na cena.
 func configure_player(player: Node2D) -> void:
 	player_node = player
 
@@ -3142,7 +4260,6 @@ func configure_player(player: Node2D) -> void:
 			}
 		)
 
-## Injeta explicitamente o container onde inimigos serão adicionados.
 func configure_enemy_root(root: Node2D) -> void:
 	enemy_root = root
 
@@ -3155,16 +4272,6 @@ func configure_enemy_root(root: Node2D) -> void:
 			}
 		)
 
-## Tenta criar imediatamente uma instância inimiga.
-##
-## Retorna `true` somente quando o inimigo foi de fato instanciado.
-## O método respeita:
-## - estado da run;
-## - habilitação do spawner;
-## - bloqueio de múltiplos spawns no mesmo frame;
-## - limite de inimigos vivos;
-## - validação da cena do inimigo;
-## - posicionamento seguro ao redor da Queen.
 func force_spawn_enemy() -> bool:
 	if RunQuery.is_gameplay_blocked(get_tree()):
 		return false
@@ -3218,9 +4325,6 @@ func force_spawn_enemy() -> bool:
 	var spawn_position: Vector2 = _get_safe_spawn_position_around_player()
 	var distance_to_player: float = spawn_position.distance_to(player_node.global_position)
 
-	# A posição local é definida antes de adicionar o inimigo à árvore.
-	# Dessa forma, o `_ready()` do EnemyBase já executa com a posição
-	# mundial correta e não aparece colado na Queen no primeiro frame.
 	enemy_node.position = enemy_root.to_local(spawn_position)
 
 	enemy_root.add_child(enemy_node)
@@ -3251,7 +4355,6 @@ func force_spawn_enemy() -> bool:
 
 	return true
 
-## Consulta a timeline e aplica a wave correspondente ao tempo atual da run.
 func _update_timeline_values() -> void:
 	if spawn_timeline_definition == null:
 		_resolve_spawn_timeline_from_map()
@@ -3275,10 +4378,6 @@ func _update_timeline_values() -> void:
 	else:
 		_apply_timeline_entry(active_entry, false)
 
-## Copia valores de uma faixa da timeline para o spawner runtime.
-##
-## Quando a wave acabou de ser ativada, pode liberar um spawn imediato,
-## respeitando o delay inicial e a trava contra spawn duplo.
 func _apply_timeline_entry(entry: SpawnTimelineEntryDefinition, changed: bool) -> void:
 	if entry == null:
 		return
@@ -3332,7 +4431,6 @@ func _apply_timeline_entry(entry: SpawnTimelineEntryDefinition, changed: bool) -
 	if spawned:
 		spawn_timer = spawn_interval_seconds
 
-## Obtém automaticamente a timeline cadastrada na definição do mapa atual.
 func _resolve_spawn_timeline_from_map() -> void:
 	if spawn_timeline_definition != null:
 		return
@@ -3364,10 +4462,6 @@ func _resolve_spawn_timeline_from_map() -> void:
 				}
 			)
 
-## Procura uma posição aleatória que respeite a distância segura do player.
-##
-## Caso nenhuma tentativa obtenha resultado ideal, retorna a melhor
-## posição encontrada ou um fallback diretamente à direita da Queen.
 func _get_safe_spawn_position_around_player() -> Vector2:
 	var safe_min_distance: float = max(minimum_safe_spawn_distance_from_player, spawn_min_distance)
 	var safe_max_distance: float = max(safe_min_distance + 1.0, spawn_max_distance)
@@ -3388,7 +4482,6 @@ func _get_safe_spawn_position_around_player() -> Vector2:
 
 	return best_position
 
-## Gera uma posição circular aleatória ao redor do player.
 func _get_spawn_position_around_player(min_distance: float, max_distance: float) -> Vector2:
 	var safe_min_distance: float = max(0.0, min_distance)
 	var safe_max_distance: float = max(safe_min_distance, max_distance)
@@ -3398,7 +4491,6 @@ func _get_spawn_position_around_player(min_distance: float, max_distance: float)
 
 	return player_node.global_position + Vector2(cos(angle), sin(angle)) * distance
 
-## Conta os inimigos ainda registrados no grupo ativo `enemy`.
 func _get_alive_enemy_count() -> int:
 	var enemies: Array[Node] = get_tree().get_nodes_in_group("enemy")
 	var count: int = 0
@@ -3414,12 +4506,6 @@ func _get_alive_enemy_count() -> int:
 
 	return count
 
-## Resolve o container onde inimigos devem ser adicionados.
-##
-## Prioridade:
-## 1. caminho configurado;
-## 2. irmão direto chamado `EnemyRoot`;
-## 3. busca ascendente por um container com esse nome.
 func _resolve_enemy_root() -> Node2D:
 	if enemy_root_path != NodePath():
 		var configured_root: Node = get_node_or_null(enemy_root_path)
@@ -3444,7 +4530,6 @@ func _resolve_enemy_root() -> Node2D:
 
 	return null
 
-## Resolve a Queen atual pelo grupo configurado.
 func _resolve_player() -> Node2D:
 	var players: Array[Node] = get_tree().get_nodes_in_group(player_group_name)
 
@@ -3454,7 +4539,6 @@ func _resolve_player() -> Node2D:
 
 	return null
 
-## Desativa definitivamente este spawner quando a run termina.
 func _on_run_finished(_result_payload: RunResultPayload) -> void:
 	spawner_enabled = false
 
@@ -3463,7 +4547,6 @@ func _on_run_finished(_result_payload: RunResultPayload) -> void:
 		"EnemySpawner"
 	)
 
-## Atalho utilizado pela cena principal para injetar referências runtime.
 func configure_spawner(player: Node2D, root: Node2D) -> void:
 	configure_player(player)
 	configure_enemy_root(root)
@@ -3471,59 +4554,32 @@ func configure_spawner(player: Node2D, root: Node2D) -> void:
 
 SCRIPT: res://gameplay/test/TestGaiaScene.gd
 --------------------------------------------------------------------------------------------------------------
-## Cena jogável de integração do Módulo 1.
-##
-## Reúne a arena infinita de teste, Gaia, inimigos, drops, câmera,
-## controlador da run e interfaces do protótipo.
-##
-## Esta cena é responsável apenas por montar e conectar os sistemas
-## principais. Regras de combate, progressão, spawn e recompensas
-## permanecem em seus respectivos controllers e resources.
 extends Node2D
 
-## Cena do player que será instanciada ao iniciar o mapa.
-##
-## Atualmente utiliza a Gaia como primeira Queen jogável do protótipo.
 @export_file("*.tscn") var player_scene_path: String = "res://gameplay/player/PlayerGaia.tscn"
 
-## Container visual da arena/mapa.
 @onready var arena_root: Node2D = $ArenaRoot
 
-## Container dos sistemas e entidades gerados durante a execução.
 @onready var runtime_root: Node2D = $RuntimeRoot
 
-## Container onde a Queen será instanciada.
 @onready var player_root: Node2D = $RuntimeRoot/PlayerRoot
 
-## Container onde inimigos criados pelo spawner serão adicionados.
 @onready var enemy_root: Node2D = $RuntimeRoot/EnemyRoot
 
-## Container onde moedas e futuros drops físicos serão adicionados.
 @onready var drop_root: Node2D = $RuntimeRoot/DropRoot
 
-## Container que reúne os spawners ativos do mapa.
 @onready var spawner_root: Node2D = $RuntimeRoot/SpawnerRoot
 
-## Controlador central da run atual.
 @onready var run_controller: Node = $RuntimeRoot/RunController
 
-## Controlador responsável pela criação de moedas após mortes de inimigos.
 @onready var drop_controller: Node = $RuntimeRoot/DropController
 
-## Posição inicial onde a Queen será colocada ao começar a run.
 @onready var player_spawn_point: Marker2D = $PlayerSpawnPoint
 
-## Câmera principal utilizada durante o gameplay.
 @onready var camera_2d: Camera2D = $Camera2D
 
-## Referência runtime da Queen instanciada nesta cena.
 var player_instance: Node2D = null
 
-## Monta a cena jogável em ordem segura:
-## 1. valida a estrutura mínima salva no editor;
-## 2. instancia a Queen;
-## 3. conecta a câmera ao player;
-## 4. injeta player e EnemyRoot nos spawners.
 func _ready() -> void:
 	_validate_scene_structure()
 	_spawn_player()
@@ -3535,29 +4591,18 @@ func _ready() -> void:
 		"TestGaiaScene"
 	)
 
-## Retorna a instância atual da Queen criada para a run.
-##
-## Usado por sistemas que precisam localizar diretamente o player
-## sem depender apenas do grupo global `player`.
 func get_player_instance() -> Node2D:
 	return player_instance
 
-## Retorna o container onde inimigos da run são adicionados.
 func get_enemy_root() -> Node2D:
 	return enemy_root
 
-## Retorna o container onde drops físicos da run são adicionados.
 func get_drop_root() -> Node2D:
 	return drop_root
 
-## Retorna o controlador principal da run presente na cena.
 func get_run_controller() -> Node:
 	return run_controller
 
-## Instancia a cena configurada para o player e a posiciona no ponto inicial.
-##
-## A ausência da cena ou a instanciação de um tipo incompatível representa
-## erro estrutural, pois impede a execução correta do protótipo.
 func _spawn_player() -> void:
 	var packed_player: PackedScene = load(player_scene_path) as PackedScene
 
@@ -3583,11 +4628,6 @@ func _spawn_player() -> void:
 		}
 	)
 
-## Define a Queen como alvo da câmera principal.
-##
-## Quando a câmera possui o método `set_target`, utiliza o comportamento
-## completo de acompanhamento. Caso contrário, posiciona a câmera diretamente
-## sobre o player como fallback simples.
 func _setup_camera_target() -> void:
 	if camera_2d == null:
 		push_warning("[TestGaiaScene] Camera2D não encontrada.")
@@ -3604,11 +4644,6 @@ func _setup_camera_target() -> void:
 	else:
 		camera_2d.global_position = player_instance.global_position
 
-## Configura todos os spawners encontrados em `SpawnerRoot`.
-##
-## Cada spawner compatível recebe:
-## - a instância atual do player, utilizada como referência de spawn e perseguição;
-## - o EnemyRoot, utilizado como container dos inimigos criados.
 func _configure_spawners() -> void:
 	if spawner_root == null:
 		push_error("[TestGaiaScene] SpawnerRoot não encontrado.")
@@ -3639,10 +4674,6 @@ func _configure_spawners() -> void:
 		}
 	)
 
-## Verifica se os nodes esperados da cena foram mantidos no editor.
-##
-## Esta validação auxilia manutenção da árvore da cena e informa rapidamente
-## quando algum container obrigatório foi removido ou renomeado.
 func _validate_scene_structure() -> void:
 	if arena_root == null:
 		push_warning("[TestGaiaScene] ArenaRoot não encontrado.")
@@ -3677,72 +4708,76 @@ func _validate_scene_structure() -> void:
 
 SCRIPT: res://gameplay/weapons/attacks/DirectionalAttackHitbox.gd
 --------------------------------------------------------------------------------------------------------------
-## Hitbox temporária criada por um disparo direcional.
-##
-## Responsabilidades:
-## - armazenar snapshot do dano do ataque;
-## - verificar inimigos dentro do raio;
-## - impedir múltiplos impactos no mesmo inimigo por disparo;
-## - construir `DamagePayload`;
-## - desaparecer ao final de sua duração.
-extends Node2D
+extends Area2D
 class_name DirectionalAttackHitbox
 
-## Raio atual da área de acerto.
-@export var hit_radius: float = 72.0
+@export_group("Lifetime")
 
-## Tempo, em segundos, durante o qual esta hitbox permanece ativa.
 @export var lifetime_seconds: float = 0.12
 
-## Dano fallback utilizado quando não existem componentes.
-@export var raw_damage: int = 5
+@export_group("Damage Fallback")
 
-## Tipo do dano fallback.
+@export var raw_damage: int = 5
 @export var damage_type: String = DamageTypes.PHYSICAL
 
-## Componentes de dano aplicados por esta hitbox.
+@export_group("Damage Components")
+
 @export var damage_components: Array[DamageComponentDefinition] = []
 
-## ID técnico da fonte responsável pelo ataque.
+@export_group("On Hit Effects")
+
+@export var hit_knockback_enabled: bool = false
+
+@export var hit_knockback_pixels: float = 0.0
+
+@export var hit_knockback_duration_seconds: float = 0.12
+
+@export_group("Attack Areas")
+
+@export var attack_areas: Array[AttackAreaDefinition] = []
+
+@export var attack_area_scale_multiplier: float = 1.0
+
+@export_group("Source")
+
 @export var source_id: String = "gaia_initial_weapon"
 
-## Grupo onde os alvos atingíveis serão procurados.
-@export var enemy_group_name: String = "enemy"
+@export_group("Collision Filter")
 
-## Exibe visualmente o raio e a direção da hitbox.
+@export_range(1, 32, 1) var attack_collision_layer_number: int = 4
+
+@export_range(1, 32, 1) var target_hurtbox_mask_number: int = 5
+
+@export_group("Debug")
+
 @export var draw_debug_hitbox: bool = false
-
-## Cor de preenchimento da hitbox técnica.
 @export var debug_color: Color = Color(0.2, 0.75, 1.0, 0.35)
-
-## Cor do contorno e direção da hitbox técnica.
 @export var debug_outline_color: Color = Color(0.2, 0.9, 1.0, 0.95)
 
-## Tempo transcorrido desde que esta hitbox foi configurada.
 var elapsed_seconds: float = 0.0
-
-## Direção normalizada do disparo que gerou esta hitbox.
 var attack_direction: Vector2 = Vector2.RIGHT
-
-## Node responsável por disparar o ataque.
 var source_node: Node = null
 
-## IDs de instâncias já atingidas por esta hitbox.
-##
-## Garante no máximo um impacto por inimigo em cada disparo.
+var runtime_shape_nodes: Array[CollisionShape2D] = []
 var already_hit_instance_ids: Dictionary = {}
 
-## Define se `setup()` já forneceu os dados necessários ao processamento.
 var is_configured: bool = false
 
-## Prepara desenho técnico e descarta a hitbox caso o gameplay já esteja bloqueado.
 func _ready() -> void:
-	queue_redraw()
+	monitoring = true
+	monitorable = false
+
+	_configure_collision_filter()
+
+	if not area_entered.is_connected(_on_area_entered):
+		area_entered.connect(_on_area_entered)
 
 	if RunQuery.is_gameplay_blocked(get_tree()):
 		queue_free()
+		return
 
-## Verifica impactos enquanto a hitbox estiver configurada e ativa.
+	queue_redraw()
+
 func _physics_process(delta: float) -> void:
 	if not is_configured:
 		return
@@ -3753,36 +4788,71 @@ func _physics_process(delta: float) -> void:
 
 	elapsed_seconds += delta
 
-	_try_hit_enemies()
+	_process_current_overlaps()
 
 	if elapsed_seconds >= lifetime_seconds:
 		queue_free()
 
-## Desenha raio e orientação da hitbox quando o debug visual está ativo.
 func _draw() -> void:
 	if not draw_debug_hitbox:
 		return
 
-	draw_circle(Vector2.ZERO, hit_radius, debug_color)
-	draw_arc(Vector2.ZERO, hit_radius, 0.0, TAU, 32, debug_outline_color, 2.0)
+	for attack_area: AttackAreaDefinition in attack_areas:
+		if attack_area == null or not attack_area.is_valid_definition():
+			continue
 
-	var nose_position: Vector2 = attack_direction.normalized() * hit_radius
-	draw_line(Vector2.ZERO, nose_position, debug_outline_color, 2.0)
-	draw_circle(nose_position, 4.0, debug_outline_color)
+		draw_set_transform(
+			attack_area.local_offset,
+			deg_to_rad(attack_area.local_rotation_degrees),
+			Vector2.ONE
+		)
 
-## Configura a hitbox com o snapshot de um disparo.
-##
-## Componentes são duplicados profundamente para preservar o valor
-## do ataque mesmo que a arma receba upgrades durante a vida desta hitbox.
+		if attack_area.shape is CircleShape2D:
+			var radius: float = attack_area.get_scaled_circle_radius(
+				attack_area_scale_multiplier
+			)
+
+			draw_circle(Vector2.ZERO, radius, debug_color)
+			draw_arc(
+				Vector2.ZERO,
+				radius,
+				0.0,
+				TAU,
+				32,
+				debug_outline_color,
+				2.0
+			)
+
+		elif attack_area.shape is RectangleShape2D:
+			var rectangle_size: Vector2 = attack_area.get_scaled_rectangle_size(
+				attack_area_scale_multiplier
+			)
+
+			var rectangle: Rect2 = Rect2(
+				-rectangle_size * 0.5,
+				rectangle_size
+			)
+
+			draw_rect(rectangle, debug_color, true)
+			draw_rect(rectangle, debug_outline_color, false, 2.0)
+
+		draw_circle(Vector2.ZERO, 3.0, debug_outline_color)
+
+	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+
 func setup(
 	p_source_node: Node,
 	p_direction: Vector2,
 	p_raw_damage: int,
 	p_damage_type: String,
-	p_hit_radius: float,
+	p_attack_areas: Array[AttackAreaDefinition],
 	p_lifetime_seconds: float,
 	p_source_id: String = "gaia_initial_weapon",
-	p_damage_components: Array[DamageComponentDefinition] = []
+	p_damage_components: Array[DamageComponentDefinition] = [],
+	p_attack_area_scale_multiplier: float = 1.0,
+	p_hit_knockback_enabled: bool = false,
+	p_hit_knockback_pixels: float = 0.0,
+	p_hit_knockback_duration_seconds: float = 0.12
 ) -> void:
 	source_node = p_source_node
 
@@ -3793,9 +4863,13 @@ func setup(
 
 	raw_damage = p_raw_damage
 	damage_type = p_damage_type
-	hit_radius = max(0.0, p_hit_radius)
 	lifetime_seconds = max(0.01, p_lifetime_seconds)
 	source_id = p_source_id
+	attack_area_scale_multiplier = max(0.01, p_attack_area_scale_multiplier)
+
+	hit_knockback_enabled = p_hit_knockback_enabled
+	hit_knockback_pixels = max(0.0, p_hit_knockback_pixels)
+	hit_knockback_duration_seconds = max(0.01, p_hit_knockback_duration_seconds)
 
 	damage_components.clear()
 
@@ -3803,79 +4877,198 @@ func setup(
 		if component == null:
 			continue
 
-		var duplicated_component: DamageComponentDefinition = component.duplicate(true) as DamageComponentDefinition
+		var duplicated_component: DamageComponentDefinition = (
+			component.duplicate(true) as DamageComponentDefinition
+		)
+
 		damage_components.append(duplicated_component)
+
+	attack_areas.clear()
+
+	for attack_area: AttackAreaDefinition in p_attack_areas:
+		if attack_area == null or not attack_area.is_valid_definition():
+			continue
+
+		var duplicated_area: AttackAreaDefinition = (
+			attack_area.duplicate(true) as AttackAreaDefinition
+		)
+
+		attack_areas.append(duplicated_area)
 
 	rotation = attack_direction.angle()
 	elapsed_seconds = 0.0
-	is_configured = true
 
+	_build_runtime_shapes()
+
+	if runtime_shape_nodes.is_empty():
+		push_warning(
+			"[DirectionalAttackHitbox] Nenhuma área ofensiva válida configurada: %s"
+			% source_id
+		)
+
+	is_configured = true
 	queue_redraw()
 
-## Procura inimigos dentro da área e aplica dano uma única vez em cada alvo.
-func _try_hit_enemies() -> void:
-	if raw_damage <= 0 and damage_components.is_empty():
+	call_deferred("_process_current_overlaps")
+
+func _configure_collision_filter() -> void:
+	collision_layer = 0
+	collision_mask = 0
+
+	set_collision_layer_value(attack_collision_layer_number, true)
+	set_collision_mask_value(target_hurtbox_mask_number, true)
+
+func _build_runtime_shapes() -> void:
+	_clear_runtime_shapes()
+
+	for attack_area: AttackAreaDefinition in attack_areas:
+		if attack_area == null or not attack_area.is_valid_definition():
+			continue
+
+		var runtime_shape: Shape2D = attack_area.build_runtime_shape(
+			attack_area_scale_multiplier
+		)
+
+		if runtime_shape == null:
+			continue
+
+		var shape_node: CollisionShape2D = CollisionShape2D.new()
+		shape_node.name = "RuntimeAttackShape_%s" % str(runtime_shape_nodes.size())
+		shape_node.shape = runtime_shape
+		shape_node.position = attack_area.local_offset
+		shape_node.rotation_degrees = attack_area.local_rotation_degrees
+
+		add_child(shape_node)
+		runtime_shape_nodes.append(shape_node)
+
+func _clear_runtime_shapes() -> void:
+	for shape_node: CollisionShape2D in runtime_shape_nodes:
+		if shape_node == null or not is_instance_valid(shape_node):
+			continue
+
+		remove_child(shape_node)
+		shape_node.queue_free()
+
+	runtime_shape_nodes.clear()
+
+func _on_area_entered(area: Area2D) -> void:
+	_try_apply_damage_to_hurtbox(area)
+
+func _process_current_overlaps() -> void:
+	for overlapping_area: Area2D in get_overlapping_areas():
+		_try_apply_damage_to_hurtbox(overlapping_area)
+
+func _try_apply_damage_to_hurtbox(area: Area2D) -> void:
+	if not is_configured:
 		return
 
-	var enemies: Array[Node] = get_tree().get_nodes_in_group(enemy_group_name)
+	if not area is HurtboxComponent:
+		return
 
-	for enemy: Node in enemies:
-		if enemy == null or not is_instance_valid(enemy):
-			continue
+	var hurtbox: HurtboxComponent = area as HurtboxComponent
 
-		if not enemy is Node2D:
-			continue
+	if not hurtbox.can_receive_damage():
+		return
 
-		var enemy_node: Node2D = enemy as Node2D
-		var instance_id: int = int(enemy_node.get_instance_id())
+	var damage_receiver: Node = hurtbox.get_damage_receiver()
 
-		if already_hit_instance_ids.has(instance_id):
-			continue
+	if damage_receiver == null or not is_instance_valid(damage_receiver):
+		return
 
-		var distance_to_enemy: float = global_position.distance_to(enemy_node.global_position)
+	var receiver_instance_id: int = int(damage_receiver.get_instance_id())
 
-		if distance_to_enemy > hit_radius:
-			continue
+	if already_hit_instance_ids.has(receiver_instance_id):
+		return
 
-		if not enemy_node.has_method("receive_damage"):
-			continue
+	if not damage_receiver.has_method("receive_damage"):
+		return
 
-		var payload: DamagePayload = DamagePayload.new(
-			raw_damage,
-			damage_type,
-			source_node,
-			source_id,
-			source_id
-		)
+	var payload: DamagePayload = DamagePayload.new(
+		raw_damage,
+		damage_type,
+		source_node,
+		source_id,
+		source_id
+	)
 
-		if not damage_components.is_empty():
-			payload.set_components(damage_components)
+	if not damage_components.is_empty():
+		payload.set_components(damage_components)
 
-		var final_damage_variant: Variant = enemy_node.call("receive_damage", payload)
+	var final_damage_variant: Variant = damage_receiver.call(
+		"receive_damage",
+		payload
+	)
 
-		already_hit_instance_ids[instance_id] = true
+	var final_damage: int = _variant_to_damage(final_damage_variant)
 
-		DeveloperAuditLogger.log_combat(
-			"Inimigo atingido: %s raw_total=%s final=%s components=%s" % [
-				enemy_node.name,
-				str(payload.get_total_raw_damage()),
-				str(final_damage_variant),
-				_get_component_debug_string()
-			],
-			"DirectionalAttackHitbox",
-			{
-				"enemy_name": enemy_node.name,
-				"raw_total": payload.get_total_raw_damage(),
-				"final_damage": final_damage_variant,
-				"components": _get_component_debug_string(),
-				"source_id": source_id
-			}
-		)
+	if final_damage <= 0:
+		return
 
-		if RunQuery.is_gameplay_blocked(get_tree()):
-			return
+	already_hit_instance_ids[receiver_instance_id] = true
 
-## Retorna descrição compacta dos componentes aplicada nos logs técnicos.
+	var knockback_applied: bool = _try_apply_hit_knockback_to_receiver(damage_receiver)
+
+	DeveloperAuditLogger.log_combat(
+		"Hurtbox atingida: receiver=%s raw_total=%s final=%s components=%s areas=%s knockback=%s/%spx applied=%s" % [
+			damage_receiver.name,
+			str(payload.get_total_raw_damage()),
+			str(final_damage),
+			_get_component_debug_string(),
+			_get_attack_area_debug_string(),
+			str(hit_knockback_enabled),
+			str(hit_knockback_pixels),
+			str(knockback_applied)
+		],
+		"DirectionalAttackHitbox",
+		{
+			"receiver_name": damage_receiver.name,
+			"raw_total": payload.get_total_raw_damage(),
+			"final_damage": final_damage,
+			"components": _get_component_debug_string(),
+			"attack_areas": _get_attack_area_debug_string(),
+			"source_id": source_id,
+			"hit_knockback_enabled": hit_knockback_enabled,
+			"hit_knockback_pixels": hit_knockback_pixels,
+			"hit_knockback_duration_seconds": hit_knockback_duration_seconds,
+			"knockback_applied": knockback_applied
+		}
+	)
+
+func _try_apply_hit_knockback_to_receiver(damage_receiver: Node) -> bool:
+	if not hit_knockback_enabled:
+		return false
+
+	if hit_knockback_pixels <= 0.0:
+		return false
+
+	if damage_receiver == null or not is_instance_valid(damage_receiver):
+		return false
+
+	if not damage_receiver.has_method("apply_hit_knockback"):
+		return false
+
+	var result_variant: Variant = damage_receiver.call(
+		"apply_hit_knockback",
+		hit_knockback_pixels,
+		hit_knockback_duration_seconds,
+		source_node,
+		attack_direction
+	)
+
+	if result_variant is bool:
+		return bool(result_variant)
+
+	return false
+
+func _variant_to_damage(value: Variant) -> int:
+	if value is int:
+		return int(value)
+
+	if value is float:
+		return int(value)
+
+	return 0
+
 func _get_component_debug_string() -> String:
 	if damage_components.is_empty():
 		return "%s:%s" % [damage_type, str(raw_damage)]
@@ -3886,104 +5079,109 @@ func _get_component_debug_string() -> String:
 		if component == null:
 			continue
 
-		parts.append("%s:%s" % [component.damage_type, str(component.amount)])
+		parts.append("%s:%s" % [
+			component.damage_type,
+			str(component.amount)
+		])
+
+	return ", ".join(parts)
+
+func _get_attack_area_debug_string() -> String:
+	var parts: Array[String] = []
+
+	for attack_area: AttackAreaDefinition in attack_areas:
+		if attack_area == null:
+			continue
+
+		parts.append(
+			attack_area.get_debug_summary(attack_area_scale_multiplier)
+		)
+
+	if parts.is_empty():
+		return "none"
 
 	return ", ".join(parts)
 
 
 SCRIPT: res://gameplay/weapons/gaia/GaiaInitialWeaponController.gd
 --------------------------------------------------------------------------------------------------------------
-## Controller da arma inicial direcional da Gaia.
-##
-## Responsabilidades:
-## - carregar valores da `WeaponDefinition`;
-## - controlar cooldown automático;
-## - utilizar direção de mira da Queen;
-## - instanciar visual e hitbox do ataque;
-## - manter componentes de dano runtime independentes do resource original;
-## - receber upgrades de arma durante a run;
-## - emitir atualizações para HUD.
 extends Node
 
-## Definition de balanceamento inicial da arma.
+@export_group("Definition")
+
 @export var weapon_definition: WeaponDefinition
 
-## Cena visual instanciada em cada disparo.
-@export_file("*.tscn") var attack_visual_scene_path: String = "res://visual/weapons/gaia_initial_weapon/GaiaAttackVisual.tscn"
+@export_group("Scenes")
 
-## Cena da hitbox instanciada em cada disparo.
+@export_file("*.tscn") var attack_visual_scene_path: String = "res://visual/weapons/gaia_initial_weapon/GaiaAttackVisual.tscn"
 @export_file("*.tscn") var attack_hitbox_scene_path: String = "res://gameplay/weapons/attacks/DirectionalAttackHitbox.tscn"
 
-## Caminho opcional para o container dos visuais de ataque.
-@export var attack_visual_root_path: NodePath
+@export_group("Runtime Roots")
 
-## Caminho opcional para o container das hitboxes de ataque.
+@export var attack_visual_root_path: NodePath
 @export var attack_hitbox_root_path: NodePath
 
-## Ativa ou desativa o funcionamento automático da arma.
+@export_group("Behaviour")
+
 @export var weapon_enabled: bool = true
 
-## Define se a arma dispara imediatamente ao carregar a cena.
-##
-## Para gameplay normal, deve permanecer `false`.
 @export var attack_on_ready: bool = false
 
-## Delay inicial até o primeiro disparo quando `attack_on_ready` é falso.
-##
-## Valores menores ou iguais a zero utilizam o cooldown normal da arma.
 @export var initial_attack_delay_seconds: float = -1.0
 
-## Define se atualizações de cooldown devem ser emitidas para a HUD.
 @export var emit_cooldown_updates: bool = true
 
-## Intervalo runtime atual entre disparos.
+@export var block_attacks_while_player_dashing: bool = true
+@export var reset_cooldown_when_dash_starts: bool = false
+@export var reset_cooldown_when_dash_ends: bool = true
+@export var pause_cooldown_while_player_dashing: bool = true
+
+@export_group("Cooldown")
+
 @export var cooldown_seconds: float = 2.0
 
-## Distância do player em que o visual do ataque será instanciado.
+@export_group("Attack Visual")
+
 @export var attack_visual_offset: float = 86.0
-
-## Tempo de existência do visual de ataque.
 @export var attack_visual_lifetime: float = 0.22
-
-## Escala aplicada ao visual de ataque instanciado.
 @export var attack_visual_scale: Vector2 = Vector2.ONE
 
-## Distância do player em que a hitbox será instanciada.
+@export_group("Attack Hitbox")
+
 @export var attack_hitbox_offset: float = 86.0
 
-## Raio atual da hitbox da arma.
-@export var attack_hitbox_radius: float = 72.0
-
-## Duração atual da hitbox da arma.
 @export var attack_hitbox_lifetime: float = 0.12
 
-## Dano fallback para armas configuradas sem componentes.
+@export var attack_areas: Array[AttackAreaDefinition] = []
+
+@export_group("On Hit Effects")
+
+@export var hit_knockback_enabled: bool = false
+
+@export var hit_knockback_pixels: float = 0.0
+
+@export var hit_knockback_duration_seconds: float = 0.12
+
+@export_group("Damage")
+
 @export var base_damage: int = 5
 
-## Tipo do dano fallback.
 @export var damage_type: String = DamageTypes.PHYSICAL
 
-## Componentes de dano atuais da arma.
-##
-## Na arma inicial da Gaia, a lista contém dano físico e dano mágico.
 @export var damage_components: Array[DamageComponentDefinition] = []
 
-## ID publicado como fonte dos ataques desta arma.
 @export var weapon_source_id: String = "gaia_initial_weapon"
 
-## Tempo restante até a arma poder disparar novamente.
 var cooldown_timer: float = 0.0
 
-## Referência do controller da Queen que possui esta arma.
+var was_player_dashing: bool = false
+
+var attack_area_scale_multiplier: float = 1.0
+
 var player_controller: Node = null
-
-## Container dos visuais instanciados.
 var attack_visual_root: Node2D = null
-
-## Container das hitboxes instanciadas.
 var attack_hitbox_root: Node2D = null
 
-## Inicializa a arma, duplica seus componentes runtime e prepara o cooldown.
 func _ready() -> void:
 	add_to_group("player_weapon")
 
@@ -4009,9 +5207,6 @@ func _ready() -> void:
 
 	_emit_cooldown_update()
 
-## Atualiza o cooldown e dispara automaticamente quando a arma está pronta.
-##
-## A arma não processa disparos durante level-up, morte ou fim da run.
 func _process(delta: float) -> void:
 	if not weapon_enabled:
 		return
@@ -4033,45 +5228,41 @@ func _process(delta: float) -> void:
 
 	var runtime_state: PlayerRuntimeState = _get_player_runtime_state()
 
-	if runtime_state == null:
+	if runtime_state == null or not runtime_state.is_alive:
 		return
 
-	if not runtime_state.is_alive:
+	if _handle_dash_attack_rules(runtime_state, delta):
 		return
 
-	cooldown_timer -= delta
-
-	cooldown_timer = max(0.0, cooldown_timer)
+	cooldown_timer = max(0.0, cooldown_timer - delta)
 	_emit_cooldown_update()
 
-	if cooldown_timer <= 0.0:
-		_fire_attack(runtime_state)
-		cooldown_timer = cooldown_seconds
-		_emit_cooldown_update()
-
-## Dispara manualmente a arma, respeitando bloqueios da run e vida do player.
-##
-## Útil para testes ou futuras mecânicas específicas.
-func force_fire() -> void:
-	if RunQuery.is_gameplay_blocked(get_tree()):
+	if cooldown_timer > 0.0:
 		return
 
-	var runtime_state: PlayerRuntimeState = _get_player_runtime_state()
-
-	if runtime_state == null:
-		return
-
-	if not runtime_state.is_alive:
+	if not _can_fire_while_player_state_allows(runtime_state):
 		return
 
 	_fire_attack(runtime_state)
 	cooldown_timer = cooldown_seconds
 	_emit_cooldown_update()
 
-## Executa um disparo completo na direção atual de mira.
-##
-## O visual e a hitbox são instanciados separadamente,
-## permitindo substituir efeitos visuais sem afetar o dano.
+func force_fire() -> void:
+	if RunQuery.is_gameplay_blocked(get_tree()):
+		return
+
+	var runtime_state: PlayerRuntimeState = _get_player_runtime_state()
+
+	if runtime_state == null or not runtime_state.is_alive:
+		return
+
+	if not _can_fire_while_player_state_allows(runtime_state):
+		return
+
+	_fire_attack(runtime_state)
+	cooldown_timer = cooldown_seconds
+	_emit_cooldown_update()
+
 func _fire_attack(runtime_state: PlayerRuntimeState) -> void:
 	var direction: Vector2 = _resolve_attack_direction(runtime_state)
 
@@ -4079,26 +5270,30 @@ func _fire_attack(runtime_state: PlayerRuntimeState) -> void:
 	_spawn_attack_hitbox(direction)
 
 	DeveloperAuditLogger.log_combat(
-		"Ataque disparado: direction=%s raw_total=%s components=%s" % [
+		"Ataque disparado: direction=%s raw_total=%s components=%s areas=%s" % [
 			str(direction),
 			str(_get_total_raw_damage()),
-			_get_component_debug_string()
+			_get_component_debug_string(),
+			_get_attack_area_debug_string()
 		],
 		"GaiaInitialWeaponController",
 		{
 			"direction": direction,
 			"raw_total": _get_total_raw_damage(),
 			"components": _get_component_debug_string(),
+			"attack_areas": _get_attack_area_debug_string(),
 			"weapon_id": weapon_source_id
 		}
 	)
 
-## Instancia somente a representação visual do ataque.
 func _spawn_attack_visual(direction: Vector2) -> void:
 	var packed_visual: PackedScene = load(attack_visual_scene_path) as PackedScene
 
 	if packed_visual == null:
-		push_warning("[GaiaInitialWeaponController] Não foi possível carregar attack_visual_scene_path: %s" % attack_visual_scene_path)
+		push_warning(
+			"[GaiaInitialWeaponController] Não foi possível carregar attack_visual_scene_path: %s"
+			% attack_visual_scene_path
+		)
 		return
 
 	var visual_instance: Node = packed_visual.instantiate()
@@ -4111,20 +5306,26 @@ func _spawn_attack_visual(direction: Vector2) -> void:
 	var visual_node: Node2D = visual_instance as Node2D
 
 	attack_visual_root.add_child(visual_node)
-	visual_node.global_position = _get_player_global_position() + direction * attack_visual_offset
+	visual_node.global_position = (
+		_get_player_global_position() + direction * attack_visual_offset
+	)
 
 	if visual_node.has_method("setup"):
-		visual_node.call("setup", direction, attack_visual_lifetime, attack_visual_scale)
+		visual_node.call(
+			"setup",
+			direction,
+			attack_visual_lifetime,
+			attack_visual_scale
+		)
 
-## Instancia a área que verificará impactos contra inimigos.
-##
-## Componentes atuais são enviados para que cada hitbox tenha
-## uma cópia independente do dano daquele disparo.
 func _spawn_attack_hitbox(direction: Vector2) -> void:
 	var packed_hitbox: PackedScene = load(attack_hitbox_scene_path) as PackedScene
 
 	if packed_hitbox == null:
-		push_warning("[GaiaInitialWeaponController] Não foi possível carregar attack_hitbox_scene_path: %s" % attack_hitbox_scene_path)
+		push_warning(
+			"[GaiaInitialWeaponController] Não foi possível carregar attack_hitbox_scene_path: %s"
+			% attack_hitbox_scene_path
+		)
 		return
 
 	var hitbox_instance: Node = packed_hitbox.instantiate()
@@ -4137,7 +5338,10 @@ func _spawn_attack_hitbox(direction: Vector2) -> void:
 	var hitbox_node: Node2D = hitbox_instance as Node2D
 
 	attack_hitbox_root.add_child(hitbox_node)
-	hitbox_node.global_position = _get_player_global_position() + direction * attack_hitbox_offset
+
+	hitbox_node.global_position = (
+		_get_player_global_position() + direction * attack_hitbox_offset
+	)
 
 	if hitbox_node.has_method("setup"):
 		hitbox_node.call(
@@ -4146,18 +5350,16 @@ func _spawn_attack_hitbox(direction: Vector2) -> void:
 			direction,
 			base_damage,
 			damage_type,
-			attack_hitbox_radius,
+			attack_areas,
 			attack_hitbox_lifetime,
 			weapon_source_id,
-			damage_components
+			damage_components,
+			attack_area_scale_multiplier,
+			hit_knockback_enabled,
+			hit_knockback_pixels,
+			hit_knockback_duration_seconds
 		)
 
-## Resolve a direção utilizada pelo próximo disparo.
-##
-## Prioridade:
-## 1. mira atual;
-## 2. última mira válida;
-## 3. direção padrão para a direita.
 func _resolve_attack_direction(runtime_state: PlayerRuntimeState) -> Vector2:
 	var direction: Vector2 = runtime_state.aim_direction
 
@@ -4169,10 +5371,6 @@ func _resolve_attack_direction(runtime_state: PlayerRuntimeState) -> Vector2:
 
 	return direction.normalized()
 
-## Copia valores iniciais da `WeaponDefinition` para o estado runtime da arma.
-##
-## Os componentes são duplicados profundamente para que upgrades
-## não alterem o resource original salvo no projeto.
 func _apply_weapon_definition() -> void:
 	if weapon_definition == null:
 		return
@@ -4189,35 +5387,63 @@ func _apply_weapon_definition() -> void:
 	attack_visual_lifetime = weapon_definition.attack_visual_lifetime
 
 	attack_hitbox_offset = weapon_definition.attack_hitbox_offset
-	attack_hitbox_radius = weapon_definition.attack_hitbox_radius
 	attack_hitbox_lifetime = weapon_definition.attack_hitbox_lifetime
+
+	hit_knockback_enabled = weapon_definition.hit_knockback_enabled
+	hit_knockback_pixels = max(0.0, weapon_definition.hit_knockback_pixels)
+	hit_knockback_duration_seconds = max(
+		0.01,
+		weapon_definition.hit_knockback_duration_seconds
+	)
+
+	attack_areas.clear()
+
+	for attack_area: AttackAreaDefinition in weapon_definition.attack_areas:
+		if attack_area == null:
+			continue
+
+		if not attack_area.is_valid_definition():
+			continue
+
+		attack_areas.append(attack_area)
+
+	if attack_areas.is_empty():
+		push_warning(
+			"[GaiaInitialWeaponController] WeaponDefinition sem áreas de ataque válidas: %s"
+			% weapon_definition.id
+		)
+
+	attack_area_scale_multiplier = 1.0
 
 	base_damage = weapon_definition.base_damage
 	damage_type = weapon_definition.damage_type
 
-	if weapon_definition.has_damage_components():
-		damage_components.clear()
+	damage_components.clear()
 
+	if weapon_definition.has_damage_components():
 		for component: DamageComponentDefinition in weapon_definition.damage_components:
 			if component == null:
 				continue
 
-			var duplicated_component: DamageComponentDefinition = component.duplicate(true) as DamageComponentDefinition
+			var duplicated_component: DamageComponentDefinition = (
+				component.duplicate(true) as DamageComponentDefinition
+			)
+
 			damage_components.append(duplicated_component)
-	else:
-		damage_components.clear()
 
 	weapon_source_id = weapon_definition.id
 
 	DeveloperAuditLogger.log_scene(
-		"Arma configurada: id=%s fallback_damage=%s components=%s visual_offset=%s hitbox_offset=%s hitbox_radius=%s cooldown=%s" % [
+		"Arma configurada: id=%s fallback_damage=%s components=%s visual_offset=%s hitbox_offset=%s attack_areas=%s cooldown=%s knockback=%s/%spx" % [
 			weapon_source_id,
 			str(base_damage),
 			_get_component_debug_string(),
 			str(attack_visual_offset),
 			str(attack_hitbox_offset),
-			str(attack_hitbox_radius),
-			str(cooldown_seconds)
+			_get_attack_area_debug_string(),
+			str(cooldown_seconds),
+			str(hit_knockback_enabled),
+			str(hit_knockback_pixels)
 		],
 		"GaiaInitialWeaponController",
 		{
@@ -4226,14 +5452,14 @@ func _apply_weapon_definition() -> void:
 			"components": _get_component_debug_string(),
 			"visual_offset": attack_visual_offset,
 			"hitbox_offset": attack_hitbox_offset,
-			"hitbox_radius": attack_hitbox_radius,
-			"cooldown_seconds": cooldown_seconds
+			"attack_areas": _get_attack_area_debug_string(),
+			"cooldown_seconds": cooldown_seconds,
+			"hit_knockback_enabled": hit_knockback_enabled,
+			"hit_knockback_pixels": hit_knockback_pixels,
+			"hit_knockback_duration_seconds": hit_knockback_duration_seconds
 		}
 	)
 
-## Soma o dano bruto atual de todos os componentes da arma.
-##
-## Quando não existem componentes, retorna o dano fallback.
 func _get_total_raw_damage() -> int:
 	if damage_components.is_empty():
 		return base_damage
@@ -4246,7 +5472,6 @@ func _get_total_raw_damage() -> int:
 
 	return total
 
-## Formata componentes atuais para logs técnicos.
 func _get_component_debug_string() -> String:
 	if damage_components.is_empty():
 		return "%s:%s" % [damage_type, str(base_damage)]
@@ -4257,11 +5482,32 @@ func _get_component_debug_string() -> String:
 		if component == null:
 			continue
 
-		parts.append("%s:%s" % [component.damage_type, str(component.amount)])
+		parts.append("%s:%s" % [
+			component.damage_type,
+			str(component.amount)
+		])
 
 	return ", ".join(parts)
 
-## Obtém o estado runtime da Queen proprietária da arma.
+func _get_attack_area_debug_string() -> String:
+	var parts: Array[String] = []
+
+	for attack_area: AttackAreaDefinition in attack_areas:
+		if attack_area == null:
+			continue
+
+		if not attack_area.is_valid_definition():
+			continue
+
+		parts.append(
+			attack_area.get_debug_summary(attack_area_scale_multiplier)
+		)
+
+	if parts.is_empty():
+		return "none"
+
+	return ", ".join(parts)
+
 func _get_player_runtime_state() -> PlayerRuntimeState:
 	if player_controller == null:
 		return null
@@ -4269,17 +5515,15 @@ func _get_player_runtime_state() -> PlayerRuntimeState:
 	if not player_controller.has_method("get_runtime_state"):
 		return null
 
-	var runtime_state_variant: Variant = player_controller.call("get_runtime_state")
+	var runtime_state_variant: Variant = player_controller.call(
+		"get_runtime_state"
+	)
 
 	if runtime_state_variant is PlayerRuntimeState:
 		return runtime_state_variant as PlayerRuntimeState
 
 	return null
 
-## Localiza o controller da Queen.
-##
-## Primeiro percorre a hierarquia ascendente da arma; caso necessário,
-## procura uma entidade compatível no grupo global `player`.
 func _resolve_player_controller() -> Node:
 	var current: Node = self
 
@@ -4297,7 +5541,6 @@ func _resolve_player_controller() -> Node:
 
 	return null
 
-## Resolve o container onde visuais do ataque serão inseridos.
 func _resolve_attack_visual_root() -> Node2D:
 	if attack_visual_root_path != NodePath():
 		var configured_root: Node = get_node_or_null(attack_visual_root_path)
@@ -4312,7 +5555,6 @@ func _resolve_attack_visual_root() -> Node2D:
 
 	return null
 
-## Resolve o container onde hitboxes do ataque serão inseridas.
 func _resolve_attack_hitbox_root() -> Node2D:
 	if attack_hitbox_root_path != NodePath():
 		var configured_root: Node = get_node_or_null(attack_hitbox_root_path)
@@ -4327,27 +5569,30 @@ func _resolve_attack_hitbox_root() -> Node2D:
 
 	return null
 
-## Retorna a posição mundial atual da Queen proprietária da arma.
 func _get_player_global_position() -> Vector2:
 	if player_controller is Node2D:
 		var player_node: Node2D = player_controller as Node2D
+
 		return player_node.global_position
 
 	return Vector2.ZERO
 
-## Aplica um upgrade compatível com esta arma.
-##
-## Retorna `true` apenas quando o efeito foi efetivamente registrado.
 func apply_run_upgrade(upgrade: UpgradeDefinition) -> bool:
 	if upgrade == null:
 		return false
 
 	match upgrade.upgrade_type:
 		UpgradeTypes.WEAPON_DAMAGE_FLAT:
-			return _apply_damage_flat_upgrade(upgrade.id, upgrade.value_int)
+			return _apply_damage_flat_upgrade(
+				upgrade.id,
+				upgrade.value_int
+			)
 
 		UpgradeTypes.WEAPON_COOLDOWN_PERCENT:
-			return _apply_cooldown_percent_upgrade(upgrade.id, upgrade.value_float)
+			return _apply_cooldown_percent_upgrade(
+				upgrade.id,
+				upgrade.value_float
+			)
 
 		UpgradeTypes.WEAPON_PHYSICAL_DAMAGE_FLAT:
 			return _apply_component_damage_flat_upgrade(
@@ -4363,21 +5608,30 @@ func apply_run_upgrade(upgrade: UpgradeDefinition) -> bool:
 				upgrade.value_int
 			)
 
-		UpgradeTypes.WEAPON_HITBOX_RADIUS_FLAT:
-			return _apply_hitbox_radius_flat_upgrade(upgrade.id, upgrade.value_int)
+		UpgradeTypes.WEAPON_ATTACK_AREA_SCALE_PERCENT:
+			return _apply_attack_area_scale_percent_upgrade(
+				upgrade.id,
+				upgrade.value_float
+			)
 
 		UpgradeTypes.WEAPON_HITBOX_LIFETIME_PERCENT:
-			return _apply_hitbox_lifetime_percent_upgrade(upgrade.id, upgrade.value_float)
+			return _apply_hitbox_lifetime_percent_upgrade(
+				upgrade.id,
+				upgrade.value_float
+			)
 
 		_:
-			push_warning("[GaiaInitialWeaponController] Upgrade não suportado pela arma: %s" % upgrade.id)
+			push_warning(
+				"[GaiaInitialWeaponController] Upgrade não suportado pela arma: %s"
+				% upgrade.id
+			)
+
 			return false
 
-## Aumenta o dano geral da arma.
-##
-## Em armas compostas, o valor atual é adicionado a cada componente.
-## Esta decisão foi mantida para validação posterior com o game designer.
-func _apply_damage_flat_upgrade(upgrade_id: String, amount: int) -> bool:
+func _apply_damage_flat_upgrade(
+	upgrade_id: String,
+	amount: int
+) -> bool:
 	if amount <= 0:
 		return false
 
@@ -4400,11 +5654,17 @@ func _apply_damage_flat_upgrade(upgrade_id: String, amount: int) -> bool:
 
 		return true
 
+	var applied_count: int = 0
+
 	for component: DamageComponentDefinition in damage_components:
 		if component == null:
 			continue
 
 		component.amount += amount
+		applied_count += 1
+
+	if applied_count <= 0:
+		return false
 
 	DeveloperAuditLogger.log_upgrade(
 		"Dano geral aplicado em todos os componentes: +%s | components=%s" % [
@@ -4416,26 +5676,28 @@ func _apply_damage_flat_upgrade(upgrade_id: String, amount: int) -> bool:
 			"upgrade_id": upgrade_id,
 			"weapon_id": weapon_source_id,
 			"amount_per_component": amount,
+			"applied_count": applied_count,
 			"components": _get_component_debug_string()
 		}
 	)
 
 	return true
 
-## Reduz percentualmente o cooldown atual da arma.
-##
-## Mantém um limite mínimo de `0.15` segundo para evitar disparos
-## excessivamente rápidos no protótipo.
-func _apply_cooldown_percent_upgrade(upgrade_id: String, percent: float) -> bool:
+func _apply_cooldown_percent_upgrade(
+	upgrade_id: String,
+	percent: float
+) -> bool:
 	if percent <= 0.0:
 		return false
 
 	var previous_cooldown_seconds: float = cooldown_seconds
 	var multiplier: float = max(0.05, 1.0 - (percent * 0.01))
-	var new_cooldown_seconds: float = max(0.15, cooldown_seconds * multiplier)
+	var new_cooldown_seconds: float = max(
+		0.15,
+		cooldown_seconds * multiplier
+	)
 
 	if is_equal_approx(previous_cooldown_seconds, new_cooldown_seconds):
-		push_warning("[GaiaInitialWeaponController] Cooldown já está no limite mínimo para upgrade: %s" % upgrade_id)
 		return false
 
 	cooldown_seconds = new_cooldown_seconds
@@ -4453,16 +5715,12 @@ func _apply_cooldown_percent_upgrade(upgrade_id: String, percent: float) -> bool
 			"upgrade_id": upgrade_id,
 			"weapon_id": weapon_source_id,
 			"percent": percent,
-			"cooldown_seconds": cooldown_seconds,
-			"cooldown_timer": cooldown_timer
+			"cooldown_seconds": cooldown_seconds
 		}
 	)
 
 	return true
 
-## Aumenta apenas componentes de determinado tipo de dano.
-##
-## Utilizado para melhorias físicas ou mágicas específicas.
 func _apply_component_damage_flat_upgrade(
 	upgrade_id: String,
 	damage_type_to_match: String,
@@ -4472,10 +5730,6 @@ func _apply_component_damage_flat_upgrade(
 		return false
 
 	if damage_components.is_empty():
-		push_warning(
-			"[GaiaInitialWeaponController] Sem componentes para aplicar dano específico: %s"
-			% damage_type_to_match
-		)
 		return false
 
 	var applied_count: int = 0
@@ -4491,10 +5745,6 @@ func _apply_component_damage_flat_upgrade(
 		applied_count += 1
 
 	if applied_count <= 0:
-		push_warning(
-			"[GaiaInitialWeaponController] Nenhum componente encontrado para dano: %s"
-			% damage_type_to_match
-		)
 		return false
 
 	DeveloperAuditLogger.log_upgrade(
@@ -4509,49 +5759,59 @@ func _apply_component_damage_flat_upgrade(
 			"weapon_id": weapon_source_id,
 			"damage_type": damage_type_to_match,
 			"amount": amount,
-			"applied_count": applied_count,
 			"components": _get_component_debug_string()
 		}
 	)
 
 	return true
 
-## Aumenta diretamente o raio da área de acerto do ataque.
-func _apply_hitbox_radius_flat_upgrade(upgrade_id: String, amount: int) -> bool:
-	if amount <= 0:
+func _apply_attack_area_scale_percent_upgrade(
+	upgrade_id: String,
+	percent: float
+) -> bool:
+	if percent <= 0.0:
 		return false
 
-	attack_hitbox_radius += float(amount)
+	if attack_areas.is_empty():
+		return false
+
+	var multiplier: float = 1.0 + (percent * 0.01)
+
+	attack_area_scale_multiplier *= multiplier
 
 	DeveloperAuditLogger.log_upgrade(
-		"Raio da hitbox aplicado: +%s | radius=%s" % [
-			str(amount),
-			str(attack_hitbox_radius)
+		"Escala da área de ataque aplicada: +%s%% | scale=%s | areas=%s" % [
+			str(percent),
+			str(attack_area_scale_multiplier),
+			_get_attack_area_debug_string()
 		],
 		"GaiaInitialWeaponController",
 		{
 			"upgrade_id": upgrade_id,
 			"weapon_id": weapon_source_id,
-			"amount": amount,
-			"hitbox_radius": attack_hitbox_radius
+			"percent": percent,
+			"attack_area_scale_multiplier": attack_area_scale_multiplier,
+			"attack_areas": _get_attack_area_debug_string()
 		}
 	)
 
 	return true
 
-## Aumenta percentualmente o tempo ativo da hitbox.
-##
-## Mantém limite máximo de `0.60` segundo no protótipo atual.
-func _apply_hitbox_lifetime_percent_upgrade(upgrade_id: String, percent: float) -> bool:
+func _apply_hitbox_lifetime_percent_upgrade(
+	upgrade_id: String,
+	percent: float
+) -> bool:
 	if percent <= 0.0:
 		return false
 
 	var previous_lifetime: float = attack_hitbox_lifetime
 	var multiplier: float = 1.0 + (percent * 0.01)
-	var new_lifetime: float = min(0.60, attack_hitbox_lifetime * multiplier)
+	var new_lifetime: float = min(
+		0.60,
+		attack_hitbox_lifetime * multiplier
+	)
 
 	if is_equal_approx(previous_lifetime, new_lifetime):
-		push_warning("[GaiaInitialWeaponController] Duração da hitbox já está no limite máximo para upgrade: %s" % upgrade_id)
 		return false
 
 	attack_hitbox_lifetime = new_lifetime
@@ -4572,14 +5832,12 @@ func _apply_hitbox_lifetime_percent_upgrade(upgrade_id: String, percent: float) 
 
 	return true
 
-## Retorna o delay utilizado antes do primeiro disparo automático.
 func _get_initial_attack_delay() -> float:
 	if initial_attack_delay_seconds > 0.0:
 		return initial_attack_delay_seconds
 
 	return cooldown_seconds
 
-## Emite para a HUD o progresso atual da recarga da arma.
 func _emit_cooldown_update() -> void:
 	if not emit_cooldown_updates:
 		return
@@ -4587,7 +5845,11 @@ func _emit_cooldown_update() -> void:
 	var progress_ratio: float = 1.0
 
 	if cooldown_seconds > 0.0:
-		progress_ratio = 1.0 - clamp(cooldown_timer / cooldown_seconds, 0.0, 1.0)
+		progress_ratio = 1.0 - clamp(
+			cooldown_timer / cooldown_seconds,
+			0.0,
+			1.0
+		)
 
 	GameEvents.weapon_cooldown_changed.emit(
 		weapon_source_id,
@@ -4596,36 +5858,89 @@ func _emit_cooldown_update() -> void:
 		progress_ratio
 	)
 
+func _handle_dash_attack_rules(
+	runtime_state: PlayerRuntimeState,
+	delta: float
+) -> bool:
+	var is_dashing: bool = _is_player_dashing(runtime_state)
+
+	if not is_dashing:
+		if was_player_dashing:
+			if _should_reset_weapon_cooldown_when_dash_ends():
+				cooldown_timer = cooldown_seconds
+				_emit_cooldown_update()
+
+		was_player_dashing = false
+		return false
+
+	if not was_player_dashing:
+		if _should_reset_weapon_cooldown_when_dash_starts():
+			cooldown_timer = cooldown_seconds
+			_emit_cooldown_update()
+
+	was_player_dashing = true
+
+	if _can_weapon_attack_while_dashing():
+		return false
+
+	if _should_pause_weapon_cooldown_while_dashing():
+		return true
+
+	cooldown_timer = max(0.0, cooldown_timer - delta)
+	_emit_cooldown_update()
+	return true
+
+func _can_fire_while_player_state_allows(runtime_state: PlayerRuntimeState) -> bool:
+	if not _is_player_dashing(runtime_state):
+		return true
+
+	return _can_weapon_attack_while_dashing()
+
+func _is_player_dashing(runtime_state: PlayerRuntimeState) -> bool:
+	if runtime_state == null:
+		return false
+
+	return (
+		runtime_state.is_dashing
+		or runtime_state.current_gameplay_state == GameplayStateTypes.DASHING
+	)
+
+func _can_weapon_attack_while_dashing() -> bool:
+	if player_controller != null and player_controller.has_method("can_weapon_attack_while_dashing"):
+		return bool(player_controller.call("can_weapon_attack_while_dashing"))
+
+	return not block_attacks_while_player_dashing
+
+func _should_pause_weapon_cooldown_while_dashing() -> bool:
+	if player_controller != null and player_controller.has_method("should_pause_weapon_cooldown_while_dashing"):
+		return bool(player_controller.call("should_pause_weapon_cooldown_while_dashing"))
+
+	return pause_cooldown_while_player_dashing
+
+func _should_reset_weapon_cooldown_when_dash_starts() -> bool:
+	if player_controller != null and player_controller.has_method("should_reset_weapon_cooldown_when_dash_starts"):
+		return bool(player_controller.call("should_reset_weapon_cooldown_when_dash_starts"))
+
+	return reset_cooldown_when_dash_starts
+
+func _should_reset_weapon_cooldown_when_dash_ends() -> bool:
+	if player_controller != null and player_controller.has_method("should_reset_weapon_cooldown_when_dash_ends"):
+		return bool(player_controller.call("should_reset_weapon_cooldown_when_dash_ends"))
+
+	return reset_cooldown_when_dash_ends
+
 
 SCRIPT: res://scenes/Main.gd
 --------------------------------------------------------------------------------------------------------------
-## Cena raiz inicial da aplicação.
-##
-## Responsável por carregar a primeira cena jogável dentro de
-## `CurrentSceneRoot`. No protótipo atual, essa cena é a arena de testes
-## com a Gaia, inimigos, HUD e ferramentas técnicas.
 extends Node
 
-## Caminho da cena que será instanciada ao iniciar a aplicação.
-##
-## Durante o Módulo 1 aponta para `TestGaiaScene.tscn`.
-## Futuramente poderá apontar para menu principal, seleção de mapa
-## ou outro fluxo inicial definitivo.
 @export_file("*.tscn") var initial_scene_path: String = "res://gameplay/test/TestGaiaScene.tscn"
 
-## Container onde a cena inicial carregada será adicionada em runtime.
 @onready var current_scene_root: Node = $CurrentSceneRoot
 
-## Inicia o carregamento da primeira cena assim que `Main` entra na árvore.
 func _ready() -> void:
 	_load_initial_scene()
 
-## Carrega e instancia a cena configurada em `initial_scene_path`.
-##
-## Em caso de caminho vazio ou resource inválido, interrompe o processo
-## e emite erro estrutural, pois não existe gameplay sem uma cena inicial.
-##
-## Ao concluir, registra no canal SCENE qual cena foi instanciada.
 func _load_initial_scene() -> void:
 	if initial_scene_path.strip_edges() == "":
 		push_error("[Main] initial_scene_path vazio.")
@@ -4649,45 +5964,225 @@ func _load_initial_scene() -> void:
 	)
 
 
+SCRIPT: res://ui/debug/DebugEnemyLinkDrawer.gd
+--------------------------------------------------------------------------------------------------------------
+extends Node2D
+class_name DebugEnemyLinkDrawer
+
+var links_enabled: bool = false
+
+var player_group_name: String = "player"
+
+var enemy_group_name: String = "enemy"
+
+var link_color: Color = Color(1.0, 0.18, 0.18, 0.70)
+
+var link_width: float = 2.0
+
+var show_markers: bool = false
+
+var player_marker_radius: float = 5.0
+
+var enemy_marker_radius: float = 4.0
+
+func _ready() -> void:
+	z_index = -10
+	set_process(false)
+	visible = false
+
+func _process(_delta: float) -> void:
+	if not links_enabled:
+		return
+
+	queue_redraw()
+
+func configure(
+	should_enable: bool,
+	p_player_group_name: String,
+	p_enemy_group_name: String,
+	p_link_color: Color,
+	p_link_width: float,
+	p_show_markers: bool,
+	p_player_marker_radius: float,
+	p_enemy_marker_radius: float
+) -> void:
+	var was_enabled: bool = links_enabled
+
+	links_enabled = should_enable
+	player_group_name = p_player_group_name
+	enemy_group_name = p_enemy_group_name
+	link_color = p_link_color
+	link_width = max(0.5, p_link_width)
+	show_markers = p_show_markers
+	player_marker_radius = max(0.0, p_player_marker_radius)
+	enemy_marker_radius = max(0.0, p_enemy_marker_radius)
+
+	visible = links_enabled
+	set_process(links_enabled)
+
+	if was_enabled != links_enabled:
+		queue_redraw()
+
+func _draw() -> void:
+	if not links_enabled:
+		return
+
+	var player_node: Node2D = _get_first_node2d_in_group(player_group_name)
+
+	if player_node == null:
+		return
+
+	var player_screen_position: Vector2 = _world_to_screen_position(player_node.global_position)
+
+	if show_markers and player_marker_radius > 0.0:
+		draw_circle(player_screen_position, player_marker_radius, link_color)
+
+	var enemies: Array[Node] = get_tree().get_nodes_in_group(enemy_group_name)
+
+	for enemy: Node in enemies:
+		if not enemy is Node2D:
+			continue
+
+		if enemy == player_node:
+			continue
+
+		if not _should_draw_enemy(enemy):
+			continue
+
+		var enemy_node: Node2D = enemy as Node2D
+		var enemy_screen_position: Vector2 = _world_to_screen_position(enemy_node.global_position)
+
+		draw_line(
+			player_screen_position,
+			enemy_screen_position,
+			link_color,
+			link_width,
+			true
+		)
+
+		if show_markers and enemy_marker_radius > 0.0:
+			draw_circle(enemy_screen_position, enemy_marker_radius, link_color)
+
+func _should_draw_enemy(enemy: Node) -> bool:
+	if enemy == null or not is_instance_valid(enemy):
+		return false
+
+	if not enemy.has_method("get_debug_data"):
+		return true
+
+	var debug_data_variant: Variant = enemy.call("get_debug_data")
+
+	if not debug_data_variant is Dictionary:
+		return true
+
+	var debug_data: Dictionary = debug_data_variant as Dictionary
+
+	if not debug_data.has("is_alive"):
+		return true
+
+	return bool(debug_data.get("is_alive", true))
+
+func _world_to_screen_position(world_position: Vector2) -> Vector2:
+	var canvas_transform: Transform2D = get_viewport().get_canvas_transform()
+
+	return canvas_transform * world_position
+
+func _get_first_node2d_in_group(group_name: String) -> Node2D:
+	if group_name.strip_edges() == "":
+		return null
+
+	var nodes: Array[Node] = get_tree().get_nodes_in_group(group_name)
+
+	for node: Node in nodes:
+		if node is Node2D:
+			return node as Node2D
+
+	return null
+
+
 SCRIPT: res://ui/debug/DebugOverlay.gd
 --------------------------------------------------------------------------------------------------------------
 extends CanvasLayer
 
 @export_group("Master")
+
 @export var debug_enabled: bool = true
+
 @export var show_title: bool = true
+
 @export var show_separators: bool = true
 
 @export_group("Panel Layout")
+
 @export var panel_position: Vector2 = Vector2(16.0, 16.0)
+
 @export var panel_size: Vector2 = Vector2(600.0, 420.0)
+
 @export var panel_margin: float = 8.0
 
 @export_group("Sections")
+
 @export var show_input_section: bool = true
+
 @export var show_animation_section: bool = true
+
 @export var show_player_core_section: bool = true
+
 @export var show_player_combat_section: bool = true
+
 @export var show_player_direction_section: bool = false
+
 @export var show_run_timer_section: bool = true
+
 @export var show_run_progression_section: bool = true
+
 @export var show_run_economy_section: bool = true
+
 @export var show_run_result_section: bool = false
+
 @export var show_save_section: bool = false
+
 @export var show_technical_section: bool = false
 
+@export_group("World Enemy Links")
+
+@export var show_enemy_links: bool = false
+
+@export var enemy_links_player_group_name: String = "player"
+
+@export var enemy_links_enemy_group_name: String = "enemy"
+
+@export var enemy_link_color: Color = Color(1.0, 0.18, 0.18, 0.70)
+
+@export var enemy_link_width: float = 2.0
+
+@export var show_enemy_link_markers: bool = false
+
+@export var player_link_marker_radius: float = 5.0
+
+@export var enemy_link_marker_radius: float = 4.0
+
 @export_group("Formatting")
+
 @export var compact_vectors: bool = true
+
 @export var decimal_places: int = 2
+
 @export var max_completed_maps_to_show: int = 3
 
 @onready var panel: Panel = get_node_or_null("Panel") as Panel
+
 @onready var label: Label = _resolve_label()
+
+@onready var enemy_link_drawer: Node2D = get_node_or_null("EnemyLinkDrawer") as Node2D
 
 var last_animation_name: String = ""
 
+var warned_missing_enemy_link_drawer: bool = false
+
 func _ready() -> void:
 	_configure_panel()
+	_sync_enemy_link_drawer()
 
 	if not GameEvents.spine_animation_changed.is_connected(_on_spine_animation_changed):
 		GameEvents.spine_animation_changed.connect(_on_spine_animation_changed)
@@ -4706,6 +6201,8 @@ func _ready() -> void:
 func _process(_delta: float) -> void:
 	if panel != null:
 		panel.visible = debug_enabled
+
+	_sync_enemy_link_drawer()
 
 	if not debug_enabled:
 		return
@@ -4898,7 +6395,12 @@ func _append_save_section(lines: Array[String], data: Dictionary) -> void:
 	lines.append("Completed Maps: %s" % _format_limited_array(data.get("completed_maps", []), max_completed_maps_to_show))
 	lines.append("SFW: %s" % str(data.get("sfw_enabled", true)))
 
-func _append_technical_section(lines: Array[String], player_data: Dictionary, run_data: Dictionary, save_data: Dictionary) -> void:
+func _append_technical_section(
+	lines: Array[String],
+	player_data: Dictionary,
+	run_data: Dictionary,
+	save_data: Dictionary
+) -> void:
 	lines.append("TECHNICAL")
 	lines.append("Has Player Data: %s" % str(not player_data.is_empty()))
 	lines.append("Has Run Data: %s" % str(not run_data.is_empty()))
@@ -5038,6 +6540,35 @@ func _format_limited_array(value: Variant, limit: int) -> String:
 		str(array_value.size() - limit)
 	]
 
+func _sync_enemy_link_drawer() -> void:
+	if enemy_link_drawer == null:
+		if debug_enabled and show_enemy_links and not warned_missing_enemy_link_drawer:
+			push_warning("[DebugOverlay] EnemyLinkDrawer não encontrado na cena.")
+			warned_missing_enemy_link_drawer = true
+
+		return
+
+	warned_missing_enemy_link_drawer = false
+
+	if not enemy_link_drawer.has_method("configure"):
+		if debug_enabled and show_enemy_links and not warned_missing_enemy_link_drawer:
+			push_warning("[DebugOverlay] EnemyLinkDrawer não implementa configure().")
+			warned_missing_enemy_link_drawer = true
+
+		return
+
+	enemy_link_drawer.call(
+		"configure",
+		debug_enabled and show_enemy_links,
+		enemy_links_player_group_name,
+		enemy_links_enemy_group_name,
+		enemy_link_color,
+		enemy_link_width,
+		show_enemy_link_markers,
+		player_link_marker_radius,
+		enemy_link_marker_radius
+	)
+
 func _on_spine_animation_changed(animation_name: String) -> void:
 	last_animation_name = animation_name
 
@@ -5049,19 +6580,27 @@ extends CanvasLayer
 const RUNTIME_TREE_SNAPSHOT_SCRIPT = preload("res://core/debug/RuntimeTreeSnapshot.gd")
 
 const TOGGLE_KEY: Key = KEY_F3
+
 const RUNTIME_SNAPSHOT_KEY: Key = KEY_F4
 
 @export_group("Availability")
+
 @export var tools_enabled: bool = true
+
 @export var visible_on_start: bool = false
+
 @export var allow_save_reset: bool = true
+
 @export var allow_force_result_actions: bool = true
 
 @export_group("Layout")
+
 @export var panel_size: Vector2 = Vector2(680.0, 520.0)
+
 @export var panel_margin: float = 16.0
 
 @export_group("Refresh")
+
 @export var refresh_interval_seconds: float = 0.20
 
 @onready var panel: Panel = $Panel
@@ -5084,6 +6623,7 @@ const RUNTIME_SNAPSHOT_KEY: Key = KEY_F4
 @onready var cancel_reset_button: Button = $Panel/MarginContainer/VBoxContainer/ConfirmationRow/CancelResetButton
 
 var refresh_timer: float = 0.0
+
 var reset_confirmation_active: bool = false
 
 func _ready() -> void:
@@ -5454,15 +6994,15 @@ SCRIPT: res://ui/feedback/RunFeedbackLayer.gd
 extends CanvasLayer
 
 @export var message_lifetime_seconds: float = 1.2
+
 @export var max_messages: int = 5
 
-# Dano já possui FloatingCombatText; manter desligado evita feedback duplicado.
 @export var show_damage_feedback: bool = false
 
 @export var show_coin_feedback: bool = true
+
 @export var show_level_up_feedback: bool = true
 
-# Vitória/derrota já possuem ResultPanel; manter desligado evita duplicação.
 @export var show_result_feedback: bool = false
 
 @onready var message_container: VBoxContainer = $MarginContainer/MessageContainer
@@ -5585,20 +7125,31 @@ SCRIPT: res://ui/hud/RunHud.gd
 extends CanvasLayer
 
 @export_group("Visibility")
+
 @export var show_hp: bool = true
+
 @export var show_xp: bool = true
+
 @export var show_timer: bool = true
+
 @export var show_coins: bool = true
+
 @export var show_level: bool = true
+
 @export var show_kills: bool = true
+
 @export var show_message: bool = true
 
 @export_group("Behavior")
+
 @export var update_interval_seconds: float = 0.10
+
 @export var show_remaining_time: bool = true
+
 @export var hide_when_result_panel_opens: bool = false
 
 @export_group("Node Paths")
+
 @export var hp_box_path: NodePath
 @export var hp_label_path: NodePath
 @export var hp_bar_path: NodePath
@@ -5638,9 +7189,11 @@ extends CanvasLayer
 @onready var message_label: Label = get_node_or_null(message_label_path) as Label
 
 var refresh_timer: float = 0.0
+
 var latest_result_type: String = ""
 
 var latest_cooldown_timer: float = 0.0
+
 var latest_cooldown_progress_ratio: float = 1.0
 
 func _ready() -> void:
@@ -5696,7 +7249,7 @@ func _connect_events() -> void:
 
 	if not GameEvents.run_finished.is_connected(_on_run_finished):
 		GameEvents.run_finished.connect(_on_run_finished)
-	
+
 	if not GameEvents.weapon_cooldown_changed.is_connected(_on_weapon_cooldown_changed):
 		GameEvents.weapon_cooldown_changed.connect(_on_weapon_cooldown_changed)
 
@@ -5718,7 +7271,7 @@ func _refresh_all() -> void:
 func _update_cooldown() -> void:
 	if not show_cooldown:
 		return
-		
+
 	var cooldown_percent: float = clamp(latest_cooldown_progress_ratio, 0.0, 1.0) * 100.0
 
 	if cooldown_label != null:
@@ -5870,7 +7423,7 @@ func _apply_visibility() -> void:
 
 	if message_label != null:
 		message_label.visible = show_message
-	
+
 	if cooldown_box != null:
 		cooldown_box.visible = show_cooldown
 
@@ -5886,7 +7439,7 @@ func _configure_bars() -> void:
 		xp_bar.max_value = 10
 		xp_bar.value = 0
 		xp_bar.show_percentage = false
-	
+
 	if cooldown_bar != null:
 		cooldown_bar.min_value = 0
 		cooldown_bar.max_value = 100
@@ -5926,7 +7479,7 @@ func _resolve_missing_nodes() -> void:
 
 	if message_label == null:
 		message_label = get_node_or_null("MarginContainer/VBoxContainer/MessageLabel") as Label
-	
+
 	if cooldown_box == null:
 		cooldown_box = get_node_or_null("MarginContainer/VBoxContainer/TopRow/CooldownBox") as Control
 
@@ -6043,12 +7596,17 @@ extends CanvasLayer
 const DEFAULT_ICON_PATH: String = "res://assets/placeholders/upgrades/upgrade_default.png"
 
 @export_group("Layout")
+
 @export var center_panel_by_script: bool = true
+
 @export var panel_size: Vector2 = Vector2(980.0, 460.0)
+
 @export var panel_top_offset: float = 0.0
 
 @export_group("Icons")
+
 @export var default_icon: Texture2D
+
 @export var hide_icon_when_missing: bool = false
 
 @onready var panel: Panel = $Panel
@@ -6060,6 +7618,7 @@ const DEFAULT_ICON_PATH: String = "res://assets/placeholders/upgrades/upgrade_de
 @onready var option_card_3: Button = $Panel/MarginContainer/VBoxContainer/OptionsContainer/OptionCard3
 
 var current_options: Array[UpgradeDefinition] = []
+
 var cached_default_icon: Texture2D = null
 
 func _ready() -> void:
@@ -6259,14 +7818,6 @@ func _get_next_upgrade_level(upgrade_id: String) -> int:
 		return int(level_variant)
 
 	return 1
-	
-func _get_run_controller() -> Node:
-	var nodes: Array[Node] = get_tree().get_nodes_in_group("run_controller")
-
-	if nodes.is_empty():
-		return null
-
-	return nodes[0]
 
 func _select_option(index: int) -> void:
 	if index < 0 or index >= current_options.size():
@@ -6327,7 +7878,9 @@ extends CanvasLayer
 @onready var restart_button: Button = $Panel/MarginContainer/VBoxContainer/RestartButton
 
 var latest_result_payload: RunResultPayload = null
+
 var persisted_result_payload: RunResultPayload = null
+
 var persisted_result_succeeded: bool = false
 
 func _ready() -> void:
@@ -6504,17 +8057,25 @@ extends Label
 class_name FloatingCombatText
 
 @export_group("Animation")
+
 @export var total_lifetime_seconds: float = 1.00
+
 @export var grow_seconds: float = 0.20
+
 @export var rise_distance: float = 112.0
 
 @export var start_scale: Vector2 = Vector2(0.78, 0.78)
+
 @export var peak_scale: Vector2 = Vector2(1.85, 1.85)
+
 @export var end_scale: Vector2 = Vector2(0.52, 0.52)
 
 @export_group("Text Style")
+
 @export var font_size: int = 52
+
 @export var outline_size: int = 6
+
 @export var outline_color: Color = Color(0.0, 0.0, 0.0, 0.92)
 
 var animation_started: bool = false
@@ -6564,18 +8125,38 @@ func _play_animation() -> void:
 	var movement_tween: Tween = create_tween()
 	movement_tween.bind_node(self)
 	movement_tween.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
-	movement_tween.tween_property(self, "position", destination, total_lifetime_seconds).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	movement_tween.tween_property(
+		self,
+		"position",
+		destination,
+		total_lifetime_seconds
+	).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 
 	var scale_tween: Tween = create_tween()
 	scale_tween.bind_node(self)
 	scale_tween.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
-	scale_tween.tween_property(self, "scale", peak_scale, grow_seconds).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-	scale_tween.tween_property(self, "scale", end_scale, shrink_seconds).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	scale_tween.tween_property(
+		self,
+		"scale",
+		peak_scale,
+		grow_seconds
+	).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	scale_tween.tween_property(
+		self,
+		"scale",
+		end_scale,
+		shrink_seconds
+	).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
 
 	var fade_tween: Tween = create_tween()
 	fade_tween.bind_node(self)
 	fade_tween.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
-	fade_tween.tween_property(self, "self_modulate:a", 0.0, fade_seconds).set_delay(fade_delay)
+	fade_tween.tween_property(
+		self,
+		"self_modulate:a",
+		0.0,
+		fade_seconds
+	).set_delay(fade_delay)
 
 	fade_tween.finished.connect(func() -> void:
 		queue_free()
@@ -6587,20 +8168,21 @@ SCRIPT: res://ui/world_feedback/WorldFeedbackLayer.gd
 extends CanvasLayer
 
 @export_group("Scene")
+
 @export var floating_combat_text_scene: PackedScene
 
 @export_group("Player Damage")
+
 @export var player_group_name: String = "player"
 
-# A arte Spine da Gaia é alta; este offset coloca o número acima da cabeça.
 @export var player_damage_world_offset: Vector2 = Vector2(0.0, -60.0)
 
 @export var damage_color: Color = Color(1.0, 0.04, 0.04, 1.0)
 
 @export_group("Debug")
+
 @export var debug_feedback: bool = false
 
-# Ative temporariamente para testar o render sem precisar receber dano.
 @export var show_test_text_on_ready: bool = false
 
 @onready var feedback_root: Control = $FeedbackRoot
@@ -6610,7 +8192,7 @@ func _ready() -> void:
 	layer = 18
 
 	_configure_feedback_root()
-	
+
 	if not GameEvents.player_damaged.is_connected(_on_player_damaged):
 		GameEvents.player_damaged.connect(_on_player_damaged)
 
@@ -6633,9 +8215,6 @@ func _configure_feedback_root() -> void:
 	if feedback_root == null:
 		return
 
-	# O FeedbackRoot ocupa toda a viewport por anchors.
-	# Não devemos definir size manualmente, pois o Godot recalcula
-	# automaticamente o tamanho de Controls com anchors Full Rect.
 	feedback_root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	feedback_root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	feedback_root.clip_contents = false
@@ -6682,7 +8261,6 @@ func spawn_floating_text(display_text: String, screen_position: Vector2, color: 
 
 	feedback_root.add_child(text_control)
 
-	# O texto centraliza sobre a posição calculada.
 	text_control.position = screen_position - (text_control.size * 0.5)
 	text_control.visible = true
 
@@ -6743,21 +8321,62 @@ SCRIPT: res://visual/characters/gaia/GaiaVisualController.gd
 extends "res://visual/spine/SpineVisualControllerBase.gd"
 
 @export_group("Animations")
-@export var idle_animation_name: String = "Idle1_Pose2" 
+
+@export var idle_animation_name: String = "Idle1_Pose2"
+
 @export var run_animation_name: String = "Run1_Pose3"
+
 @export var dash_animation_name: String = "Dash1_Pose3"
+
 @export var death_animation_name: String = "Die_Pose1"
 
+@export var dash_side_animation_name: String = "Dash1_Pose3"
+@export var dash_up_animation_name: String = ""
+@export var dash_down_animation_name: String = ""
+@export_range(0.0, 1.0, 0.05) var dash_vertical_threshold: float = 0.55
+
+@export_group("Blink Overlay")
+
+@export var blink_enabled: bool = true
+
+@export var blink_track_index: int = 1
+
+@export var blink_interval_min_seconds: float = 1.0
+
+@export var blink_interval_max_seconds: float = 7.0
+
+@export var idle_blink_animation_name: String = "Blink_Idle_Pose2"
+
+@export var run_blink_animation_name: String = ""
+
+@export var dash_blink_animation_name: String = ""
+
+@export var allow_blink_while_dashing: bool = false
+
+@export var blink_animation_duration_seconds: float = 0.22
+
+@export var allow_blink_while_running: bool = true
+
 @export_group("Damage Flash")
+
 @export var damage_flash_color: Color = Color(1.0, 0.25, 0.25, 1.0)
+
 @export var damage_flash_duration: float = 0.12
 
 var damage_flash_tween: Tween = null
+
 var default_modulate: Color = Color.WHITE
+
+var is_blink_playing: bool = false
+
+var blink_schedule_token: int = 0
+
+var last_gameplay_state: String = GameplayStateTypes.IDLE
 
 func _ready() -> void:
 	default_modulate = modulate
 	super._ready()
+	_schedule_next_blink()
 
 func _get_visual_log_name() -> String:
 	return "GaiaVisualController"
@@ -6771,7 +8390,19 @@ func apply_runtime_state(runtime_state: PlayerRuntimeState) -> void:
 
 	_apply_horizontal_facing(runtime_state.facing_direction)
 
+	var previous_gameplay_state: String = last_gameplay_state
 	var gameplay_state: String = runtime_state.current_gameplay_state
+	last_gameplay_state = gameplay_state
+
+	if previous_gameplay_state != gameplay_state:
+		if not _state_supports_blink_overlay(gameplay_state):
+			_clear_blink_overlay_track()
+
+	if gameplay_state == GameplayStateTypes.DEAD:
+		_cancel_blink()
+		runtime_state.current_visual_state = GameplayStateTypes.DEAD
+		play_death()
+		return
 
 	runtime_state.current_visual_state = gameplay_state
 
@@ -6783,10 +8414,10 @@ func apply_runtime_state(runtime_state: PlayerRuntimeState) -> void:
 			play_run()
 
 		GameplayStateTypes.DASHING:
-			play_dash()
-
-		GameplayStateTypes.DEAD:
-			play_death()
+			play_dash(
+				runtime_state.dash_direction,
+				runtime_state.dash_animation_time_scale
+			)
 
 		_:
 			play_idle()
@@ -6805,11 +8436,17 @@ func play_run() -> void:
 		GameplayStateTypes.MOVING
 	)
 
-func play_dash() -> void:
+func play_dash(
+	dash_direction: Vector2 = Vector2.ZERO,
+	time_scale: float = 1.0
+) -> void:
+	var animation_name: String = _get_dash_animation_name(dash_direction)
+
 	_play_animation_if_changed(
-		dash_animation_name,
+		animation_name,
 		false,
-		GameplayStateTypes.DASHING
+		GameplayStateTypes.DASHING,
+		time_scale
 	)
 
 func play_death() -> void:
@@ -6838,6 +8475,161 @@ func play_damage_flash() -> void:
 		damage_flash_tween = null
 	)
 
+func _schedule_next_blink() -> void:
+	blink_schedule_token += 1
+
+	if not blink_enabled:
+		return
+
+	if not is_inside_tree():
+		return
+
+	var safe_min_seconds: float = max(0.1, blink_interval_min_seconds)
+	var safe_max_seconds: float = max(safe_min_seconds, blink_interval_max_seconds)
+	var wait_seconds: float = randf_range(safe_min_seconds, safe_max_seconds)
+	var token: int = blink_schedule_token
+
+	var timer: SceneTreeTimer = get_tree().create_timer(wait_seconds)
+
+	timer.timeout.connect(func() -> void:
+		if token != blink_schedule_token:
+			return
+
+		_try_play_scheduled_blink()
+	)
+
+func _try_play_scheduled_blink() -> void:
+	if not blink_enabled:
+		return
+
+	if is_blink_playing:
+		_schedule_next_blink()
+		return
+
+	var blink_animation_name: String = _get_blink_animation_for_current_state()
+
+	if blink_animation_name.strip_edges() == "":
+		_schedule_next_blink()
+		return
+
+	_play_blink_overlay_animation(blink_animation_name)
+
+func _state_supports_blink_overlay(gameplay_state: String) -> bool:
+	match gameplay_state:
+		GameplayStateTypes.IDLE:
+			return idle_blink_animation_name.strip_edges() != ""
+
+		GameplayStateTypes.MOVING:
+			return (
+				allow_blink_while_running
+				and run_blink_animation_name.strip_edges() != ""
+			)
+
+		GameplayStateTypes.DASHING:
+			return (
+				allow_blink_while_dashing
+				and dash_blink_animation_name.strip_edges() != ""
+			)
+
+		_:
+			return false
+
+func _clear_blink_overlay_track() -> void:
+	is_blink_playing = false
+
+	var safe_track_index: int = max(1, blink_track_index)
+	_clear_animation_track(safe_track_index)
+
+func _get_blink_animation_for_current_state() -> String:
+	match last_gameplay_state:
+		GameplayStateTypes.IDLE:
+			return idle_blink_animation_name
+
+		GameplayStateTypes.MOVING:
+			if not allow_blink_while_running:
+				return ""
+
+			return run_blink_animation_name
+
+		GameplayStateTypes.DASHING:
+			if not allow_blink_while_dashing:
+				return ""
+
+			return dash_blink_animation_name
+
+		_:
+			return ""
+
+func _play_blink_overlay_animation(blink_animation_name: String) -> void:
+	if blink_animation_name.strip_edges() == "":
+		_schedule_next_blink()
+		return
+
+	var safe_track_index: int = max(1, blink_track_index)
+
+	var played_successfully: bool = _play_animation_on_track(
+		blink_animation_name,
+		false,
+		safe_track_index,
+		false
+	)
+
+	if not played_successfully:
+		_schedule_next_blink()
+		return
+
+	is_blink_playing = true
+
+	var token: int = blink_schedule_token
+	var duration_seconds: float = max(0.01, blink_animation_duration_seconds)
+	var timer: SceneTreeTimer = get_tree().create_timer(duration_seconds)
+
+	timer.timeout.connect(func() -> void:
+		if token != blink_schedule_token:
+			return
+
+		_finish_blink_overlay()
+	)
+
+func _finish_blink_overlay() -> void:
+	is_blink_playing = false
+
+	var safe_track_index: int = max(1, blink_track_index)
+	_clear_animation_track(safe_track_index)
+
+	_schedule_next_blink()
+
+func _cancel_blink() -> void:
+	blink_schedule_token += 1
+	_clear_blink_overlay_track()
+
+func _get_dash_animation_name(dash_direction: Vector2) -> String:
+	var safe_dash_direction: Vector2 = dash_direction
+
+	if safe_dash_direction.length() <= 0.001:
+		return _get_fallback_dash_animation_name()
+
+	safe_dash_direction = safe_dash_direction.normalized()
+
+	if (
+		abs(safe_dash_direction.y) >= dash_vertical_threshold
+		and abs(safe_dash_direction.y) > abs(safe_dash_direction.x)
+	):
+		if safe_dash_direction.y < 0.0:
+			if dash_up_animation_name.strip_edges() != "":
+				return dash_up_animation_name
+		else:
+			if dash_down_animation_name.strip_edges() != "":
+				return dash_down_animation_name
+
+	return _get_fallback_dash_animation_name()
+
+func _get_fallback_dash_animation_name() -> String:
+	if dash_side_animation_name.strip_edges() != "":
+		return dash_side_animation_name
+
+	return dash_animation_name
+
 
 SCRIPT: res://visual/enemies/goblin_warrior/GoblinWarriorSpineAdapter.gd
 --------------------------------------------------------------------------------------------------------------
@@ -6852,14 +8644,35 @@ SCRIPT: res://visual/enemies/goblin_warrior/GoblinWarriorVisualController.gd
 extends "res://visual/spine/SpineVisualControllerBase.gd"
 
 @export_group("Animations")
+
 @export var idle_animation_name: String = "Idle"
+
 @export var run_animation_name: String = "Run"
+
 @export var walk_animation_name: String = "Run"
+
 @export var death_animation_name: String = "Die"
 
 @export_group("Behaviour")
+
 @export var use_walk_when_run_missing: bool = true
+
 @export var flip_by_movement_direction: bool = true
+
+@export_group("Damage Flash")
+
+@export_range(1.0, 8.0, 0.1) var damage_flash_brightness: float = 4.0
+
+@export var damage_flash_hold_seconds: float = 0.035
+
+@export var damage_flash_duration: float = 0.12
+
+var damage_flash_tween: Tween = null
+var default_modulate: Color = Color.WHITE
+
+func _ready() -> void:
+	default_modulate = modulate
+	super._ready()
 
 func _get_visual_log_name() -> String:
 	return "GoblinWarriorVisualController"
@@ -6912,6 +8725,53 @@ func play_death() -> void:
 		"death"
 	)
 
+func play_damage_flash() -> void:
+	if damage_flash_tween != null:
+		damage_flash_tween.kill()
+		damage_flash_tween = null
+
+	var safe_brightness: float = max(1.0, damage_flash_brightness)
+	var flash_modulate: Color = Color(
+		safe_brightness,
+		safe_brightness,
+		safe_brightness,
+		default_modulate.a
+	)
+
+	modulate = flash_modulate
+
+	damage_flash_tween = create_tween()
+	damage_flash_tween.set_trans(Tween.TRANS_QUAD)
+	damage_flash_tween.set_ease(Tween.EASE_OUT)
+
+	if damage_flash_hold_seconds > 0.0:
+		damage_flash_tween.tween_interval(damage_flash_hold_seconds)
+
+	damage_flash_tween.tween_property(
+		self,
+		"modulate",
+		default_modulate,
+		max(0.01, damage_flash_duration)
+	)
+
+	damage_flash_tween.finished.connect(func() -> void:
+		damage_flash_tween = null
+	)
+
+	DeveloperAuditLogger.log_animation(
+		"Flash de dano executado: brightness=%s hold=%s duration=%s" % [
+			str(safe_brightness),
+			str(damage_flash_hold_seconds),
+			str(damage_flash_duration)
+		],
+		"GoblinWarriorVisualController",
+		{
+			"brightness": safe_brightness,
+			"hold_seconds": damage_flash_hold_seconds,
+			"duration_seconds": damage_flash_duration
+		}
+	)
+
 
 SCRIPT: res://visual/weapons/gaia_initial_weapon/GaiaAttackVisualController.gd
 --------------------------------------------------------------------------------------------------------------
@@ -6925,21 +8785,30 @@ enum VisualMode {
 
 @export var visual_mode: VisualMode = VisualMode.PLACEHOLDER
 
+@export_group("Node Paths")
+
 @export var placeholder_root_path: NodePath
+
 @export var placeholder_sprite_path: NodePath
+
 @export var spine_root_path: NodePath
 
+@export_group("Placeholder")
+
 @export var default_placeholder_texture_path: String = "res://assets/placeholders/weapons/gaia_initial_weapon/gaia_attack_placeholder.png"
+
 @export var placeholder_texture: Texture2D
 
-# Use isso se a imagem não estiver naturalmente apontando para direita.
-# 0 = imagem aponta para direita.
-# 90 = imagem aponta para cima.
-# -90 = imagem aponta para baixo.
+@export_group("Direction")
+
 @export var angle_offset_degrees: float = 0.0
 
+@export_group("Lifetime")
+
 @export var lifetime_seconds: float = 0.22
+
 @export var fade_out: bool = true
+
 @export var auto_queue_free: bool = true
 
 @onready var placeholder_root: Node2D = get_node_or_null(placeholder_root_path) as Node2D
@@ -6947,6 +8816,7 @@ enum VisualMode {
 @onready var spine_root: Node2D = get_node_or_null(spine_root_path) as Node2D
 
 var elapsed_seconds: float = 0.0
+
 var attack_direction: Vector2 = Vector2.RIGHT
 
 func _ready() -> void:
@@ -6965,7 +8835,11 @@ func _process(delta: float) -> void:
 	if auto_queue_free and lifetime_seconds > 0.0 and elapsed_seconds >= lifetime_seconds:
 		queue_free()
 
-func setup(direction: Vector2, p_lifetime_seconds: float = -1.0, p_visual_scale: Vector2 = Vector2.ONE) -> void:
+func setup(
+	direction: Vector2,
+	p_lifetime_seconds: float = -1.0,
+	p_visual_scale: Vector2 = Vector2.ONE
+) -> void:
 	if direction.length() > 0.001:
 		attack_direction = direction.normalized()
 	else:

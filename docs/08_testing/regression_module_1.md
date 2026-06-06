@@ -54,3 +54,22 @@
 - [ ] Snapshot sem duplicidades anormais.
 - [ ] Busca residual retorna zero.
 - [ ] Canais temporários desligados.
+
+## Etapa 2R2-B — Testes regressivos
+
+- [ ] Goblins perseguem Gaia.
+- [ ] Goblins se esbarram sem empilhar.
+- [ ] Esbarrão não causa dano.
+- [ ] Goblins deslizam sem inverter animação.
+- [ ] Goblins ainda atacam Gaia por EnemyAttackHitbox.
+- [ ] Gaia recebe dano por PlayerHurtbox.
+- [ ] Arma da Gaia causa dano por EnemyHurtbox.
+- [ ] Knockback da arma ocorre apenas após dano válido.
+- [ ] Goblins voltam a perseguir após knockback.
+- [ ] Morte de Goblin gera XP/moeda.
+- [ ] Upgrades de arma continuam funcionando.
+- [ ] Blink da Gaia roda em overlay.
+- [ ] Idle da Gaia não congela durante blink.
+- [ ] Run da Gaia continua normal.
+- [ ] Morte da Gaia interrompe blink.
+- [ ] Logs detalhados ficam desligados por padrão.

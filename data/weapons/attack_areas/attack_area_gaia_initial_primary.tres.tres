@@ -2,11 +2,12 @@
 
 [ext_resource type="Script" uid="uid://dvk8ne584ljjf" path="res://definitions/AttackAreaDefinition.gd" id="1_qt4k7"]
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_qt4k7"]
-size = Vector2(90, 300)
+[sub_resource type="ConvexPolygonShape2D" id="ConvexPolygonShape2D_qt4k7"]
+points = PackedVector2Array(-152, -176, -48, -168, 48, -136, 104, -96, 152, -48, 176, 0, 144, 64, 88, 112, 8, 152, -56, 168, -152, 176)
 
 [resource]
 script = ExtResource("1_qt4k7")
-id = "attack_area_gaia_initial_primary"
-shape = SubResource("RectangleShape2D_qt4k7")
+id = "attack_area_gaia_initial_test"
+shape = SubResource("ConvexPolygonShape2D_qt4k7")
+local_offset = Vector2(-80, 0)
 metadata/_custom_type_script = "uid://dvk8ne584ljjf"

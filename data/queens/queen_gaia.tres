@@ -1,17 +1,26 @@
 [gd_resource type="Resource" script_class="QueenDefinition" format=3 uid="uid://clvjmbxgwi00b"]
 
+[ext_resource type="Resource" uid="uid://bur0bcw5tmnkx" path="res://data/queens/gaia/dash_gaia_basic.tres" id="1_0eh4v"]
 [ext_resource type="Script" uid="uid://dbnkbm8ijaa0r" path="res://definitions/HurtboxAreaDefinition.gd" id="1_0664h"]
 [ext_resource type="Script" uid="uid://dv4a6bqp34v1e" path="res://definitions/QueenDefinition.gd" id="1_w76qd"]
-[ext_resource type="Resource" uid="uid://c4n0ganiu7tb" path="res://data/queens/hurtbox_area_gaia_body.tres" id="2_0eh4v"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_0664h"]
+radius = 30.02
+
+[sub_resource type="Resource" id="Resource_0eh4v"]
+script = ExtResource("1_0664h")
+id = "hurtbox_area_gaia_basic_body"
+shape = SubResource("CircleShape2D_0664h")
+metadata/_custom_type_script = "uid://dbnkbm8ijaa0r"
 
 [resource]
 script = ExtResource("1_w76qd")
 id = "gaia"
 display_name_key = "queen.gaia.name"
 description_key = "queen.gaia.description"
-base_move_speed = 185.0
 starting_weapon_id = "gaia_initial_weapon"
-hurtbox_areas = Array[ExtResource("1_0664h")]([ExtResource("2_0eh4v")])
+hurtbox_areas = Array[ExtResource("1_0664h")]([SubResource("Resource_0eh4v")])
 visual_scene_path = "uid://dxtnkjw5suqk"
 spine_skeleton_data_resource_path = "res://assets/spine/gaia/gaia_spine_skeleton_data_resource.tres"
+dash_definition = ExtResource("1_0eh4v")
 metadata/_custom_type_script = "uid://dv4a6bqp34v1e"

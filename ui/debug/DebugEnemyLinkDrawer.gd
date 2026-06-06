@@ -1,60 +1,33 @@
-## Drawer visual utilizado pelo DebugOverlay para representar
-## conexões entre a Gaia e inimigos ativos durante testes.
-##
-## Responsabilidades:
-## - localizar o player e os inimigos pelos grupos runtime;
-## - converter posições mundiais em posições da tela;
-## - desenhar linhas técnicas sem alterar comportamento do jogo.
-##
-## O drawer fica desabilitado por padrão e só processa frames
-## quando o DebugOverlay habilitar explicitamente essa visualização.
 extends Node2D
 class_name DebugEnemyLinkDrawer
 
-## Define se as conexões devem ser desenhadas.
 var links_enabled: bool = false
 
-## Grupo utilizado para localizar a Gaia ou player ativo.
 var player_group_name: String = "player"
 
-## Grupo utilizado para localizar inimigos existentes na cena.
 var enemy_group_name: String = "enemy"
 
-## Cor das linhas desenhadas entre player e inimigos.
 var link_color: Color = Color(1.0, 0.18, 0.18, 0.70)
 
-## Espessura das linhas desenhadas.
 var link_width: float = 2.0
 
-## Define se pequenos marcadores devem acompanhar as extremidades.
 var show_markers: bool = false
 
-## Raio do marcador exibido sobre a posição do player.
 var player_marker_radius: float = 5.0
 
-## Raio do marcador exibido sobre cada inimigo.
 var enemy_marker_radius: float = 4.0
 
-## Inicia o drawer sem processamento até que a ferramenta seja habilitada.
 func _ready() -> void:
 	z_index = -10
 	set_process(false)
 	visible = false
 
-## Solicita novo desenho enquanto a ferramenta estiver habilitada.
-##
-## A atualização contínua permite acompanhar player, câmera
-## e inimigos em movimento sem conexão adicional de signals.
 func _process(_delta: float) -> void:
 	if not links_enabled:
 		return
 
 	queue_redraw()
 
-## Recebe as configurações atualmente definidas no DebugOverlay.
-##
-## O método também ativa ou desativa o processamento do drawer,
-## evitando custo runtime quando a ferramenta não está em uso.
 func configure(
 	should_enable: bool,
 	p_player_group_name: String,
@@ -79,12 +52,9 @@ func configure(
 	visible = links_enabled
 	set_process(links_enabled)
 
-	# Ao habilitar ou desabilitar, força redesenho imediato para
-	# mostrar ou remover linhas sem aguardar o próximo frame útil.
 	if was_enabled != links_enabled:
 		queue_redraw()
 
-## Desenha linhas entre o player atual e todos os inimigos válidos.
 func _draw() -> void:
 	if not links_enabled:
 		return
@@ -125,11 +95,6 @@ func _draw() -> void:
 		if show_markers and enemy_marker_radius > 0.0:
 			draw_circle(enemy_screen_position, enemy_marker_radius, link_color)
 
-## Decide se um inimigo deve permanecer visível no desenho técnico.
-##
-## Quando o inimigo disponibilizar `get_debug_data()` com `is_alive`,
-## inimigos mortos são ignorados. Caso contrário, mantém compatibilidade
-## e desenha qualquer node ainda pertencente ao grupo `enemy`.
 func _should_draw_enemy(enemy: Node) -> bool:
 	if enemy == null or not is_instance_valid(enemy):
 		return false
@@ -149,16 +114,11 @@ func _should_draw_enemy(enemy: Node) -> bool:
 
 	return bool(debug_data.get("is_alive", true))
 
-## Converte coordenada mundial para posição visual na viewport atual.
-##
-## Como o drawer pertence a um CanvasLayer de UI, a posição mundial
-## precisa considerar o transform da câmera antes de ser desenhada.
 func _world_to_screen_position(world_position: Vector2) -> Vector2:
 	var canvas_transform: Transform2D = get_viewport().get_canvas_transform()
 
 	return canvas_transform * world_position
 
-## Retorna o primeiro Node2D encontrado em determinado grupo runtime.
 func _get_first_node2d_in_group(group_name: String) -> Node2D:
 	if group_name.strip_edges() == "":
 		return null

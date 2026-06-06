@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="AttackAreaDefinition" format=3 uid="uid://bhya3vd2g1dan"]
+
+[ext_resource type="Script" uid="uid://dvk8ne584ljjf" path="res://definitions/AttackAreaDefinition.gd" id="1_b8ic4"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_b8ic4"]
+size = Vector2(50, 180)
+
+[resource]
+script = ExtResource("1_b8ic4")
+id = "dash_shape_definition"
+shape = SubResource("RectangleShape2D_b8ic4")
+local_offset = Vector2(80, 0)
+metadata/_custom_type_script = "uid://dvk8ne584ljjf"

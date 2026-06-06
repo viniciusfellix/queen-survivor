@@ -1,76 +1,31 @@
-## Controlador principal de uma run jogável.
-##
-## Responsabilidades:
-## - inicializar o `RunState` com o mapa atual;
-## - controlar tempo e condições de vitória/derrota;
-## - receber eventos de morte, dano e coleta;
-## - administrar XP, level-ups e aplicação transacional de upgrades;
-## - construir o `RunResultPayload`;
-## - emitir o encerramento da run para save e interfaces;
-## - expor ferramentas técnicas de vitória/derrota forçada.
-##
-## Este controller coordena sistemas, mas não implementa diretamente:
-## - combate da Queen;
-## - comportamento dos inimigos;
-## - criação visual de drops;
-## - persistência permanente.
 extends Node
 
-## Estado mutável da run atual.
-##
-## Pode ser configurado pelo Inspector ou criado automaticamente ao iniciar.
 @export var run_state: RunState
 
-## Configuração do mapa executado nesta run.
-##
-## Define duração, recompensa de vitória, timeline de spawn e pool padrão.
 @export var map_definition: MapDefinition
 
-## Override opcional da pool de upgrades para cenas de teste.
-##
-## No fluxo normal, a pool deve vir de `MapDefinition.upgrade_pool`.
 @export var upgrade_pool_definition: UpgradePoolDefinition
 
-## Define se a SceneTree deve permanecer pausada após o resultado final.
 @export var finish_run_pauses_tree: bool = true
 
-## Delay visual entre a morte do player e a exibição da derrota.
 @export var defeat_result_delay_seconds: float = 0.75
 
 @export_group("Debug Tools")
 
-## Permite que ferramentas do protótipo forcem vitória ou derrota.
-##
-## Deve permanecer desabilitado em cenas ou builds onde essa ação
-## não seja desejada.
 @export var allow_debug_force_finish: bool = false
 
-## Quantidade de level-ups conquistados ainda aguardando escolha.
 var pending_level_ups: int = 0
 
-## Opções atualmente apresentadas no painel de level-up.
 var current_level_up_options: Array[UpgradeDefinition] = []
 
-## Indica se existe uma escolha de level-up ativa neste momento.
 var is_level_up_active: bool = false
 
-## Resultado final construído ao encerrar a run.
 var result_payload: RunResultPayload = null
 
-## Quantidade de vezes que cada upgrade foi escolhido na run atual.
 var selected_upgrade_counts: Dictionary = {}
 
-## IDs das opções oferecidas no level-up anterior.
-##
-## Utilizado para reduzir repetição imediata de cards quando a pool permitir.
 var previous_upgrade_option_ids: Array[String] = []
 
-## Prepara a run ao entrar na árvore:
-## - mantém processamento durante pausas;
-## - registra o controller no grupo global;
-## - cria ou configura o estado da run;
-## - resolve a pool de upgrades;
-## - conecta eventos de gameplay.
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	add_to_group("run_controller")
@@ -97,12 +52,6 @@ func _ready() -> void:
 		}
 	)
 
-## Atualiza o tempo da run enquanto o gameplay estiver ativo.
-##
-## Durante pause, encerramento intermediário ou resultado final,
-## o tempo deixa de avançar.
-##
-## Quando o tempo alcança a duração do mapa, consolida vitória.
 func _process(delta: float) -> void:
 	if run_state == null:
 		return
@@ -124,28 +73,18 @@ func _process(delta: float) -> void:
 	if run_state.elapsed_seconds >= run_state.map_duration_seconds:
 		_finish_victory()
 
-## Retorna o estado mutável da run atual.
-##
-## Utilizado por `RunQuery`, HUD e ferramentas técnicas.
 func get_run_state() -> RunState:
 	return run_state
 
-## Retorna a definição do mapa executado nesta run.
 func get_map_definition() -> MapDefinition:
 	return map_definition
 
-## Retorna a pool de upgrades atualmente utilizada pela run.
 func get_upgrade_pool_definition() -> UpgradePoolDefinition:
 	return upgrade_pool_definition
 
-## Retorna o payload final após vitória ou derrota ser consolidada.
 func get_result_payload() -> RunResultPayload:
 	return result_payload
 
-## Retorna informações técnicas da run para overlay e ferramentas de debug.
-##
-## Este método não representa contrato definitivo de UI comercial;
-## sua finalidade é apoiar testes do protótipo.
 func get_debug_data() -> Dictionary:
 	if run_state == null:
 		return {
@@ -185,13 +124,6 @@ func get_debug_data() -> Dictionary:
 		"death_cause": run_state.death_cause
 	}
 
-## Conecta os sinais globais que alimentam estatísticas e fluxo da run.
-##
-## Emissores principais:
-## - `EnemyBase`: dano recebido e morte do inimigo;
-## - `CoinDrop`: moeda coletada;
-## - `PlayerController`: dano recebido e morte do player;
-## - `LevelUpPanel`: upgrade escolhido.
 func _connect_events() -> void:
 	if not GameEvents.enemy_died.is_connected(_on_enemy_died):
 		GameEvents.enemy_died.connect(_on_enemy_died)
@@ -211,17 +143,6 @@ func _connect_events() -> void:
 	if not GameEvents.enemy_damaged.is_connected(_on_enemy_damaged):
 		GameEvents.enemy_damaged.connect(_on_enemy_damaged)
 
-## Processa a morte válida de um inimigo durante a run.
-##
-## Fluxo:
-## - incrementa abates;
-## - adiciona XP direta;
-## - acumula level-ups pendentes;
-## - emite atualizações para HUD;
-## - inicia a próxima escolha de upgrade quando necessário.
-##
-## O drop físico da moeda é tratado separadamente pelo `DropController`,
-## que também escuta o evento `enemy_died`.
 func _on_enemy_died(
 	enemy_id: String,
 	source_id: String,
@@ -282,10 +203,6 @@ func _on_enemy_died(
 	if pending_level_ups > 0 and not is_level_up_active:
 		_start_next_level_up()
 
-## Processa uma moeda física efetivamente coletada pelo player.
-##
-## Apenas moedas coletadas antes do encerramento entram no saldo da run.
-## Moedas apenas dropadas ou ainda magnetizadas não geram recompensa.
 func _on_run_coin_collected(value: int, coin_global_position: Vector2) -> void:
 	if run_state == null:
 		return
@@ -319,7 +236,6 @@ func _on_run_coin_collected(value: int, coin_global_position: Vector2) -> void:
 		}
 	)
 
-## Registra nas estatísticas da run o dano efetivamente recebido pelo player.
 func _on_player_damaged(
 	_raw_damage: int,
 	final_damage: int,
@@ -335,7 +251,6 @@ func _on_player_damaged(
 
 	run_state.add_damage_taken(final_damage)
 
-## Registra nas estatísticas da run o dano efetivamente causado a inimigos.
 func _on_enemy_damaged(
 	_enemy_id: String,
 	_raw_damage: int,
@@ -352,11 +267,6 @@ func _on_enemy_damaged(
 
 	run_state.add_damage_dealt(final_damage)
 
-## Inicia o fluxo de derrota quando o player morre.
-##
-## O gameplay é bloqueado imediatamente por `begin_ending()`, evitando
-## novos danos, moedas ou ações durante o delay visual de morte.
-## Após o delay configurado, a derrota é consolidada.
 func _on_player_died(source_id: String) -> void:
 	if run_state == null:
 		return
@@ -397,8 +307,6 @@ func _on_player_died(source_id: String) -> void:
 		_finish_defeat(source_id)
 	)
 
-## Consolida vitória quando o tempo do mapa chega ao fim
-## ou quando uma ferramenta técnica força esse resultado.
 func _finish_victory() -> void:
 	if run_state == null:
 		return
@@ -411,7 +319,6 @@ func _finish_victory() -> void:
 
 	_finish_run()
 
-## Consolida derrota após a morte do player ou por ferramenta técnica.
 func _finish_defeat(source_id: String = "") -> void:
 	if run_state == null:
 		return
@@ -423,15 +330,6 @@ func _finish_defeat(source_id: String = "") -> void:
 
 	_finish_run()
 
-## Finaliza o fluxo comum de vitória ou derrota.
-##
-## Fluxo:
-## - encerra qualquer level-up pendente;
-## - pausa logicamente a run;
-## - constrói o payload final;
-## - registra o dinheiro obtido;
-## - emite `GameEvents.run_finished`, consumido por save e UI;
-## - opcionalmente pausa toda a SceneTree.
 func _finish_run() -> void:
 	if run_state == null:
 		return
@@ -472,11 +370,6 @@ func _finish_run() -> void:
 	if finish_run_pauses_tree:
 		get_tree().paused = true
 
-## Constrói o payload imutável por convenção utilizado no resultado e save.
-##
-## Regra monetária:
-## - derrota: entrega somente moedas coletadas;
-## - vitória: utiliza o multiplicador e bônus configurados no mapa.
 func _build_result_payload() -> RunResultPayload:
 	var payload: RunResultPayload = RunResultPayload.new()
 
@@ -519,11 +412,6 @@ func _build_result_payload() -> RunResultPayload:
 
 	return payload
 
-## Inicia a próxima escolha pendente de level-up.
-##
-## A run e a árvore são pausadas enquanto o painel aguarda seleção.
-## Caso a pool não possua opções válidas, o level-up é consumido
-## sem escolha para evitar travar a execução.
 func _start_next_level_up() -> void:
 	if run_state == null:
 		return
@@ -575,14 +463,6 @@ func _start_next_level_up() -> void:
 
 	GameEvents.run_level_up_started.emit(run_state.current_level, current_level_up_options)
 
-## Recebe a opção escolhida pelo painel de level-up.
-##
-## O upgrade é aplicado de forma transacional:
-## - primeiro o efeito deve ser aceito pelo player ou arma;
-## - somente depois o stack é registrado e a escolha consumida.
-##
-## Caso a aplicação falhe, o level-up permanece aberto para evitar
-## consumir uma escolha que não produziu efeito.
 func _on_level_up_option_selected(upgrade: UpgradeDefinition) -> void:
 	if not is_level_up_active:
 		return
@@ -638,10 +518,6 @@ func _on_level_up_option_selected(upgrade: UpgradeDefinition) -> void:
 
 	get_tree().paused = false
 
-## Encaminha o upgrade escolhido para o player atual.
-##
-## O player é responsável por aplicar melhorias próprias ou encaminhar
-## melhorias de arma. O retorno booleano informa se houve efeito real.
 func _apply_upgrade(upgrade: UpgradeDefinition) -> bool:
 	var player: Node = _get_player()
 
@@ -661,7 +537,6 @@ func _apply_upgrade(upgrade: UpgradeDefinition) -> bool:
 	push_warning("[RunController] apply_run_upgrade precisa retornar bool: %s" % upgrade.id)
 	return false
 
-## Localiza a Queen ativa por meio do grupo `player`.
 func _get_player() -> Node:
 	var players: Array[Node] = get_tree().get_nodes_in_group("player")
 
@@ -670,7 +545,6 @@ func _get_player() -> Node:
 
 	return players[0]
 
-## Converte a lista de opções em texto legível para logs técnicos.
 func _get_option_ids(options: Array[UpgradeDefinition]) -> String:
 	var ids: Array[String] = []
 
@@ -682,11 +556,6 @@ func _get_option_ids(options: Array[UpgradeDefinition]) -> String:
 
 	return ", ".join(ids)
 
-## Resolve qual pool de upgrades será utilizada nesta run.
-##
-## Prioridade:
-## 1. override configurado diretamente na cena;
-## 2. pool cadastrada no `MapDefinition`.
 func _resolve_upgrade_pool() -> void:
 	if upgrade_pool_definition != null:
 		DeveloperAuditLogger.log_upgrade(
@@ -719,7 +588,6 @@ func _resolve_upgrade_pool() -> void:
 		}
 	)
 
-## Solicita ao serviço de opções novos cards válidos para o level-up atual.
 func _generate_level_up_options() -> Array[UpgradeDefinition]:
 	if upgrade_pool_definition == null:
 		return []
@@ -730,7 +598,6 @@ func _generate_level_up_options() -> Array[UpgradeDefinition]:
 		previous_upgrade_option_ids
 	)
 
-## Registra que determinado upgrade foi aplicado com sucesso nesta run.
 func _register_selected_upgrade(upgrade: UpgradeDefinition) -> void:
 	if upgrade == null:
 		return
@@ -738,10 +605,6 @@ func _register_selected_upgrade(upgrade: UpgradeDefinition) -> void:
 	var current_count: int = int(selected_upgrade_counts.get(upgrade.id, 0))
 	selected_upgrade_counts[upgrade.id] = current_count + 1
 
-## Finaliza um level-up que não possuía nenhuma opção válida disponível.
-##
-## Evita que a run permaneça pausada indefinidamente quando a pool
-## estiver vazia ou todos os upgrades alcançarem seus limites.
 func _complete_level_up_without_option() -> void:
 	pending_level_ups = max(0, pending_level_ups - 1)
 
@@ -757,14 +620,12 @@ func _complete_level_up_without_option() -> void:
 
 	get_tree().paused = false
 
-## Retorna o ID da pool ativa ou `none` quando nenhuma pool foi resolvida.
 func _get_upgrade_pool_id() -> String:
 	if upgrade_pool_definition == null:
 		return "none"
 
 	return upgrade_pool_definition.id
 
-## Converte as opções atuais em uma lista de IDs utilizada para evitar repetição.
 func _get_option_id_array(options: Array[UpgradeDefinition]) -> Array[String]:
 	var ids: Array[String] = []
 
@@ -776,22 +637,15 @@ func _get_option_id_array(options: Array[UpgradeDefinition]) -> Array[String]:
 
 	return ids
 
-## Retorna quantas vezes um upgrade já foi escolhido na run atual.
 func get_selected_upgrade_count(upgrade_id: String) -> int:
 	if upgrade_id.strip_edges() == "":
 		return 0
 
 	return int(selected_upgrade_counts.get(upgrade_id, 0))
 
-## Retorna o nível/stack que um upgrade atingirá caso seja escolhido agora.
-##
-## Utilizado pelo painel para exibir badges como `Nv. 2`.
 func get_next_upgrade_level(upgrade_id: String) -> int:
 	return get_selected_upgrade_count(upgrade_id) + 1
 
-## Força vitória por meio das ferramentas técnicas do protótipo.
-##
-## Retorna `true` somente quando a ação é permitida e aplicada.
 func debug_force_victory() -> bool:
 	if not allow_debug_force_finish:
 		DeveloperAuditLogger.log_audit(
@@ -814,10 +668,6 @@ func debug_force_victory() -> bool:
 
 	return true
 
-## Força derrota por meio das ferramentas técnicas do protótipo.
-##
-## Utiliza a causa `debug_force_defeat` para deixar explícito no resultado
-## que a derrota não veio de uma interação normal de gameplay.
 func debug_force_defeat() -> bool:
 	if not allow_debug_force_finish:
 		DeveloperAuditLogger.log_audit(

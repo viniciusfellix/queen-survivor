@@ -1,39 +1,18 @@
-## Hitbox ofensiva runtime pertencente a um inimigo.
-##
-## Responsabilidades:
-## - funcionar como Area2D monitorando PlayerHurtbox;
-## - construir CollisionShape2D runtime a partir de EnemyAttackDefinition;
-## - respeitar delay inicial e intervalo entre impactos;
-## - criar DamagePayload e encaminhar dano ao receiver atingido;
-## - ativar ou desativar o ataque quando o inimigo nasce ou morre.
-##
-## Este componente não controla movimento, HP, morte ou animação.
 extends Area2D
 class_name EnemyAttackHitbox
 
 @export_group("Collision Filter")
 
-## Layer ofensiva desta hitbox.
-##
-## Convenção atual:
-## Layer 6 = EnemyAttackHitbox.
 @export_range(1, 32, 1) var collision_layer_number: int = 6
 
-## Layer que esta hitbox deve detectar.
-##
-## Convenção atual:
-## Layer 7 = PlayerHurtbox.
 @export_range(1, 32, 1) var target_hurtbox_layer_number: int = 7
 
-## Quando verdadeiro, configura automaticamente layer e mask no _ready().
 @export var configure_collision_filter_on_ready: bool = true
 
 @export_group("Diagnostics")
 
-## Ativa log de configuração da hitbox.
 @export var log_configuration: bool = false
 
-## Ativa log somente quando um impacto causa dano efetivo.
 @export var log_successful_hits: bool = true
 
 var runtime_definition: EnemyAttackDefinition = null
@@ -47,11 +26,6 @@ var elapsed_seconds: float = 0.0
 var is_active: bool = false
 var is_configured: bool = false
 
-## Inicializa os filtros físicos da hitbox.
-##
-## A definição de ataque não é carregada diretamente neste node:
-## ela é fornecida obrigatoriamente pelo `EnemyBase`, cuja
-## `EnemyDefinition` é a fonte oficial dos dados de balanceamento.
 func _ready() -> void:
 	add_to_group("enemy_attack_hitbox")
 
@@ -61,7 +35,6 @@ func _ready() -> void:
 	if configure_collision_filter_on_ready:
 		_configure_collision_filter()
 
-## Processa delay, cooldowns e impactos durante gameplay ativo.
 func _physics_process(delta: float) -> void:
 	if not is_configured or not is_active:
 		return
@@ -81,10 +54,6 @@ func _physics_process(delta: float) -> void:
 
 	_try_damage_overlapping_hurtboxes()
 
-## Recebe a definição de ataque correspondente ao inimigo atual.
-##
-## A definition é duplicada para que alterações runtime futuras
-## não modifiquem diretamente o resource salvo no projeto.
 func setup(
 	p_attack_definition: EnemyAttackDefinition,
 	p_source_node: Node,
@@ -139,7 +108,6 @@ func setup(
 			}
 		)
 
-## Reconstrói as CollisionShape2D runtime do ataque atual.
 func rebuild_runtime_shapes() -> void:
 	_clear_runtime_shapes()
 
@@ -167,10 +135,6 @@ func rebuild_runtime_shapes() -> void:
 	if runtime_shape_nodes.is_empty():
 		push_warning("[EnemyAttackHitbox] Nenhuma shape ofensiva válida foi construída.")
 
-## Habilita ou desabilita a área ofensiva.
-##
-## Utiliza operação deferred para evitar alterações físicas inseguras
-## durante callbacks ou passos de colisão.
 func set_attack_active(should_be_active: bool) -> void:
 	is_active = should_be_active
 
@@ -185,7 +149,6 @@ func set_attack_active(should_be_active: bool) -> void:
 	if not should_be_active:
 		receiver_cooldowns.clear()
 
-## Procura PlayerHurtboxes atualmente sobrepostas e tenta causar dano.
 func _try_damage_overlapping_hurtboxes() -> void:
 	if runtime_definition == null:
 		return
@@ -220,8 +183,6 @@ func _try_damage_overlapping_hurtboxes() -> void:
 		var final_damage_variant: Variant = receiver.call("receive_damage", payload)
 		var final_damage: int = _variant_to_damage(final_damage_variant)
 
-		# A invencibilidade temporária da Gaia pode retornar zero.
-		# Nesse caso não consumimos o cooldown do ataque.
 		if final_damage <= 0:
 			continue
 
@@ -248,7 +209,6 @@ func _try_damage_overlapping_hurtboxes() -> void:
 				}
 			)
 
-## Reduz os cooldowns individuais dos receivers já atingidos.
 func _update_receiver_cooldowns(delta: float) -> void:
 	for receiver_id_variant: Variant in receiver_cooldowns.keys():
 		var remaining_seconds: float = (
@@ -260,7 +220,6 @@ func _update_receiver_cooldowns(delta: float) -> void:
 		else:
 			receiver_cooldowns[receiver_id_variant] = remaining_seconds
 
-## Define a hitbox apenas na layer ofensiva e detectando PlayerHurtbox.
 func _configure_collision_filter() -> void:
 	collision_layer = 0
 	collision_mask = 0
@@ -268,7 +227,6 @@ func _configure_collision_filter() -> void:
 	set_collision_layer_value(collision_layer_number, true)
 	set_collision_mask_value(target_hurtbox_layer_number, true)
 
-## Remove shapes runtime anteriormente construídas.
 func _clear_runtime_shapes() -> void:
 	for shape_node: CollisionShape2D in runtime_shape_nodes:
 		if shape_node == null or not is_instance_valid(shape_node):
@@ -279,7 +237,6 @@ func _clear_runtime_shapes() -> void:
 
 	runtime_shape_nodes.clear()
 
-## Converte retorno numérico genérico do receiver em dano inteiro.
 func _variant_to_damage(value: Variant) -> int:
 	if value is int:
 		return int(value)
@@ -289,7 +246,6 @@ func _variant_to_damage(value: Variant) -> int:
 
 	return 0
 
-## Retorna dados técnicos desta hitbox para debugging futuro.
 func get_debug_data() -> Dictionary:
 	return {
 		"is_configured": is_configured,

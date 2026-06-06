@@ -1,71 +1,88 @@
-## Controller visual específico da Gaia.
-##
-## Responsabilidades:
-## - converter estados runtime da personagem em animações Spine;
-## - aplicar orientação horizontal baseada no movimento corporal;
-## - executar flash visual quando a Gaia recebe dano.
-##
-## A mira não controla o lado para o qual o corpo está virado.
-## Essa decisão permanece no `PlayerRuntimeState`.
 extends "res://visual/spine/SpineVisualControllerBase.gd"
 
 @export_group("Animations")
 
-## Animação padrão quando a Gaia está parada.
 @export var idle_animation_name: String = "Idle1_Pose2"
 
-## Animação executada enquanto a Gaia se movimenta.
 @export var run_animation_name: String = "Run1_Pose3"
 
-## Animação prevista para deslocamento rápido futuro.
 @export var dash_animation_name: String = "Dash1_Pose3"
 
-## Animação executada quando a Gaia morre.
 @export var death_animation_name: String = "Die_Pose1"
+
+@export var dash_side_animation_name: String = "Dash1_Pose3"
+@export var dash_up_animation_name: String = ""
+@export var dash_down_animation_name: String = ""
+@export_range(0.0, 1.0, 0.05) var dash_vertical_threshold: float = 0.55
+
+@export_group("Blink Overlay")
+
+@export var blink_enabled: bool = true
+
+@export var blink_track_index: int = 1
+
+@export var blink_interval_min_seconds: float = 1.0
+
+@export var blink_interval_max_seconds: float = 7.0
+
+@export var idle_blink_animation_name: String = "Blink_Idle_Pose2"
+
+@export var run_blink_animation_name: String = ""
+
+@export var dash_blink_animation_name: String = ""
+
+@export var allow_blink_while_dashing: bool = false
+
+@export var blink_animation_duration_seconds: float = 0.22
+
+@export var allow_blink_while_running: bool = true
 
 @export_group("Damage Flash")
 
-## Cor aplicada temporariamente ao visual quando a Gaia recebe dano.
 @export var damage_flash_color: Color = Color(1.0, 0.25, 0.25, 1.0)
 
-## Tempo necessário para o visual retornar à cor original.
 @export var damage_flash_duration: float = 0.12
 
-## Tween atualmente responsável pelo flash de dano.
-##
-## Mantido em referência para cancelar um flash anterior
-## caso outro dano seja recebido antes de sua conclusão.
 var damage_flash_tween: Tween = null
 
-## Cor original do visual, restaurada ao final do flash.
 var default_modulate: Color = Color.WHITE
 
-## Armazena a cor original e inicializa o comportamento visual herdado.
+var is_blink_playing: bool = false
+
+var blink_schedule_token: int = 0
+
+var last_gameplay_state: String = GameplayStateTypes.IDLE
+
 func _ready() -> void:
 	default_modulate = modulate
 	super._ready()
+	_schedule_next_blink()
 
-## Define o identificador utilizado nos logs deste controller.
 func _get_visual_log_name() -> String:
 	return "GaiaVisualController"
 
-## Inicia a Gaia em sua animação ociosa padrão.
 func _play_initial_animation() -> void:
 	play_idle()
 
-## Aplica visualmente o estado runtime atual da Gaia.
-##
-## Este método:
-## - ajusta orientação horizontal;
-## - registra o estado visual no runtime state;
-## - escolhe a animação correspondente.
 func apply_runtime_state(runtime_state: PlayerRuntimeState) -> void:
 	if runtime_state == null:
 		return
 
 	_apply_horizontal_facing(runtime_state.facing_direction)
 
+	var previous_gameplay_state: String = last_gameplay_state
 	var gameplay_state: String = runtime_state.current_gameplay_state
+	last_gameplay_state = gameplay_state
+
+	if previous_gameplay_state != gameplay_state:
+		if not _state_supports_blink_overlay(gameplay_state):
+			_clear_blink_overlay_track()
+
+	if gameplay_state == GameplayStateTypes.DEAD:
+		_cancel_blink()
+		runtime_state.current_visual_state = GameplayStateTypes.DEAD
+		play_death()
+		return
 
 	runtime_state.current_visual_state = gameplay_state
 
@@ -77,15 +94,14 @@ func apply_runtime_state(runtime_state: PlayerRuntimeState) -> void:
 			play_run()
 
 		GameplayStateTypes.DASHING:
-			play_dash()
-
-		GameplayStateTypes.DEAD:
-			play_death()
+			play_dash(
+				runtime_state.dash_direction,
+				runtime_state.dash_animation_time_scale
+			)
 
 		_:
 			play_idle()
 
-## Solicita a animação idle em loop.
 func play_idle() -> void:
 	_play_animation_if_changed(
 		idle_animation_name,
@@ -93,7 +109,6 @@ func play_idle() -> void:
 		GameplayStateTypes.IDLE
 	)
 
-## Solicita a animação de movimento em loop.
 func play_run() -> void:
 	_play_animation_if_changed(
 		run_animation_name,
@@ -101,17 +116,19 @@ func play_run() -> void:
 		GameplayStateTypes.MOVING
 	)
 
-## Solicita a animação de dash sem repetição automática.
-##
-## O dash ainda é um estado preparado para evolução futura do gameplay.
-func play_dash() -> void:
+func play_dash(
+	dash_direction: Vector2 = Vector2.ZERO,
+	time_scale: float = 1.0
+) -> void:
+	var animation_name: String = _get_dash_animation_name(dash_direction)
+
 	_play_animation_if_changed(
-		dash_animation_name,
+		animation_name,
 		false,
-		GameplayStateTypes.DASHING
+		GameplayStateTypes.DASHING,
+		time_scale
 	)
 
-## Solicita a animação de morte sem repetição automática.
 func play_death() -> void:
 	_play_animation_if_changed(
 		death_animation_name,
@@ -119,10 +136,6 @@ func play_death() -> void:
 		GameplayStateTypes.DEAD
 	)
 
-## Executa o feedback visual de dano sobre a Gaia.
-##
-## Caso um flash anterior ainda esteja ativo, ele é cancelado
-## antes de iniciar a nova transição de retorno à cor original.
 func play_damage_flash() -> void:
 	if damage_flash_tween != null:
 		damage_flash_tween.kill()
@@ -141,3 +154,158 @@ func play_damage_flash() -> void:
 	damage_flash_tween.finished.connect(func() -> void:
 		damage_flash_tween = null
 	)
+
+func _schedule_next_blink() -> void:
+	blink_schedule_token += 1
+
+	if not blink_enabled:
+		return
+
+	if not is_inside_tree():
+		return
+
+	var safe_min_seconds: float = max(0.1, blink_interval_min_seconds)
+	var safe_max_seconds: float = max(safe_min_seconds, blink_interval_max_seconds)
+	var wait_seconds: float = randf_range(safe_min_seconds, safe_max_seconds)
+	var token: int = blink_schedule_token
+
+	var timer: SceneTreeTimer = get_tree().create_timer(wait_seconds)
+
+	timer.timeout.connect(func() -> void:
+		if token != blink_schedule_token:
+			return
+
+		_try_play_scheduled_blink()
+	)
+
+func _try_play_scheduled_blink() -> void:
+	if not blink_enabled:
+		return
+
+	if is_blink_playing:
+		_schedule_next_blink()
+		return
+
+	var blink_animation_name: String = _get_blink_animation_for_current_state()
+
+	if blink_animation_name.strip_edges() == "":
+		_schedule_next_blink()
+		return
+
+	_play_blink_overlay_animation(blink_animation_name)
+
+func _state_supports_blink_overlay(gameplay_state: String) -> bool:
+	match gameplay_state:
+		GameplayStateTypes.IDLE:
+			return idle_blink_animation_name.strip_edges() != ""
+
+		GameplayStateTypes.MOVING:
+			return (
+				allow_blink_while_running
+				and run_blink_animation_name.strip_edges() != ""
+			)
+
+		GameplayStateTypes.DASHING:
+			return (
+				allow_blink_while_dashing
+				and dash_blink_animation_name.strip_edges() != ""
+			)
+
+		_:
+			return false
+
+func _clear_blink_overlay_track() -> void:
+	is_blink_playing = false
+
+	var safe_track_index: int = max(1, blink_track_index)
+	_clear_animation_track(safe_track_index)
+
+func _get_blink_animation_for_current_state() -> String:
+	match last_gameplay_state:
+		GameplayStateTypes.IDLE:
+			return idle_blink_animation_name
+
+		GameplayStateTypes.MOVING:
+			if not allow_blink_while_running:
+				return ""
+
+			return run_blink_animation_name
+
+		GameplayStateTypes.DASHING:
+			if not allow_blink_while_dashing:
+				return ""
+
+			return dash_blink_animation_name
+
+		_:
+			return ""
+
+func _play_blink_overlay_animation(blink_animation_name: String) -> void:
+	if blink_animation_name.strip_edges() == "":
+		_schedule_next_blink()
+		return
+
+	var safe_track_index: int = max(1, blink_track_index)
+
+	var played_successfully: bool = _play_animation_on_track(
+		blink_animation_name,
+		false,
+		safe_track_index,
+		false
+	)
+
+	if not played_successfully:
+		_schedule_next_blink()
+		return
+
+	is_blink_playing = true
+
+	var token: int = blink_schedule_token
+	var duration_seconds: float = max(0.01, blink_animation_duration_seconds)
+	var timer: SceneTreeTimer = get_tree().create_timer(duration_seconds)
+
+	timer.timeout.connect(func() -> void:
+		if token != blink_schedule_token:
+			return
+
+		_finish_blink_overlay()
+	)
+
+func _finish_blink_overlay() -> void:
+	is_blink_playing = false
+
+	var safe_track_index: int = max(1, blink_track_index)
+	_clear_animation_track(safe_track_index)
+
+	_schedule_next_blink()
+
+func _cancel_blink() -> void:
+	blink_schedule_token += 1
+	_clear_blink_overlay_track()
+
+func _get_dash_animation_name(dash_direction: Vector2) -> String:
+	var safe_dash_direction: Vector2 = dash_direction
+
+	if safe_dash_direction.length() <= 0.001:
+		return _get_fallback_dash_animation_name()
+
+	safe_dash_direction = safe_dash_direction.normalized()
+
+	if (
+		abs(safe_dash_direction.y) >= dash_vertical_threshold
+		and abs(safe_dash_direction.y) > abs(safe_dash_direction.x)
+	):
+		if safe_dash_direction.y < 0.0:
+			if dash_up_animation_name.strip_edges() != "":
+				return dash_up_animation_name
+		else:
+			if dash_down_animation_name.strip_edges() != "":
+				return dash_down_animation_name
+
+	return _get_fallback_dash_animation_name()
+
+func _get_fallback_dash_animation_name() -> String:
+	if dash_side_animation_name.strip_edges() != "":
+		return dash_side_animation_name
+
+	return dash_animation_name

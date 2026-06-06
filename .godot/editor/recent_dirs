@@ -1,3 +1,10 @@
+res://data/queens/gaia/
+res://gameplay/player/
+C:/Users/acer/Documents/Godot/Projects/queen-survivor/docs/03_domains/weapons/
+C:/Users/acer/Documents/Godot/Projects/queen-survivor/docs/03_domains/enemies/
+C:/Users/acer/Documents/Godot/Projects/queen-survivor/docs/02_lifecycles/
+C:/Users/acer/Documents/Godot/Projects/queen-survivor/docs/01_architecture/
+C:/Users/acer/Documents/Godot/Projects/queen-survivor/docs/04_decisions/
 res://gameplay/combat/
 res://data/enemies/
 res://data/queens/
@@ -12,8 +19,6 @@ res://data/spawn_timelines/test_arena_10min/
 res://ui/hud/
 C:/Users/acer/Documents/Godot/Projects/queen-survivor/docs/03_domains/maps/
 C:/Users/acer/Documents/Godot/Projects/queen-survivor/docs/05_game_design/
-C:/Users/acer/Documents/Godot/Projects/queen-survivor/docs/04_decisions/
-C:/Users/acer/Documents/Godot/Projects/queen-survivor/docs/02_lifecycles/
 C:/Users/acer/Documents/Godot/Projects/queen-survivor/docs/03_domains/results/
 res://ui/result/
 res://data/maps/
@@ -23,6 +28,4 @@ res://ui/level_up/
 res://gameplay/run/
 res://data/weapons/components/
 res://gameplay/weapons/attacks/
-res://visual/weapons/gaia_initial_weapon/
-res://gameplay/weapons/gaia/
 C:/Users/acer/Documents/Godot/Projects/queen-survivor/data/localization/

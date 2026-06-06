@@ -1,0 +1,29 @@
+[gd_resource type="Resource" script_class="QueenDashDefinition" format=3 uid="uid://bur0bcw5tmnkx"]
+
+[ext_resource type="Script" uid="uid://dvk8ne584ljjf" path="res://definitions/AttackAreaDefinition.gd" id="1_amsvo"]
+[ext_resource type="Script" uid="uid://bxs38nfkbxel5" path="res://definitions/QueenDashDefinition.gd" id="2_htne8"]
+[ext_resource type="Script" uid="uid://eagwh5a4kuew" path="res://definitions/DamageComponentDefinition.gd" id="3_jdo3y"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_htne8"]
+size = Vector2(200, 200)
+
+[sub_resource type="Resource" id="Resource_htne8"]
+script = ExtResource("1_amsvo")
+id = "queen.gaia.dash"
+shape = SubResource("RectangleShape2D_htne8")
+local_offset = Vector2(60, 0)
+metadata/_custom_type_script = "uid://dvk8ne584ljjf"
+
+[resource]
+script = ExtResource("2_htne8")
+id = "gaia_basic_dash"
+dash_distance_pixels = 700.0
+dash_duration_seconds = 0.7
+allow_weapon_attacks_while_dashing = true
+pause_weapon_cooldown_while_dashing = false
+reset_weapon_cooldown_when_dash_ends = false
+impact_source_id = "gaia_dash"
+impact_knockback_max_velocity_override = 520.0
+impact_chase_weight_override = 1.0
+impact_areas = Array[ExtResource("1_amsvo")]([SubResource("Resource_htne8")])
+metadata/_custom_type_script = "uid://bxs38nfkbxel5"

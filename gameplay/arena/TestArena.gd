@@ -1,27 +1,15 @@
-## Visual técnico da arena infinita utilizada no protótipo.
-##
-## Desenha uma grade de referência e um marcador de origem para facilitar
-## testes de movimentação, spawn, câmera, alcance e orientação de ataques.
-##
-## Este script não define colisões, limites de mapa ou regras de gameplay.
 extends Node2D
 
-## Define se a grade técnica deve ser desenhada.
 @export var draw_debug_grid: bool = true
 
-## Distância em pixels entre linhas consecutivas da grade.
 @export var grid_size: int = 128
 
-## Extensão desenhada da grade para cada direção a partir da origem.
 @export var grid_extent: int = 4096
 
-## Define se o marcador circular da origem do mapa deve ser exibido.
 @export var draw_origin_marker: bool = true
 
-## Raio visual do marcador desenhado na coordenada `(0, 0)`.
 @export var origin_marker_radius: float = 10.0
 
-## Valida configurações visuais básicas e agenda o desenho inicial da arena.
 func _ready() -> void:
 	if draw_debug_grid and grid_size <= 0:
 		push_warning("[TestArena] grid_size precisa ser maior que zero para desenhar a grade.")
@@ -34,10 +22,6 @@ func _ready() -> void:
 
 	queue_redraw()
 
-## Desenha os elementos técnicos habilitados independentemente.
-##
-## A grade e o marcador possuem toggles separados para permitir testes
-## com a arena visualmente limpa sem perder referência da origem.
 func _draw() -> void:
 	if draw_debug_grid:
 		_draw_grid()
@@ -45,10 +29,6 @@ func _draw() -> void:
 	if draw_origin_marker:
 		_draw_origin_marker()
 
-## Desenha a grade técnica da arena e destaca seus eixos centrais.
-##
-## Linhas principais aparecem a cada quatro células para facilitar
-## leitura visual de distâncias maiores durante os testes.
 func _draw_grid() -> void:
 	if grid_size <= 0 or grid_extent <= 0:
 		return
@@ -102,7 +82,6 @@ func _draw_grid() -> void:
 		3.0
 	)
 
-## Desenha o marcador circular da origem absoluta da arena.
 func _draw_origin_marker() -> void:
 	if origin_marker_radius <= 0.0:
 		return

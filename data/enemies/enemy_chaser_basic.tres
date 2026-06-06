@@ -1,9 +1,9 @@
 [gd_resource type="Resource" script_class="EnemyDefinition" format=3 uid="uid://cdk2sbcwdtnd0"]
 
 [ext_resource type="Resource" uid="uid://bct06pf54aowq" path="res://data/enemies/enemy_attack_chaser_basic_contact.tres" id="1_dxn2a"]
-[ext_resource type="Script" uid="uid://dbnkbm8ijaa0r" path="res://definitions/HurtboxAreaDefinition.gd" id="1_fgtwb"]
 [ext_resource type="Script" uid="uid://fr6wn7bdn5xk" path="res://definitions/EnemyDefinition.gd" id="1_kl2a7"]
 [ext_resource type="Resource" uid="uid://u75uut5lm3eg" path="res://data/enemies/hurtbox_area_enemy_chaser_basic_body.tres" id="2_dxn2a"]
+[ext_resource type="Script" uid="uid://dbnkbm8ijaa0r" path="res://definitions/HurtboxAreaDefinition.gd" id="2_q0eit"]
 
 [resource]
 script = ExtResource("1_kl2a7")
@@ -13,11 +13,10 @@ description_key = "enemy.chaser_basic.description"
 base_max_hp = 14
 base_move_speed = 82.0
 contact_attack = ExtResource("1_dxn2a")
-weak_damage_types = ["physical"]
-resistant_damage_types = ["magical"]
 resistance_reduction_percent = 0.0
 xp_reward = 10
 coin_drop_chance = 0.2
-hurtbox_areas = Array[ExtResource("1_fgtwb")]([ExtResource("2_dxn2a")])
+hurtbox_areas = Array[ExtResource("2_q0eit")]([ExtResource("2_dxn2a")])
 spine_skeleton_data_resource_path = "uid://ch73k34flbrwq"
+received_knockback_chase_weight = 0.0
 metadata/_custom_type_script = "uid://fr6wn7bdn5xk"

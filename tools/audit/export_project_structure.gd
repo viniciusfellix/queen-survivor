@@ -1,27 +1,13 @@
 @tool
 extends EditorScript
 
-## Exporta a estrutura de todas as cenas do projeto para um arquivo TXT.
-##
-## O relatório contém:
-## - Cenas encontradas.
-## - Árvore de nós de cada cena.
-## - Tipo de cada nó.
-## - Caminho do script anexado a cada nó.
-## - Código-fonte dos scripts anexados, deduplicado ao final do relatório.
-##
-## Compatível com Godot 4.x.
-
 const OUTPUT_DIR := "res://_audit_export"
 const OUTPUT_FILE := OUTPUT_DIR + "/godot_project_structure.txt"
 
-## true  = inclui o conteúdo integral dos scripts no TXT.
-## false = inclui apenas o caminho dos scripts anexados.
 const INCLUDE_SCRIPT_SOURCE := true
 
 const SCENE_EXTENSIONS := ["tscn", "scn"]
 
-## Diretórios que não devem ser varridos.
 const IGNORED_DIRECTORIES := [
 	".godot",
 	".git",
@@ -32,7 +18,6 @@ const IGNORED_DIRECTORIES := [
 var _scene_paths: Array[String] = []
 var _attached_scripts: Dictionary = {}
 var _warnings: Array[String] = []
-
 
 func _run() -> void:
 	_scene_paths.clear()
@@ -54,7 +39,6 @@ func _run() -> void:
 
 	_save_report(lines)
 
-
 func _append_header(lines: Array[String]) -> void:
 	lines.append("GODOT PROJECT STRUCTURE EXPORT")
 	lines.append("=".repeat(110))
@@ -69,7 +53,6 @@ func _append_header(lines: Array[String]) -> void:
 	lines.append("")
 	lines.append("=".repeat(110))
 	lines.append("")
-
 
 func _collect_scene_paths(directory_path: String) -> void:
 	var directory := DirAccess.open(directory_path)
@@ -97,7 +80,6 @@ func _collect_scene_paths(directory_path: String) -> void:
 		item_name = directory.get_next()
 
 	directory.list_dir_end()
-
 
 func _append_scene_report(scene_path: String, lines: Array[String]) -> void:
 	var packed_scene := ResourceLoader.load(scene_path, "PackedScene") as PackedScene
@@ -156,15 +138,12 @@ func _append_scene_report(scene_path: String, lines: Array[String]) -> void:
 			]
 		)
 
-
 func _resolve_node_type(state: SceneState, node_index: int) -> String:
 	var node_type := String(state.get_node_type(node_index))
 
 	if not node_type.is_empty():
 		return node_type
 
-	## Em alguns casos, o nó representa a raiz de uma cena instanciada.
-	## Nessa situação, recuperamos o tipo da raiz da cena original.
 	var instanced_scene: PackedScene = state.get_node_instance(node_index)
 
 	if instanced_scene != null:
@@ -180,7 +159,6 @@ func _resolve_node_type(state: SceneState, node_index: int) -> String:
 
 	return "UnknownType"
 
-
 func _find_attached_script(state: SceneState, node_index: int) -> Script:
 	for property_index: int in state.get_node_property_count(node_index):
 		var property_name: StringName = state.get_node_property_name(node_index, property_index)
@@ -193,18 +171,15 @@ func _find_attached_script(state: SceneState, node_index: int) -> Script:
 
 	return null
 
-
 func _get_script_identifier(script: Script, scene_path: String, node_path: String) -> String:
 	if not script.resource_path.is_empty():
 		return script.resource_path
 
 	return "%s::built_in_script::%s" % [scene_path, node_path]
 
-
 func _register_script(script_identifier: String, script: Script) -> void:
 	if not _attached_scripts.has(script_identifier):
 		_attached_scripts[script_identifier] = script
-
 
 func _append_scripts_report(lines: Array[String]) -> void:
 	lines.append("")
@@ -229,7 +204,6 @@ func _append_scripts_report(lines: Array[String]) -> void:
 
 		var source_code := script.get_source_code()
 
-		## Fallback para scripts externos, caso o recurso não exponha o fonte diretamente.
 		if source_code.is_empty() \
 		and not script.resource_path.is_empty() \
 		and FileAccess.file_exists(script.resource_path):
@@ -239,7 +213,6 @@ func _append_scripts_report(lines: Array[String]) -> void:
 			lines.append("[Código-fonte não disponível para este script]")
 		else:
 			lines.append(source_code)
-
 
 func _append_warnings(lines: Array[String]) -> void:
 	if _warnings.is_empty():
@@ -253,13 +226,11 @@ func _append_warnings(lines: Array[String]) -> void:
 	for warning in _warnings:
 		lines.append("- %s" % warning)
 
-
 func _calculate_depth(node_path: String) -> int:
 	if node_path.is_empty() or node_path == ".":
 		return 0
 
 	return node_path.count("/") + 1
-
 
 func _save_report(lines: Array[String]) -> void:
 	var create_directory_error: Error = DirAccess.make_dir_recursive_absolute(OUTPUT_DIR)
