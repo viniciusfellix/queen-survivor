@@ -1,0 +1,4 @@
+*.tmp
+*.tmp.*
+*.tscn*.tmp
+*.tres*.tmp
