@@ -28,3 +28,6 @@ monitorable = false
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="CollectArea" unique_id=337458570]
 shape = SubResource("CircleShape2D_collect")
+
+[node name="IdleTimer" type="Timer" parent="." unique_id=773145221]
+one_shot = true
