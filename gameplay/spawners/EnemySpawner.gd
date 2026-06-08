@@ -59,7 +59,7 @@ extends Node
 
 @export var prevent_multiple_spawns_same_frame: bool = true
 
-@export var log_spawn_distance: bool = true
+@export var log_spawn_distance: bool = false
 
 
 ## Configurações para spawn controlado por timeline do mapa.
@@ -69,7 +69,7 @@ extends Node
 
 @export var spawn_timeline_definition: SpawnTimelineDefinition
 
-@export var log_timeline_changes: bool = true
+@export var log_timeline_changes: bool = false
 
 
 ## Pré-aquecimento do pool de inimigos.

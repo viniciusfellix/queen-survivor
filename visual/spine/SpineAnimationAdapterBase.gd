@@ -5,7 +5,7 @@ class_name SpineAnimationAdapterBase
 @export var spine_sprite_path: NodePath
 
 @export_group("Diagnostics")
-@export var log_ready_status: bool = true
+@export var log_ready_status: bool = false
 @export var log_animation_changes: bool = false
 @onready var spine_sprite: Node = _resolve_spine_sprite()
 

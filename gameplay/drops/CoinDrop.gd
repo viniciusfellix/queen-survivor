@@ -18,7 +18,7 @@ class_name CoinDrop
 @export var initial_idle_seconds: float = 0.15
 @export var magnet_acceleration: float = 900.0
 @export var max_magnet_speed: float = 520.0
-@export var draw_debug_visual: bool = true
+@export var draw_debug_visual: bool = false
 @export var debug_radius: float = 8.0
 @export var debug_color: Color = Color(1.0, 0.78, 0.18, 1.0)
 @export var debug_outline_color: Color = Color(1.0, 1.0, 1.0, 0.95)

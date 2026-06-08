@@ -22,7 +22,7 @@ class_name SpineVisualControllerBase
 @export_group("Diagnostics")
 
 ## Loga mudanças visuais quando ativo.
-@export var log_visual_state_changes: bool = true
+@export var log_visual_state_changes: bool = false
 
 ## Referência ao adapter visual.
 @onready var spine_adapter: Node = _resolve_spine_adapter()
