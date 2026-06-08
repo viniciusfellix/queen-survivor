@@ -1,7 +1,26 @@
-# Domínio — Localização
+# Dominio - Localizacao
 
-A localização usa o sistema **nativo** do Godot: `res://data/localization/translation.csv` (recurso Translation), registrado em `project.godot [internationalization]` via `locale/translations`, com `locale/fallback="pt_BR"`. Novos textos de gameplay/UI devem possuir chave no CSV.
+A localizacao usa o sistema nativo do Godot:
 
-Os textos são resolvidos com `tr(key)`. O locale inicial é definido no boot por `App.gd` (`TranslationServer.set_locale("pt_BR")`); a troca de idioma é feita via `TranslationServer.set_locale(...)`.
+- arquivo fonte versionado: `res://data/localization/translation.csv`
+- registro no projeto: `project.godot [internationalization]`
+- fallback atual: `locale/fallback="pt_BR"`
+- resolucao de texto: `tr(key)`
 
-Idiomas suportados (7): `pt_BR`, `en`, `es`, `zh`, `ja`, `ko`, `ru`.
+O locale inicial e definido no boot por `App.gd` via `TranslationServer.set_locale("pt_BR")`.
+
+## Estado atual
+
+- Nao existe mais `LocalizationManager` em runtime.
+- Nao existe mais JSON proprio como source of truth de traducao.
+- O CSV nativo da Godot e a fonte atual de traducao versionada.
+
+## Idiomas suportados
+
+`pt_BR`, `en`, `es`, `zh`, `ja`, `ko`, `ru`
+
+## Regras para novos textos
+
+- criar a chave em `translation.csv`
+- usar `tr("chave")` no codigo ou em scripts de UI
+- nao criar sistema paralelo de lookup textual
