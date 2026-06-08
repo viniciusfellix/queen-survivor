@@ -333,6 +333,7 @@ func _on_pool_acquire() -> void:
 	death_despawn_token += 1
 	is_alive = true
 	target_node = null
+	visual_chase_direction = Vector2.RIGHT
 	set_physics_process(true)
 
 	velocity = Vector2.ZERO
@@ -355,11 +356,14 @@ func _on_pool_acquire() -> void:
 	if contact_attack_hitbox != null:
 		contact_attack_hitbox.set_attack_active(true)
 
+	_reset_visual_for_pool_reuse()
+
 ## Hook do pool: desliga combate e limpa estado sensível ao devolver o inimigo.
 func _on_pool_release() -> void:
 	death_despawn_token += 1
 	is_alive = false
 	target_node = null
+	visual_chase_direction = Vector2.RIGHT
 	set_physics_process(false)
 
 	velocity = Vector2.ZERO
@@ -372,6 +376,7 @@ func _on_pool_release() -> void:
 	last_damage_source_id = ""
 
 	_disable_combat_areas()
+	_deactivate_visual_for_pool()
 
 ## Copia dados do EnemyDefinition para estado runtime do inimigo.
 func _apply_definition() -> void:
@@ -507,6 +512,28 @@ func _disable_combat_areas() -> void:
 
 	if contact_attack_hitbox != null:
 		contact_attack_hitbox.set_attack_active(false)
+
+## Solicita que o visual pooled descarte morte/flash/tweens antigos antes de reusar.
+func _reset_visual_for_pool_reuse() -> void:
+	if visual_controller == null:
+		visual_controller = _resolve_visual_controller()
+
+	if visual_controller == null:
+		return
+
+	if visual_controller.has_method("reset_visual_state"):
+		visual_controller.call("reset_visual_state")
+
+## Solicita que o visual pooled entre em estado neutro ao sair da run ativa.
+func _deactivate_visual_for_pool() -> void:
+	if visual_controller == null:
+		visual_controller = _resolve_visual_controller()
+
+	if visual_controller == null:
+		return
+
+	if visual_controller.has_method("deactivate_for_pool"):
+		visual_controller.call("deactivate_for_pool")
 
 ## Calcula perseguição direta em direção à Gaia.
 func _follow_target() -> void:

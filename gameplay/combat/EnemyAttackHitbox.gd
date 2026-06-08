@@ -58,6 +58,16 @@ func _ready() -> void:
 	if not area_exited.is_connected(_on_area_exited):
 		area_exited.connect(_on_area_exited)
 
+## Hook do pool: limpa estado interno antes de o inimigo ser configurado novamente.
+func _on_pool_acquire() -> void:
+	reset_runtime_state()
+	set_attack_active(false)
+
+## Hook do pool: desliga tracking ofensivo ao devolver o inimigo ao pool.
+func _on_pool_release() -> void:
+	reset_runtime_state()
+	set_attack_active(false)
+
 ## Atualiza timing, cooldowns por receiver e tenta aplicar dano quando ativo.
 func _physics_process(delta: float) -> void:
 	if not is_configured or not is_active:
@@ -81,6 +91,7 @@ func setup(
 	p_source_node: Node,
 	p_source_id: String = ""
 ) -> void:
+	reset_runtime_state()
 	source_node = p_source_node
 
 	if p_attack_definition == null or not p_attack_definition.is_valid_definition():
@@ -100,8 +111,6 @@ func setup(
 		source_id = runtime_definition.id
 
 	elapsed_seconds = 0.0
-	receiver_cooldowns.clear()
-	overlapping_hurtboxes.clear()
 
 	rebuild_runtime_shapes()
 
@@ -175,8 +184,7 @@ func set_attack_active(should_be_active: bool) -> void:
 		shape_node.set_deferred("disabled", not should_be_active)
 
 	if not should_be_active:
-		receiver_cooldowns.clear()
-		overlapping_hurtboxes.clear()
+		clear_tracked_receivers()
 
 ## Verifica hurtboxes rastreadas e aplica dano respeitando cooldown por receiver.
 func _try_damage_overlapping_hurtboxes() -> void:
@@ -274,6 +282,9 @@ func _register_current_overlaps() -> void:
 
 ## Reduz os cooldowns individuais de receivers atingidos recentemente.
 func _update_receiver_cooldowns(delta: float) -> void:
+	if receiver_cooldowns.is_empty():
+		return
+
 	for receiver_id_variant: Variant in receiver_cooldowns.keys():
 		var remaining_seconds: float = (
 			float(receiver_cooldowns.get(receiver_id_variant, 0.0)) - delta
@@ -302,6 +313,20 @@ func _clear_runtime_shapes() -> void:
 		shape_node.queue_free()
 
 	runtime_shape_nodes.clear()
+
+## Limpa receivers rastreados e cooldowns de usos anteriores.
+func clear_tracked_receivers() -> void:
+	receiver_cooldowns.clear()
+	overlapping_hurtboxes.clear()
+
+## Reseta estado runtime sensível para reuso pooled seguro.
+func reset_runtime_state() -> void:
+	elapsed_seconds = 0.0
+	source_node = null
+	source_id = ""
+	runtime_definition = null
+	is_configured = false
+	clear_tracked_receivers()
 
 ## Retorna dados compactos para debug/auditoria.
 func get_debug_data() -> Dictionary:

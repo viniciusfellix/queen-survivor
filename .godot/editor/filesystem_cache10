@@ -1,5 +1,5 @@
 cb68465a049d370e5dc715e0fed1d1f8
-::res://::1780891308
+::res://::1780891835
 AUDIT_01_PROJECT_INVENTORY.md::TextFile::-1::1780870398::0::1::::<><><>0<>0<><>::
 AUDIT_02_ARCHITECTURE_REVIEW.md::TextFile::-1::1780871881::0::1::::<><><>0<>0<><>::
 AUDIT_03_SYSTEM_CLASSIFICATION.md::TextFile::-1::1780871881::0::1::::<><><>0<>0<><>::
@@ -230,7 +230,7 @@ structural_audit_checklist.md::TextFile::-1::1780780437::0::1::::<><><>0<>0<><>:
 ::res://docs/08_testing/::1780863223
 combat_modular_validation.md::TextFile::-1::1780863223::0::1::::<><><>0<>0<><>::
 regression_module_1.md::TextFile::-1::1780863223::0::1::::<><><>0<>0<><>::
-::res://docs/migration/::1780890996
+::res://docs/migration/::1780891642
 CURRENT_SOURCE_OF_TRUTH.md::TextFile::-1::1780886459::0::1::::<><><>0<>0<><>::
 PR1_STRUCTURAL_CLEANUP.md::TextFile::-1::1780884738::0::1::::<><><>0<>0<><>::
 PR2_PARALLEL_RUNSCENE.md::TextFile::-1::1780885040::0::1::::<><><>0<>0<><>::
@@ -243,6 +243,7 @@ PR8_POOLING_LIFECYCLE_AUDIT.md::TextFile::-1::1780888041::0::1::::<><><>0<>0<><>
 PR9_GODOT_NATIVE_LOCALIZATION.md::TextFile::-1::1780888687::0::1::::<><><>0<>0<><>::
 PR10_SHORT_LIVED_OBJECT_POOLING.md::TextFile::-1::1780889080::0::1::::<><><>0<>0<><>::
 PR11_ENEMY_LIFECYCLE_POOLING_AUDIT.md::TextFile::-1::1780890996::0::1::::<><><>0<>0<><>::
+PR12_ENEMY_POOLED_REUSE_HARDENING.md::TextFile::-1::1780891642::0::1::::<><><>0<>0<><>::
 ::res://gameplay/::1779306989
 ::res://gameplay/arena/::1780863223
 TestArena.gd::GDScript::1916285675563646228::1780780437::0::1::::<>Node2D<><>0<>0<><>::
@@ -252,14 +253,14 @@ FollowCamera.gd::GDScript::4422091295799672834::1780780437::0::1::::<>Camera2D<>
 ::res://gameplay/combat/::1780863223
 DamagePayload.gd::GDScript::665767500730511566::1780780437::0::1::::DamagePayload<>RefCounted<><>0<>0<><>::
 DamageResolver.gd::GDScript::1636718477248732714::1780780437::0::1::::DamageResolver<>RefCounted<><>0<>0<><>::
-EnemyAttackHitbox.gd::GDScript::1076059727398489994::1780888040::0::1::::EnemyAttackHitbox<>Area2D<><>0<>0<><>::
-HurtboxComponent.gd::GDScript::5520735660760564168::1780780437::0::1::::HurtboxComponent<>Area2D<><>0<>0<><>::
+EnemyAttackHitbox.gd::GDScript::1076059727398489994::1780891640::0::1::::EnemyAttackHitbox<>Area2D<><>0<>0<><>::
+HurtboxComponent.gd::GDScript::5520735660760564168::1780891641::0::1::::HurtboxComponent<>Area2D<><>0<>0<><>::
 ::res://gameplay/drops/::1780889885
 CoinDrop.gd::GDScript::3785625926568661064::1780888039::0::1::::CoinDrop<>Node2D<><>0<>0<><>::
 CoinDrop.tscn::PackedScene::587500221055694846::1780889885::0::1::::<><><>0<>0<><>::uid://bt61yabvjl8ho::::res://gameplay/drops/CoinDrop.gd<>uid://bcfegd6d7xccr::::res://data/drops/coin_default.tres
 DropController.gd::GDScript::6528458090303809249::1780863223::0::1::::<>Node<><>0<>0<><>::
 ::res://gameplay/enemies/::1780863223
-EnemyBase.gd::GDScript::4581220726298131987::1780890995::0::1::::EnemyBase<>CharacterBody2D<><>0<>0<><>::
+EnemyBase.gd::GDScript::4581220726298131987::1780891640::0::1::::EnemyBase<>CharacterBody2D<><>0<>0<><>::
 EnemyBase.tscn::PackedScene::7635436700707188906::1780887522::0::1::::<><><>0<>0<><>::uid://b6jgbhwoc2gnj::::res://gameplay/enemies/EnemyBase.gd<>uid://bal0n2h0w1ovu::::res://visual/enemies/goblin_warrior/GoblinWarriorVisual.tscn<>uid://plist0qhvo47::::res://gameplay/combat/EnemyAttackHitbox.gd<>uid://ckwjyep0lbn5a::::res://gameplay/combat/HurtboxComponent.gd
 ::res://gameplay/level_up/::1780780437
 LevelUpOptionService.gd::GDScript::3325403227772563967::1780780437::0::1::::LevelUpOptionService<>RefCounted<><>0<>0<><>::
@@ -338,9 +339,9 @@ GaiaVisualController.gd::GDScript::6618924662721466233::1780780437::0::1::::<>No
 ::res://visual/enemies/goblin_warrior/::1780780437
 GoblinWarriorSpineAdapter.gd::GDScript::4988648287107107971::1780780437::0::1::::<>Node<><>0<>0<><>::
 GoblinWarriorVisual.tscn::PackedScene::2410671409238092454::1780780437::0::1::::<><><>0<>0<><>::uid://btf63xacwt2kg::::res://visual/enemies/goblin_warrior/GoblinWarriorVisualController.gd<>uid://ch73k34flbrwq::::res://assets/spine/goblin-warrior/goblin_warrior_spine_skeleton_data_resource.tres<>uid://cdcskqs33d5fj::::res://visual/enemies/goblin_warrior/GoblinWarriorSpineAdapter.gd
-GoblinWarriorVisualController.gd::GDScript::3732264038749214590::1780780437::0::1::::<>Node2D<><>0<>0<><>::
+GoblinWarriorVisualController.gd::GDScript::3732264038749214590::1780891641::0::1::::<>Node2D<><>0<>0<><>::
 ::res://visual/spine/::1780780437
-SpineAnimationAdapterBase.gd::GDScript::3821145704761055715::1780780437::0::1::::SpineAnimationAdapterBase<>Node<><>0<>0<><>::
+SpineAnimationAdapterBase.gd::GDScript::3821145704761055715::1780891641::0::1::::SpineAnimationAdapterBase<>Node<><>0<>0<><>::
 SpineVisualControllerBase.gd::GDScript::8109806863181187401::1780780437::0::1::::SpineVisualControllerBase<>Node2D<><>0<>0<><>::
 ::res://visual/weapons/::1779158494
 ::res://visual/weapons/gaia_initial_weapon/::1780863223
