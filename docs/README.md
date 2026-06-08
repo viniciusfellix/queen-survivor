@@ -3,7 +3,8 @@
 **Estado documentado:** Módulo 1 — Core, Gaia e Arena Infinita, após a auditoria/refatoração 2R1-D e a migração validada do combate modular Hitbox/Hurtbox.  
 **Engine:** Godot 4.6.1 com Spine.  
 **Plataforma inicial:** PC.  
-**Cena técnica atual:** `res://gameplay/test/TestGaiaScene.tscn`.
+**Cena oficial atual da run:** `res://scenes/run/RunScene.tscn`.  
+**Cena técnica legada de referência:** `res://gameplay/test/TestGaiaScene.tscn`.
 
 ## Objetivo desta pasta
 

@@ -66,6 +66,10 @@ extends CanvasLayer
 
 @export var max_completed_maps_to_show: int = 3
 
+@export_group("Refresh")
+
+@export var refresh_interval_seconds: float = 0.20
+
 @onready var panel: Panel = get_node_or_null("Panel") as Panel
 
 @onready var label: Label = _resolve_label()
@@ -75,6 +79,8 @@ extends CanvasLayer
 var last_animation_name: String = ""
 
 var warned_missing_enemy_link_drawer: bool = false
+var refresh_timer: float = 0.0
+var last_enemy_link_signature: String = ""
 
 func _ready() -> void:
 	_configure_panel()
@@ -102,6 +108,13 @@ func _process(_delta: float) -> void:
 
 	if not debug_enabled:
 		return
+
+	refresh_timer += _delta
+
+	if refresh_timer < refresh_interval_seconds:
+		return
+
+	refresh_timer = 0.0
 
 	if label == null:
 		label = _resolve_label()
@@ -437,6 +450,13 @@ func _format_limited_array(value: Variant, limit: int) -> String:
 	]
 
 func _sync_enemy_link_drawer() -> void:
+	var current_signature: String = _build_enemy_link_signature()
+
+	if current_signature == last_enemy_link_signature:
+		return
+
+	last_enemy_link_signature = current_signature
+
 	if enemy_link_drawer == null:
 		if debug_enabled and show_enemy_links and not warned_missing_enemy_link_drawer:
 			push_warning("[DebugOverlay] EnemyLinkDrawer não encontrado na cena.")
@@ -467,3 +487,16 @@ func _sync_enemy_link_drawer() -> void:
 
 func _on_spine_animation_changed(animation_name: String) -> void:
 	last_animation_name = animation_name
+
+func _build_enemy_link_signature() -> String:
+	return "|".join([
+		str(debug_enabled),
+		str(show_enemy_links),
+		enemy_links_player_group_name,
+		enemy_links_enemy_group_name,
+		str(enemy_link_color),
+		str(enemy_link_width),
+		str(show_enemy_link_markers),
+		str(player_link_marker_radius),
+		str(enemy_link_marker_radius)
+	])

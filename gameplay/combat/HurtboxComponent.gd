@@ -47,6 +47,16 @@ func _ready() -> void:
 	if not hurtbox_areas.is_empty():
 		rebuild_runtime_shapes()
 
+## Hook do pool: deixa a hurtbox inerte até o setup do próximo uso.
+func _on_pool_acquire() -> void:
+	damage_receiver = null
+	set_hurtbox_active(false)
+
+## Hook do pool: limpa receiver e desliga a hurtbox ao devolver ao pool.
+func _on_pool_release() -> void:
+	damage_receiver = null
+	set_hurtbox_active(false)
+
 ## Configura áreas vulneráveis e receiver de dano em runtime.
 func setup(
 	p_hurtbox_areas: Array[HurtboxAreaDefinition],

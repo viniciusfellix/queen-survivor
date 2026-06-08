@@ -70,6 +70,7 @@ var attack_direction: Vector2 = Vector2.RIGHT
 
 ## Inicializa nodes, textura e rotação.
 func _ready() -> void:
+	set_process(true)
 	_resolve_nodes_if_needed()
 	_setup_placeholder_texture()
 	_apply_visual_mode()
@@ -92,8 +93,12 @@ func _process(delta: float) -> void:
 ## O setup() reaplica direção, lifetime e escala em seguida.
 func _on_pool_acquire() -> void:
 	elapsed_seconds = 0.0
-	modulate.a = 1.0
+	attack_direction = Vector2.RIGHT
+	rotation = deg_to_rad(angle_offset_degrees)
+	scale = Vector2.ONE
+	modulate = Color.WHITE
 	visible = true
+	set_process(true)
 
 ## Configura direção, lifetime e escala do visual.
 ##
@@ -114,8 +119,20 @@ func setup(
 	scale = p_visual_scale
 	elapsed_seconds = 0.0
 	modulate.a = 1.0
+	visible = true
+	set_process(true)
 
 	_apply_direction_rotation()
+
+## Hook do pool: pausa processamento e esconde o visual ao hibernar.
+func _on_pool_release() -> void:
+	set_process(false)
+	visible = false
+	elapsed_seconds = 0.0
+	attack_direction = Vector2.RIGHT
+	rotation = deg_to_rad(angle_offset_degrees)
+	scale = Vector2.ONE
+	modulate = Color.WHITE
 
 ## Altera modo visual em runtime.
 func set_visual_mode(new_mode: VisualMode) -> void:

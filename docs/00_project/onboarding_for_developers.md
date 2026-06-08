@@ -10,7 +10,9 @@ Leia `docs/README.md`, o status do módulo, a arquitetura de cenas, a arquitetur
 
 ## Cena técnica
 
-Execute `res://gameplay/test/TestGaiaScene.tscn` para validar o protótipo atual.
+Use `res://scenes/run/RunScene.tscn` como composição oficial atual da run.
+
+`res://gameplay/test/TestGaiaScene.tscn` permanece no projeto apenas como referência técnica temporária da composição anterior.
 
 ## Antes de alterar
 

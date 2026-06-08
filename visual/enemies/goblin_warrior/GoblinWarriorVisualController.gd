@@ -164,3 +164,34 @@ func play_damage_flash() -> void:
 			"duration_seconds": damage_flash_duration
 		}
 	)
+
+## Reseta estado visual para reuso pooled seguro antes do proximo spawn.
+func reset_visual_state() -> void:
+	_stop_damage_flash_tween()
+	modulate = default_modulate
+	visible = true
+	current_animation_name = ""
+	current_visual_state = ""
+	current_animation_time_scale = 1.0
+	scale = Vector2(abs(scale.x), abs(scale.y))
+
+	if spine_adapter != null and spine_adapter.has_method("reset_adapter_state"):
+		spine_adapter.call("reset_adapter_state")
+
+## Coloca o visual em estado neutro ao sair do pool ativo.
+func deactivate_for_pool() -> void:
+	_stop_damage_flash_tween()
+	modulate = default_modulate
+	current_animation_name = ""
+	current_visual_state = ""
+	current_animation_time_scale = 1.0
+	scale = Vector2(abs(scale.x), abs(scale.y))
+
+	if spine_adapter != null and spine_adapter.has_method("reset_adapter_state"):
+		spine_adapter.call("reset_adapter_state")
+
+## Mata tween de flash para evitar reaproveitar brilho antigo.
+func _stop_damage_flash_tween() -> void:
+	if damage_flash_tween != null:
+		damage_flash_tween.kill()
+		damage_flash_tween = null

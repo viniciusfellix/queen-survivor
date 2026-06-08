@@ -119,17 +119,6 @@ func set_impact_active(should_be_active: bool) -> void:
 		shape_node.disabled = not should_be_active
 
 
-## Processa overlaps existentes enquanto o dash está ativo.
-func _physics_process(_delta: float) -> void:
-	if not is_active:
-		return
-
-	if not is_configured:
-		return
-
-	_process_current_overlaps()
-
-
 ## Reage a novas hurtboxes que entram na área durante o dash.
 func _on_area_entered(area: Area2D) -> void:
 	_try_apply_dash_impact_to_hurtbox(area)

@@ -27,7 +27,7 @@ shape = SubResource("CircleShape2D_0a7w7")
 [node name="PlayerHurtbox" type="Area2D" parent="." unique_id=1729074534]
 script = ExtResource("3_0a7w7")
 collision_layer_number = 7
-log_configuration = true
+log_configuration = false
 
 [node name="DashImpactArea" type="Area2D" parent="." unique_id=1755591863]
 monitoring = false

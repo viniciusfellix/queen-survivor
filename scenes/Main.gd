@@ -11,7 +11,7 @@
 extends Node
 
 ## Cena inicial carregada ao iniciar o jogo.
-@export_file("*.tscn") var initial_scene_path: String = "res://gameplay/test/TestGaiaScene.tscn"
+@export_file("*.tscn") var initial_scene_path: String = "res://scenes/run/RunScene.tscn"
 
 ## Root onde a cena carregada será instanciada.
 @onready var current_scene_root: Node = $CurrentSceneRoot

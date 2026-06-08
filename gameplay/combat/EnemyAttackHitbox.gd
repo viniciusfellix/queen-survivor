@@ -25,7 +25,7 @@ class_name EnemyAttackHitbox
 
 @export var log_configuration: bool = false
 
-@export var log_successful_hits: bool = true
+@export var log_successful_hits: bool = false
 
 ## Definition e origem usadas por esta instância runtime.
 var runtime_definition: EnemyAttackDefinition = null
@@ -35,6 +35,7 @@ var source_id: String = ""
 ## Shapes geradas em runtime e cooldowns por receiver atingido.
 var runtime_shape_nodes: Array[CollisionShape2D] = []
 var receiver_cooldowns: Dictionary = {}
+var overlapping_hurtboxes: Dictionary = {}
 
 ## Controle de tempo interno e estado de ativação.
 var elapsed_seconds: float = 0.0
@@ -50,6 +51,22 @@ func _ready() -> void:
 
 	if configure_collision_filter_on_ready:
 		_configure_collision_filter()
+
+	if not area_entered.is_connected(_on_area_entered):
+		area_entered.connect(_on_area_entered)
+
+	if not area_exited.is_connected(_on_area_exited):
+		area_exited.connect(_on_area_exited)
+
+## Hook do pool: limpa estado interno antes de o inimigo ser configurado novamente.
+func _on_pool_acquire() -> void:
+	reset_runtime_state()
+	set_attack_active(false)
+
+## Hook do pool: desliga tracking ofensivo ao devolver o inimigo ao pool.
+func _on_pool_release() -> void:
+	reset_runtime_state()
+	set_attack_active(false)
 
 ## Atualiza timing, cooldowns por receiver e tenta aplicar dano quando ativo.
 func _physics_process(delta: float) -> void:
@@ -74,6 +91,7 @@ func setup(
 	p_source_node: Node,
 	p_source_id: String = ""
 ) -> void:
+	reset_runtime_state()
 	source_node = p_source_node
 
 	if p_attack_definition == null or not p_attack_definition.is_valid_definition():
@@ -93,12 +111,12 @@ func setup(
 		source_id = runtime_definition.id
 
 	elapsed_seconds = 0.0
-	receiver_cooldowns.clear()
 
 	rebuild_runtime_shapes()
 
 	is_configured = not runtime_shape_nodes.is_empty()
 	set_attack_active(is_configured)
+	call_deferred("_register_current_overlaps")
 
 	if log_configuration:
 		DeveloperAuditLogger.log_combat(
@@ -144,6 +162,7 @@ func rebuild_runtime_shapes() -> void:
 		shape_node.shape = runtime_shape
 		shape_node.position = attack_area.local_offset
 		shape_node.rotation_degrees = attack_area.local_rotation_degrees
+		shape_node.disabled = true
 
 		add_child(shape_node)
 		runtime_shape_nodes.append(shape_node)
@@ -156,6 +175,7 @@ func set_attack_active(should_be_active: bool) -> void:
 	is_active = should_be_active
 
 	set_deferred("monitoring", should_be_active)
+	set_physics_process(should_be_active)
 
 	for shape_node: CollisionShape2D in runtime_shape_nodes:
 		if shape_node == null or not is_instance_valid(shape_node):
@@ -164,18 +184,24 @@ func set_attack_active(should_be_active: bool) -> void:
 		shape_node.set_deferred("disabled", not should_be_active)
 
 	if not should_be_active:
-		receiver_cooldowns.clear()
+		clear_tracked_receivers()
 
-## Verifica hurtboxes sobrepostas e aplica dano respeitando cooldown por receiver.
+## Verifica hurtboxes rastreadas e aplica dano respeitando cooldown por receiver.
 func _try_damage_overlapping_hurtboxes() -> void:
 	if runtime_definition == null:
 		return
 
-	for overlapping_area: Area2D in get_overlapping_areas():
-		if not overlapping_area is HurtboxComponent:
+	for hurtbox_instance_id: Variant in overlapping_hurtboxes.keys():
+		var hurtbox_variant: Variant = overlapping_hurtboxes.get(hurtbox_instance_id, null)
+
+		if not (hurtbox_variant is HurtboxComponent):
 			continue
 
-		var hurtbox: HurtboxComponent = overlapping_area as HurtboxComponent
+		var hurtbox: HurtboxComponent = hurtbox_variant as HurtboxComponent
+
+		if hurtbox == null or not is_instance_valid(hurtbox):
+			overlapping_hurtboxes.erase(hurtbox_instance_id)
+			continue
 
 		if not hurtbox.can_receive_damage():
 			continue
@@ -231,8 +257,34 @@ func _try_damage_overlapping_hurtboxes() -> void:
 				}
 			)
 
+## Registra hurtbox quando ela entra na área ofensiva.
+func _on_area_entered(area: Area2D) -> void:
+	if not (area is HurtboxComponent):
+		return
+
+	var hurtbox: HurtboxComponent = area as HurtboxComponent
+	overlapping_hurtboxes[int(hurtbox.get_instance_id())] = hurtbox
+
+## Remove hurtbox rastreada quando ela sai da área ofensiva.
+func _on_area_exited(area: Area2D) -> void:
+	if not (area is HurtboxComponent):
+		return
+
+	overlapping_hurtboxes.erase(int(area.get_instance_id()))
+
+## Faz uma leitura inicial dos overlaps ao ativar a hitbox.
+func _register_current_overlaps() -> void:
+	if not is_active:
+		return
+
+	for overlapping_area: Area2D in get_overlapping_areas():
+		_on_area_entered(overlapping_area)
+
 ## Reduz os cooldowns individuais de receivers atingidos recentemente.
 func _update_receiver_cooldowns(delta: float) -> void:
+	if receiver_cooldowns.is_empty():
+		return
+
 	for receiver_id_variant: Variant in receiver_cooldowns.keys():
 		var remaining_seconds: float = (
 			float(receiver_cooldowns.get(receiver_id_variant, 0.0)) - delta
@@ -261,6 +313,20 @@ func _clear_runtime_shapes() -> void:
 		shape_node.queue_free()
 
 	runtime_shape_nodes.clear()
+
+## Limpa receivers rastreados e cooldowns de usos anteriores.
+func clear_tracked_receivers() -> void:
+	receiver_cooldowns.clear()
+	overlapping_hurtboxes.clear()
+
+## Reseta estado runtime sensível para reuso pooled seguro.
+func reset_runtime_state() -> void:
+	elapsed_seconds = 0.0
+	source_node = null
+	source_id = ""
+	runtime_definition = null
+	is_configured = false
+	clear_tracked_receivers()
 
 ## Retorna dados compactos para debug/auditoria.
 func get_debug_data() -> Dictionary:

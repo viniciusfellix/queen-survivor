@@ -46,6 +46,9 @@ class_name FloatingCombatText
 
 ## Evita iniciar animação mais de uma vez.
 var animation_started: bool = false
+var movement_tween: Tween = null
+var scale_tween: Tween = null
+var fade_tween: Tween = null
 
 ## Configura aparência base do label.
 func _ready() -> void:
@@ -92,7 +95,7 @@ func _play_animation() -> void:
 	var fade_delay: float = grow_seconds * 0.70
 	var fade_seconds: float = max(0.05, total_lifetime_seconds - fade_delay)
 
-	var movement_tween: Tween = create_tween()
+	movement_tween = create_tween()
 	movement_tween.bind_node(self)
 	movement_tween.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
 	movement_tween.tween_property(
@@ -102,7 +105,7 @@ func _play_animation() -> void:
 		total_lifetime_seconds
 	).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 
-	var scale_tween: Tween = create_tween()
+	scale_tween = create_tween()
 	scale_tween.bind_node(self)
 	scale_tween.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
 	scale_tween.tween_property(
@@ -118,7 +121,7 @@ func _play_animation() -> void:
 		shrink_seconds
 	).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
 
-	var fade_tween: Tween = create_tween()
+	fade_tween = create_tween()
 	fade_tween.bind_node(self)
 	fade_tween.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
 	fade_tween.tween_property(
@@ -137,7 +140,37 @@ func _play_animation() -> void:
 ##
 ## O setup() reaplica texto, cor, escala e modulate em seguida.
 func _on_pool_acquire() -> void:
+	_kill_active_tweens()
 	animation_started = false
+	text = ""
 	visible = true
 	self_modulate = Color.WHITE
+	modulate = Color.WHITE
 	scale = start_scale
+	pivot_offset = size * 0.5
+
+## Hook do pool: mata tweens ativos antes de devolver o texto à fila.
+func _on_pool_release() -> void:
+	_kill_active_tweens()
+	animation_started = false
+	text = ""
+	visible = false
+	self_modulate = Color.WHITE
+	modulate = Color.WHITE
+	scale = start_scale
+	pivot_offset = size * 0.5
+
+## Cancela tweens ativos para evitar estado sujo ao reusar o texto.
+func _kill_active_tweens() -> void:
+	if movement_tween != null and is_instance_valid(movement_tween):
+		movement_tween.kill()
+
+	if scale_tween != null and is_instance_valid(scale_tween):
+		scale_tween.kill()
+
+	if fade_tween != null and is_instance_valid(fade_tween):
+		fade_tween.kill()
+
+	movement_tween = null
+	scale_tween = null
+	fade_tween = null

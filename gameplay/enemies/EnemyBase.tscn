@@ -21,11 +21,11 @@ debug_color = Color(1, 0.011462747, 0.054261394, 0.41960785)
 
 [node name="ContactAttackHitbox" type="Area2D" parent="." unique_id=1204959538]
 script = ExtResource("3_o5f70")
-log_configuration = true
+log_configuration = false
 
 [node name="Hurtbox" type="Area2D" parent="." unique_id=1269563624]
 script = ExtResource("3_vrnya")
-log_configuration = true
+log_configuration = false
 
 [node name="VisualRoot" type="Node2D" parent="." unique_id=604840823]
 

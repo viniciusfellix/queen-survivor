@@ -72,6 +72,7 @@ var last_damage_source_id: String = ""
 var active_knockback_chase_weight: float = -1.0
 var player_body_slide_velocity: Vector2 = Vector2.ZERO
 var player_body_slide_decay_per_second: float = 360.0
+var death_despawn_token: int = 0
 
 ## Inicializa inimigo, aplica definition, resolve alvo/visual e prepara debug.
 func _ready() -> void:
@@ -261,8 +262,10 @@ func die(source_id: String = "") -> void:
 		return
 
 	is_alive = false
+	death_despawn_token += 1
 	velocity = Vector2.ZERO
 	body_bump_velocity = Vector2.ZERO
+	player_body_slide_velocity = Vector2.ZERO
 	_clear_received_knockback()
 
 	if hurtbox_component != null:
@@ -299,16 +302,27 @@ func die(source_id: String = "") -> void:
 	)
 
 	_update_visual_state()
+	set_physics_process(false)
 
-	remove_from_group("enemy")
+	if is_in_group("enemy"):
+		remove_from_group("enemy")
 
+	var despawn_token: int = death_despawn_token
 	var death_timer: SceneTreeTimer = get_tree().create_timer(remove_after_death_seconds)
-	death_timer.timeout.connect(_on_death_timer_timeout)
+	death_timer.timeout.connect(func() -> void:
+		if despawn_token != death_despawn_token:
+			return
+
+		_on_death_timer_timeout()
+	)
 
 ## Devolve o inimigo ao pool depois do pequeno delay de morte.
 ##
 ## Se o inimigo não tiver vindo do pool, o PoolManager faz queue_free() como fallback.
 func _on_death_timer_timeout() -> void:
+	if is_alive:
+		return
+
 	PoolManager.despawn(self)
 
 ## Hook do pool: restaura o inimigo ao estado de "recém-nascido" antes de reusar.
@@ -316,7 +330,11 @@ func _on_death_timer_timeout() -> void:
 ## A configuração de HP/áreas é refeita logo depois pelo setup() do spawner;
 ## aqui garantimos vida, grupo, velocidades e telemetria zerados.
 func _on_pool_acquire() -> void:
+	death_despawn_token += 1
 	is_alive = true
+	target_node = null
+	visual_chase_direction = Vector2.RIGHT
+	set_physics_process(true)
 
 	velocity = Vector2.ZERO
 	body_bump_velocity = Vector2.ZERO
@@ -337,6 +355,28 @@ func _on_pool_acquire() -> void:
 
 	if contact_attack_hitbox != null:
 		contact_attack_hitbox.set_attack_active(true)
+
+	_reset_visual_for_pool_reuse()
+
+## Hook do pool: desliga combate e limpa estado sensível ao devolver o inimigo.
+func _on_pool_release() -> void:
+	death_despawn_token += 1
+	is_alive = false
+	target_node = null
+	visual_chase_direction = Vector2.RIGHT
+	set_physics_process(false)
+
+	velocity = Vector2.ZERO
+	body_bump_velocity = Vector2.ZERO
+	player_body_slide_velocity = Vector2.ZERO
+	_clear_received_knockback()
+
+	total_damage_taken = 0
+	last_damage_taken = 0
+	last_damage_source_id = ""
+
+	_disable_combat_areas()
+	_deactivate_visual_for_pool()
 
 ## Copia dados do EnemyDefinition para estado runtime do inimigo.
 func _apply_definition() -> void:
@@ -472,6 +512,28 @@ func _disable_combat_areas() -> void:
 
 	if contact_attack_hitbox != null:
 		contact_attack_hitbox.set_attack_active(false)
+
+## Solicita que o visual pooled descarte morte/flash/tweens antigos antes de reusar.
+func _reset_visual_for_pool_reuse() -> void:
+	if visual_controller == null:
+		visual_controller = _resolve_visual_controller()
+
+	if visual_controller == null:
+		return
+
+	if visual_controller.has_method("reset_visual_state"):
+		visual_controller.call("reset_visual_state")
+
+## Solicita que o visual pooled entre em estado neutro ao sair da run ativa.
+func _deactivate_visual_for_pool() -> void:
+	if visual_controller == null:
+		visual_controller = _resolve_visual_controller()
+
+	if visual_controller == null:
+		return
+
+	if visual_controller.has_method("deactivate_for_pool"):
+		visual_controller.call("deactivate_for_pool")
 
 ## Calcula perseguição direta em direção à Gaia.
 func _follow_target() -> void:

@@ -145,6 +145,28 @@ func clear_animation_track(track_index: int) -> bool:
 
 	return cleared_successfully
 
+## Limpa tracks e cache interno para reuso pooled seguro do visual dono.
+func reset_adapter_state() -> void:
+	var tracked_indices: Array[int] = []
+
+	for track_key: Variant in current_animation_by_track.keys():
+		if track_key is int:
+			tracked_indices.append(int(track_key))
+
+	for track_key: Variant in current_time_scale_by_track.keys():
+		if track_key is int and not tracked_indices.has(int(track_key)):
+			tracked_indices.append(int(track_key))
+
+	if tracked_indices.is_empty():
+		tracked_indices.append(0)
+
+	for track_index: int in tracked_indices:
+		clear_animation_track(track_index)
+
+	current_animation_name = ""
+	current_animation_by_track.clear()
+	current_time_scale_by_track.clear()
+
 func get_current_animation_name() -> String:
 	return current_animation_name
 

@@ -472,31 +472,45 @@ func _on_player_damaged(
 	_max_hp: int,
 	_source_id: String
 ) -> void:
-	_refresh_all()
+	_update_hp(_get_player_debug_data())
 
 func _on_player_died(_source_id: String) -> void:
 	_refresh_all()
 
 func _on_run_xp_changed(
 	_run_xp_gained: int,
-	_current_level: int,
-	_current_level_xp: int,
-	_xp_required_for_next_level: int
+	current_level: int,
+	current_level_xp: int,
+	xp_required_for_next_level: int
 ) -> void:
-	_refresh_all()
+	var partial_run_data: Dictionary = {
+		"current_level": current_level,
+		"current_level_xp": current_level_xp,
+		"xp_required_for_next_level": xp_required_for_next_level
+	}
 
-func _on_run_enemy_killed(_enemy_id: String, _enemies_killed: int) -> void:
-	_refresh_all()
+	_update_xp(partial_run_data)
+	_update_level(partial_run_data)
 
-func _on_run_coins_changed(_run_coins_collected: int, _run_coins_available: int) -> void:
-	_refresh_all()
+func _on_run_enemy_killed(_enemy_id: String, enemies_killed: int) -> void:
+	_update_kills({
+		"enemies_killed": enemies_killed
+	})
+
+func _on_run_coins_changed(run_coins_collected: int, _run_coins_available: int) -> void:
+	_update_coins({
+		"run_coins_collected": run_coins_collected
+	})
 
 func _on_run_timer_changed(
-	_elapsed_seconds: float,
-	_remaining_seconds: float,
+	elapsed_seconds: float,
+	remaining_seconds: float,
 	_duration_seconds: float
 ) -> void:
-	_refresh_all()
+	_update_timer({
+		"elapsed_seconds": elapsed_seconds,
+		"remaining_seconds": remaining_seconds
+	})
 
 ## Callback de fim da run.
 func _on_run_finished(result_payload: RunResultPayload) -> void:
