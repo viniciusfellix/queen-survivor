@@ -1,5 +1,5 @@
 cb68465a049d370e5dc715e0fed1d1f8
-::res://::1780893439
+::res://::1780935045
 AUDIT_01_PROJECT_INVENTORY.md::TextFile::-1::1780870398::0::1::::<><><>0<>0<><>::
 AUDIT_02_ARCHITECTURE_REVIEW.md::TextFile::-1::1780871881::0::1::::<><><>0<>0<><>::
 AUDIT_03_SYSTEM_CLASSIFICATION.md::TextFile::-1::1780871881::0::1::::<><><>0<>0<><>::
@@ -258,7 +258,7 @@ DamageResolver.gd::GDScript::1636718477248732714::1780780437::0::1::::DamageReso
 EnemyAttackHitbox.gd::GDScript::1076059727398489994::1780891640::0::1::::EnemyAttackHitbox<>Area2D<><>0<>0<><>::
 HurtboxComponent.gd::GDScript::5520735660760564168::1780891641::0::1::::HurtboxComponent<>Area2D<><>0<>0<><>::
 ::res://gameplay/drops/::1780892936
-CoinDrop.gd::GDScript::3785625926568661064::1780893305::0::1::::CoinDrop<>Node2D<><>0<>0<><>::
+CoinDrop.gd::GDScript::3785625926568661064::1780893699::0::1::::CoinDrop<>Node2D<><>0<>0<><>::
 CoinDrop.tscn::PackedScene::587500221055694846::1780892950::0::1::::<><><>0<>0<><>::uid://bt61yabvjl8ho::::res://gameplay/drops/CoinDrop.gd<>uid://bcfegd6d7xccr::::res://data/drops/coin_default.tres
 DropController.gd::GDScript::6528458090303809249::1780863223::0::1::::<>Node<><>0<>0<><>::
 ::res://gameplay/enemies/::1780863223
