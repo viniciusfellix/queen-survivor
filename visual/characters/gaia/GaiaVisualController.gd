@@ -1,5 +1,10 @@
 extends "res://visual/spine/SpineVisualControllerBase.gd"
 
+@export_group("Aim Indicator")
+
+@export var aim_indicator_path: NodePath
+@export var show_aim_indicator: bool = true
+
 @export_group("Animations")
 
 @export var idle_animation_name: String = "Idle1_Pose2"
@@ -39,13 +44,20 @@ extends "res://visual/spine/SpineVisualControllerBase.gd"
 
 @export_group("Damage Flash")
 
-@export var damage_flash_color: Color = Color(1.0, 0.25, 0.25, 1.0)
+@export var damage_flash_colors: Array[Color] = [
+	Color(1.0, 0.0, 0.0, 1.0),
+	Color(0.0, 0.0, 0.0, 1.0),
+	Color(1.0, 0.0, 0.0, 1.0)
+]
 
-@export var damage_flash_duration: float = 0.12
+@export var damage_flash_step_seconds: float = 0.08
+
+@export var restore_default_between_flash_colors: bool = false
 
 var damage_flash_tween: Tween = null
 
 var default_modulate: Color = Color.WHITE
+@onready var aim_indicator: GaiaAimIndicator = _resolve_aim_indicator()
 
 var is_blink_playing: bool = false
 
@@ -66,7 +78,15 @@ func _play_initial_animation() -> void:
 
 func apply_runtime_state(runtime_state: PlayerRuntimeState) -> void:
 	if runtime_state == null:
+		_update_aim_indicator(Vector2.RIGHT, false)
 		return
+
+	var aim_direction: Vector2 = runtime_state.aim_direction
+
+	if aim_direction.length() <= 0.001:
+		aim_direction = runtime_state.last_valid_aim_direction
+
+	_update_aim_indicator(aim_direction, runtime_state.is_alive)
 
 	_apply_horizontal_facing(runtime_state.facing_direction)
 
@@ -137,23 +157,89 @@ func play_death() -> void:
 	)
 
 func play_damage_flash() -> void:
+	_stop_damage_flash_tween()
+
+	var flash_sequence: Array[Color] = _build_damage_flash_sequence()
+
+	if flash_sequence.is_empty():
+		modulate = default_modulate
+		return
+
+	modulate = flash_sequence[0]
+	damage_flash_tween = create_tween()
+
+	for sequence_index: int in range(1, flash_sequence.size()):
+		damage_flash_tween.tween_property(
+			self,
+			"modulate",
+			flash_sequence[sequence_index],
+			max(0.01, damage_flash_step_seconds)
+		)
+
+	damage_flash_tween.finished.connect(func() -> void:
+		modulate = default_modulate
+		damage_flash_tween = null
+	)
+
+func configure_aim_indicator(radius_pixels: float, is_enabled: bool = true) -> void:
+	if aim_indicator == null:
+		aim_indicator = _resolve_aim_indicator()
+
+	if aim_indicator == null:
+		return
+
+	aim_indicator.configure_indicator(radius_pixels, show_aim_indicator and is_enabled)
+
+func _resolve_aim_indicator() -> GaiaAimIndicator:
+	if aim_indicator_path != NodePath():
+		var configured_indicator: Node = get_node_or_null(aim_indicator_path)
+
+		if configured_indicator is GaiaAimIndicator:
+			return configured_indicator as GaiaAimIndicator
+
+	var sibling_indicator: Node = get_node_or_null("../GaiaAimIndicator")
+
+	if sibling_indicator is GaiaAimIndicator:
+		return sibling_indicator as GaiaAimIndicator
+
+	return null
+
+func _update_aim_indicator(direction: Vector2, is_runtime_visible: bool) -> void:
+	if aim_indicator == null:
+		aim_indicator = _resolve_aim_indicator()
+
+	if aim_indicator == null:
+		return
+
+	aim_indicator.set_indicator_enabled(show_aim_indicator and is_runtime_visible)
+	aim_indicator.apply_aim_direction(direction)
+
+func _build_damage_flash_sequence() -> Array[Color]:
+	var sequence: Array[Color] = []
+
+	for flash_color: Color in damage_flash_colors:
+		var sanitized_color: Color = flash_color
+		sanitized_color.a = default_modulate.a
+		sequence.append(sanitized_color)
+
+		if restore_default_between_flash_colors:
+			sequence.append(default_modulate)
+
+	if (
+		not restore_default_between_flash_colors
+		or sequence.is_empty()
+		or sequence[sequence.size() - 1] != default_modulate
+	):
+		sequence.append(default_modulate)
+
+	return sequence
+
+func _stop_damage_flash_tween() -> void:
 	if damage_flash_tween != null:
 		damage_flash_tween.kill()
 		damage_flash_tween = null
 
-	modulate = damage_flash_color
-
-	damage_flash_tween = create_tween()
-	damage_flash_tween.tween_property(
-		self,
-		"modulate",
-		default_modulate,
-		damage_flash_duration
-	)
-
-	damage_flash_tween.finished.connect(func() -> void:
-		damage_flash_tween = null
-	)
+	modulate = default_modulate
 
 func _schedule_next_blink() -> void:
 	blink_schedule_token += 1

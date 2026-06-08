@@ -51,6 +51,9 @@ extends Node
 @export var attack_hitbox_lifetime: float = 0.12
 @export var attack_areas: Array[AttackAreaDefinition] = []
 
+@export_group("Aim Indicator")
+@export var aim_indicator_radius_pixels: float = 0.0
+
 ## Efeitos aplicados somente depois de um hit válido.
 @export_group("On Hit Effects")
 @export var hit_knockback_enabled: bool = false
@@ -397,6 +400,64 @@ func _get_attack_area_debug_string() -> String:
 	return ", ".join(parts)
 
 ## Obtém PlayerRuntimeState do player dono da arma.
+func get_aim_indicator_radius_pixels() -> float:
+	if aim_indicator_radius_pixels > 0.0:
+		return aim_indicator_radius_pixels
+
+	var max_forward_reach: float = 0.0
+
+	for attack_area: AttackAreaDefinition in attack_areas:
+		if attack_area == null:
+			continue
+
+		if not attack_area.is_valid_definition():
+			continue
+
+		max_forward_reach = max(
+			max_forward_reach,
+			_get_attack_area_forward_reach_pixels(
+				attack_area,
+				attack_area_scale_multiplier
+			)
+		)
+
+	return max(attack_hitbox_offset, attack_hitbox_offset + max_forward_reach)
+
+func _get_attack_area_forward_reach_pixels(
+	attack_area: AttackAreaDefinition,
+	scale_multiplier: float
+) -> float:
+	if attack_area == null or not attack_area.is_valid_definition():
+		return 0.0
+
+	var runtime_shape: Shape2D = attack_area.build_runtime_shape(scale_multiplier)
+
+	if runtime_shape == null:
+		return 0.0
+
+	if runtime_shape is CircleShape2D:
+		var circle_shape: CircleShape2D = runtime_shape as CircleShape2D
+		return attack_area.local_offset.x + circle_shape.radius
+
+	if runtime_shape is RectangleShape2D:
+		var rectangle_shape: RectangleShape2D = runtime_shape as RectangleShape2D
+		return attack_area.local_offset.x + (rectangle_shape.size.x * 0.5)
+
+	if runtime_shape is CapsuleShape2D:
+		var capsule_shape: CapsuleShape2D = runtime_shape as CapsuleShape2D
+		return attack_area.local_offset.x + capsule_shape.radius + (capsule_shape.height * 0.5)
+
+	if runtime_shape is ConvexPolygonShape2D:
+		var polygon_shape: ConvexPolygonShape2D = runtime_shape as ConvexPolygonShape2D
+		var max_point_x: float = 0.0
+
+		for point: Vector2 in polygon_shape.points:
+			max_point_x = max(max_point_x, point.x)
+
+		return attack_area.local_offset.x + max_point_x
+
+	return 0.0
+
 func _get_player_runtime_state() -> PlayerRuntimeState:
 	if player_controller == null:
 		return null

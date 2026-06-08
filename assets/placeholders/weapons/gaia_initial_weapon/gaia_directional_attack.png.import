@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://djyx8dg75s0yd"
-path="res://.godot/imported/gaia_drectional_attack.png-f06d07fb07ca232d28aeaa0178ba585d.ctex"
+path="res://.godot/imported/gaia_directional_attack.png-41eb76b11ff01177bb81ecd81db6a48c.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/placeholders/weapons/gaia_initial_weapon/gaia_drectional_attack.png"
-dest_files=["res://.godot/imported/gaia_drectional_attack.png-f06d07fb07ca232d28aeaa0178ba585d.ctex"]
+source_file="res://assets/placeholders/weapons/gaia_initial_weapon/gaia_directional_attack.png"
+dest_files=["res://.godot/imported/gaia_directional_attack.png-41eb76b11ff01177bb81ecd81db6a48c.ctex"]
 
 [params]
 

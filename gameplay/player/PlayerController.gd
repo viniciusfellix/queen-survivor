@@ -28,6 +28,12 @@ class_name PlayerController
 ## Gaia. Enemies still detect her and slide around (player_body_slide) either way.
 @export var collide_with_enemy_bodies: bool = false
 
+@export_group("Aim")
+@export var aim_indicator_path: NodePath
+@export var weapon_controller_path: NodePath
+@export var mouse_aim_sensitivity: float = 1.0
+@export var analog_aim_sensitivity: float = 1.0
+
 
 ## Configurações runtime do dash da Gaia/player.
 @export_group("Dash")
@@ -45,6 +51,8 @@ class_name PlayerController
 @onready var dash_impact_area: PlayerDashImpactArea = (
 	_resolve_dash_impact_area()
 )
+@onready var aim_indicator: GaiaAimIndicator = _resolve_aim_indicator()
+@onready var primary_weapon_controller: Node = _resolve_primary_weapon_controller()
 
 
 ## Feedback visual e invulnerabilidade após dano recebido.
@@ -91,6 +99,7 @@ func _ready() -> void:
 	if visual_controller == null:
 		push_warning("[PlayerController] visual_controller não encontrado. Verifique visual_controller_path.")
 
+	_configure_aim_indicator()
 	_update_visual_state()
 	_queue_debug_redraw()
 
@@ -471,6 +480,52 @@ func _resolve_visual_controller() -> Node:
 
 
 ## Localiza a área de impacto do dash usada pelo PlayerController.
+func _resolve_aim_indicator() -> GaiaAimIndicator:
+	if aim_indicator_path != NodePath():
+		var configured_indicator: Node = get_node_or_null(aim_indicator_path)
+
+		if configured_indicator is GaiaAimIndicator:
+			return configured_indicator as GaiaAimIndicator
+
+	var direct_indicator: Node = get_node_or_null("VisualRoot/GaiaAimIndicator")
+
+	if direct_indicator is GaiaAimIndicator:
+		return direct_indicator as GaiaAimIndicator
+
+	return null
+
+func _resolve_primary_weapon_controller() -> Node:
+	if weapon_controller_path != NodePath():
+		return get_node_or_null(weapon_controller_path)
+
+	return get_node_or_null("WeaponRoot/GaiaInitialWeaponController")
+
+func _configure_aim_indicator() -> void:
+	if aim_indicator == null:
+		aim_indicator = _resolve_aim_indicator()
+
+	if aim_indicator == null:
+		return
+
+	var indicator_radius_pixels: float = 0.0
+
+	if primary_weapon_controller == null:
+		primary_weapon_controller = _resolve_primary_weapon_controller()
+
+	if (
+		primary_weapon_controller != null
+		and primary_weapon_controller.has_method("get_aim_indicator_radius_pixels")
+	):
+		var radius_variant: Variant = primary_weapon_controller.call("get_aim_indicator_radius_pixels")
+
+		if radius_variant is float or radius_variant is int:
+			indicator_radius_pixels = float(radius_variant)
+
+	if indicator_radius_pixels <= 0.0:
+		indicator_radius_pixels = 256.0
+
+	aim_indicator.configure_indicator(indicator_radius_pixels, true)
+
 func _resolve_dash_impact_area() -> PlayerDashImpactArea:
 	if dash_impact_area_path != NodePath():
 		var configured_area: Node = get_node_or_null(dash_impact_area_path)

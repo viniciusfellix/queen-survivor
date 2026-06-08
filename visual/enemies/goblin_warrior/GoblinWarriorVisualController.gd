@@ -35,14 +35,15 @@ extends "res://visual/spine/SpineVisualControllerBase.gd"
 
 @export_group("Damage Flash")
 
-## Intensidade do flash claro ao receber dano.
-@export_range(1.0, 8.0, 0.1) var damage_flash_brightness: float = 4.0
+## Sequencia configuravel do flash ao receber dano.
+@export var damage_flash_colors: Array[Color] = [
+	Color(1.0, 1.0, 1.0, 1.0),
+	Color(1.0, 1.0, 1.0, 1.0)
+]
 
-## Tempo segurando o brilho máximo.
-@export var damage_flash_hold_seconds: float = 0.035
+@export var damage_flash_step_seconds: float = 0.06
 
-## Tempo de retorno ao modulate padrão.
-@export var damage_flash_duration: float = 0.12
+@export var restore_default_between_flash_colors: bool = true
 
 ## Tween atual do flash.
 var damage_flash_tween: Tween = null
@@ -115,53 +116,48 @@ func play_death() -> void:
 		"death"
 	)
 
-## Executa flash claro de dano.
+## Executa flash claro em sequencia.
 ##
 ## O efeito é puramente visual e não altera gameplay.
 func play_damage_flash() -> void:
-	if damage_flash_tween != null:
-		damage_flash_tween.kill()
-		damage_flash_tween = null
+	_stop_damage_flash_tween()
 
-	var safe_brightness: float = max(1.0, damage_flash_brightness)
-	var flash_modulate: Color = Color(
-		safe_brightness,
-		safe_brightness,
-		safe_brightness,
-		default_modulate.a
-	)
+	var flash_sequence: Array[Color] = _build_damage_flash_sequence()
 
-	modulate = flash_modulate
+	if flash_sequence.is_empty():
+		modulate = default_modulate
+		return
+
+	modulate = flash_sequence[0]
 
 	damage_flash_tween = create_tween()
 	damage_flash_tween.set_trans(Tween.TRANS_QUAD)
 	damage_flash_tween.set_ease(Tween.EASE_OUT)
 
-	if damage_flash_hold_seconds > 0.0:
-		damage_flash_tween.tween_interval(damage_flash_hold_seconds)
-
-	damage_flash_tween.tween_property(
-		self,
-		"modulate",
-		default_modulate,
-		max(0.01, damage_flash_duration)
-	)
+	for sequence_index: int in range(1, flash_sequence.size()):
+		damage_flash_tween.tween_property(
+			self,
+			"modulate",
+			flash_sequence[sequence_index],
+			max(0.01, damage_flash_step_seconds)
+		)
 
 	damage_flash_tween.finished.connect(func() -> void:
+		modulate = default_modulate
 		damage_flash_tween = null
 	)
 
 	DeveloperAuditLogger.log_animation(
-		"Flash de dano executado: brightness=%s hold=%s duration=%s" % [
-			str(safe_brightness),
-			str(damage_flash_hold_seconds),
-			str(damage_flash_duration)
+		"Flash de dano executado: steps=%s step_seconds=%s restore_between=%s" % [
+			str(flash_sequence.size()),
+			str(damage_flash_step_seconds),
+			str(restore_default_between_flash_colors)
 		],
 		"GoblinWarriorVisualController",
 		{
-			"brightness": safe_brightness,
-			"hold_seconds": damage_flash_hold_seconds,
-			"duration_seconds": damage_flash_duration
+			"steps": flash_sequence.size(),
+			"step_seconds": damage_flash_step_seconds,
+			"restore_default_between_flash_colors": restore_default_between_flash_colors
 		}
 	)
 
@@ -195,3 +191,25 @@ func _stop_damage_flash_tween() -> void:
 	if damage_flash_tween != null:
 		damage_flash_tween.kill()
 		damage_flash_tween = null
+
+	modulate = default_modulate
+
+func _build_damage_flash_sequence() -> Array[Color]:
+	var sequence: Array[Color] = []
+
+	for flash_color: Color in damage_flash_colors:
+		var sanitized_color: Color = flash_color
+		sanitized_color.a = default_modulate.a
+		sequence.append(sanitized_color)
+
+		if restore_default_between_flash_colors:
+			sequence.append(default_modulate)
+
+	if (
+		not restore_default_between_flash_colors
+		or sequence.is_empty()
+		or sequence[sequence.size() - 1] != default_modulate
+	):
+		sequence.append(default_modulate)
+
+	return sequence

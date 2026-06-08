@@ -7,6 +7,7 @@
 [ext_resource type="Script" uid="uid://bfafk4jqwrtsf" path="res://gameplay/player/PlayerDashImpactArea.gd" id="4_85b2w"]
 [ext_resource type="Script" uid="uid://3e5fkbiwcfkb" path="res://gameplay/weapons/gaia/GaiaInitialWeaponController.gd" id="4_wm5q1"]
 [ext_resource type="Resource" uid="uid://rysi500pe7yh" path="res://data/weapons/weapon_gaia_initial.tres" id="5_0caxs"]
+[ext_resource type="PackedScene" path="res://visual/weapons/gaia_initial_weapon/GaiaAimIndicator.tscn" id="6_aim"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_0a7w7"]
 radius = 30.016663
@@ -17,6 +18,8 @@ collision_mask = 5
 script = ExtResource("1_64352")
 queen_definition = ExtResource("2_b2oau")
 visual_controller_path = NodePath("VisualRoot/GaiaVisual")
+aim_indicator_path = NodePath("VisualRoot/GaiaAimIndicator")
+weapon_controller_path = NodePath("WeaponRoot/GaiaInitialWeaponController")
 
 [node name="BodyCollision" type="CollisionShape2D" parent="." unique_id=158647657]
 position = Vector2(-1, 0)
@@ -35,9 +38,12 @@ script = ExtResource("4_85b2w")
 [node name="VisualRoot" type="Node2D" parent="." unique_id=721531233]
 
 [node name="GaiaVisual" parent="VisualRoot" unique_id=337840 instance=ExtResource("2_cbat8")]
-damage_flash_color = Color(1, 0, 0, 1)
-damage_flash_duration = 0.35
 spine_adapter_path = NodePath("")
+aim_indicator_path = NodePath("../GaiaAimIndicator")
+damage_flash_step_seconds = 0.08
+
+[node name="GaiaAimIndicator" parent="VisualRoot" instance=ExtResource("6_aim")]
+position_offset = Vector2(0, -18)
 
 [node name="WeaponRoot" type="Node2D" parent="." unique_id=1652286854]
 
