@@ -1,7 +1,8 @@
 [gd_resource type="Resource" script_class="SpawnTimelineEntryDefinition" format=3 uid="uid://d4dxamgnry4k4"]
 
-[ext_resource type="Script" path="res://definitions/SpawnTimelineEntryDefinition.gd" id="1_entry"]
+[ext_resource type="Script" uid="uid://u04lr4kql6m5" path="res://definitions/SpawnTimelineEntryDefinition.gd" id="1_entry"]
 [ext_resource type="Resource" uid="uid://cdk2sbcwdtnd0" path="res://data/enemies/enemy_chaser_basic.tres" id="2_enemy"]
+[ext_resource type="Script" uid="uid://d066loftc30me" path="res://definitions/SpawnRuleDefinition.gd" id="3_16dr1"]
 [ext_resource type="Resource" path="res://data/spawn_timelines/test_arena_10min/rule_wave_03_final_push_goblin.tres" id="3_rule"]
 
 [resource]
@@ -20,5 +21,5 @@ spawn_interval_seconds = 1.45
 max_alive_enemies = 30
 spawn_min_distance = 440.0
 spawn_max_distance = 700.0
-spawn_rules = Array[ExtResource("3_rule")]([ExtResource("3_rule")])
+spawn_rules = Array[ExtResource("3_16dr1")]([ExtResource("3_rule")])
 metadata/_custom_type_script = "uid://u04lr4kql6m5"

@@ -35,6 +35,13 @@ var last_valid_aim_direction: Vector2 = Vector2.RIGHT
 ## Deve ser lido pelo PlayerController e consumido dentro do fluxo de dash.
 var dash_just_pressed: bool = false
 
+## Hooks de configuração preparados para menu futuro.
+##
+## O sistema atual de mira é direcional/normalizado, então esses valores
+## ainda não alteram o feel da mira por si só.
+var mouse_aim_sensitivity_setting: float = 1.0
+var analog_aim_sensitivity_setting: float = 1.0
+
 ## Inicializa o gerenciador de input.
 ##
 ## As actions (move_*, aim_*, dash) são definidas no Input Map do projeto
@@ -77,6 +84,20 @@ func get_last_valid_aim_direction() -> Vector2:
 ## Retorna true somente no frame em que o dash foi pressionado.
 func was_dash_just_pressed() -> bool:
 	return dash_just_pressed
+
+## Armazena sensibilidades configuradas para integração futura com menu/settings.
+func configure_aim_settings(
+	mouse_sensitivity: float,
+	analog_sensitivity: float
+) -> void:
+	mouse_aim_sensitivity_setting = max(0.01, mouse_sensitivity)
+	analog_aim_sensitivity_setting = max(0.01, analog_sensitivity)
+
+func get_mouse_aim_sensitivity_setting() -> float:
+	return mouse_aim_sensitivity_setting
+
+func get_analog_aim_sensitivity_setting() -> float:
+	return analog_aim_sensitivity_setting
 
 ## Calcula direção de movimento a partir das actions configuradas.
 ##

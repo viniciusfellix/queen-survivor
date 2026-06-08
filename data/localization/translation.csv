@@ -28,6 +28,10 @@ ui.hud.defeat,Derrota,Defeat,Derrota,失败,敗北,패배,Поражение
 ui.hud.run_active,Sobreviva até o fim da run,Survive until the end of the run,Sobrevive hasta el final de la run,坚持到本局结束,ランの終わりまで生き延びろ,런이 끝날 때까지 살아남으세요,Выживите до конца забега
 ui.hud.attack,Ataque,Attack,Ataque,攻击,攻撃,공격,Атака
 ui.hud.attack_ready,pronto,ready,listo,就绪,準備完了,준비됨,готово
+ui.hud.dash,Dash,Dash,Dash,冲刺,ダッシュ,대시,Рывок
+ui.hud.dash_ready,pronto,ready,listo,就绪,準備完了,준비됨,готово
+ui.hud.wave,Wave,Wave,Oleada,波次,ウェーブ,웨이브,Волна
+ui.hud.wave_none,-,-,-,-,-,-,-
 ui.feedback.damage_taken,Dano recebido,Damage taken,Daño recibido,受到伤害,被ダメージ,받은 피해,Полученный урон
 ui.feedback.coin_collected,Moeda coletada,Coin collected,Moneda recogida,已收集金币,コイン獲得,코인 획득,Монета собрана
 ui.feedback.level_up,Level Up!,Level Up!,¡Subida de nivel!,升级！,レベルアップ！,레벨 업!,Новый уровень!

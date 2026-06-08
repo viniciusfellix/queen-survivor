@@ -1,7 +1,7 @@
 ## HUD principal da run.
 ##
 ## Responsabilidades:
-## - exibir HP, XP, timer, moedas, level, kills e cooldown da arma;
+## - exibir HP, XP, timer, moedas, level, kills e cooldowns principais;
 ## - consultar dados atuais do player e da run;
 ## - responder a eventos globais;
 ## - atualizar visual periodicamente;
@@ -34,6 +34,12 @@ extends CanvasLayer
 
 ## Exibe/oculta mensagem de estado da run.
 @export var show_message: bool = true
+
+## Exibe/oculta cooldown do dash.
+@export var show_dash_cooldown: bool = true
+
+## Exibe/oculta bloco de wave ativa para debug/prototipo.
+@export var show_wave_debug_info: bool = true
 
 @export_group("Behavior")
 
@@ -73,6 +79,14 @@ extends CanvasLayer
 ## Exibe/oculta cooldown da arma.
 @export var show_cooldown: bool = true
 
+## Caminhos configuráveis dos nodes de cooldown do dash.
+@export var dash_cooldown_box_path: NodePath
+@export var dash_cooldown_label_path: NodePath
+@export var dash_cooldown_bar_path: NodePath
+
+## Caminho configurável do label de wave ativa.
+@export var wave_label_path: NodePath
+
 ## Referências resolvidas de HP.
 @onready var hp_box: Control = get_node_or_null(hp_box_path) as Control
 @onready var hp_label: Label = get_node_or_null(hp_label_path) as Label
@@ -88,12 +102,18 @@ extends CanvasLayer
 @onready var cooldown_label: Label = get_node_or_null(cooldown_label_path) as Label
 @onready var cooldown_bar: ProgressBar = get_node_or_null(cooldown_bar_path) as ProgressBar
 
+## Referências resolvidas de cooldown do dash.
+@onready var dash_cooldown_box: Control = get_node_or_null(dash_cooldown_box_path) as Control
+@onready var dash_cooldown_label: Label = get_node_or_null(dash_cooldown_label_path) as Label
+@onready var dash_cooldown_bar: ProgressBar = get_node_or_null(dash_cooldown_bar_path) as ProgressBar
+
 ## Referências resolvidas de labels gerais.
 @onready var timer_label: Label = get_node_or_null(timer_label_path) as Label
 @onready var coins_label: Label = get_node_or_null(coins_label_path) as Label
 @onready var level_label: Label = get_node_or_null(level_label_path) as Label
 @onready var kills_label: Label = get_node_or_null(kills_label_path) as Label
 @onready var message_label: Label = get_node_or_null(message_label_path) as Label
+@onready var wave_label: Label = get_node_or_null(wave_label_path) as Label
 
 ## Acumulador usado para limitar frequência de refresh.
 var refresh_timer: float = 0.0
@@ -107,11 +127,17 @@ var latest_cooldown_timer: float = 0.0
 ## Último progresso do cooldown da arma, de 0 a 1.
 var latest_cooldown_progress_ratio: float = 1.0
 
+## Referências cacheadas para evitar buscas repetidas.
+var cached_player_node: Node = null
+var cached_run_controller: Node = null
+var cached_enemy_spawner: Node = null
+
 ## Inicializa HUD, resolve nodes, conecta eventos e faz primeiro refresh.
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 
 	_resolve_missing_nodes()
+	_resolve_runtime_references()
 	_apply_visibility()
 	_configure_bars()
 	_connect_events()
@@ -124,10 +150,12 @@ func _ready() -> void:
 			"show_hp": show_hp,
 			"show_xp": show_xp,
 			"show_cooldown": show_cooldown,
+			"show_dash_cooldown": show_dash_cooldown,
 			"show_timer": show_timer,
 			"show_coins": show_coins,
 			"show_level": show_level,
-			"show_kills": show_kills
+			"show_kills": show_kills,
+			"show_wave_debug_info": show_wave_debug_info
 		}
 	)
 
@@ -170,6 +198,7 @@ func _connect_events() -> void:
 ## Atualiza todos os blocos do HUD.
 func _refresh_all() -> void:
 	_apply_visibility()
+	_resolve_runtime_references()
 
 	var player_data: Dictionary = _get_player_debug_data()
 	var run_data: Dictionary = _get_run_debug_data()
@@ -181,6 +210,8 @@ func _refresh_all() -> void:
 	_update_level(run_data)
 	_update_kills(run_data)
 	_update_cooldown()
+	_update_dash_cooldown(player_data)
+	_update_wave_debug_info()
 	_update_message(run_data)
 
 ## Atualiza visual do cooldown da arma.
@@ -205,6 +236,68 @@ func _update_cooldown() -> void:
 	if cooldown_bar != null:
 		cooldown_bar.max_value = 100.0
 		cooldown_bar.value = cooldown_percent
+
+## Atualiza visual do cooldown do dash.
+func _update_dash_cooldown(player_data: Dictionary) -> void:
+	if not show_dash_cooldown:
+		return
+
+	var dash_cooldown_timer: float = float(player_data.get("dash_cooldown_timer", 0.0))
+	var dash_cooldown_seconds: float = float(player_data.get("dash_cooldown_seconds", 0.0))
+	var dash_progress_ratio: float = 1.0
+
+	if dash_cooldown_seconds > 0.0:
+		dash_progress_ratio = 1.0 - clamp(
+			dash_cooldown_timer / dash_cooldown_seconds,
+			0.0,
+			1.0
+		)
+
+	if dash_cooldown_label != null:
+		if dash_cooldown_timer <= 0.0:
+			dash_cooldown_label.text = "%s: %s" % [
+				tr("ui.hud.dash"),
+				tr("ui.hud.dash_ready")
+			]
+		else:
+			dash_cooldown_label.text = "%s: %.1fs" % [
+				tr("ui.hud.dash"),
+				dash_cooldown_timer
+			]
+
+	if dash_cooldown_bar != null:
+		dash_cooldown_bar.max_value = 100.0
+		dash_cooldown_bar.value = clamp(dash_progress_ratio, 0.0, 1.0) * 100.0
+
+## Atualiza informacao resumida de wave ativa para debug/prototipo.
+func _update_wave_debug_info() -> void:
+	if not show_wave_debug_info:
+		return
+
+	if wave_label == null:
+		return
+
+	var wave_debug_data: Dictionary = _get_enemy_spawner_debug_data()
+	var active_wave_count: int = int(wave_debug_data.get("active_wave_count", 0))
+	var active_wave_ids_variant: Variant = wave_debug_data.get("active_wave_ids", [])
+	var active_wave_ids: Array[String] = []
+
+	if active_wave_ids_variant is Array:
+		for wave_id_variant: Variant in active_wave_ids_variant:
+			active_wave_ids.append(str(wave_id_variant))
+
+	if active_wave_count <= 0 or active_wave_ids.is_empty():
+		wave_label.text = "%s: %s" % [
+			tr("ui.hud.wave"),
+			tr("ui.hud.wave_none")
+		]
+		return
+
+	wave_label.text = "%s: %s (%s)" % [
+		tr("ui.hud.wave"),
+		", ".join(active_wave_ids),
+		str(active_wave_count)
+	]
 
 ## Atualiza HP.
 func _update_hp(player_data: Dictionary) -> void:
@@ -351,6 +444,12 @@ func _apply_visibility() -> void:
 	if cooldown_box != null:
 		cooldown_box.visible = show_cooldown
 
+	if dash_cooldown_box != null:
+		dash_cooldown_box.visible = show_dash_cooldown
+
+	if wave_label != null:
+		wave_label.visible = show_wave_debug_info
+
 ## Configura valores base das barras.
 func _configure_bars() -> void:
 	if hp_bar != null:
@@ -370,6 +469,12 @@ func _configure_bars() -> void:
 		cooldown_bar.max_value = 100
 		cooldown_bar.value = 100
 		cooldown_bar.show_percentage = false
+
+	if dash_cooldown_bar != null:
+		dash_cooldown_bar.min_value = 0
+		dash_cooldown_bar.max_value = 100
+		dash_cooldown_bar.value = 100
+		dash_cooldown_bar.show_percentage = false
 
 ## Resolve nodes por caminhos padrão quando paths exportados não foram definidos.
 func _resolve_missing_nodes() -> void:
@@ -415,24 +520,32 @@ func _resolve_missing_nodes() -> void:
 	if cooldown_bar == null:
 		cooldown_bar = get_node_or_null("MarginContainer/VBoxContainer/TopRow/CooldownBox/CooldownBar") as ProgressBar
 
+	if dash_cooldown_box == null:
+		dash_cooldown_box = get_node_or_null("MarginContainer/VBoxContainer/TopRow/DashCooldownBox") as Control
+
+	if dash_cooldown_label == null:
+		dash_cooldown_label = get_node_or_null("MarginContainer/VBoxContainer/TopRow/DashCooldownBox/DashCooldownLabel") as Label
+
+	if dash_cooldown_bar == null:
+		dash_cooldown_bar = get_node_or_null("MarginContainer/VBoxContainer/TopRow/DashCooldownBox/DashCooldownBar") as ProgressBar
+
+	if wave_label == null:
+		wave_label = get_node_or_null("MarginContainer/VBoxContainer/WaveLabel") as Label
+
 ## Busca dados técnicos do player.
 ##
 ## O HUD usa get_debug_data() para evitar acoplamento direto com PlayerController.
 func _get_player_debug_data() -> Dictionary:
-	var players: Array[Node] = get_tree().get_nodes_in_group("player")
+	if cached_player_node == null or not is_instance_valid(cached_player_node):
+		cached_player_node = _resolve_player_node()
 
-	if players.is_empty():
+	if cached_player_node == null:
 		return {}
 
-	var player: Node = players[0]
-
-	if player == null:
+	if not cached_player_node.has_method("get_debug_data"):
 		return {}
 
-	if not player.has_method("get_debug_data"):
-		return {}
-
-	var debug_data_variant: Variant = player.call("get_debug_data")
+	var debug_data_variant: Variant = cached_player_node.call("get_debug_data")
 
 	if debug_data_variant is Dictionary:
 		return debug_data_variant as Dictionary
@@ -441,20 +554,69 @@ func _get_player_debug_data() -> Dictionary:
 
 ## Busca dados técnicos da run.
 func _get_run_debug_data() -> Dictionary:
-	var run_controller: Node = RunQuery.get_run_controller(get_tree())
+	if cached_run_controller == null or not is_instance_valid(cached_run_controller):
+		cached_run_controller = RunQuery.get_run_controller(get_tree())
 
-	if run_controller == null:
+	if cached_run_controller == null:
 		return {}
 
-	if not run_controller.has_method("get_debug_data"):
+	if not cached_run_controller.has_method("get_debug_data"):
 		return {}
 
-	var debug_data_variant: Variant = run_controller.call("get_debug_data")
+	var debug_data_variant: Variant = cached_run_controller.call("get_debug_data")
 
 	if debug_data_variant is Dictionary:
 		return debug_data_variant as Dictionary
 
 	return {}
+
+func _get_enemy_spawner_debug_data() -> Dictionary:
+	if cached_enemy_spawner == null or not is_instance_valid(cached_enemy_spawner):
+		cached_enemy_spawner = _resolve_enemy_spawner()
+
+	if cached_enemy_spawner == null:
+		return {}
+
+	if not cached_enemy_spawner.has_method("get_debug_data"):
+		return {}
+
+	var debug_data_variant: Variant = cached_enemy_spawner.call("get_debug_data")
+
+	if debug_data_variant is Dictionary:
+		return debug_data_variant as Dictionary
+
+	return {}
+
+func _resolve_runtime_references() -> void:
+	if cached_player_node == null or not is_instance_valid(cached_player_node):
+		cached_player_node = _resolve_player_node()
+
+	if cached_run_controller == null or not is_instance_valid(cached_run_controller):
+		cached_run_controller = RunQuery.get_run_controller(get_tree())
+
+	if cached_enemy_spawner == null or not is_instance_valid(cached_enemy_spawner):
+		cached_enemy_spawner = _resolve_enemy_spawner()
+
+func _resolve_player_node() -> Node:
+	var players: Array[Node] = get_tree().get_nodes_in_group("player")
+
+	if players.is_empty():
+		return null
+
+	return players[0]
+
+func _resolve_enemy_spawner() -> Node:
+	var direct_spawner: Node = get_node_or_null("../SpawnerRoot/EnemySpawner")
+
+	if direct_spawner != null:
+		return direct_spawner
+
+	var run_controller: Node = RunQuery.get_run_controller(get_tree())
+
+	if run_controller == null:
+		return null
+
+	return run_controller.get_node_or_null("../SpawnerRoot/EnemySpawner")
 
 ## Formata segundos como MM:SS.
 func _format_seconds(seconds: float) -> String:

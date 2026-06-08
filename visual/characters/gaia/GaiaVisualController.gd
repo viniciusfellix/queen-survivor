@@ -190,6 +190,17 @@ func configure_aim_indicator(radius_pixels: float, is_enabled: bool = true) -> v
 
 	aim_indicator.configure_indicator(radius_pixels, show_aim_indicator and is_enabled)
 
+func set_show_aim_indicator_enabled(is_enabled: bool) -> void:
+	show_aim_indicator = is_enabled
+
+	if aim_indicator == null:
+		aim_indicator = _resolve_aim_indicator()
+
+	if aim_indicator == null:
+		return
+
+	aim_indicator.set_indicator_enabled(show_aim_indicator)
+
 func _resolve_aim_indicator() -> GaiaAimIndicator:
 	if aim_indicator_path != NodePath():
 		var configured_indicator: Node = get_node_or_null(aim_indicator_path)

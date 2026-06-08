@@ -672,6 +672,33 @@ func _get_spawn_position_around_player(min_distance: float, max_distance: float)
 func _get_alive_enemy_count() -> int:
 	return _alive_enemy_count
 
+func get_debug_data() -> Dictionary:
+	var active_entries: Array[SpawnTimelineEntryDefinition] = []
+	var active_wave_ids: Array[String] = []
+
+	if _timeline_runtime_initialized and spawn_timeline_definition != null:
+		active_entries = _get_runtime_active_entries(_get_run_elapsed_seconds())
+
+		for entry: SpawnTimelineEntryDefinition in active_entries:
+			if entry == null:
+				continue
+
+			active_wave_ids.append(entry.id)
+
+	return {
+		"spawner_enabled": spawner_enabled,
+		"timeline_initialized": _timeline_runtime_initialized,
+		"timeline_id": (
+			spawn_timeline_definition.id
+			if spawn_timeline_definition != null
+			else ""
+		),
+		"active_entry_id": active_entry_id,
+		"active_wave_ids": active_wave_ids,
+		"active_wave_count": active_wave_ids.size(),
+		"alive_enemy_count": _alive_enemy_count
+	}
+
 func _on_enemy_died_count(
 	_enemy_id: String,
 	_source_id: String,

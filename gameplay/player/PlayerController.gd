@@ -92,6 +92,7 @@ func _ready() -> void:
 
 	_apply_dash_definition()
 	_configure_dash_impact_area()
+	_apply_input_settings_hooks()
 
 	_configure_player_hurtbox()
 	_configure_enemy_body_collision()
@@ -526,6 +527,30 @@ func _configure_aim_indicator() -> void:
 
 	aim_indicator.configure_indicator(indicator_radius_pixels, true)
 
+func _apply_input_settings_hooks() -> void:
+	InputManager.configure_aim_settings(
+		mouse_aim_sensitivity,
+		analog_aim_sensitivity
+	)
+
+func set_mouse_aim_sensitivity(value: float) -> void:
+	mouse_aim_sensitivity = max(0.01, value)
+	_apply_input_settings_hooks()
+
+func set_analog_aim_sensitivity(value: float) -> void:
+	analog_aim_sensitivity = max(0.01, value)
+	_apply_input_settings_hooks()
+
+func set_aim_indicator_enabled(is_enabled: bool) -> void:
+	if visual_controller == null:
+		visual_controller = _resolve_visual_controller()
+
+	if visual_controller == null:
+		return
+
+	if visual_controller.has_method("set_show_aim_indicator_enabled"):
+		visual_controller.call("set_show_aim_indicator_enabled", is_enabled)
+
 func _resolve_dash_impact_area() -> PlayerDashImpactArea:
 	if dash_impact_area_path != NodePath():
 		var configured_area: Node = get_node_or_null(dash_impact_area_path)
@@ -807,8 +832,15 @@ func get_debug_data() -> Dictionary:
 		"is_dash_active": is_dash_active,
 		"dash_timer": dash_timer,
 		"dash_cooldown_timer": dash_cooldown_timer,
+		"dash_cooldown_seconds": (
+			dash_definition.dash_cooldown_seconds
+			if dash_definition != null
+			else 0.0
+		),
 		"active_dash_direction": active_dash_direction,
 		"has_dash_impact_area": dash_impact_area != null,
+		"mouse_aim_sensitivity": mouse_aim_sensitivity,
+		"analog_aim_sensitivity": analog_aim_sensitivity,
 		"has_player_hurtbox": player_hurtbox != null,
 		"current_gameplay_state": runtime_state.current_gameplay_state,
 		"current_visual_state": runtime_state.current_visual_state,
