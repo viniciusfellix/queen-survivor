@@ -52,6 +52,7 @@ class_name DirectionalAttackHitbox
 @export var draw_debug_hitbox: bool = false
 @export var debug_color: Color = Color(0.2, 0.75, 1.0, 0.35)
 @export var debug_outline_color: Color = Color(0.2, 0.9, 1.0, 0.95)
+@export var log_successful_hits: bool = false
 
 var elapsed_seconds: float = 0.0
 var attack_direction: Vector2 = Vector2.RIGHT
@@ -64,7 +65,7 @@ var is_configured: bool = false
 
 ## Configura filtros, conecta sinais e prepara a hitbox runtime.
 func _ready() -> void:
-	monitoring = true
+	monitoring = false
 	monitorable = false
 
 	_configure_collision_filter()
@@ -81,17 +82,17 @@ func _on_pool_acquire() -> void:
 	elapsed_seconds = 0.0
 	is_configured = false
 	already_hit_instance_ids.clear()
+	_set_hitbox_active(false)
 
-## Controla lifetime e processa overlaps enquanto a hitbox está ativa.
+## Controla lifetime da hitbox enquanto a instância está ativa.
 func _physics_process(delta: float) -> void:
 	if not is_configured:
 		return
 
 	elapsed_seconds += delta
 
-	_process_current_overlaps()
-
 	if elapsed_seconds >= lifetime_seconds:
+		_set_hitbox_active(false)
 		PoolManager.despawn(self)
 
 ## Desenha shapes de debug quando habilitado.
@@ -209,10 +210,12 @@ func setup(
 			% source_id
 		)
 
-	is_configured = true
+	is_configured = not runtime_shape_nodes.is_empty()
+	_set_hitbox_active(is_configured)
 	queue_redraw()
 
-	call_deferred("_process_current_overlaps")
+	if is_configured:
+		call_deferred("_process_current_overlaps")
 
 ## Configura layer/mask da hitbox ofensiva.
 func _configure_collision_filter() -> void:
@@ -242,6 +245,7 @@ func _build_runtime_shapes() -> void:
 		shape_node.shape = runtime_shape
 		shape_node.position = attack_area.local_offset
 		shape_node.rotation_degrees = attack_area.local_rotation_degrees
+		shape_node.disabled = true
 
 		add_child(shape_node)
 		runtime_shape_nodes.append(shape_node)
@@ -256,6 +260,16 @@ func _clear_runtime_shapes() -> void:
 		shape_node.queue_free()
 
 	runtime_shape_nodes.clear()
+
+## Ativa/desativa monitoramento e shapes da hitbox runtime.
+func _set_hitbox_active(should_be_active: bool) -> void:
+	monitoring = should_be_active
+
+	for shape_node: CollisionShape2D in runtime_shape_nodes:
+		if shape_node == null or not is_instance_valid(shape_node):
+			continue
+
+		shape_node.set_deferred("disabled", not should_be_active)
 
 
 ## Processa hurtbox que entrou na área ofensiva.
@@ -310,31 +324,32 @@ func _try_apply_damage_to_hurtbox(area: Area2D) -> void:
 
 	var knockback_applied: bool = _try_apply_hit_knockback_to_receiver(damage_receiver)
 
-	DeveloperAuditLogger.log_combat(
-		"Hurtbox atingida: receiver=%s raw_total=%s final=%s components=%s areas=%s knockback=%s/%spx applied=%s" % [
-			damage_receiver.name,
-			str(payload.get_total_raw_damage()),
-			str(final_damage),
-			_get_component_debug_string(),
-			_get_attack_area_debug_string(),
-			str(hit_knockback_enabled),
-			str(hit_knockback_pixels),
-			str(knockback_applied)
-		],
-		"DirectionalAttackHitbox",
-		{
-			"receiver_name": damage_receiver.name,
-			"raw_total": payload.get_total_raw_damage(),
-			"final_damage": final_damage,
-			"components": _get_component_debug_string(),
-			"attack_areas": _get_attack_area_debug_string(),
-			"source_id": source_id,
-			"hit_knockback_enabled": hit_knockback_enabled,
-			"hit_knockback_pixels": hit_knockback_pixels,
-			"hit_knockback_duration_seconds": hit_knockback_duration_seconds,
-			"knockback_applied": knockback_applied
-		}
-	)
+	if log_successful_hits:
+		DeveloperAuditLogger.log_combat(
+			"Hurtbox atingida: receiver=%s raw_total=%s final=%s components=%s areas=%s knockback=%s/%spx applied=%s" % [
+				damage_receiver.name,
+				str(payload.get_total_raw_damage()),
+				str(final_damage),
+				_get_component_debug_string(),
+				_get_attack_area_debug_string(),
+				str(hit_knockback_enabled),
+				str(hit_knockback_pixels),
+				str(knockback_applied)
+			],
+			"DirectionalAttackHitbox",
+			{
+				"receiver_name": damage_receiver.name,
+				"raw_total": payload.get_total_raw_damage(),
+				"final_damage": final_damage,
+				"components": _get_component_debug_string(),
+				"attack_areas": _get_attack_area_debug_string(),
+				"source_id": source_id,
+				"hit_knockback_enabled": hit_knockback_enabled,
+				"hit_knockback_pixels": hit_knockback_pixels,
+				"hit_knockback_duration_seconds": hit_knockback_duration_seconds,
+				"knockback_applied": knockback_applied
+			}
+		)
 
 ## Solicita knockback pós-hit quando configurado e dano válido foi confirmado.
 func _try_apply_hit_knockback_to_receiver(damage_receiver: EnemyBase) -> bool:

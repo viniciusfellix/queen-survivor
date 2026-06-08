@@ -4,6 +4,6 @@
 
 [node name="DirectionalAttackHitbox" type="Area2D" unique_id=104047366]
 script = ExtResource("1_tw1wm")
-draw_debug_hitbox = true
+draw_debug_hitbox = false
 debug_color = Color(0.7019608, 0, 0, 0.5764706)
 debug_outline_color = Color(0.4745633, 0.42036623, 0, 0.9490196)

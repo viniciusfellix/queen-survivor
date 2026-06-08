@@ -8,3 +8,5 @@ res://data/localization/translation.ru.translation
 res://scenes/Main.gd
 res://gameplay/test/TestGaiaScene.gd
 res://scenes/run/RunScene.gd
+res://gameplay/combat/EnemyAttackHitbox.gd
+res://gameplay/player/PlayerDashImpactArea.gd

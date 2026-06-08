@@ -25,7 +25,7 @@ class_name EnemyAttackHitbox
 
 @export var log_configuration: bool = false
 
-@export var log_successful_hits: bool = true
+@export var log_successful_hits: bool = false
 
 ## Definition e origem usadas por esta instância runtime.
 var runtime_definition: EnemyAttackDefinition = null
@@ -35,6 +35,7 @@ var source_id: String = ""
 ## Shapes geradas em runtime e cooldowns por receiver atingido.
 var runtime_shape_nodes: Array[CollisionShape2D] = []
 var receiver_cooldowns: Dictionary = {}
+var overlapping_hurtboxes: Dictionary = {}
 
 ## Controle de tempo interno e estado de ativação.
 var elapsed_seconds: float = 0.0
@@ -50,6 +51,12 @@ func _ready() -> void:
 
 	if configure_collision_filter_on_ready:
 		_configure_collision_filter()
+
+	if not area_entered.is_connected(_on_area_entered):
+		area_entered.connect(_on_area_entered)
+
+	if not area_exited.is_connected(_on_area_exited):
+		area_exited.connect(_on_area_exited)
 
 ## Atualiza timing, cooldowns por receiver e tenta aplicar dano quando ativo.
 func _physics_process(delta: float) -> void:
@@ -94,11 +101,13 @@ func setup(
 
 	elapsed_seconds = 0.0
 	receiver_cooldowns.clear()
+	overlapping_hurtboxes.clear()
 
 	rebuild_runtime_shapes()
 
 	is_configured = not runtime_shape_nodes.is_empty()
 	set_attack_active(is_configured)
+	call_deferred("_register_current_overlaps")
 
 	if log_configuration:
 		DeveloperAuditLogger.log_combat(
@@ -144,6 +153,7 @@ func rebuild_runtime_shapes() -> void:
 		shape_node.shape = runtime_shape
 		shape_node.position = attack_area.local_offset
 		shape_node.rotation_degrees = attack_area.local_rotation_degrees
+		shape_node.disabled = true
 
 		add_child(shape_node)
 		runtime_shape_nodes.append(shape_node)
@@ -165,17 +175,24 @@ func set_attack_active(should_be_active: bool) -> void:
 
 	if not should_be_active:
 		receiver_cooldowns.clear()
+		overlapping_hurtboxes.clear()
 
-## Verifica hurtboxes sobrepostas e aplica dano respeitando cooldown por receiver.
+## Verifica hurtboxes rastreadas e aplica dano respeitando cooldown por receiver.
 func _try_damage_overlapping_hurtboxes() -> void:
 	if runtime_definition == null:
 		return
 
-	for overlapping_area: Area2D in get_overlapping_areas():
-		if not overlapping_area is HurtboxComponent:
+	for hurtbox_instance_id: Variant in overlapping_hurtboxes.keys():
+		var hurtbox_variant: Variant = overlapping_hurtboxes.get(hurtbox_instance_id, null)
+
+		if not (hurtbox_variant is HurtboxComponent):
 			continue
 
-		var hurtbox: HurtboxComponent = overlapping_area as HurtboxComponent
+		var hurtbox: HurtboxComponent = hurtbox_variant as HurtboxComponent
+
+		if hurtbox == null or not is_instance_valid(hurtbox):
+			overlapping_hurtboxes.erase(hurtbox_instance_id)
+			continue
 
 		if not hurtbox.can_receive_damage():
 			continue
@@ -230,6 +247,29 @@ func _try_damage_overlapping_hurtboxes() -> void:
 					"areas": runtime_definition.get_areas_debug_summary()
 				}
 			)
+
+## Registra hurtbox quando ela entra na área ofensiva.
+func _on_area_entered(area: Area2D) -> void:
+	if not (area is HurtboxComponent):
+		return
+
+	var hurtbox: HurtboxComponent = area as HurtboxComponent
+	overlapping_hurtboxes[int(hurtbox.get_instance_id())] = hurtbox
+
+## Remove hurtbox rastreada quando ela sai da área ofensiva.
+func _on_area_exited(area: Area2D) -> void:
+	if not (area is HurtboxComponent):
+		return
+
+	overlapping_hurtboxes.erase(int(area.get_instance_id()))
+
+## Faz uma leitura inicial dos overlaps ao ativar a hitbox.
+func _register_current_overlaps() -> void:
+	if not is_active:
+		return
+
+	for overlapping_area: Area2D in get_overlapping_areas():
+		_on_area_entered(overlapping_area)
 
 ## Reduz os cooldowns individuais de receivers atingidos recentemente.
 func _update_receiver_cooldowns(delta: float) -> void:
