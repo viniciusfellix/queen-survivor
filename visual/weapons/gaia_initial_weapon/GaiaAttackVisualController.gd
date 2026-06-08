@@ -93,7 +93,10 @@ func _process(delta: float) -> void:
 ## O setup() reaplica direção, lifetime e escala em seguida.
 func _on_pool_acquire() -> void:
 	elapsed_seconds = 0.0
-	modulate.a = 1.0
+	attack_direction = Vector2.RIGHT
+	rotation = deg_to_rad(angle_offset_degrees)
+	scale = Vector2.ONE
+	modulate = Color.WHITE
 	visible = true
 	set_process(true)
 
@@ -126,7 +129,10 @@ func _on_pool_release() -> void:
 	set_process(false)
 	visible = false
 	elapsed_seconds = 0.0
-	modulate.a = 1.0
+	attack_direction = Vector2.RIGHT
+	rotation = deg_to_rad(angle_offset_degrees)
+	scale = Vector2.ONE
+	modulate = Color.WHITE
 
 ## Altera modo visual em runtime.
 func set_visual_mode(new_mode: VisualMode) -> void:

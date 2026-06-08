@@ -16,7 +16,6 @@ coin_definition = ExtResource("2_1k4t7")
 [node name="MagnetArea" type="Area2D" parent="." unique_id=79821511]
 collision_layer = 0
 collision_mask = 2
-monitoring = true
 monitorable = false
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="MagnetArea" unique_id=845019205]
@@ -25,7 +24,6 @@ shape = SubResource("CircleShape2D_magnet")
 [node name="CollectArea" type="Area2D" parent="." unique_id=457694130]
 collision_layer = 0
 collision_mask = 2
-monitoring = true
 monitorable = false
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="CollectArea" unique_id=337458570]

@@ -5,30 +5,30 @@
 ## - rotacionar e posicionar o ataque conforme a mira;
 ## - detectar EnemyHurtbox;
 ## - montar DamagePayload com dano simples ou composto;
-## - aplicar knockback pós-hit quando configurado;
-## - impedir acerto duplicado no mesmo alvo por instância;
+## - aplicar knockback pÃ³s-hit quando configurado;
+## - impedir acerto duplicado no mesmo alvo por instÃ¢ncia;
 ## - respeitar bloqueio da run.
 ##
 ## Importante:
-## Esta hitbox é ofensiva. Ela não depende da BodyCollision da Gaia.
+## Esta hitbox Ã© ofensiva. Ela nÃ£o depende da BodyCollision da Gaia.
 extends Area2D
 class_name DirectionalAttackHitbox
 
-## Tempo de vida da instância runtime.
+## Tempo de vida da instÃ¢ncia runtime.
 @export_group("Lifetime")
 @export var lifetime_seconds: float = 0.12
 
-## Dano usado quando não há componentes compostos.
+## Dano usado quando nÃ£o hÃ¡ componentes compostos.
 @export_group("Damage Fallback")
 @export var raw_damage: int = 5
 @export var damage_type: String = DamageTypes.PHYSICAL
 
 
-## Componentes de dano usados para ataques híbridos/compostos.
+## Componentes de dano usados para ataques hÃ­bridos/compostos.
 @export_group("Damage Components")
 @export var damage_components: Array[DamageComponentDefinition] = []
 
-## Efeitos aplicados somente depois de um hit válido.
+## Efeitos aplicados somente depois de um hit vÃ¡lido.
 @export_group("On Hit Effects")
 @export var hit_knockback_enabled: bool = false
 @export var hit_knockback_pixels: float = 0.0
@@ -38,7 +38,7 @@ class_name DirectionalAttackHitbox
 @export var attack_areas: Array[AttackAreaDefinition] = []
 @export var attack_area_scale_multiplier: float = 1.0
 
-## Identificação da fonte do ataque para logs, dano e estatísticas.
+## IdentificaÃ§Ã£o da fonte do ataque para logs, dano e estatÃ­sticas.
 @export_group("Source")
 @export var source_id: String = "gaia_initial_weapon"
 
@@ -47,7 +47,7 @@ class_name DirectionalAttackHitbox
 @export_range(1, 32, 1) var attack_collision_layer_number: int = 4
 @export_range(1, 32, 1) var target_hurtbox_mask_number: int = 5
 
-## Configurações usadas apenas para visualização e diagnóstico.
+## ConfiguraÃ§Ãµes usadas apenas para visualizaÃ§Ã£o e diagnÃ³stico.
 @export_group("Debug")
 @export var draw_debug_hitbox: bool = false
 @export var debug_color: Color = Color(0.2, 0.75, 1.0, 0.35)
@@ -59,6 +59,7 @@ var attack_direction: Vector2 = Vector2.RIGHT
 var source_node: Node = null
 
 var runtime_shape_nodes: Array[CollisionShape2D] = []
+var active_runtime_shape_count: int = 0
 var already_hit_instance_ids: Dictionary = {}
 
 var is_configured: bool = false
@@ -77,14 +78,33 @@ func _ready() -> void:
 
 ## Hook do pool: zera o estado de hit antes de reusar a hitbox.
 ##
-## O setup() reconfigura direção, dano, áreas e lifetime em seguida.
+## O setup() reconfigura direÃ§Ã£o, dano, Ã¡reas e lifetime em seguida.
 func _on_pool_acquire() -> void:
 	elapsed_seconds = 0.0
 	is_configured = false
+	active_runtime_shape_count = 0
+	source_node = null
+	attack_direction = Vector2.RIGHT
 	already_hit_instance_ids.clear()
+	damage_components.clear()
+	attack_areas.clear()
 	_set_hitbox_active(false)
+	_reset_unused_runtime_shapes(0)
 
-## Controla lifetime da hitbox enquanto a instância está ativa.
+## Hook do pool: desliga monitoramento e limpa estado sensÃ­vel antes de hibernar.
+func _on_pool_release() -> void:
+	elapsed_seconds = 0.0
+	is_configured = false
+	active_runtime_shape_count = 0
+	source_node = null
+	attack_direction = Vector2.RIGHT
+	already_hit_instance_ids.clear()
+	damage_components.clear()
+	attack_areas.clear()
+	_set_hitbox_active(false)
+	_reset_unused_runtime_shapes(0)
+
+## Controla lifetime da hitbox enquanto a instÃ¢ncia estÃ¡ ativa.
 func _physics_process(delta: float) -> void:
 	if not is_configured:
 		return
@@ -143,7 +163,7 @@ func _draw() -> void:
 
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 
-## Recebe dados do ataque e constrói shapes runtime.
+## Recebe dados do ataque e constrÃ³i shapes runtime.
 func setup(
 	p_source_node: Node,
 	p_direction: Vector2,
@@ -201,16 +221,17 @@ func setup(
 
 	rotation = attack_direction.angle()
 	elapsed_seconds = 0.0
+	already_hit_instance_ids.clear()
 
 	_build_runtime_shapes()
 
-	if runtime_shape_nodes.is_empty():
+	if active_runtime_shape_count <= 0:
 		push_warning(
 			"[DirectionalAttackHitbox] Nenhuma área ofensiva válida configurada: %s"
 			% source_id
 		)
 
-	is_configured = not runtime_shape_nodes.is_empty()
+	is_configured = active_runtime_shape_count > 0
 	_set_hitbox_active(is_configured)
 	queue_redraw()
 
@@ -227,7 +248,7 @@ func _configure_collision_filter() -> void:
 
 ## Cria CollisionShape2D a partir das attack_areas e escala atual.
 func _build_runtime_shapes() -> void:
-	_clear_runtime_shapes()
+	var used_shape_count: int = 0
 
 	for attack_area: AttackAreaDefinition in attack_areas:
 		if attack_area == null or not attack_area.is_valid_definition():
@@ -240,26 +261,48 @@ func _build_runtime_shapes() -> void:
 		if runtime_shape == null:
 			continue
 
-		var shape_node: CollisionShape2D = CollisionShape2D.new()
-		shape_node.name = "RuntimeAttackShape_%s" % str(runtime_shape_nodes.size())
+		var shape_node: CollisionShape2D = _ensure_runtime_shape_node(used_shape_count)
+		shape_node.name = "RuntimeAttackShape_%s" % str(used_shape_count)
 		shape_node.shape = runtime_shape
 		shape_node.position = attack_area.local_offset
 		shape_node.rotation_degrees = attack_area.local_rotation_degrees
 		shape_node.disabled = true
 
-		add_child(shape_node)
+		used_shape_count += 1
+
+	active_runtime_shape_count = used_shape_count
+	_reset_unused_runtime_shapes(used_shape_count)
+
+## Garante um CollisionShape2D reutilizÃ¡vel no Ã­ndice solicitado.
+func _ensure_runtime_shape_node(index: int) -> CollisionShape2D:
+	if index < runtime_shape_nodes.size():
+		var existing_shape_node: CollisionShape2D = runtime_shape_nodes[index]
+
+		if existing_shape_node != null and is_instance_valid(existing_shape_node):
+			return existing_shape_node
+
+	var shape_node: CollisionShape2D = CollisionShape2D.new()
+	add_child(shape_node)
+
+	if index < runtime_shape_nodes.size():
+		runtime_shape_nodes[index] = shape_node
+	else:
 		runtime_shape_nodes.append(shape_node)
 
-## Remove shapes runtime antigas antes de reconstruir ou liberar.
-func _clear_runtime_shapes() -> void:
-	for shape_node: CollisionShape2D in runtime_shape_nodes:
+	return shape_node
+
+## Desativa e limpa shapes que sobraram de usos anteriores.
+func _reset_unused_runtime_shapes(from_index: int) -> void:
+	for shape_index: int in range(from_index, runtime_shape_nodes.size()):
+		var shape_node: CollisionShape2D = runtime_shape_nodes[shape_index]
+
 		if shape_node == null or not is_instance_valid(shape_node):
 			continue
 
-		remove_child(shape_node)
-		shape_node.queue_free()
-
-	runtime_shape_nodes.clear()
+		shape_node.shape = null
+		shape_node.position = Vector2.ZERO
+		shape_node.rotation = 0.0
+		shape_node.set_deferred("disabled", true)
 
 ## Ativa/desativa monitoramento e shapes da hitbox runtime.
 func _set_hitbox_active(should_be_active: bool) -> void:
@@ -273,11 +316,11 @@ func _set_hitbox_active(should_be_active: bool) -> void:
 		shape_node.set_deferred("disabled", not should_be_active)
 
 
-## Processa hurtbox que entrou na área ofensiva.
+## Processa hurtbox que entrou na Ã¡rea ofensiva.
 func _on_area_entered(area: Area2D) -> void:
 	_try_apply_damage_to_hurtbox(area)
 
-## Reprocessa overlaps atuais para garantir detecção contínua.
+## Reprocessa overlaps atuais para garantir detecÃ§Ã£o contÃ­nua.
 func _process_current_overlaps() -> void:
 	for overlapping_area: Area2D in get_overlapping_areas():
 		_try_apply_damage_to_hurtbox(overlapping_area)
@@ -352,7 +395,7 @@ func _try_apply_damage_to_hurtbox(area: Area2D) -> void:
 			}
 		)
 
-## Solicita knockback pós-hit quando configurado e dano válido foi confirmado.
+## Solicita knockback pÃ³s-hit quando configurado e dano vÃ¡lido foi confirmado.
 func _try_apply_hit_knockback_to_receiver(damage_receiver: EnemyBase) -> bool:
 	if not hit_knockback_enabled:
 		return false
@@ -388,7 +431,7 @@ func _get_component_debug_string() -> String:
 
 	return ", ".join(parts)
 
-## Gera resumo das áreas ofensivas para logs.
+## Gera resumo das Ã¡reas ofensivas para logs.
 func _get_attack_area_debug_string() -> String:
 	var parts: Array[String] = []
 

@@ -142,17 +142,23 @@ func _play_animation() -> void:
 func _on_pool_acquire() -> void:
 	_kill_active_tweens()
 	animation_started = false
+	text = ""
 	visible = true
 	self_modulate = Color.WHITE
+	modulate = Color.WHITE
 	scale = start_scale
+	pivot_offset = size * 0.5
 
 ## Hook do pool: mata tweens ativos antes de devolver o texto à fila.
 func _on_pool_release() -> void:
 	_kill_active_tweens()
 	animation_started = false
+	text = ""
 	visible = false
 	self_modulate = Color.WHITE
+	modulate = Color.WHITE
 	scale = start_scale
+	pivot_offset = size * 0.5
 
 ## Cancela tweens ativos para evitar estado sujo ao reusar o texto.
 func _kill_active_tweens() -> void:
