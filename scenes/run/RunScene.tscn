@@ -61,7 +61,9 @@ script = ExtResource("4_follow_camera")
 
 [node name="WorldFeedbackLayer" parent="." instance=ExtResource("12_world_feedback")]
 
-[node name="DebugOverlay" parent="." instance=ExtResource("3_debug_overlay")]
+[node name="DebugRoot" type="Node" parent="."]
+
+[node name="DebugOverlay" parent="DebugRoot" instance=ExtResource("3_debug_overlay")]
 debug_enabled = false
 show_input_section = false
 show_animation_section = false
@@ -75,7 +77,7 @@ show_run_result_section = false
 show_technical_section = false
 show_enemy_link_markers = true
 
-[node name="PrototypeToolsPanel" parent="." instance=ExtResource("15_prototype_tools")]
+[node name="PrototypeToolsPanel" parent="DebugRoot" instance=ExtResource("15_prototype_tools")]
 
 [node name="LevelUpPanel" parent="." instance=ExtResource("10_level_up")]
 
