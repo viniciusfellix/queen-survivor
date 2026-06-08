@@ -1,5 +1,5 @@
 cb68465a049d370e5dc715e0fed1d1f8
-::res://::1780891835
+::res://::1780893439
 AUDIT_01_PROJECT_INVENTORY.md::TextFile::-1::1780870398::0::1::::<><><>0<>0<><>::
 AUDIT_02_ARCHITECTURE_REVIEW.md::TextFile::-1::1780871881::0::1::::<><><>0<>0<><>::
 AUDIT_03_SYSTEM_CLASSIFICATION.md::TextFile::-1::1780871881::0::1::::<><><>0<>0<><>::
@@ -230,7 +230,7 @@ structural_audit_checklist.md::TextFile::-1::1780780437::0::1::::<><><>0<>0<><>:
 ::res://docs/08_testing/::1780863223
 combat_modular_validation.md::TextFile::-1::1780863223::0::1::::<><><>0<>0<><>::
 regression_module_1.md::TextFile::-1::1780863223::0::1::::<><><>0<>0<><>::
-::res://docs/migration/::1780891642
+::res://docs/migration/::1780893031
 CURRENT_SOURCE_OF_TRUTH.md::TextFile::-1::1780886459::0::1::::<><><>0<>0<><>::
 PR1_STRUCTURAL_CLEANUP.md::TextFile::-1::1780884738::0::1::::<><><>0<>0<><>::
 PR2_PARALLEL_RUNSCENE.md::TextFile::-1::1780885040::0::1::::<><><>0<>0<><>::
@@ -244,6 +244,8 @@ PR9_GODOT_NATIVE_LOCALIZATION.md::TextFile::-1::1780888687::0::1::::<><><>0<>0<>
 PR10_SHORT_LIVED_OBJECT_POOLING.md::TextFile::-1::1780889080::0::1::::<><><>0<>0<><>::
 PR11_ENEMY_LIFECYCLE_POOLING_AUDIT.md::TextFile::-1::1780890996::0::1::::<><><>0<>0<><>::
 PR12_ENEMY_POOLED_REUSE_HARDENING.md::TextFile::-1::1780891642::0::1::::<><><>0<>0<><>::
+PR13_FRAME_PROCESSING_AUDIT.md::TextFile::-1::1780892418::0::1::::<><><>0<>0<><>::
+PR14_COIN_DROP_HOTPATH.md::TextFile::-1::1780893031::0::1::::<><><>0<>0<><>::
 ::res://gameplay/::1779306989
 ::res://gameplay/arena/::1780863223
 TestArena.gd::GDScript::1916285675563646228::1780780437::0::1::::<>Node2D<><>0<>0<><>::
@@ -255,9 +257,9 @@ DamagePayload.gd::GDScript::665767500730511566::1780780437::0::1::::DamagePayloa
 DamageResolver.gd::GDScript::1636718477248732714::1780780437::0::1::::DamageResolver<>RefCounted<><>0<>0<><>::
 EnemyAttackHitbox.gd::GDScript::1076059727398489994::1780891640::0::1::::EnemyAttackHitbox<>Area2D<><>0<>0<><>::
 HurtboxComponent.gd::GDScript::5520735660760564168::1780891641::0::1::::HurtboxComponent<>Area2D<><>0<>0<><>::
-::res://gameplay/drops/::1780889885
-CoinDrop.gd::GDScript::3785625926568661064::1780888039::0::1::::CoinDrop<>Node2D<><>0<>0<><>::
-CoinDrop.tscn::PackedScene::587500221055694846::1780889885::0::1::::<><><>0<>0<><>::uid://bt61yabvjl8ho::::res://gameplay/drops/CoinDrop.gd<>uid://bcfegd6d7xccr::::res://data/drops/coin_default.tres
+::res://gameplay/drops/::1780892936
+CoinDrop.gd::GDScript::3785625926568661064::1780893305::0::1::::CoinDrop<>Node2D<><>0<>0<><>::
+CoinDrop.tscn::PackedScene::587500221055694846::1780892950::0::1::::<><><>0<>0<><>::uid://bt61yabvjl8ho::::res://gameplay/drops/CoinDrop.gd<>uid://bcfegd6d7xccr::::res://data/drops/coin_default.tres
 DropController.gd::GDScript::6528458090303809249::1780863223::0::1::::<>Node<><>0<>0<><>::
 ::res://gameplay/enemies/::1780863223
 EnemyBase.gd::GDScript::4581220726298131987::1780891640::0::1::::EnemyBase<>CharacterBody2D<><>0<>0<><>::
@@ -307,16 +309,16 @@ export_project_structure.gd::GDScript::6553600764936335022::1780780437::0::1::::
 ::res://ui/::1780780437
 ::res://ui/debug/::1780780437
 DebugEnemyLinkDrawer.gd::GDScript::6116621648933219278::1780780437::0::1::::DebugEnemyLinkDrawer<>Node2D<><>0<>0<><>::
-DebugOverlay.gd::GDScript::8541149494031276328::1780780437::0::1::::<>CanvasLayer<><>0<>0<><>::
+DebugOverlay.gd::GDScript::8541149494031276328::1780892276::0::1::::<>CanvasLayer<><>0<>0<><>::
 DebugOverlay.tscn::PackedScene::2816137499605085881::1780780437::0::1::::<><><>0<>0<><>::uid://dtxnqp3rajhxw::::res://ui/debug/DebugOverlay.gd<>uid://cte64n3menda1::::res://ui/debug/DebugEnemyLinkDrawer.gd
 ::res://ui/debug/tools/::1780780437
-PrototypeToolsPanel.gd::GDScript::7682150955834844724::1780780437::0::1::::<>CanvasLayer<><>0<>0<><>::
+PrototypeToolsPanel.gd::GDScript::7682150955834844724::1780892285::0::1::::<>CanvasLayer<><>0<>0<><>::
 PrototypeToolsPanel.tscn::PackedScene::8772468370515384111::1780780437::0::1::::<><><>0<>0<><>::uid://dhpj5y4tcryam::::res://ui/debug/tools/PrototypeToolsPanel.gd
 ::res://ui/feedback/::1780780437
 RunFeedbackLayer.gd::GDScript::5120332473755649460::1780780437::0::1::::<>CanvasLayer<><>0<>0<><>::
 RunFeedbackLayer.tscn::PackedScene::4366183617130838993::1780780437::0::1::::<><><>0<>0<><>::uid://ce7lelxgxqu1a::::res://ui/feedback/RunFeedbackLayer.gd
 ::res://ui/hud/::1780780437
-RunHud.gd::GDScript::3710984833061123710::1780780437::0::1::::<>CanvasLayer<><>0<>0<><>::
+RunHud.gd::GDScript::3710984833061123710::1780892302::0::1::::<>CanvasLayer<><>0<>0<><>::
 RunHud.tscn::PackedScene::5676700670260443624::1780780437::0::1::::<><><>0<>0<><>::uid://bs4vm38wguqb3::::res://ui/hud/RunHud.gd
 ::res://ui/level_up/::1780780437
 LevelUpPanel.gd::GDScript::4084257718777502720::1780780437::0::1::::<>CanvasLayer<><>0<>0<><>::

@@ -218,6 +218,7 @@ func _collect() -> void:
 		return
 
 	is_collected = true
+	collection_enabled = false
 	_stop_idle_window()
 	_set_motion_processing_enabled(false)
 	_set_coin_active(false)
@@ -236,12 +237,13 @@ func _collect() -> void:
 		}
 	)
 
-	PoolManager.despawn(self)
+	call_deferred("_despawn_to_pool")
 
 ## Pool hook: leave the coin inert until setup() reconfigures it.
 func _on_pool_acquire() -> void:
 	_reset_runtime_state()
 	player_node = null
+	collection_enabled = false
 	_stop_idle_window()
 	_set_motion_processing_enabled(false)
 	_set_coin_active(false)
@@ -250,6 +252,7 @@ func _on_pool_acquire() -> void:
 func _on_pool_release() -> void:
 	_reset_runtime_state()
 	player_node = null
+	collection_enabled = false
 	_stop_idle_window()
 	_set_motion_processing_enabled(false)
 	_set_coin_active(false)
@@ -257,16 +260,16 @@ func _on_pool_release() -> void:
 ## Enables/disables the coin areas and collision shapes.
 func _set_coin_active(should_be_active: bool) -> void:
 	if magnet_area != null:
-		magnet_area.monitoring = should_be_active
+		magnet_area.set_deferred("monitoring", should_be_active)
 
 	if collect_area != null:
-		collect_area.monitoring = should_be_active
+		collect_area.set_deferred("monitoring", should_be_active)
 
 	if magnet_collision_shape != null:
-		magnet_collision_shape.disabled = not should_be_active
+		magnet_collision_shape.set_deferred("disabled", not should_be_active)
 
 	if collect_collision_shape != null:
-		collect_collision_shape.disabled = not should_be_active
+		collect_collision_shape.set_deferred("disabled", not should_be_active)
 
 ## Enables/disables motion processing without affecting the pickup areas.
 func _set_motion_processing_enabled(should_be_active: bool) -> void:
@@ -274,7 +277,12 @@ func _set_motion_processing_enabled(should_be_active: bool) -> void:
 
 ## Resolves the first Node2D in the player group.
 func _resolve_player() -> Node2D:
-	var players: Array[Node] = get_tree().get_nodes_in_group(player_group_name)
+	var tree: SceneTree = get_tree()
+
+	if tree == null:
+		return null
+
+	var players: Array[Node] = tree.get_nodes_in_group(player_group_name)
 
 	for node: Node in players:
 		if node is Node2D:
@@ -296,7 +304,7 @@ func _on_run_finished(_result_payload: RunResultPayload) -> void:
 
 ## Refreshes radius-dependent state after upgrades are applied.
 func _on_run_level_up_completed(_current_level: int, _selected_upgrade_id: String) -> void:
-	if is_collected:
+	if is_collected or not is_inside_tree() or not collection_enabled:
 		return
 
 	if player_node == null or not is_instance_valid(player_node):
@@ -398,6 +406,7 @@ func _activate_coin_runtime() -> void:
 		player_node = _resolve_player()
 
 	_reset_runtime_state()
+	collection_enabled = true
 	_refresh_area_radii()
 	_set_coin_active(true)
 	_refresh_area_overlap_state_once()
@@ -451,10 +460,13 @@ func _should_keep_motion_processing() -> bool:
 func _reset_runtime_state() -> void:
 	is_collected = false
 	is_magnetized = false
-	collection_enabled = true
+	collection_enabled = false
 	player_inside_magnet_area = false
 	player_inside_collect_area = false
 	idle_completed = false
 	velocity = Vector2.ZERO
 	last_applied_magnet_radius = -1.0
 	last_applied_collect_radius = -1.0
+
+func _despawn_to_pool() -> void:
+	PoolManager.despawn(self)
