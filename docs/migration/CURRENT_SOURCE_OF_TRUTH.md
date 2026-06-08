@@ -85,21 +85,17 @@ Os seguintes elementos continuam presentes na cena atual:
 - `DebugOverlay`
 - `PrototypeToolsPanel`
 
-## Decisão desta PR
+Na composição oficial atual, esses elementos vivem sob `DebugRoot`.
 
-Eles permanecem na cena atual até uma PR própria de separação debug/dev-only.
+`DebugRoot` é apenas organização estrutural. Nenhuma dessas ferramentas foi removida nesta etapa.
 
-Esta PR não cria:
-
-- `DebugRoot`
-- carregamento condicional de debug
-- cena paralela de runtime
+`DebugOverlay` e `PrototypeToolsPanel` continuam disponíveis no runtime oficial atual.
 
 ## Intenção para as próximas etapas
 
 Ordem pretendida após esta PR:
 
-1. `RunScene` oficializada no boot;
-2. `TestGaiaScene` mantida como cena técnica/de referência;
+1. `RunScene` mantida como source of truth oficial da run;
+2. `TestGaiaScene` mantida como cena técnica/de referência temporária;
 3. remoção futura de duplicidades e ambiguidade estrutural remanescente;
 4. migração gradual dos sistemas arquiteturais ainda pendentes.

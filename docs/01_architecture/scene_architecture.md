@@ -5,15 +5,15 @@
 ```text
 Main.tscn
 └── CurrentSceneRoot
-    └── TestGaiaScene.tscn
+    └── RunScene.tscn
 ```
 
-`Main.gd` carrega a cena inicial. `TestGaiaScene.gd` monta o protótipo e conecta player, câmera e spawners.
+`Main.gd` carrega a cena inicial. `RunScene.gd` é a composition root oficial atual e conecta player, câmera e spawners.
 
-## Cena técnica
+## Cena oficial da run
 
 ```text
-TestGaiaScene <Node2D>
+RunScene <Node2D>
 ├── ArenaRoot/TestArena
 ├── RuntimeRoot
 │   ├── PlayerRoot/PlayerGaia [runtime]
@@ -27,11 +27,14 @@ TestGaiaScene <Node2D>
 ├── RunHud
 ├── RunFeedbackLayer
 ├── WorldFeedbackLayer
-├── DebugOverlay
-├── PrototypeToolsPanel
+├── DebugRoot
+│   ├── DebugOverlay
+│   └── PrototypeToolsPanel
 ├── LevelUpPanel
 └── ResultPanel
 ```
+
+`TestGaiaScene` continua existindo como cena técnica legada/de referência temporária.
 
 ## PlayerGaia
 

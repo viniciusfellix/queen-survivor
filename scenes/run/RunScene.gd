@@ -1,17 +1,16 @@
-## Cena paralela de runtime preparada para a futura migração da run oficial.
+## Composition root oficial atual da run.
+##
+## Importante:
+## - esta é a cena oficial carregada no boot da aplicação;
+## - ela substitui `res://gameplay/test/TestGaiaScene.tscn` como source of truth;
+## - ainda reutiliza os mesmos sistemas de gameplay existentes.
 ##
 ## Responsabilidades:
-## - espelhar a composição funcional atual da cena de runtime existente;
 ## - validar a estrutura esperada da cena;
 ## - instanciar a Gaia no ponto de spawn;
 ## - configurar câmera;
 ## - configurar spawners;
-## - expor roots e controllers para testes/debug.
-##
-## Importante:
-## Esta cena ainda não substitui a runtime oficial atual.
-## Ela existe para preparar uma migração gradual sem alterar o fluxo carregado
-## por Main.gd nesta PR.
+## - expor roots e controllers para runtime e debug.
 extends Node2D
 
 @export_file("*.tscn") var player_scene_path: String = "res://gameplay/player/PlayerGaia.tscn"

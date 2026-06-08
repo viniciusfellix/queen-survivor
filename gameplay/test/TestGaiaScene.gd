@@ -1,13 +1,17 @@
-## Cena técnica integrada usada para testar Gaia no Módulo 1.
+## Cena técnica legada usada como referência temporária da composição anterior da run.
 ##
-## Responsabilidades:
-## - validar a estrutura esperada da cena;
+## Importante:
+## - esta cena não é mais o runtime oficial carregado no boot;
+## - a source of truth atual da run é `res://scenes/run/RunScene.tscn`;
+## - TestGaiaScene deve ser usada apenas como referência técnica temporária;
+## - novas mudanças de composição da run devem ser feitas primeiro em RunScene.
+##
+## Responsabilidades preservadas nesta cena:
+## - validar a estrutura esperada da composição antiga;
 ## - instanciar a Gaia no ponto de spawn;
 ## - configurar câmera;
 ## - configurar spawners;
 ## - expor roots e controllers para testes/debug.
-##
-## Esta cena é o laboratório jogável atual do Módulo 1.
 extends Node2D
 
 @export_file("*.tscn") var player_scene_path: String = "res://gameplay/player/PlayerGaia.tscn"
