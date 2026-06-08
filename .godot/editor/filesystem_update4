@@ -10,3 +10,6 @@ res://gameplay/test/TestGaiaScene.gd
 res://scenes/run/RunScene.gd
 res://gameplay/combat/EnemyAttackHitbox.gd
 res://gameplay/player/PlayerDashImpactArea.gd
+res://gameplay/drops/CoinDrop.gd
+res://ui/world_feedback/FloatingCombatText.gd
+res://visual/weapons/gaia_initial_weapon/GaiaAttackVisualController.gd

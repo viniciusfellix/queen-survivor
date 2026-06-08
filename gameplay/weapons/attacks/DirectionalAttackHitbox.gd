@@ -264,6 +264,7 @@ func _clear_runtime_shapes() -> void:
 ## Ativa/desativa monitoramento e shapes da hitbox runtime.
 func _set_hitbox_active(should_be_active: bool) -> void:
 	monitoring = should_be_active
+	set_physics_process(should_be_active)
 
 	for shape_node: CollisionShape2D in runtime_shape_nodes:
 		if shape_node == null or not is_instance_valid(shape_node):

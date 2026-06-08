@@ -166,6 +166,7 @@ func set_attack_active(should_be_active: bool) -> void:
 	is_active = should_be_active
 
 	set_deferred("monitoring", should_be_active)
+	set_physics_process(should_be_active)
 
 	for shape_node: CollisionShape2D in runtime_shape_nodes:
 		if shape_node == null or not is_instance_valid(shape_node):

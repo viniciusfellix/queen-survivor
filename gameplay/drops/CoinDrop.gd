@@ -71,6 +71,7 @@ func _ready() -> void:
 	_apply_definition()
 	player_node = _resolve_player()
 	_connect_area_signals()
+	_set_coin_active(true)
 	_refresh_area_radii()
 	_refresh_area_overlap_state()
 	_queue_debug_redraw()
@@ -241,6 +242,7 @@ func _collect() -> void:
 		return
 
 	is_collected = true
+	_set_coin_active(false)
 
 	GameEvents.run_coin_collected.emit(value, global_position)
 
@@ -263,6 +265,7 @@ func _collect() -> void:
 ##
 ## O setup() reaplica a definition e o valor logo em seguida.
 func _on_pool_acquire() -> void:
+	_set_coin_active(true)
 	is_collected = false
 	is_magnetized = false
 	collection_enabled = true
@@ -272,6 +275,31 @@ func _on_pool_acquire() -> void:
 	elapsed_seconds = 0.0
 	last_applied_magnet_radius = -1.0
 	last_applied_collect_radius = -1.0
+
+## Hook do pool: desliga monitoramento e física antes de hibernar a moeda.
+func _on_pool_release() -> void:
+	_set_coin_active(false)
+	is_magnetized = false
+	collection_enabled = false
+	player_inside_magnet_area = false
+	player_inside_collect_area = false
+	velocity = Vector2.ZERO
+
+## Liga/desliga monitoramento e shapes da moeda pooled.
+func _set_coin_active(should_be_active: bool) -> void:
+	set_physics_process(should_be_active)
+
+	if magnet_area != null:
+		magnet_area.monitoring = should_be_active
+
+	if collect_area != null:
+		collect_area.monitoring = should_be_active
+
+	if magnet_collision_shape != null:
+		magnet_collision_shape.disabled = not should_be_active
+
+	if collect_collision_shape != null:
+		collect_collision_shape.disabled = not should_be_active
 
 ## Localiza o primeiro Node2D no grupo de player.
 func _resolve_player() -> Node2D:
