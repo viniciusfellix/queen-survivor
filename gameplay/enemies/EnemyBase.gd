@@ -1057,10 +1057,13 @@ func _format_damage_breakdown(damage_result: Dictionary) -> String:
 
 		var entry: Dictionary = entry_variant
 
-		parts.append("%s raw=%s final=%s weak=%s resist=%s mult=%s" % [
+		parts.append("%s role=%s raw=%s final=%s applied=%s reason=%s weak=%s resist=%s mult=%s" % [
 			str(entry.get("damage_type", "")),
+			str(entry.get("component_role", "")),
 			str(entry.get("raw_damage", 0)),
 			str(entry.get("final_damage", 0)),
+			str(entry.get("applied", false)),
+			str(entry.get("reason", "")),
 			str(entry.get("is_weak", false)),
 			str(entry.get("is_resistant", false)),
 			str(entry.get("multiplier", 1.0))

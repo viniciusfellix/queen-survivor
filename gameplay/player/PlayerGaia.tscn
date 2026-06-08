@@ -7,8 +7,6 @@
 [ext_resource type="Script" uid="uid://bfafk4jqwrtsf" path="res://gameplay/player/PlayerDashImpactArea.gd" id="4_85b2w"]
 [ext_resource type="Script" uid="uid://3e5fkbiwcfkb" path="res://gameplay/weapons/gaia/GaiaInitialWeaponController.gd" id="4_wm5q1"]
 [ext_resource type="Resource" uid="uid://rysi500pe7yh" path="res://data/weapons/weapon_gaia_initial.tres" id="5_0caxs"]
-[ext_resource type="Script" uid="uid://dvk8ne584ljjf" path="res://definitions/AttackAreaDefinition.gd" id="8_85b2w"]
-[ext_resource type="Resource" uid="uid://oaclyehjgory" path="res://resources/combat/attack_areas/attack_area_gaia_initial_d.tres" id="9_h8com"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_0a7w7"]
 radius = 30.016663
@@ -55,6 +53,5 @@ attack_hitbox_scene_path = "uid://f301wqo5vajy"
 attack_visual_root_path = NodePath("../AttackVisualRoot")
 attack_hitbox_root_path = NodePath("../AttackHitboxRoot")
 attack_hitbox_offset = 0.0
-attack_areas = Array[ExtResource("8_85b2w")]([ExtResource("9_h8com")])
 hit_knockback_enabled = true
 hit_knockback_pixels = 360.0

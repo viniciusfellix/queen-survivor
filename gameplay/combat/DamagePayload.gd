@@ -47,12 +47,9 @@ func set_components(p_damage_components: Array[DamageComponentDefinition]) -> vo
 func has_components() -> bool:
 	return not damage_components.is_empty()
 
-## Soma o dano bruto total considerando componentes válidos ou fallback simples.
+## Soma o dano bruto total considerando base_damage e componentes válidos.
 func get_total_raw_damage() -> int:
-	if damage_components.is_empty():
-		return raw_damage
-
-	var total: int = 0
+	var total: int = max(0, raw_damage)
 
 	for component: DamageComponentDefinition in damage_components:
 		if component != null and component.is_valid_component():
@@ -62,7 +59,7 @@ func get_total_raw_damage() -> int:
 
 ## Verifica se o payload possui dano e tipo/componentes válidos.
 func is_valid_payload() -> bool:
-	if has_components():
-		return get_total_raw_damage() > 0
+	if raw_damage > 0 and DamageTypes.is_valid_type(damage_type):
+		return true
 
-	return raw_damage > 0 and DamageTypes.is_valid_type(damage_type)
+	return has_components() and get_total_raw_damage() > 0

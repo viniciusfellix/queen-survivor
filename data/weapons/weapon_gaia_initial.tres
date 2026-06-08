@@ -19,5 +19,6 @@ attack_areas = Array[ExtResource("1_sf3oo")]([ExtResource("2_sf3oo")])
 hit_knockback_enabled = true
 hit_knockback_pixels = 60.0
 hit_knockback_duration_seconds = 0.18
+base_damage = 6
 damage_components = Array[ExtResource("3_n5x3p")]([ExtResource("2_dpeut"), ExtResource("3_dpeut")])
 metadata/_custom_type_script = "uid://qe50xi38krmo"

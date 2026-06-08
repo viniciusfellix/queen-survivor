@@ -7,5 +7,7 @@
 script = ExtResource("1_n3oli")
 enemy_scene_path = "uid://dg1wr6dv8jxxi"
 enemy_definition = ExtResource("2_2dsmo")
+spawn_interval_seconds = 0.1
+max_alive_enemies = 180
 
 [node name="HintLabel" type="Label" parent="." unique_id=730562488]

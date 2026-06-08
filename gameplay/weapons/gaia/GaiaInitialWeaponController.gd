@@ -350,10 +350,7 @@ func _apply_weapon_definition() -> void:
 
 ## Soma dano bruto dos componentes ou retorna fallback simples.
 func _get_total_raw_damage() -> int:
-	if damage_components.is_empty():
-		return base_damage
-
-	var total: int = 0
+	var total: int = max(0, base_damage)
 
 	for component: DamageComponentDefinition in damage_components:
 		if component != null and component.is_valid_component():
@@ -523,48 +520,20 @@ func _apply_damage_flat_upgrade(
 	if amount <= 0:
 		return false
 
-	if damage_components.is_empty():
-		base_damage += amount
-
-		DeveloperAuditLogger.log_upgrade(
-			"Dano fallback aplicado: +%s | base_damage=%s" % [
-				str(amount),
-				str(base_damage)
-			],
-			"GaiaInitialWeaponController",
-			{
-				"upgrade_id": upgrade_id,
-				"weapon_id": weapon_source_id,
-				"base_damage": base_damage,
-				"mode": "fallback"
-			}
-		)
-
-		return true
-
-	var applied_count: int = 0
-
-	for component: DamageComponentDefinition in damage_components:
-		if component == null:
-			continue
-
-		component.amount += amount
-		applied_count += 1
-
-	if applied_count <= 0:
-		return false
+	base_damage += amount
 
 	DeveloperAuditLogger.log_upgrade(
-		"Dano geral aplicado em todos os componentes: +%s | components=%s" % [
+		"Dano base aplicado: +%s | base_damage=%s | components=%s" % [
 			str(amount),
+			str(base_damage),
 			_get_component_debug_string()
 		],
 		"GaiaInitialWeaponController",
 		{
 			"upgrade_id": upgrade_id,
 			"weapon_id": weapon_source_id,
-			"amount_per_component": amount,
-			"applied_count": applied_count,
+			"base_damage": base_damage,
+			"amount": amount,
 			"components": _get_component_debug_string()
 		}
 	)

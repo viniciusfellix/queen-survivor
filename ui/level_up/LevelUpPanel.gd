@@ -13,7 +13,7 @@
 extends CanvasLayer
 
 ## Ícone fallback usado quando o upgrade não possui ícone.
-const DEFAULT_ICON_PATH: String = "res://assets/placeholders/upgrades/upgrade_default.png"
+const DEFAULT_ICON_PATH: String = "res://assets/placeholders/upgrades/upgrade_damage.png"
 
 @export_group("Layout")
 

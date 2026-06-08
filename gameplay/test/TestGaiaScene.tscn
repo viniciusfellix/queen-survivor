@@ -64,7 +64,6 @@ script = ExtResource("3_38slv")
 [node name="DebugRoot" type="Node" parent="." unique_id=1828051001]
 
 [node name="DebugOverlay" parent="DebugRoot" unique_id=1878947059 instance=ExtResource("2_jgi7i")]
-debug_enabled = false
 show_input_section = false
 show_animation_section = false
 show_player_core_section = false
