@@ -1,17 +1,24 @@
 [gd_resource type="Resource" script_class="SpawnTimelineEntryDefinition" format=3 uid="uid://bj11xixdvv46k"]
 
-[ext_resource type="Resource" uid="uid://cdk2sbcwdtnd0" path="res://data/enemies/enemy_chaser_basic.tres" id="1_5gpm2"]
-[ext_resource type="Script" uid="uid://u04lr4kql6m5" path="res://definitions/SpawnTimelineEntryDefinition.gd" id="1_rl4an"]
+[ext_resource type="Script" path="res://definitions/SpawnTimelineEntryDefinition.gd" id="1_entry"]
+[ext_resource type="Resource" uid="uid://cdk2sbcwdtnd0" path="res://data/enemies/enemy_chaser_basic.tres" id="2_enemy"]
+[ext_resource type="Resource" path="res://data/spawn_timelines/test_arena_10min/rule_wave_02_pressure_goblin.tres" id="3_rule"]
 
 [resource]
-script = ExtResource("1_rl4an")
+script = ExtResource("1_entry")
 id = "wave_02_pressure"
+wave_name = "pressure"
 start_time_seconds = 300.0
 end_time_seconds = 480.0
+start_time_min_seconds = 290.0
+start_time_max_seconds = 310.0
+end_time_min_seconds = 470.0
+end_time_max_seconds = 490.0
 enemy_scene_path = "uid://dg1wr6dv8jxxi"
-enemy_definition = ExtResource("1_5gpm2")
+enemy_definition = ExtResource("2_enemy")
 spawn_interval_seconds = 1.8
 max_alive_enemies = 22
 spawn_min_distance = 430.0
 spawn_max_distance = 660.0
+spawn_rules = Array[ExtResource("3_rule")]([ExtResource("3_rule")])
 metadata/_custom_type_script = "uid://u04lr4kql6m5"

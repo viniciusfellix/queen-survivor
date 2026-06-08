@@ -7,7 +7,7 @@
 [ext_resource type="Script" uid="uid://bfafk4jqwrtsf" path="res://gameplay/player/PlayerDashImpactArea.gd" id="4_85b2w"]
 [ext_resource type="Script" uid="uid://3e5fkbiwcfkb" path="res://gameplay/weapons/gaia/GaiaInitialWeaponController.gd" id="4_wm5q1"]
 [ext_resource type="Resource" uid="uid://rysi500pe7yh" path="res://data/weapons/weapon_gaia_initial.tres" id="5_0caxs"]
-[ext_resource type="PackedScene" path="res://visual/weapons/gaia_initial_weapon/GaiaAimIndicator.tscn" id="6_aim"]
+[ext_resource type="PackedScene" uid="uid://dm1nlgy7en2io" path="res://visual/weapons/gaia_initial_weapon/GaiaAimIndicator.tscn" id="6_aim"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_0a7w7"]
 radius = 30.016663
@@ -22,13 +22,12 @@ aim_indicator_path = NodePath("VisualRoot/GaiaAimIndicator")
 weapon_controller_path = NodePath("WeaponRoot/GaiaInitialWeaponController")
 
 [node name="BodyCollision" type="CollisionShape2D" parent="." unique_id=158647657]
-position = Vector2(-1, 0)
+position = Vector2(-1, 61)
 shape = SubResource("CircleShape2D_0a7w7")
 
 [node name="PlayerHurtbox" type="Area2D" parent="." unique_id=1729074534]
 script = ExtResource("3_0a7w7")
 collision_layer_number = 7
-log_configuration = false
 
 [node name="DashImpactArea" type="Area2D" parent="." unique_id=1755591863]
 monitoring = false
@@ -38,11 +37,11 @@ script = ExtResource("4_85b2w")
 [node name="VisualRoot" type="Node2D" parent="." unique_id=721531233]
 
 [node name="GaiaVisual" parent="VisualRoot" unique_id=337840 instance=ExtResource("2_cbat8")]
-spine_adapter_path = NodePath("")
 aim_indicator_path = NodePath("../GaiaAimIndicator")
-damage_flash_step_seconds = 0.08
+damage_flash_step_seconds = 0.2
+spine_adapter_path = NodePath("")
 
-[node name="GaiaAimIndicator" parent="VisualRoot" instance=ExtResource("6_aim")]
+[node name="GaiaAimIndicator" parent="VisualRoot" unique_id=681057750 instance=ExtResource("6_aim")]
 position_offset = Vector2(0, -18)
 
 [node name="WeaponRoot" type="Node2D" parent="." unique_id=1652286854]
@@ -58,6 +57,7 @@ attack_visual_scene_path = "uid://dpikvdhhe37hy"
 attack_hitbox_scene_path = "uid://f301wqo5vajy"
 attack_visual_root_path = NodePath("../AttackVisualRoot")
 attack_hitbox_root_path = NodePath("../AttackHitboxRoot")
+attack_visual_offset = 0.0
 attack_hitbox_offset = 0.0
 hit_knockback_enabled = true
 hit_knockback_pixels = 360.0

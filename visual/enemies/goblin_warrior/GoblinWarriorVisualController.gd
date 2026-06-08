@@ -48,13 +48,17 @@ extends "res://visual/spine/SpineVisualControllerBase.gd"
 ## Tween atual do flash.
 var damage_flash_tween: Tween = null
 
+## Alvo real do flash visual.
+var flash_canvas_item: CanvasItem = null
+
 ## Cor/modulate original do visual.
 var default_modulate: Color = Color.WHITE
 
 ## Guarda modulate original e inicializa base.
 func _ready() -> void:
-	default_modulate = modulate
 	super._ready()
+	flash_canvas_item = _resolve_flash_canvas_item()
+	default_modulate = _get_current_flash_modulate()
 
 ## Nome usado em logs técnicos.
 func _get_visual_log_name() -> String:
@@ -125,10 +129,12 @@ func play_damage_flash() -> void:
 	var flash_sequence: Array[Color] = _build_damage_flash_sequence()
 
 	if flash_sequence.is_empty():
-		modulate = default_modulate
+		_apply_flash_modulate(default_modulate)
 		return
 
-	modulate = flash_sequence[0]
+	_apply_flash_modulate(flash_sequence[0])
+
+	var tween_target: Object = _get_flash_tween_target()
 
 	damage_flash_tween = create_tween()
 	damage_flash_tween.set_trans(Tween.TRANS_QUAD)
@@ -136,14 +142,14 @@ func play_damage_flash() -> void:
 
 	for sequence_index: int in range(1, flash_sequence.size()):
 		damage_flash_tween.tween_property(
-			self,
+			tween_target,
 			"modulate",
 			flash_sequence[sequence_index],
 			max(0.01, damage_flash_step_seconds)
 		)
 
 	damage_flash_tween.finished.connect(func() -> void:
-		modulate = default_modulate
+		_apply_flash_modulate(default_modulate)
 		damage_flash_tween = null
 	)
 
@@ -164,7 +170,7 @@ func play_damage_flash() -> void:
 ## Reseta estado visual para reuso pooled seguro antes do proximo spawn.
 func reset_visual_state() -> void:
 	_stop_damage_flash_tween()
-	modulate = default_modulate
+	_apply_flash_modulate(default_modulate)
 	visible = true
 	current_animation_name = ""
 	current_visual_state = ""
@@ -177,7 +183,7 @@ func reset_visual_state() -> void:
 ## Coloca o visual em estado neutro ao sair do pool ativo.
 func deactivate_for_pool() -> void:
 	_stop_damage_flash_tween()
-	modulate = default_modulate
+	_apply_flash_modulate(default_modulate)
 	current_animation_name = ""
 	current_visual_state = ""
 	current_animation_time_scale = 1.0
@@ -192,7 +198,7 @@ func _stop_damage_flash_tween() -> void:
 		damage_flash_tween.kill()
 		damage_flash_tween = null
 
-	modulate = default_modulate
+	_apply_flash_modulate(default_modulate)
 
 func _build_damage_flash_sequence() -> Array[Color]:
 	var sequence: Array[Color] = []
@@ -213,3 +219,30 @@ func _build_damage_flash_sequence() -> Array[Color]:
 		sequence.append(default_modulate)
 
 	return sequence
+
+func _resolve_flash_canvas_item() -> CanvasItem:
+	if spine_adapter != null:
+		var spine_sprite_variant: Variant = spine_adapter.get("spine_sprite")
+
+		if spine_sprite_variant is CanvasItem:
+			return spine_sprite_variant as CanvasItem
+
+	return self
+
+func _get_current_flash_modulate() -> Color:
+	if flash_canvas_item != null:
+		return flash_canvas_item.modulate
+
+	return modulate
+
+func _apply_flash_modulate(target_color: Color) -> void:
+	modulate = target_color
+
+	if flash_canvas_item != null and flash_canvas_item != self:
+		flash_canvas_item.modulate = target_color
+
+func _get_flash_tween_target() -> Object:
+	if flash_canvas_item != null:
+		return flash_canvas_item
+
+	return self
