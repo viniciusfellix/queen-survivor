@@ -1,5 +1,5 @@
 cb68465a049d370e5dc715e0fed1d1f8
-::res://::1780890306
+::res://::1780891308
 AUDIT_01_PROJECT_INVENTORY.md::TextFile::-1::1780870398::0::1::::<><><>0<>0<><>::
 AUDIT_02_ARCHITECTURE_REVIEW.md::TextFile::-1::1780871881::0::1::::<><><>0<>0<><>::
 AUDIT_03_SYSTEM_CLASSIFICATION.md::TextFile::-1::1780871881::0::1::::<><><>0<>0<><>::
@@ -230,7 +230,7 @@ structural_audit_checklist.md::TextFile::-1::1780780437::0::1::::<><><>0<>0<><>:
 ::res://docs/08_testing/::1780863223
 combat_modular_validation.md::TextFile::-1::1780863223::0::1::::<><><>0<>0<><>::
 regression_module_1.md::TextFile::-1::1780863223::0::1::::<><><>0<>0<><>::
-::res://docs/migration/::1780889080
+::res://docs/migration/::1780890996
 CURRENT_SOURCE_OF_TRUTH.md::TextFile::-1::1780886459::0::1::::<><><>0<>0<><>::
 PR1_STRUCTURAL_CLEANUP.md::TextFile::-1::1780884738::0::1::::<><><>0<>0<><>::
 PR2_PARALLEL_RUNSCENE.md::TextFile::-1::1780885040::0::1::::<><><>0<>0<><>::
@@ -242,6 +242,7 @@ PR7_COMBAT_HOTPATH_NATIVE_AUDIT.md::TextFile::-1::1780887574::0::1::::<><><>0<>0
 PR8_POOLING_LIFECYCLE_AUDIT.md::TextFile::-1::1780888041::0::1::::<><><>0<>0<><>::
 PR9_GODOT_NATIVE_LOCALIZATION.md::TextFile::-1::1780888687::0::1::::<><><>0<>0<><>::
 PR10_SHORT_LIVED_OBJECT_POOLING.md::TextFile::-1::1780889080::0::1::::<><><>0<>0<><>::
+PR11_ENEMY_LIFECYCLE_POOLING_AUDIT.md::TextFile::-1::1780890996::0::1::::<><><>0<>0<><>::
 ::res://gameplay/::1779306989
 ::res://gameplay/arena/::1780863223
 TestArena.gd::GDScript::1916285675563646228::1780780437::0::1::::<>Node2D<><>0<>0<><>::
@@ -258,7 +259,7 @@ CoinDrop.gd::GDScript::3785625926568661064::1780888039::0::1::::CoinDrop<>Node2D
 CoinDrop.tscn::PackedScene::587500221055694846::1780889885::0::1::::<><><>0<>0<><>::uid://bt61yabvjl8ho::::res://gameplay/drops/CoinDrop.gd<>uid://bcfegd6d7xccr::::res://data/drops/coin_default.tres
 DropController.gd::GDScript::6528458090303809249::1780863223::0::1::::<>Node<><>0<>0<><>::
 ::res://gameplay/enemies/::1780863223
-EnemyBase.gd::GDScript::4581220726298131987::1780863223::0::1::::EnemyBase<>CharacterBody2D<><>0<>0<><>::
+EnemyBase.gd::GDScript::4581220726298131987::1780890995::0::1::::EnemyBase<>CharacterBody2D<><>0<>0<><>::
 EnemyBase.tscn::PackedScene::7635436700707188906::1780887522::0::1::::<><><>0<>0<><>::uid://b6jgbhwoc2gnj::::res://gameplay/enemies/EnemyBase.gd<>uid://bal0n2h0w1ovu::::res://visual/enemies/goblin_warrior/GoblinWarriorVisual.tscn<>uid://plist0qhvo47::::res://gameplay/combat/EnemyAttackHitbox.gd<>uid://ckwjyep0lbn5a::::res://gameplay/combat/HurtboxComponent.gd
 ::res://gameplay/level_up/::1780780437
 LevelUpOptionService.gd::GDScript::3325403227772563967::1780780437::0::1::::LevelUpOptionService<>RefCounted<><>0<>0<><>::
@@ -279,7 +280,7 @@ TestGaiaScene.gd::GDScript::4093809713450377015::1780886458::0::1::::<>Node2D<><
 TestGaiaScene.tscn::PackedScene::3398736143813768225::1780885524::0::1::::<><><>0<>0<><>::uid://bylcphy8ngatr::::res://gameplay/test/TestGaiaScene.gd<>uid://dx5c33k1kx622::::res://gameplay/arena/TestArena.tscn<>uid://bgefmxnkcihft::::res://ui/debug/DebugOverlay.tscn<>uid://b4adgyne26btq::::res://gameplay/camera/FollowCamera.gd<>uid://dm5ecyvme3lym::::res://gameplay/spawners/EnemySpawner.tscn<>uid://c2kfgw32sq0o0::::res://gameplay/run/RunController.gd<>uid://bmqjfu8a5d81w::::res://data/maps/map_test_arena_10min.tres<>uid://c0ao0scpvx5d2::::res://gameplay/drops/DropController.gd<>uid://bcfegd6d7xccr::::res://data/drops/coin_default.tres<>uid://cct45mramyoo7::::res://ui/level_up/LevelUpPanel.tscn<>uid://b3han2v54mmov::::res://ui/feedback/RunFeedbackLayer.tscn<>uid://dhlthdpkspki7::::res://ui/world_feedback/WorldFeedbackLayer.tscn<>uid://bfu3srmi1h0cw::::res://ui/result/ResultPanel.tscn<>uid://cm43ov31i3a3q::::res://ui/hud/RunHud.tscn<>uid://dw8pji4737owl::::res://ui/debug/tools/PrototypeToolsPanel.tscn
 ::res://gameplay/weapons/::1779163233
 ::res://gameplay/weapons/attacks/::1780889885
-DirectionalAttackHitbox.gd::GDScript::1260375184870002234::1780890078::0::1::::DirectionalAttackHitbox<>Area2D<><>0<>0<><>::
+DirectionalAttackHitbox.gd::GDScript::1260375184870002234::1780890402::0::1::::DirectionalAttackHitbox<>Area2D<><>0<>0<><>::
 DirectionalAttackHitbox.tscn::PackedScene::410312331672110098::1780887522::0::1::::<><><>0<>0<><>::uid://r7sgvuih1krq::::res://gameplay/weapons/attacks/DirectionalAttackHitbox.gd
 ::res://gameplay/weapons/gaia/::1780863223
 GaiaInitialWeaponController.gd::GDScript::1975376098804937625::1780863223::0::1::::<>Node<><>0<>0<><>::
