@@ -3,6 +3,30 @@
 [ext_resource type="Script" uid="uid://bt61yabvjl8ho" path="res://gameplay/drops/CoinDrop.gd" id="1_wjvt6"]
 [ext_resource type="Resource" uid="uid://bcfegd6d7xccr" path="res://data/drops/coin_default.tres" id="2_1k4t7"]
 
+[sub_resource type="CircleShape2D" id="CircleShape2D_magnet"]
+radius = 165.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_collect"]
+radius = 28.0
+
 [node name="CoinDrop" type="Node2D" unique_id=333999507]
 script = ExtResource("1_wjvt6")
 coin_definition = ExtResource("2_1k4t7")
+
+[node name="MagnetArea" type="Area2D" parent="." unique_id=79821511]
+collision_layer = 0
+collision_mask = 2
+monitoring = true
+monitorable = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="MagnetArea" unique_id=845019205]
+shape = SubResource("CircleShape2D_magnet")
+
+[node name="CollectArea" type="Area2D" parent="." unique_id=457694130]
+collision_layer = 0
+collision_mask = 2
+monitoring = true
+monitorable = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="CollectArea" unique_id=337458570]
+shape = SubResource("CircleShape2D_collect")

@@ -37,6 +37,14 @@ class_name CoinDrop
 
 @export var debug_outline_color: Color = Color(1.0, 1.0, 1.0, 0.95)
 
+@onready var magnet_area: Area2D = $MagnetArea
+
+@onready var magnet_collision_shape: CollisionShape2D = $MagnetArea/CollisionShape2D
+
+@onready var collect_area: Area2D = $CollectArea
+
+@onready var collect_collision_shape: CollisionShape2D = $CollectArea/CollisionShape2D
+
 ## Referências e estado físico runtime da moeda.
 var player_node: Node2D = null
 
@@ -50,10 +58,21 @@ var is_magnetized: bool = false
 
 var collection_enabled: bool = true
 
+var player_inside_magnet_area: bool = false
+
+var player_inside_collect_area: bool = false
+
+var last_applied_magnet_radius: float = -1.0
+
+var last_applied_collect_radius: float = -1.0
+
 ## Aplica definition, localiza player e conecta evento de fim da run.
 func _ready() -> void:
 	_apply_definition()
 	player_node = _resolve_player()
+	_connect_area_signals()
+	_refresh_area_radii()
+	_refresh_area_overlap_state()
 	_queue_debug_redraw()
 
 	if not GameEvents.run_finished.is_connected(_on_run_finished):
@@ -75,18 +94,18 @@ func _physics_process(delta: float) -> void:
 	if player_node == null:
 		return
 
-	var distance_to_player: float = global_position.distance_to(player_node.global_position)
-	var effective_collect_radius: float = _get_effective_collect_radius()
-	var effective_magnet_radius: float = _get_effective_magnet_radius()
+	_refresh_area_radii()
+	_refresh_area_overlap_state()
 
-	if distance_to_player <= effective_collect_radius:
+	if player_inside_collect_area:
 		_collect()
 		return
 
 	if elapsed_seconds < initial_idle_seconds:
+		is_magnetized = false
 		return
 
-	if distance_to_player <= effective_magnet_radius:
+	if player_inside_magnet_area:
 		is_magnetized = true
 		_update_magnet_movement(delta)
 	else:
@@ -123,6 +142,8 @@ func setup(p_definition: CoinDropDefinition, p_value: int = 1, p_player: Node2D 
 		player_node = p_player
 
 	_apply_definition()
+	_refresh_area_radii()
+	_refresh_area_overlap_state()
 	_queue_debug_redraw()
 
 ## Copia dados da CoinDropDefinition para campos runtime.
@@ -140,6 +161,66 @@ func _apply_definition() -> void:
 	debug_radius = coin_definition.debug_radius
 	debug_color = coin_definition.debug_color
 	debug_outline_color = coin_definition.debug_outline_color
+
+## Conecta os sinais nativos das áreas de magnetismo e coleta.
+func _connect_area_signals() -> void:
+	if magnet_area != null:
+		if not magnet_area.body_entered.is_connected(_on_magnet_area_body_entered):
+			magnet_area.body_entered.connect(_on_magnet_area_body_entered)
+
+		if not magnet_area.body_exited.is_connected(_on_magnet_area_body_exited):
+			magnet_area.body_exited.connect(_on_magnet_area_body_exited)
+
+	if collect_area != null:
+		if not collect_area.body_entered.is_connected(_on_collect_area_body_entered):
+			collect_area.body_entered.connect(_on_collect_area_body_entered)
+
+		if not collect_area.body_exited.is_connected(_on_collect_area_body_exited):
+			collect_area.body_exited.connect(_on_collect_area_body_exited)
+
+## Atualiza os raios efetivos das áreas a partir da definition e dos modificadores do player.
+func _refresh_area_radii() -> void:
+	var effective_magnet_radius: float = _get_effective_magnet_radius()
+	var effective_collect_radius: float = _get_effective_collect_radius()
+
+	if not is_equal_approx(last_applied_magnet_radius, effective_magnet_radius):
+		_set_area_radius(magnet_collision_shape, effective_magnet_radius)
+		last_applied_magnet_radius = effective_magnet_radius
+
+	if not is_equal_approx(last_applied_collect_radius, effective_collect_radius):
+		_set_area_radius(collect_collision_shape, effective_collect_radius)
+		last_applied_collect_radius = effective_collect_radius
+
+## Aplica um raio em um CircleShape2D de forma segura.
+func _set_area_radius(shape_node: CollisionShape2D, radius: float) -> void:
+	if shape_node == null:
+		return
+
+	var circle_shape: CircleShape2D = shape_node.shape as CircleShape2D
+
+	if circle_shape == null:
+		return
+
+	circle_shape.radius = max(1.0, radius)
+
+## Sincroniza flags de overlap usando a consulta nativa da Area2D.
+##
+## Isso cobre casos de pool/reuso e mudanças de raio em runtime sem voltar ao cálculo manual
+## de distância para iniciar magnetismo ou coleta.
+func _refresh_area_overlap_state() -> void:
+	player_inside_magnet_area = _area_has_player_body(magnet_area)
+	player_inside_collect_area = _area_has_player_body(collect_area)
+
+## Verifica se a Area2D contém algum body do player esperado.
+func _area_has_player_body(area: Area2D) -> bool:
+	if area == null:
+		return false
+
+	for body: Node in area.get_overlapping_bodies():
+		if _is_valid_player_body(body):
+			return true
+
+	return false
 
 ## Calcula atração da moeda até o player e move sua posição.
 func _update_magnet_movement(delta: float) -> void:
@@ -185,8 +266,12 @@ func _on_pool_acquire() -> void:
 	is_collected = false
 	is_magnetized = false
 	collection_enabled = true
+	player_inside_magnet_area = false
+	player_inside_collect_area = false
 	velocity = Vector2.ZERO
 	elapsed_seconds = 0.0
+	last_applied_magnet_radius = -1.0
+	last_applied_collect_radius = -1.0
 
 ## Localiza o primeiro Node2D no grupo de player.
 func _resolve_player() -> Node2D:
@@ -202,6 +287,8 @@ func _resolve_player() -> Node2D:
 func _on_run_finished(_result_payload: RunResultPayload) -> void:
 	collection_enabled = false
 	is_magnetized = false
+	player_inside_magnet_area = false
+	player_inside_collect_area = false
 	velocity = Vector2.ZERO
 	_queue_debug_redraw()
 
@@ -232,3 +319,38 @@ func _get_player_collection_multiplier(key: String) -> float:
 	var multiplier: float = float(modifiers.get(key, 1.0))
 
 	return max(0.10, multiplier)
+
+## body_entered do MagnetArea: ativa estado quando o player entra no raio.
+func _on_magnet_area_body_entered(body: Node) -> void:
+	if _is_valid_player_body(body):
+		player_inside_magnet_area = true
+
+## body_exited do MagnetArea: desativa estado quando o player sai do raio.
+func _on_magnet_area_body_exited(body: Node) -> void:
+	if _is_valid_player_body(body):
+		player_inside_magnet_area = _area_has_player_body(magnet_area)
+
+## body_entered do CollectArea: registra overlap e coleta imediatamente se permitido.
+func _on_collect_area_body_entered(body: Node) -> void:
+	if not _is_valid_player_body(body):
+		return
+
+	player_inside_collect_area = true
+
+	if collection_enabled and not is_collected:
+		_collect()
+
+## body_exited do CollectArea: atualiza estado quando o player sai do raio final.
+func _on_collect_area_body_exited(body: Node) -> void:
+	if _is_valid_player_body(body):
+		player_inside_collect_area = _area_has_player_body(collect_area)
+
+## Valida se um body pertence ao player detectável pela moeda.
+func _is_valid_player_body(body: Node) -> bool:
+	if body == null:
+		return false
+
+	if player_node != null and body == player_node:
+		return true
+
+	return body.is_in_group(player_group_name)
