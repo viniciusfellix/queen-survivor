@@ -29,6 +29,7 @@ class_name HurtboxComponent
 
 ## Receiver real que receberá chamadas de dano.
 var damage_receiver: Node = null
+var damage_receiver_can_receive_damage: bool = false
 var runtime_shape_nodes: Array[CollisionShape2D] = []
 var is_active: bool = true
 
@@ -42,19 +43,19 @@ func _ready() -> void:
 	if configure_collision_filter_on_ready:
 		_configure_collision_filter()
 
-	damage_receiver = _resolve_damage_receiver()
+	_set_damage_receiver(_resolve_damage_receiver())
 
 	if not hurtbox_areas.is_empty():
 		rebuild_runtime_shapes()
 
 ## Hook do pool: deixa a hurtbox inerte até o setup do próximo uso.
 func _on_pool_acquire() -> void:
-	damage_receiver = null
+	_set_damage_receiver(null)
 	set_hurtbox_active(false)
 
 ## Hook do pool: limpa receiver e desliga a hurtbox ao devolver ao pool.
 func _on_pool_release() -> void:
-	damage_receiver = null
+	_set_damage_receiver(null)
 	set_hurtbox_active(false)
 
 ## Configura áreas vulneráveis e receiver de dano em runtime.
@@ -63,9 +64,9 @@ func setup(
 	p_damage_receiver: Node = null
 ) -> void:
 	if p_damage_receiver != null:
-		damage_receiver = p_damage_receiver
+		_set_damage_receiver(p_damage_receiver)
 	else:
-		damage_receiver = _resolve_damage_receiver()
+		_set_damage_receiver(_resolve_damage_receiver())
 
 	hurtbox_areas.clear()
 
@@ -133,7 +134,7 @@ func can_receive_damage() -> bool:
 		is_active
 		and damage_receiver != null
 		and is_instance_valid(damage_receiver)
-		and damage_receiver.has_method("receive_damage")
+		and damage_receiver_can_receive_damage
 	)
 
 ## Ativa/desativa a hurtbox sem remover suas shapes.
@@ -163,6 +164,15 @@ func _resolve_damage_receiver() -> Node:
 			return configured_receiver
 
 	return get_parent()
+
+## Atualiza receiver e cache do contrato mínimo de dano fora do hot path.
+func _set_damage_receiver(receiver: Node) -> void:
+	damage_receiver = receiver
+	damage_receiver_can_receive_damage = (
+		damage_receiver != null
+		and is_instance_valid(damage_receiver)
+		and damage_receiver.has_method("receive_damage")
+	)
 
 ## Remove shapes runtime geradas anteriormente.
 func _clear_runtime_shapes() -> void:

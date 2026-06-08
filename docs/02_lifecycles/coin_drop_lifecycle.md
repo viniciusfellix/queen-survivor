@@ -1,18 +1,30 @@
-# Lifecycle — Coin Drop
+# Lifecycle - Coin Drop
 
 ```text
 EnemyBase morre
-→ GameEvents.enemy_died
-→ DropController avalia chance
-→ PoolManager.spawn da CoinDrop em DropRoot (posição antes do add_child)
-→ _on_pool_acquire reseta o estado da moeda reusada
-→ idle inicial / magnetismo
-→ coleta física
-→ run_coin_collected + run_coins_changed
-→ RunState soma moeda
-→ PoolManager.despawn(self) (não queue_free)
+-> GameEvents.enemy_died
+-> DropController avalia chance
+-> PoolManager.spawn da CoinDrop em DropRoot
+-> _on_pool_acquire reseta estado
+-> idle inicial
+-> MagnetArea/CollectArea ativadas
+-> signals nativos detectam a Gaia
+-> moeda magnetiza quando necessario
+-> run_coin_collected + run_coins_changed
+-> RunState soma moeda coletada
+-> PoolManager.despawn(self)
 ```
 
-A moeda é poolizada: nasce via `PoolManager.spawn` e, na coleta, chama `PoolManager.despawn(self)` em vez de `queue_free`; ao ser reusada, `_on_pool_acquire()` reseta seu estado.
+## Estado atual
 
-Moeda não é concedida ao matar; ela precisa ser coletada. Moeda não coletada não entra no resultado final.
+- `CoinDrop` usa `Area2D` e `CollisionShape2D` para magnetismo e coleta.
+- O fluxo principal e orientado a signals.
+- `_physics_process()` so fica ligado quando a moeda realmente precisa se mover.
+- A moeda e poolizada: nasce via `PoolManager.spawn` e volta via `PoolManager.despawn(self)`.
+
+## Regras importantes
+
+- Matar inimigo nao concede moeda automaticamente.
+- A moeda so conta quando e coletada.
+- Moeda nao coletada nao entra no resultado final.
+- A coleta para quando a run esta encerrando ou finalizada.

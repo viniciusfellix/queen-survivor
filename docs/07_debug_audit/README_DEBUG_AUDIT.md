@@ -1,39 +1,55 @@
-# Debug e Auditoria — Manual de Testes
+# Debug e Auditoria - Manual Rapido
 
 ## Objetivo
 
-Testar módulos específicos e encontrar problemas estruturais sem manter logs excessivos nas runs normais.
+Usar ferramentas tecnicas para QA e investigacao sem tratar debug como parte do gameplay.
 
-## Painel do Protótipo
+## Ferramentas atuais
+
+- `DebugOverlay`
+- `DebugEnemyLinkDrawer`
+- `PrototypeToolsPanel`
+- `RuntimeTreeSnapshot`
+- `DeveloperAuditLogger`
+
+Esses elementos vivem sob `DebugRoot` na `RunScene`.
+
+## Atalhos de desenvolvimento
 
 ```text
-F3: mostrar/ocultar ferramentas
-F4: exportar árvore runtime
+F3: mostrar/ocultar PrototypeToolsPanel
+F4: exportar runtime tree snapshot
 ```
 
-Permite forçar vitória, forçar derrota, resetar progressão e consultar run/save. Ações forçadas percorrem o fluxo real e podem persistir resultado.
+## Estado atual dos defaults
+
+- `DebugOverlay` nasce desligado por padrao.
+- `PrototypeToolsPanel` continua disponivel em desenvolvimento, mas nao aparece aberto no start.
+- Canais verbosos do `DeveloperAuditLogger` nao ficam ligados por padrao.
+- Debug draw opcional de combate, inimigo e moeda deve permanecer desligado por padrao.
 
 ## Visible Collision Shapes
 
-Use `Debug > Visible Collision Shapes` para investigar combate. Confira ataque retangular Gaia, hurtbox Goblin, ataque Goblin e PlayerHurtbox.
+Use `Debug > Visible Collision Shapes` no editor para investigar:
 
-## DeveloperAuditLogger
+- ataque retangular da Gaia
+- hurtbox do Goblin
+- ataque do Goblin
+- PlayerHurtbox
+
+## Canais do DeveloperAuditLogger
 
 | Canal | Uso |
 |---|---|
-| `LIFECYCLE` | boot/resultado |
-| `SCENE` | montagem da cena |
-| `SPAWN` | inimigos/moedas |
-| `COMBAT` | hitboxes/dano/morte |
-| `ANIMATION` | Spine/flashes |
-| `UPGRADE` | level-up/aplicação |
-| `SAVE` | persistência |
-| `UI` | painéis/feedback |
-| `SIGNAL` | eventos investigados |
-| `AUDIT` | operações técnicas |
+| `LIFECYCLE` | boot, fechamento, resultado |
+| `SCENE` | montagem de cena |
+| `SPAWN` | inimigos, moedas, drops |
+| `COMBAT` | hitboxes, dano, morte |
+| `ANIMATION` | Spine, flashes, visuais |
+| `UPGRADE` | level-up e aplicacao |
+| `SAVE` | persistencia |
+| `UI` | paineis e feedback |
+| `SIGNAL` | investigacao de eventos |
+| `AUDIT` | operacoes tecnicas |
 
-Ative canais detalhados somente durante o teste correspondente e desligue-os após aprovação.
-
-## Relato de bug ideal
-
-Inclua cenário, resource alterado, canais ativos, logs relevantes, print/relato das collision shapes e comparação entre esperado e obtido.
+Ative canais detalhados apenas durante o teste correspondente e desligue depois.

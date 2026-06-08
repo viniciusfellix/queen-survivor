@@ -112,7 +112,13 @@ func _on_enemy_died(
 		)
 		return
 
-	_spawn_coin(enemy_global_position, coin_drop_value, enemy_id, source_id)
+	call_deferred(
+		"_spawn_coin",
+		enemy_global_position,
+		coin_drop_value,
+		enemy_id,
+		source_id
+	)
 
 ## Instancia uma moeda física no mundo.
 ##
@@ -121,6 +127,9 @@ func _on_enemy_died(
 ## - valor;
 ## - referência do player para magnetismo.
 func _spawn_coin(spawn_position: Vector2, value: int, enemy_id: String, source_id: String) -> void:
+	if RunQuery.is_run_ending(get_tree()) or RunQuery.is_run_finished(get_tree()):
+		return
+
 	if drop_root == null:
 		drop_root = _resolve_drop_root()
 

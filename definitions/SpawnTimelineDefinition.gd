@@ -1,36 +1,45 @@
 ## Resource que define a timeline de spawn de um mapa.
 ##
 ## Responsabilidades:
-## - agrupar entradas de spawn;
-## - escolher qual entrada está ativa com base no tempo da run;
-## - fornecer resumo técnico para debug.
-##
-## Cada mapa pode apontar para uma SpawnTimelineDefinition diferente.
+## - agrupar entries de spawn;
+## - listar entries potencialmente ativas por tempo;
+## - manter compatibilidade com consulta legacy de uma unica entry ativa;
+## - fornecer resumo tecnico para debug.
 extends Resource
 class_name SpawnTimelineDefinition
 
-## ID técnico único da timeline.
+## ID tecnico unico da timeline.
 @export var id: String = ""
 
-## Chave de localização para nome/descrição da timeline, se necessário.
+## Chave de localizacao para nome/descricao da timeline, se necessario.
 @export var display_name_key: String = ""
 
 ## Entradas de spawn configuradas.
-##
-## Cada entrada representa uma faixa de tempo com inimigo, intervalo,
-## limite de inimigos vivos e distância de spawn.
 @export var entries: Array[SpawnTimelineEntryDefinition] = []
 
-## Verifica se a timeline possui configuração mínima válida.
 func is_valid_definition() -> bool:
 	return id.strip_edges() != "" and not entries.is_empty()
 
-## Retorna a entrada ativa para determinado tempo da run.
+## Retorna a entrada ativa legacy para determinado tempo da run.
 ##
-## Se mais de uma entrada estiver ativa, escolhe a que começou mais tarde.
-## Isso permite sobrepor ou substituir fases de spawn por tempo.
+## Se mais de uma entry estiver ativa, escolhe a que comecou mais tarde.
 func get_active_entry(elapsed_seconds: float) -> SpawnTimelineEntryDefinition:
+	var active_entries: Array[SpawnTimelineEntryDefinition] = get_active_entries(elapsed_seconds)
 	var selected_entry: SpawnTimelineEntryDefinition = null
+
+	for entry: SpawnTimelineEntryDefinition in active_entries:
+		if selected_entry == null:
+			selected_entry = entry
+			continue
+
+		if entry.get_effective_start_time_min_seconds() >= selected_entry.get_effective_start_time_min_seconds():
+			selected_entry = entry
+
+	return selected_entry
+
+## Retorna todas as entries potencialmente ativas em determinado tempo da run.
+func get_active_entries(elapsed_seconds: float) -> Array[SpawnTimelineEntryDefinition]:
+	var active_entries: Array[SpawnTimelineEntryDefinition] = []
 
 	for entry: SpawnTimelineEntryDefinition in entries:
 		if entry == null:
@@ -42,16 +51,10 @@ func get_active_entry(elapsed_seconds: float) -> SpawnTimelineEntryDefinition:
 		if not entry.is_active_at(elapsed_seconds):
 			continue
 
-		if selected_entry == null:
-			selected_entry = entry
-			continue
+		active_entries.append(entry)
 
-		if entry.start_time_seconds >= selected_entry.start_time_seconds:
-			selected_entry = entry
+	return active_entries
 
-	return selected_entry
-
-## Retorna resumo textual das entries configuradas.
 func get_debug_summary() -> String:
 	var parts: Array[String] = []
 
@@ -61,8 +64,8 @@ func get_debug_summary() -> String:
 
 		parts.append("%s[%s-%s]" % [
 			entry.id,
-			str(entry.start_time_seconds),
-			str(entry.end_time_seconds)
+			str(entry.get_effective_start_time_min_seconds()),
+			str(entry.get_effective_end_time_max_seconds())
 		])
 
 	return ", ".join(parts)

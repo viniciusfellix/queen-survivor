@@ -20,11 +20,15 @@ message_label_path = NodePath("MarginContainer/VBoxContainer/MessageLabel")
 cooldown_box_path = NodePath("MarginContainer/VBoxContainer/TopRow/CooldownBox")
 cooldown_label_path = NodePath("MarginContainer/VBoxContainer/TopRow/CooldownBox/CooldownLabel")
 cooldown_bar_path = NodePath("MarginContainer/VBoxContainer/TopRow/CooldownBox/CooldownBar")
+dash_cooldown_box_path = NodePath("MarginContainer/VBoxContainer/TopRow/DashCooldownBox")
+dash_cooldown_label_path = NodePath("MarginContainer/VBoxContainer/TopRow/DashCooldownBox/DashCooldownLabel")
+dash_cooldown_bar_path = NodePath("MarginContainer/VBoxContainer/TopRow/DashCooldownBox/DashCooldownBar")
+wave_label_path = NodePath("MarginContainer/VBoxContainer/WaveLabel")
 
 [node name="MarginContainer" type="MarginContainer" parent="." unique_id=717528673]
 anchors_preset = 10
 anchor_right = 1.0
-offset_bottom = 81.0
+offset_bottom = 109.0
 grow_horizontal = 2
 
 [node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer" unique_id=771167569]
@@ -74,6 +78,19 @@ custom_minimum_size = Vector2(150, 12)
 layout_mode = 2
 value = 100.0
 
+[node name="DashCooldownBox" type="VBoxContainer" parent="MarginContainer/VBoxContainer/TopRow" unique_id=926415117]
+custom_minimum_size = Vector2(150, 42)
+layout_mode = 2
+
+[node name="DashCooldownLabel" type="Label" parent="MarginContainer/VBoxContainer/TopRow/DashCooldownBox" unique_id=188825411]
+layout_mode = 2
+text = "Dash: pronto"
+
+[node name="DashCooldownBar" type="ProgressBar" parent="MarginContainer/VBoxContainer/TopRow/DashCooldownBox" unique_id=124805351]
+custom_minimum_size = Vector2(150, 12)
+layout_mode = 2
+value = 100.0
+
 [node name="TimerLabel" type="Label" parent="MarginContainer/VBoxContainer/TopRow" unique_id=1959516806]
 custom_minimum_size = Vector2(100, 32)
 layout_mode = 2
@@ -87,7 +104,7 @@ text = "Moedas: 0"
 [node name="LevelLabel" type="Label" parent="MarginContainer/VBoxContainer/TopRow" unique_id=506808573]
 custom_minimum_size = Vector2(100, 32)
 layout_mode = 2
-text = "Nível: 1"
+text = "Nivel: 1"
 
 [node name="KillsLabel" type="Label" parent="MarginContainer/VBoxContainer/TopRow" unique_id=1812162148]
 custom_minimum_size = Vector2(100, 32)
@@ -96,4 +113,8 @@ text = "Abates: 0"
 
 [node name="MessageLabel" type="Label" parent="MarginContainer/VBoxContainer" unique_id=1174913704]
 layout_mode = 2
-text = "Sobreviva até o fim da run"
+text = "Sobreviva ate o fim da run"
+
+[node name="WaveLabel" type="Label" parent="MarginContainer/VBoxContainer" unique_id=203990117]
+layout_mode = 2
+text = "Wave: -"

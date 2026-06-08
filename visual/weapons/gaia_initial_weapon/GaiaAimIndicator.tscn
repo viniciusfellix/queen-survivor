@@ -1,0 +1,12 @@
+[gd_scene format=3 uid="uid://dm1nlgy7en2io"]
+
+[ext_resource type="Script" uid="uid://co2pyq5w3p1lw" path="res://visual/weapons/gaia_initial_weapon/GaiaAimIndicator.gd" id="1_aim"]
+[ext_resource type="Texture2D" uid="uid://jrk6skey8h4p" path="res://assets/placeholders/weapons/gaia_initial_weapon/gaia_directional_attack.png" id="2_tex"]
+
+[node name="GaiaAimIndicator" type="Node2D" unique_id=1663339269]
+script = ExtResource("1_aim")
+sprite_path = NodePath("Sprite2D")
+indicator_texture = ExtResource("2_tex")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1521130715]
+texture = ExtResource("2_tex")

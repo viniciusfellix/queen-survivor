@@ -599,19 +599,26 @@ func _process_body_bump_collisions() -> void:
 		if not other_enemy.is_in_group("enemy"):
 			continue
 
-		if other_enemy.has_method("is_enemy_alive"):
-			var other_alive_variant: Variant = other_enemy.call("is_enemy_alive")
+		var other_body_bump_power: float = body_bump_power
+		var other_enemy_base: EnemyBase = other_enemy as EnemyBase
 
-			if other_alive_variant is bool and not bool(other_alive_variant):
+		if other_enemy_base != null:
+			if not other_enemy_base.is_enemy_alive():
 				continue
 
-		var other_body_bump_power: float = body_bump_power
+			other_body_bump_power = other_enemy_base.get_body_bump_power()
+		else:
+			if other_enemy.has_method("is_enemy_alive"):
+				var other_alive_variant: Variant = other_enemy.call("is_enemy_alive")
 
-		if other_enemy.has_method("get_body_bump_power"):
-			var other_power_variant: Variant = other_enemy.call("get_body_bump_power")
+				if other_alive_variant is bool and not bool(other_alive_variant):
+					continue
 
-			if other_power_variant is float or other_power_variant is int:
-				other_body_bump_power = float(other_power_variant)
+			if other_enemy.has_method("get_body_bump_power"):
+				var other_power_variant: Variant = other_enemy.call("get_body_bump_power")
+
+				if other_power_variant is float or other_power_variant is int:
+					other_body_bump_power = float(other_power_variant)
 
 		var received_bump_power: float = _calculate_received_body_bump_power(
 			other_body_bump_power
@@ -1050,10 +1057,13 @@ func _format_damage_breakdown(damage_result: Dictionary) -> String:
 
 		var entry: Dictionary = entry_variant
 
-		parts.append("%s raw=%s final=%s weak=%s resist=%s mult=%s" % [
+		parts.append("%s role=%s raw=%s final=%s applied=%s reason=%s weak=%s resist=%s mult=%s" % [
 			str(entry.get("damage_type", "")),
+			str(entry.get("component_role", "")),
 			str(entry.get("raw_damage", 0)),
 			str(entry.get("final_damage", 0)),
+			str(entry.get("applied", false)),
+			str(entry.get("reason", "")),
 			str(entry.get("is_weak", false)),
 			str(entry.get("is_resistant", false)),
 			str(entry.get("multiplier", 1.0))

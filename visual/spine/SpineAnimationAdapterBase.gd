@@ -5,7 +5,7 @@ class_name SpineAnimationAdapterBase
 @export var spine_sprite_path: NodePath
 
 @export_group("Diagnostics")
-@export var log_ready_status: bool = true
+@export var log_ready_status: bool = false
 @export var log_animation_changes: bool = false
 @onready var spine_sprite: Node = _resolve_spine_sprite()
 
@@ -163,6 +163,7 @@ func reset_adapter_state() -> void:
 	for track_index: int in tracked_indices:
 		clear_animation_track(track_index)
 
+	_reset_spine_sprite_pose()
 	current_animation_name = ""
 	current_animation_by_track.clear()
 	current_time_scale_by_track.clear()
@@ -307,3 +308,46 @@ func _try_apply_time_scale_to_track_entry(
 		if property_name == "timeScale":
 			track_entry.set("timeScale", safe_time_scale)
 			return
+
+func _reset_spine_sprite_pose() -> void:
+	if spine_sprite == null:
+		return
+
+	if _call_if_exists(spine_sprite, "set_to_setup_pose"):
+		return
+
+	if _call_if_exists(spine_sprite, "setToSetupPose"):
+		return
+
+	var skeleton_variant: Variant = null
+
+	if spine_sprite.has_method("get_skeleton"):
+		skeleton_variant = spine_sprite.call("get_skeleton")
+	elif spine_sprite.has_method("getSkeleton"):
+		skeleton_variant = spine_sprite.call("getSkeleton")
+
+	if not skeleton_variant is Object:
+		return
+
+	var skeleton_object: Object = skeleton_variant as Object
+
+	if _call_if_exists(skeleton_object, "set_to_setup_pose"):
+		return
+
+	if _call_if_exists(skeleton_object, "setToSetupPose"):
+		return
+
+	_call_if_exists(skeleton_object, "set_bones_to_setup_pose")
+	_call_if_exists(skeleton_object, "setBonesToSetupPose")
+	_call_if_exists(skeleton_object, "set_slots_to_setup_pose")
+	_call_if_exists(skeleton_object, "setSlotsToSetupPose")
+
+func _call_if_exists(target: Object, method_name: String) -> bool:
+	if target == null:
+		return false
+
+	if not target.has_method(method_name):
+		return false
+
+	target.call(method_name)
+	return true

@@ -91,13 +91,16 @@ class_name WeaponDefinition
 ## - physical;
 ## - magical.
 ##
-## Quando preenchido, normalmente prevalece sobre base_damage/damage_type.
+## Regra oficial atual:
+## - base_damage e sempre aplicado;
+## - damage_components sao dano adicional condicional;
+## - cada componente so entra no total quando o alvo e fraco ao tipo.
 @export var damage_components: Array[DamageComponentDefinition] = []
 
-## Dano fallback para armas simples sem damage_components.
+## Dano principal sempre aplicado ao alvo.
 @export var base_damage: int = 5
 
-## Tipo de dano fallback para armas simples.
+## Tipo associado ao dano base principal.
 @export var damage_type: String = DamageTypes.PHYSICAL
 
 ## Verifica se a arma possui configuração mínima válida.

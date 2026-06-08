@@ -2,7 +2,7 @@ extends CanvasLayer
 
 @export_group("Master")
 
-@export var debug_enabled: bool = true
+@export var debug_enabled: bool = false
 
 @export var show_title: bool = true
 

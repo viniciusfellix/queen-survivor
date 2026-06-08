@@ -2,7 +2,7 @@
 
 ## Runtime oficial atual
 
-No estado atual do projeto, a cena oficial de runtime passa a ser:
+A cena oficial de runtime da run e:
 
 - `res://scenes/run/RunScene.tscn`
 
@@ -13,13 +13,14 @@ Fluxo atual de boot:
 - `res://scenes/Main.gd`
 - `res://scenes/run/RunScene.tscn`
 
-## Observação importante
+## Estado atual de composicao
 
-`RunScene` passa a ser a composition root oficial da run no boot do jogo.
+- `RunScene` e a composition root oficial atual.
+- `TestGaiaScene` continua existindo apenas como cena tecnica legada/de referencia.
+- `DebugRoot` concentra `DebugOverlay` e `PrototypeToolsPanel`.
+- Essas ferramentas continuam disponiveis para desenvolvimento, mas nao fazem parte do gameplay.
 
-`TestGaiaScene` continua existindo no projeto como cena técnica/de referência.
-
-## Resources principais que parecem oficiais hoje
+## Resources principais atualmente oficiais
 
 ### Mapa / run
 
@@ -48,54 +49,17 @@ Fluxo atual de boot:
 
 - `res://data/drops/coin_default.tres`
 
-## Duplicidade identificada: attack area da Gaia
+## Duplicidade identificada na attack area da Gaia
 
-Foi identificada duplicidade ou concorrência aparente entre attack areas da arma inicial da Gaia:
+Foi identificada duplicidade aparente entre:
 
 - `res://resources/combat/attack_areas/attack_area_gaia_initial_d.tres`
 - `res://data/weapons/attack_areas/attack_area_gaia_initial_primary.tres.tres`
 
-## Decisão desta PR
+Essa duplicidade continua documentada, mas nao foi removida. A exclusao segura depende de confirmacao de referencias no editor Godot.
 
-Esta PR não remove nenhuma dessas duas resources.
+## Observacoes atuais
 
-Motivo:
-
-- elas podem estar referenciadas por `.tscn` ou `.tres`;
-- a exclusão segura precisa ser feita em uma PR própria;
-- primeiro precisamos confirmar no editor Godot qual delas deve permanecer como oficial.
-
-## Situação atual da cena do player
-
-`res://gameplay/player/PlayerGaia.tscn` continua sendo a cena atual do player em runtime.
-
-Esta PR não altera:
-
-- exports da cena;
-- wiring da arma;
-- hurtbox;
-- dash;
-- visual;
-- roots de ataque.
-
-## Situação atual do debug
-
-Os seguintes elementos continuam presentes na cena atual:
-
-- `DebugOverlay`
-- `PrototypeToolsPanel`
-
-Na composição oficial atual, esses elementos vivem sob `DebugRoot`.
-
-`DebugRoot` é apenas organização estrutural. Nenhuma dessas ferramentas foi removida nesta etapa.
-
-`DebugOverlay` e `PrototypeToolsPanel` continuam disponíveis no runtime oficial atual.
-
-## Intenção para as próximas etapas
-
-Ordem pretendida após esta PR:
-
-1. `RunScene` mantida como source of truth oficial da run;
-2. `TestGaiaScene` mantida como cena técnica/de referência temporária;
-3. remoção futura de duplicidades e ambiguidade estrutural remanescente;
-4. migração gradual dos sistemas arquiteturais ainda pendentes.
+- `PlayerGaia.tscn` continua sendo a cena de player usada em runtime.
+- `RunScene` continua sendo a source of truth oficial para mudancas de composicao da run.
+- Mudancas novas de composicao devem acontecer primeiro em `RunScene`, nao em `TestGaiaScene`.

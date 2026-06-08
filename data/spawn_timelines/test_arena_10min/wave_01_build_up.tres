@@ -1,15 +1,23 @@
 [gd_resource type="Resource" script_class="SpawnTimelineEntryDefinition" format=3 uid="uid://bjk0aqwvdl7h7"]
 
-[ext_resource type="Script" uid="uid://u04lr4kql6m5" path="res://definitions/SpawnTimelineEntryDefinition.gd" id="1_3tdwb"]
-[ext_resource type="Resource" uid="uid://cdk2sbcwdtnd0" path="res://data/enemies/enemy_chaser_basic.tres" id="1_ahaid"]
+[ext_resource type="Script" uid="uid://u04lr4kql6m5" path="res://definitions/SpawnTimelineEntryDefinition.gd" id="1_entry"]
+[ext_resource type="Resource" uid="uid://cdk2sbcwdtnd0" path="res://data/enemies/enemy_chaser_basic.tres" id="2_enemy"]
+[ext_resource type="Script" uid="uid://d066loftc30me" path="res://definitions/SpawnRuleDefinition.gd" id="3_pnrpy"]
+[ext_resource type="Resource" path="res://data/spawn_timelines/test_arena_10min/rule_wave_01_build_up_goblin.tres" id="3_rule"]
 
 [resource]
-script = ExtResource("1_3tdwb")
+script = ExtResource("1_entry")
 id = "wave_01_build_up"
+wave_name = "build_up"
 start_time_seconds = 120.0
 end_time_seconds = 300.0
+start_time_min_seconds = 112.0
+start_time_max_seconds = 128.0
+end_time_min_seconds = 290.0
+end_time_max_seconds = 310.0
 enemy_scene_path = "uid://dg1wr6dv8jxxi"
-enemy_definition = ExtResource("1_ahaid")
+enemy_definition = ExtResource("2_enemy")
 spawn_interval_seconds = 2.1
 max_alive_enemies = 14
+spawn_rules = Array[ExtResource("3_pnrpy")]([ExtResource("3_rule")])
 metadata/_custom_type_script = "uid://u04lr4kql6m5"

@@ -1,27 +1,15 @@
 [gd_resource type="Resource" script_class="SpawnTimelineDefinition" format=3 uid="uid://di1w0avj1sdmj"]
 
-[ext_resource type="Script" uid="uid://u04lr4kql6m5" path="res://definitions/SpawnTimelineEntryDefinition.gd" id="1_vh387"]
-[ext_resource type="Script" uid="uid://d4nbsixhxb5e5" path="res://definitions/SpawnTimelineDefinition.gd" id="2_3jjyw"]
-[ext_resource type="Resource" uid="uid://cdk2sbcwdtnd0" path="res://data/enemies/enemy_chaser_basic.tres" id="2_diqoa"]
-[ext_resource type="Resource" uid="uid://bjk0aqwvdl7h7" path="res://data/spawn_timelines/test_arena_10min/wave_01_build_up.tres" id="3_rar2l"]
-[ext_resource type="Resource" uid="uid://bj11xixdvv46k" path="res://data/spawn_timelines/test_arena_10min/wave_02_pressure.tres" id="4_8e5ay"]
-[ext_resource type="Resource" uid="uid://d4dxamgnry4k4" path="res://data/spawn_timelines/test_arena_10min/wave_03_final_push.tres" id="5_ovyse"]
-
-[sub_resource type="Resource" id="Resource_rar2l"]
-script = ExtResource("1_vh387")
-id = "wave_00_intro"
-end_time_seconds = 120.0
-enemy_scene_path = "uid://dg1wr6dv8jxxi"
-enemy_definition = ExtResource("2_diqoa")
-spawn_interval_seconds = 0.1
-max_alive_enemies = 20
-spawn_min_distance = 480.0
-spawn_max_distance = 680.0
-metadata/_custom_type_script = "uid://u04lr4kql6m5"
+[ext_resource type="Script" path="res://definitions/SpawnTimelineDefinition.gd" id="1_timeline"]
+[ext_resource type="Script" path="res://definitions/SpawnTimelineEntryDefinition.gd" id="2_entry"]
+[ext_resource type="Resource" uid="uid://c20lh3t5jhw5x" path="res://data/spawn_timelines/test_arena_10min/wave_00_intro.tres" id="3_wave0"]
+[ext_resource type="Resource" uid="uid://bjk0aqwvdl7h7" path="res://data/spawn_timelines/test_arena_10min/wave_01_build_up.tres" id="4_wave1"]
+[ext_resource type="Resource" uid="uid://bj11xixdvv46k" path="res://data/spawn_timelines/test_arena_10min/wave_02_pressure.tres" id="5_wave2"]
+[ext_resource type="Resource" uid="uid://d4dxamgnry4k4" path="res://data/spawn_timelines/test_arena_10min/wave_03_final_push.tres" id="6_wave3"]
 
 [resource]
-script = ExtResource("2_3jjyw")
+script = ExtResource("1_timeline")
 id = "spawn_timeline_test_arena_10min"
 display_name_key = "spawn_timeline.test_arena_10min.name"
-entries = Array[ExtResource("1_vh387")]([SubResource("Resource_rar2l"), ExtResource("3_rar2l"), ExtResource("4_8e5ay"), ExtResource("5_ovyse")])
+entries = Array[ExtResource("2_entry")]([ExtResource("3_wave0"), ExtResource("4_wave1"), ExtResource("5_wave2"), ExtResource("6_wave3")])
 metadata/_custom_type_script = "uid://d4nbsixhxb5e5"

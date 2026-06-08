@@ -1,33 +1,38 @@
-# Lifecycle — Hitbox e Hurtbox
+# Lifecycle - Hitbox e Hurtbox
 
 ## Gaia atingindo Goblin
 
 ```text
 WeaponDefinition.attack_areas
-→ GaiaInitialWeaponController instancia DirectionalAttackHitbox
-→ rectangle runtime é criada
-→ detecta HurtboxComponent do EnemyBase
-→ envia components physical + magical
-→ EnemyBase/DamageResolver
+-> GaiaInitialWeaponController
+-> DirectionalAttackHitbox <Area2D>
+-> HurtboxComponent <Area2D> do inimigo
+-> EnemyBase.receive_damage()
+-> DamageResolver
 ```
 
-Uma execução da hitbox não deve reaplicar dano ao mesmo receiver repetidamente.
+Uma execucao da hitbox nao deve reaplicar dano ao mesmo receiver pela mesma instancia ativa.
 
 ## Goblin atingindo Gaia
 
 ```text
 EnemyDefinition.contact_attack
-→ EnemyAttackDefinition
-→ EnemyAttackHitbox cria shape runtime
-→ aguarda delay inicial
-→ detecta PlayerHurtbox
-→ respeita cooldown por receiver
-→ PlayerController/DamageResolver
+-> EnemyAttackHitbox <Area2D>
+-> PlayerHurtbox <Area2D>
+-> PlayerController.receive_damage()
+-> DamageResolver
 ```
 
-## Segurança
+## Estado atual
 
-- Gaia morta desativa PlayerHurtbox.
-- Goblin morto desativa Hurtbox e ContactAttackHitbox.
-- A pausa nativa (`get_tree().paused`) impede efeitos durante level-up/encerramento: hitboxes e hurtboxes pausáveis param de processar sozinhas.
-- Alterações de shape durante física devem usar operação segura/deferred quando aplicável.
+- Hitboxes e hurtboxes usam `Area2D`, `CollisionShape2D`, layers/masks e signals.
+- `BodyCollision` continua separada da fonte de dano.
+- `DamageResolver` calcula dano final; nao procura targets nem detecta overlaps.
+- Hitboxes temporarias e hitboxes de inimigo ja seguem o contrato modular atual.
+
+## Seguranca
+
+- Gaia morta desativa `PlayerHurtbox`.
+- Goblin morto desativa `Hurtbox` e `ContactAttackHitbox`.
+- A pausa nativa (`get_tree().paused`) bloqueia processamento de gameplay durante level-up e encerramento.
+- Alteracoes de shape/monitoring durante fisica devem usar operacao segura ou deferred quando aplicavel.

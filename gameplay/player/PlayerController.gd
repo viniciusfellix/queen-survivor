@@ -28,6 +28,12 @@ class_name PlayerController
 ## Gaia. Enemies still detect her and slide around (player_body_slide) either way.
 @export var collide_with_enemy_bodies: bool = false
 
+@export_group("Aim")
+@export var aim_indicator_path: NodePath
+@export var weapon_controller_path: NodePath
+@export var mouse_aim_sensitivity: float = 1.0
+@export var analog_aim_sensitivity: float = 1.0
+
 
 ## Configurações runtime do dash da Gaia/player.
 @export_group("Dash")
@@ -45,6 +51,8 @@ class_name PlayerController
 @onready var dash_impact_area: PlayerDashImpactArea = (
 	_resolve_dash_impact_area()
 )
+@onready var aim_indicator: GaiaAimIndicator = _resolve_aim_indicator()
+@onready var primary_weapon_controller: Node = _resolve_primary_weapon_controller()
 
 
 ## Feedback visual e invulnerabilidade após dano recebido.
@@ -84,6 +92,7 @@ func _ready() -> void:
 
 	_apply_dash_definition()
 	_configure_dash_impact_area()
+	_apply_input_settings_hooks()
 
 	_configure_player_hurtbox()
 	_configure_enemy_body_collision()
@@ -91,6 +100,7 @@ func _ready() -> void:
 	if visual_controller == null:
 		push_warning("[PlayerController] visual_controller não encontrado. Verifique visual_controller_path.")
 
+	_configure_aim_indicator()
 	_update_visual_state()
 	_queue_debug_redraw()
 
@@ -471,6 +481,76 @@ func _resolve_visual_controller() -> Node:
 
 
 ## Localiza a área de impacto do dash usada pelo PlayerController.
+func _resolve_aim_indicator() -> GaiaAimIndicator:
+	if aim_indicator_path != NodePath():
+		var configured_indicator: Node = get_node_or_null(aim_indicator_path)
+
+		if configured_indicator is GaiaAimIndicator:
+			return configured_indicator as GaiaAimIndicator
+
+	var direct_indicator: Node = get_node_or_null("VisualRoot/GaiaAimIndicator")
+
+	if direct_indicator is GaiaAimIndicator:
+		return direct_indicator as GaiaAimIndicator
+
+	return null
+
+func _resolve_primary_weapon_controller() -> Node:
+	if weapon_controller_path != NodePath():
+		return get_node_or_null(weapon_controller_path)
+
+	return get_node_or_null("WeaponRoot/GaiaInitialWeaponController")
+
+func _configure_aim_indicator() -> void:
+	if aim_indicator == null:
+		aim_indicator = _resolve_aim_indicator()
+
+	if aim_indicator == null:
+		return
+
+	var indicator_radius_pixels: float = 0.0
+
+	if primary_weapon_controller == null:
+		primary_weapon_controller = _resolve_primary_weapon_controller()
+
+	if (
+		primary_weapon_controller != null
+		and primary_weapon_controller.has_method("get_aim_indicator_radius_pixels")
+	):
+		var radius_variant: Variant = primary_weapon_controller.call("get_aim_indicator_radius_pixels")
+
+		if radius_variant is float or radius_variant is int:
+			indicator_radius_pixels = float(radius_variant)
+
+	if indicator_radius_pixels <= 0.0:
+		indicator_radius_pixels = 256.0
+
+	aim_indicator.configure_indicator(indicator_radius_pixels, true)
+
+func _apply_input_settings_hooks() -> void:
+	InputManager.configure_aim_settings(
+		mouse_aim_sensitivity,
+		analog_aim_sensitivity
+	)
+
+func set_mouse_aim_sensitivity(value: float) -> void:
+	mouse_aim_sensitivity = max(0.01, value)
+	_apply_input_settings_hooks()
+
+func set_analog_aim_sensitivity(value: float) -> void:
+	analog_aim_sensitivity = max(0.01, value)
+	_apply_input_settings_hooks()
+
+func set_aim_indicator_enabled(is_enabled: bool) -> void:
+	if visual_controller == null:
+		visual_controller = _resolve_visual_controller()
+
+	if visual_controller == null:
+		return
+
+	if visual_controller.has_method("set_show_aim_indicator_enabled"):
+		visual_controller.call("set_show_aim_indicator_enabled", is_enabled)
+
 func _resolve_dash_impact_area() -> PlayerDashImpactArea:
 	if dash_impact_area_path != NodePath():
 		var configured_area: Node = get_node_or_null(dash_impact_area_path)
@@ -752,8 +832,15 @@ func get_debug_data() -> Dictionary:
 		"is_dash_active": is_dash_active,
 		"dash_timer": dash_timer,
 		"dash_cooldown_timer": dash_cooldown_timer,
+		"dash_cooldown_seconds": (
+			dash_definition.dash_cooldown_seconds
+			if dash_definition != null
+			else 0.0
+		),
 		"active_dash_direction": active_dash_direction,
 		"has_dash_impact_area": dash_impact_area != null,
+		"mouse_aim_sensitivity": mouse_aim_sensitivity,
+		"analog_aim_sensitivity": analog_aim_sensitivity,
 		"has_player_hurtbox": player_hurtbox != null,
 		"current_gameplay_state": runtime_state.current_gameplay_state,
 		"current_visual_state": runtime_state.current_visual_state,

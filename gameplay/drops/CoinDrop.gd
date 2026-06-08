@@ -18,7 +18,7 @@ class_name CoinDrop
 @export var initial_idle_seconds: float = 0.15
 @export var magnet_acceleration: float = 900.0
 @export var max_magnet_speed: float = 520.0
-@export var draw_debug_visual: bool = true
+@export var draw_debug_visual: bool = false
 @export var debug_radius: float = 8.0
 @export var debug_color: Color = Color(1.0, 0.78, 0.18, 1.0)
 @export var debug_outline_color: Color = Color(1.0, 1.0, 1.0, 0.95)
@@ -39,12 +39,13 @@ var player_inside_collect_area: bool = false
 var idle_completed: bool = false
 var last_applied_magnet_radius: float = -1.0
 var last_applied_collect_radius: float = -1.0
+var activation_request_token: int = 0
 
 ## Connects signals and prepares the coin for standalone/runtime use.
 func _ready() -> void:
 	_connect_area_signals()
 	_connect_runtime_signals()
-	_activate_coin_runtime()
+	_request_runtime_activation()
 	_queue_debug_redraw()
 
 ## Moves the coin only while magnetized or while decelerating from a previous pull.
@@ -113,7 +114,7 @@ func setup(p_definition: CoinDropDefinition, p_value: int = 1, p_player: Node2D 
 	elif player_node == null:
 		player_node = _resolve_player()
 
-	_activate_coin_runtime()
+	_request_runtime_activation()
 	_queue_debug_redraw()
 
 ## Copies runtime data from the configured CoinDropDefinition.
@@ -185,6 +186,12 @@ func _set_area_radius(shape_node: CollisionShape2D, radius: float) -> void:
 
 ## One-time overlap sync for spawn/reuse and radius refresh cases.
 func _refresh_area_overlap_state_once() -> void:
+	if magnet_area == null or collect_area == null:
+		return
+
+	if not magnet_area.monitoring or not collect_area.monitoring:
+		return
+
 	player_inside_magnet_area = _area_has_player_body(magnet_area)
 	player_inside_collect_area = _area_has_player_body(collect_area)
 
@@ -241,6 +248,7 @@ func _collect() -> void:
 
 ## Pool hook: leave the coin inert until setup() reconfigures it.
 func _on_pool_acquire() -> void:
+	activation_request_token += 1
 	_reset_runtime_state()
 	player_node = null
 	collection_enabled = false
@@ -250,6 +258,7 @@ func _on_pool_acquire() -> void:
 
 ## Pool hook: disable monitoring/physics and clear transient state.
 func _on_pool_release() -> void:
+	activation_request_token += 1
 	_reset_runtime_state()
 	player_node = null
 	collection_enabled = false
@@ -409,13 +418,9 @@ func _activate_coin_runtime() -> void:
 	collection_enabled = true
 	_refresh_area_radii()
 	_set_coin_active(true)
-	_refresh_area_overlap_state_once()
-
-	if is_collected:
-		return
-
 	_start_idle_window()
 	_reevaluate_motion_state()
+	call_deferred("_sync_overlap_state_after_activation", activation_request_token)
 
 ## Starts or skips the initial idle window.
 func _start_idle_window() -> void:
@@ -470,3 +475,27 @@ func _reset_runtime_state() -> void:
 
 func _despawn_to_pool() -> void:
 	PoolManager.despawn(self)
+
+func _request_runtime_activation() -> void:
+	activation_request_token += 1
+	call_deferred("_activate_coin_runtime_deferred", activation_request_token)
+
+func _activate_coin_runtime_deferred(request_token: int) -> void:
+	if request_token != activation_request_token:
+		return
+
+	if not is_inside_tree():
+		return
+
+	_activate_coin_runtime()
+
+func _sync_overlap_state_after_activation(request_token: int) -> void:
+	if request_token != activation_request_token:
+		return
+
+	if not is_inside_tree():
+		return
+
+	_refresh_area_overlap_state_once()
+	_reevaluate_motion_state()
+	_queue_debug_redraw()
