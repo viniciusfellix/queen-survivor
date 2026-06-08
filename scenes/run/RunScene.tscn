@@ -1,0 +1,82 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scenes/run/RunScene.gd" id="1_runscript"]
+[ext_resource type="PackedScene" uid="uid://dx5c33k1kx622" path="res://gameplay/arena/TestArena.tscn" id="2_arena"]
+[ext_resource type="PackedScene" uid="uid://bgefmxnkcihft" path="res://ui/debug/DebugOverlay.tscn" id="3_debug_overlay"]
+[ext_resource type="Script" uid="uid://b4adgyne26btq" path="res://gameplay/camera/FollowCamera.gd" id="4_follow_camera"]
+[ext_resource type="PackedScene" uid="uid://dm5ecyvme3lym" path="res://gameplay/spawners/EnemySpawner.tscn" id="5_enemy_spawner"]
+[ext_resource type="Script" uid="uid://c2kfgw32sq0o0" path="res://gameplay/run/RunController.gd" id="6_run_controller"]
+[ext_resource type="Resource" uid="uid://bmqjfu8a5d81w" path="res://data/maps/map_test_arena_10min.tres" id="7_map"]
+[ext_resource type="Script" uid="uid://c0ao0scpvx5d2" path="res://gameplay/drops/DropController.gd" id="8_drop_controller"]
+[ext_resource type="Resource" uid="uid://bcfegd6d7xccr" path="res://data/drops/coin_default.tres" id="9_coin"]
+[ext_resource type="PackedScene" uid="uid://cct45mramyoo7" path="res://ui/level_up/LevelUpPanel.tscn" id="10_level_up"]
+[ext_resource type="PackedScene" uid="uid://b3han2v54mmov" path="res://ui/feedback/RunFeedbackLayer.tscn" id="11_run_feedback"]
+[ext_resource type="PackedScene" uid="uid://dhlthdpkspki7" path="res://ui/world_feedback/WorldFeedbackLayer.tscn" id="12_world_feedback"]
+[ext_resource type="PackedScene" uid="uid://bfu3srmi1h0cw" path="res://ui/result/ResultPanel.tscn" id="13_result_panel"]
+[ext_resource type="PackedScene" uid="uid://cm43ov31i3a3q" path="res://ui/hud/RunHud.tscn" id="14_run_hud"]
+[ext_resource type="PackedScene" uid="uid://dw8pji4737owl" path="res://ui/debug/tools/PrototypeToolsPanel.tscn" id="15_prototype_tools"]
+
+[node name="RunScene" type="Node2D"]
+script = ExtResource("1_runscript")
+player_scene_path = "uid://d3b8gxr3tu0p7"
+
+[node name="ArenaRoot" type="Node2D" parent="."]
+
+[node name="TestArena" parent="ArenaRoot" instance=ExtResource("2_arena")]
+
+[node name="RuntimeRoot" type="Node2D" parent="."]
+
+[node name="PlayerRoot" type="Node2D" parent="RuntimeRoot"]
+y_sort_enabled = true
+
+[node name="EnemyRoot" type="Node2D" parent="RuntimeRoot"]
+y_sort_enabled = true
+
+[node name="DropRoot" type="Node2D" parent="RuntimeRoot"]
+
+[node name="SpawnerRoot" type="Node2D" parent="RuntimeRoot"]
+
+[node name="EnemySpawner" parent="RuntimeRoot/SpawnerRoot" instance=ExtResource("5_enemy_spawner")]
+enemy_root_path = NodePath("../../EnemyRoot")
+
+[node name="RunController" type="Node" parent="RuntimeRoot"]
+script = ExtResource("6_run_controller")
+map_definition = ExtResource("7_map")
+allow_debug_force_finish = true
+
+[node name="DropController" type="Node" parent="RuntimeRoot"]
+script = ExtResource("8_drop_controller")
+coin_drop_scene_path = "uid://imubpqpdu5kc"
+coin_definition = ExtResource("9_coin")
+drop_root_path = NodePath("../DropRoot")
+
+[node name="PlayerSpawnPoint" type="Marker2D" parent="."]
+
+[node name="Camera2D" type="Camera2D" parent="."]
+script = ExtResource("4_follow_camera")
+
+[node name="RunHud" parent="." instance=ExtResource("14_run_hud")]
+
+[node name="RunFeedbackLayer" parent="." instance=ExtResource("11_run_feedback")]
+
+[node name="WorldFeedbackLayer" parent="." instance=ExtResource("12_world_feedback")]
+
+[node name="DebugOverlay" parent="." instance=ExtResource("3_debug_overlay")]
+debug_enabled = false
+show_input_section = false
+show_animation_section = false
+show_player_core_section = false
+show_player_combat_section = false
+show_player_direction_section = false
+show_run_timer_section = false
+show_run_progression_section = false
+show_run_economy_section = false
+show_run_result_section = false
+show_technical_section = false
+show_enemy_link_markers = true
+
+[node name="PrototypeToolsPanel" parent="." instance=ExtResource("15_prototype_tools")]
+
+[node name="LevelUpPanel" parent="." instance=ExtResource("10_level_up")]
+
+[node name="ResultPanel" parent="." instance=ExtResource("13_result_panel")]
