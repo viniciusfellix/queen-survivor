@@ -54,6 +54,7 @@ func _ready() -> void:
 	layer = 100
 
 	visible = tools_enabled and visible_on_start
+	set_process(visible)
 
 	_configure_layout()
 	_configure_static_texts()
@@ -76,9 +77,11 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	if not tools_enabled:
 		visible = false
+		set_process(false)
 		return
 
 	if not visible:
+		set_process(false)
 		return
 
 	refresh_timer += delta
@@ -106,8 +109,10 @@ func _unhandled_input(event: InputEvent) -> void:
 
 	if key_event.keycode == TOGGLE_KEY:
 		visible = not visible
+		set_process(visible)
 
 		if visible:
+			refresh_timer = 0.0
 			_refresh_panel()
 
 		get_viewport().set_input_as_handled()
