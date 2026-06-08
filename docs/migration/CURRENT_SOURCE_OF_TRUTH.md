@@ -2,22 +2,22 @@
 
 ## Runtime oficial atual
 
-No estado atual do projeto, a cena oficial de runtime continua sendo:
+No estado atual do projeto, a cena oficial de runtime passa a ser:
 
-- `res://gameplay/test/TestGaiaScene.tscn`
+- `res://scenes/run/RunScene.tscn`
 
 Fluxo atual de boot:
 
 - `project.godot`
 - `res://scenes/Main.tscn`
 - `res://scenes/Main.gd`
-- `res://gameplay/test/TestGaiaScene.tscn`
+- `res://scenes/run/RunScene.tscn`
 
 ## Observação importante
 
-`TestGaiaScene` ainda é a cena oficial atual até a criação futura de uma cena própria de gameplay, como `RunScene`.
+`RunScene` passa a ser a composition root oficial da run no boot do jogo.
 
-Esta PR não altera esse fluxo.
+`TestGaiaScene` continua existindo no projeto como cena técnica/de referência.
 
 ## Resources principais que parecem oficiais hoje
 
@@ -99,7 +99,7 @@ Esta PR não cria:
 
 Ordem pretendida após esta PR:
 
-1. limpeza estrutural mínima;
-2. documentação da source of truth;
-3. criação futura de uma arquitetura alvo em paralelo;
-4. só depois disso, remoção de duplicidades e migração de sistemas.
+1. `RunScene` oficializada no boot;
+2. `TestGaiaScene` mantida como cena técnica/de referência;
+3. remoção futura de duplicidades e ambiguidade estrutural remanescente;
+4. migração gradual dos sistemas arquiteturais ainda pendentes.

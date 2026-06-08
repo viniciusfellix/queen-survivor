@@ -5,3 +5,4 @@ res://data/localization/translation.zh.translation
 res://data/localization/translation.ja.translation
 res://data/localization/translation.ko.translation
 res://data/localization/translation.ru.translation
+res://scenes/Main.gd
