@@ -88,6 +88,7 @@ aim_down={
 [internationalization]
 
 locale/translations=PackedStringArray("res://data/localization/translation.pt_BR.translation", "res://data/localization/translation.en.translation", "res://data/localization/translation.es.translation", "res://data/localization/translation.zh.translation", "res://data/localization/translation.ja.translation", "res://data/localization/translation.ko.translation", "res://data/localization/translation.ru.translation")
+locale/fallback="pt_BR"
 locale/language_filter=["en", "es", "ja", "ko", "pt", "ru", "zh"]
 locale/script_filter=["Armn"]
 locale/locale_filter_mode=1
