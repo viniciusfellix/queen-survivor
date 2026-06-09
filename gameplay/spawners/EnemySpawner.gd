@@ -675,6 +675,8 @@ func _get_alive_enemy_count() -> int:
 func get_debug_data() -> Dictionary:
 	var active_entries: Array[SpawnTimelineEntryDefinition] = []
 	var active_wave_ids: Array[String] = []
+	var active_rule_keys: Array[String] = []
+	var total_spawned: int = 0
 
 	if _timeline_runtime_initialized and spawn_timeline_definition != null:
 		active_entries = _get_runtime_active_entries(_get_run_elapsed_seconds())
@@ -684,6 +686,18 @@ func get_debug_data() -> Dictionary:
 				continue
 
 			active_wave_ids.append(entry.id)
+
+		active_rule_keys = _get_runtime_active_rule_keys(
+			active_entries,
+			_get_run_elapsed_seconds()
+		)
+
+	for rule_runtime_variant: Variant in _rule_runtime_by_key.values():
+		if not rule_runtime_variant is Dictionary:
+			continue
+
+		var rule_runtime: Dictionary = rule_runtime_variant
+		total_spawned += int(rule_runtime.get("total_spawned", 0))
 
 	return {
 		"spawner_enabled": spawner_enabled,
@@ -696,8 +710,42 @@ func get_debug_data() -> Dictionary:
 		"active_entry_id": active_entry_id,
 		"active_wave_ids": active_wave_ids,
 		"active_wave_count": active_wave_ids.size(),
-		"alive_enemy_count": _alive_enemy_count
+		"active_rule_keys": active_rule_keys,
+		"active_rule_count": active_rule_keys.size(),
+		"tracked_rule_count": _rule_runtime_by_key.size(),
+		"total_spawned": total_spawned,
+		"alive_enemy_count": _alive_enemy_count,
+		"effective_global_max_alive": _get_effective_global_max_alive(active_entries)
 	}
+
+func _get_runtime_active_rule_keys(
+	active_entries: Array[SpawnTimelineEntryDefinition],
+	elapsed_seconds: float
+) -> Array[String]:
+	var active_rule_keys: Array[String] = []
+
+	for entry: SpawnTimelineEntryDefinition in active_entries:
+		if entry == null:
+			continue
+
+		var entry_runtime: Dictionary = _entry_runtime_by_id.get(entry.id, {})
+
+		if entry_runtime.is_empty():
+			continue
+
+		var entry_start_seconds: float = float(entry_runtime.get("start_time_seconds", 0.0))
+		var wave_elapsed_seconds: float = max(0.0, elapsed_seconds - entry_start_seconds)
+
+		for spawn_rule: SpawnRuleDefinition in entry.get_effective_spawn_rules():
+			if spawn_rule == null:
+				continue
+
+			if not spawn_rule.is_active_for_wave_elapsed(wave_elapsed_seconds):
+				continue
+
+			active_rule_keys.append(_build_rule_runtime_key(entry.id, spawn_rule.id))
+
+	return active_rule_keys
 
 func _on_enemy_died_count(
 	_enemy_id: String,

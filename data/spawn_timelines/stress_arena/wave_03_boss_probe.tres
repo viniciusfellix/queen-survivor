@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="SpawnTimelineEntryDefinition" format=3]
+
+[ext_resource type="Script" path="res://definitions/SpawnTimelineEntryDefinition.gd" id="1_entry"]
+[ext_resource type="Script" path="res://definitions/SpawnRuleDefinition.gd" id="2_rule_script"]
+[ext_resource type="Resource" path="res://data/spawn_timelines/stress_arena/rule_wave_03_boss_probe_single.tres" id="2_rule"]
+[ext_resource type="Resource" path="res://data/spawn_timelines/stress_arena/rule_wave_03_boss_probe_elite_support.tres" id="3_rule"]
+
+[resource]
+script = ExtResource("1_entry")
+id = "wave_03_boss_probe"
+wave_name = "stress_boss_probe"
+start_time_min_seconds = 95.0
+start_time_max_seconds = 120.0
+end_time_min_seconds = 180.0
+end_time_max_seconds = 210.0
+allow_concurrent = true
+spawn_interval_seconds = 1.0
+max_alive_enemies = 180
+spawn_on_activate = true
+spawn_rules = Array[ExtResource("2_rule_script")]([ExtResource("2_rule"), ExtResource("3_rule")])

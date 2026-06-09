@@ -137,6 +137,25 @@ func clear_all() -> void:
 
 	_free_nodes.clear()
 
+## Retorna um resumo read-only do estado atual do pool para debug/profiling.
+func get_debug_data() -> Dictionary:
+	var free_count_by_key: Dictionary = {}
+	var total_free_nodes: int = 0
+
+	for key: String in _free_nodes.keys():
+		var free_list: Array = _free_nodes[key]
+		var free_count: int = free_list.size()
+		free_count_by_key[key] = free_count
+		total_free_nodes += free_count
+
+	return {
+		"cached_scene_count": _scene_cache.size(),
+		"pooled_scene_keys": _free_nodes.keys(),
+		"pooled_scene_count": _free_nodes.size(),
+		"total_free_nodes": total_free_nodes,
+		"free_count_by_key": free_count_by_key
+	}
+
 # Remove e retorna um nó válido da fila da chave, ou null se a fila estiver vazia.
 func _take_free_node(key: String) -> Node:
 	var free_list: Array = _get_free_list(key)

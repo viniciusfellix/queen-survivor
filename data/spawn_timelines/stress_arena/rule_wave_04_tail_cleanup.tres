@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="SpawnRuleDefinition" format=3]
+
+[ext_resource type="Script" path="res://definitions/SpawnRuleDefinition.gd" id="1_rule"]
+[ext_resource type="Resource" path="res://data/enemies/enemy_chaser_basic.tres" id="2_enemy"]
+
+[resource]
+script = ExtResource("1_rule")
+id = "rule_wave_04_tail_cleanup"
+enemy_scene_path = "res://gameplay/enemies/EnemyBase.tscn"
+enemy_definition = ExtResource("2_enemy")
+spawn_probability_percent = 100.0
+spawn_interval_min_seconds = 0.35
+spawn_interval_max_seconds = 0.6
+spawn_on_activate = true
+tags = PackedStringArray("normal", "tail")
