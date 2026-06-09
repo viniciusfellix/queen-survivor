@@ -72,6 +72,9 @@ EnemyBase / ContactAttackHitbox <Area2D>
 | Localizar scripts | `06_reference/file_responsibilities.md` |
 | Fazer testes | `08_testing/regression_module_1.md` |
 | Usar ferramentas tecnicas | `07_debug_audit/README_DEBUG_AUDIT.md` |
+| Rodar testes unitarios nativos | `../tests/README.md` |
+| Rodar stress test de horda | `testing/HORDE_STRESS_TEST_GUIDE.md` |
+| Ver readiness da rodada atual | `testing/PROTOTYPE_READINESS_REPORT.md` |
 
 ## Termos removidos do estado atual
 

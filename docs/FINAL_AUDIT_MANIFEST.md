@@ -14,6 +14,16 @@ Ele nao altera runtime. Ele documenta:
 
 ## Estado atual do projeto
 
+### Estado consolidado da rodada PR20-PR26
+
+- PR20: modelo de dano V2 consolidado (`base_damage` sempre aplica; componentes sao bonus condicionais)
+- PR21: leitura visual de combate melhorada com aim indicator e feedback visual por sequencia
+- PR22: spawn timeline V2 com waves concorrentes, rules, probabilidade e limites
+- PR23: HUD/settings hooks refinados para o prototipo
+- PR24: fundacao de testes unitarios nativos em GDScript
+- PR25: cena e recursos paralelos de stress/profiling adicionados
+- PR26: readiness gate documental/QA para decidir continuidade da proxima fase
+
 ### Cena oficial atual
 
 - Cena oficial da run: `res://scenes/run/RunScene.tscn`
@@ -141,6 +151,12 @@ Nao inclua:
 - logs locais
 - arquivos pessoais do editor
 - relatorios temporarios fora do escopo, salvo se forem intencionalmente incluidos
+
+## Observacao de hygiene atual
+
+Existe um arquivo versionado `docs/migration.zip`.
+
+Ele nao afeta runtime, mas tambem nao deveria fazer parte de um pacote tecnico limpo sem decisao explicita. Trate isso como follow-up de organizacao antes de auditoria externa final ou pacote comercial.
 
 ## Verificacoes sugeridas antes de empacotar
 
