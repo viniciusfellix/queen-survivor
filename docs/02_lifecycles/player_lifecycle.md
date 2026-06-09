@@ -3,7 +3,7 @@
 ## Criação
 
 ```text
-TestGaiaScene._spawn_player()
+RunScene._spawn_player()
 → PlayerController lê QueenDefinition
 → PlayerRuntimeState recebe HP e velocidade
 → PlayerHurtbox é configurada pelas hurtbox_areas de queen_gaia.tres

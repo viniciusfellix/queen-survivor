@@ -1,5 +1,7 @@
 # Arquitetura - Cenas e Arvore Runtime
 
+> Documento legado de apoio. A source of truth atual de arquitetura esta em `docs/01_architecture/ARCHITECTURE_OVERVIEW.md`.
+
 ## Entrada
 
 ```text

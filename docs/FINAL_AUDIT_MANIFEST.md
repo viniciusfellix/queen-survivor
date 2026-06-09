@@ -14,7 +14,7 @@ Ele nao altera runtime. Ele documenta:
 
 ## Estado atual do projeto
 
-### Estado consolidado da rodada PR20-PR26
+### Estado consolidado da rodada PR20-PR28
 
 - PR20: modelo de dano V2 consolidado (`base_damage` sempre aplica; componentes sao bonus condicionais)
 - PR21: leitura visual de combate melhorada com aim indicator e feedback visual por sequencia
@@ -23,6 +23,8 @@ Ele nao altera runtime. Ele documenta:
 - PR24: fundacao de testes unitarios nativos em GDScript
 - PR25: cena e recursos paralelos de stress/profiling adicionados
 - PR26: readiness gate documental/QA para decidir continuidade da proxima fase
+- PR27: overlay tecnico de metricas e template de evidencias de stress
+- PR28: consolidacao final da documentacao
 
 ### Cena oficial atual
 
@@ -152,11 +154,22 @@ Nao inclua:
 - arquivos pessoais do editor
 - relatorios temporarios fora do escopo, salvo se forem intencionalmente incluidos
 
+## Stress result oficial atual
+
+- ~90 inimigos vivos: ~60 FPS medio
+- ~120 inimigos vivos: ~50 FPS medio
+- ~140 inimigos vivos: ~40 FPS
+- ~180 inimigos vivos: ~30 FPS
+
+Interpretacao oficial:
+
+- o projeto esta saudavel para continuar
+- meta segura atual para gameplay normal: `80-100` inimigos vivos
+- acima de `140` inimigos vivos deve ser tratado como stress tecnico ou futura meta de otimizacao
+
 ## Observacao de hygiene atual
 
-Existe um arquivo versionado `docs/migration.zip`.
-
-Ele nao afeta runtime, mas tambem nao deveria fazer parte de um pacote tecnico limpo sem decisao explicita. Trate isso como follow-up de organizacao antes de auditoria externa final ou pacote comercial.
+`docs/migration.zip` foi removido na consolidacao documental final. O historico tecnico permanece nos arquivos `docs/migration/PR*.md`.
 
 ## Verificacoes sugeridas antes de empacotar
 

@@ -22,7 +22,7 @@ O principal motivo para nao marcar `READY` puro nesta PR26 e simples:
 
 - o stress/profiling de horda continua dependendo de execucao manual com preenchimento real de metricas;
 - ainda ha follow-ups conhecidos de polish e tooling;
-- existe ao menos um ponto de hygiene documental/artefato versionado (`docs/migration.zip`) que nao bloqueia runtime, mas merece limpeza futura.
+- a rodada ainda termina com follow-ups conhecidos de conteudo, stress continuo e tooling, mas sem bloqueio de runtime.
 
 ## Escopo consolidado desta rodada
 
@@ -151,7 +151,7 @@ Observacao:
 - otimizar Spine/horda apenas se profiler indicar
 - evoluir HUD final de player
 - definir dev/build mode explicito
-- decidir destino de `docs/migration.zip` no repositorio
+- consolidar futuras revisoes documentais apenas quando novos sistemas de runtime forem fechados
 
 ## Workspace e sanity
 
@@ -164,7 +164,7 @@ Observacao:
 
 - `Main.gd` oficial preservado
 - `RunScene.tscn` oficial preservada
-- `StressRunScene.tscn` paralela preservada
+- `StressRunScene.tscn` tecnica/dev-only preservada
 - `.godot/` nao versionado
 - `.tmp` nao encontrado na busca versionada desta PR
 
