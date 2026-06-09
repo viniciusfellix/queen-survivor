@@ -49,8 +49,42 @@ Rule mix included:
 1. Open the project in Godot.
 2. Open `res://scenes/test/StressRunScene.tscn`.
 3. Run that scene directly, not the main Play button.
-4. Keep debug overlay and verbose channels disabled by default.
-5. Observe Godot monitors and profiler during 3 to 5 minutes of play.
+4. Confirm the dedicated stress metrics overlay is visible.
+5. Use `F6` to hide/show the overlay if needed.
+6. Keep the general debug overlay and verbose channels disabled by default.
+7. Observe Godot monitors and profiler during 3 to 5 minutes of play.
+
+## Stress overlay metrics
+
+The dedicated overlay appears only in `StressRunScene`.
+
+It shows:
+
+- current FPS;
+- process time;
+- physics process time;
+- node count;
+- object count;
+- run time;
+- enemies alive;
+- total spawned;
+- active wave count;
+- active rule count;
+- effective global max alive;
+- drops alive;
+- pool free total;
+- pool scene count;
+- active wave IDs;
+- active rule keys;
+- pool free-node summary by scene key.
+
+It also shows a simple status label:
+
+- `OK`
+- `WARNING`
+- `CRITICAL`
+
+This status is based only on FPS and is meant as a quick visual cue, not a full diagnosis.
 
 ## Recommended Godot monitors
 
@@ -71,6 +105,11 @@ If using the Profiler tab, focus on:
 - `_process`
 - spikes during coin bursts
 - spikes during level-up pauses/resume
+
+Use the overlay values together with the Godot profiler:
+
+- overlay tells you "what is happening right now"
+- profiler helps identify "what is taking time"
 
 ## Read-only debug data already available
 
@@ -174,6 +213,10 @@ These are starting heuristics, not hard certification limits.
 | Minimum | 1 min |  |  |  |  |  |  | NOT TESTED |
 | Medium | 2 min |  |  |  |  |  |  | NOT TESTED |
 | Heavy | 3-5 min |  |  |  |  |  |  | NOT TESTED |
+
+For full evidence capture, use:
+
+- `docs/testing/STRESS_PROFILING_RESULTS_TEMPLATE.md`
 
 ## What not to do in this PR
 

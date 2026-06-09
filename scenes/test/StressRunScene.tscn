@@ -15,6 +15,7 @@
 [ext_resource type="PackedScene" uid="uid://bfu3srmi1h0cw" path="res://ui/result/ResultPanel.tscn" id="13_result_panel"]
 [ext_resource type="PackedScene" uid="uid://cm43ov31i3a3q" path="res://ui/hud/RunHud.tscn" id="14_run_hud"]
 [ext_resource type="PackedScene" uid="uid://dw8pji4737owl" path="res://ui/debug/tools/PrototypeToolsPanel.tscn" id="15_prototype_tools"]
+[ext_resource type="PackedScene" path="res://ui/debug/StressMetricsOverlay.tscn" id="16_stress_metrics"]
 
 [node name="StressRunScene" type="Node2D"]
 script = ExtResource("1_runscript")
@@ -82,3 +83,8 @@ show_enemy_link_markers = true
 [node name="LevelUpPanel" parent="." instance=ExtResource("10_level_up")]
 
 [node name="ResultPanel" parent="." instance=ExtResource("13_result_panel")]
+
+[node name="StressMetricsOverlay" parent="." instance=ExtResource("16_stress_metrics")]
+enemy_spawner_path = NodePath("../RuntimeRoot/SpawnerRoot/EnemySpawner")
+drop_controller_path = NodePath("../RuntimeRoot/DropController")
+run_controller_path = NodePath("../RuntimeRoot/RunController")
