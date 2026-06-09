@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="SpawnTimelineDefinition" format=3]
+
+[ext_resource type="Script" path="res://definitions/SpawnTimelineDefinition.gd" id="1_timeline"]
+[ext_resource type="Script" path="res://definitions/SpawnTimelineEntryDefinition.gd" id="2_entry"]
+[ext_resource type="Resource" path="res://data/spawn_timelines/stress_arena/wave_00_ramp.tres" id="2_wave"]
+[ext_resource type="Resource" path="res://data/spawn_timelines/stress_arena/wave_01_overlap_pressure.tres" id="3_wave"]
+[ext_resource type="Resource" path="res://data/spawn_timelines/stress_arena/wave_02_peak.tres" id="4_wave"]
+[ext_resource type="Resource" path="res://data/spawn_timelines/stress_arena/wave_03_boss_probe.tres" id="5_wave"]
+[ext_resource type="Resource" path="res://data/spawn_timelines/stress_arena/wave_04_tail_cleanup.tres" id="6_wave"]
+
+[resource]
+script = ExtResource("1_timeline")
+id = "spawn_timeline_stress_arena"
+display_name_key = "spawn_timeline.stress_arena.name"
+entries = Array[ExtResource("2_entry")]([ExtResource("2_wave"), ExtResource("3_wave"), ExtResource("4_wave"), ExtResource("5_wave"), ExtResource("6_wave")])

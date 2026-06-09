@@ -1,5 +1,7 @@
 # Onboarding para Desenvolvedores
 
+> Documento legado. A source of truth de onboarding agora esta em `docs/00_project/ONBOARDING.md`.
+
 ## Princípio central
 
 O projeto é um survivor-like em Godot com visuais Spine. A regra principal é: **gameplay decide; visual representa**. Scripts Spine não calculam dano, XP, recompensa, progressão ou colisão ofensiva.

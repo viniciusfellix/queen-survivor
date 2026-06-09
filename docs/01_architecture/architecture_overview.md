@@ -1,19 +1,7 @@
-### Movimento orgânico de inimigos perseguidores
+# Architecture Overview (Legacy Pointer)
 
-Inimigos perseguidores básicos continuam usando perseguição direta ao player.
+Este arquivo permanece apenas como ponte historica/compatibilidade de navegacao.
 
-A sensação orgânica de bando é obtida por:
+Use a source of truth atual:
 
-- esbarrão físico configurável entre inimigos;
-- força lateral leve no esbarrão;
-- knockback externo configurável;
-- separação entre direção visual e velocidade física.
-
-A velocidade física final de um inimigo pode combinar:
-
-```txt
-chase_velocity
-+
-body_bump_velocity
-+
-received_knockback_velocity
+- `docs/01_architecture/ARCHITECTURE_OVERVIEW.md`

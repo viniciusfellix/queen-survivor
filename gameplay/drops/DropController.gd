@@ -225,3 +225,17 @@ func _resolve_player() -> Node2D:
 			return node as Node2D
 
 	return null
+
+func get_debug_data() -> Dictionary:
+	var alive_drops: int = 0
+
+	if drop_root != null:
+		alive_drops = drop_root.get_child_count()
+
+	return {
+		"has_drop_root": drop_root != null,
+		"drop_root_name": drop_root.name if drop_root != null else "",
+		"coin_scene_path": coin_drop_scene_path,
+		"coin_definition_id": coin_definition.id if coin_definition != null else "",
+		"alive_drop_count": alive_drops
+	}

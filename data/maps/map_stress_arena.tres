@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="MapDefinition" format=3]
+
+[ext_resource type="Script" path="res://definitions/MapDefinition.gd" id="1_map"]
+[ext_resource type="Resource" path="res://data/spawn_timelines/stress_arena/spawn_timeline_stress_arena.tres" id="2_timeline"]
+[ext_resource type="Resource" path="res://data/upgrade_pools/upgrade_pool_gaia_default.tres" id="3_upgrades"]
+
+[resource]
+script = ExtResource("1_map")
+id = "map_stress_arena"
+display_name_key = "map.stress_arena.name"
+description_key = "map.stress_arena.description"
+duration_seconds = 240.0
+spawn_timeline = ExtResource("2_timeline")
+upgrade_pool = ExtResource("3_upgrades")

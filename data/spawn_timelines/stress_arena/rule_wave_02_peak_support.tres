@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="SpawnRuleDefinition" format=3]
+
+[ext_resource type="Script" path="res://definitions/SpawnRuleDefinition.gd" id="1_rule"]
+[ext_resource type="Resource" path="res://data/enemies/enemy_chaser_basic.tres" id="2_enemy"]
+
+[resource]
+script = ExtResource("1_rule")
+id = "rule_wave_02_peak_support"
+enemy_scene_path = "res://gameplay/enemies/EnemyBase.tscn"
+enemy_definition = ExtResource("2_enemy")
+spawn_probability_percent = 25.0
+spawn_interval_min_seconds = 0.3
+spawn_interval_max_seconds = 0.5
+tags = PackedStringArray("normal", "support")

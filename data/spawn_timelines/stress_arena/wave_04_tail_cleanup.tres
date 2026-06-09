@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="SpawnTimelineEntryDefinition" format=3]
+
+[ext_resource type="Script" path="res://definitions/SpawnTimelineEntryDefinition.gd" id="1_entry"]
+[ext_resource type="Script" path="res://definitions/SpawnRuleDefinition.gd" id="2_rule_script"]
+[ext_resource type="Resource" path="res://data/spawn_timelines/stress_arena/rule_wave_04_tail_cleanup.tres" id="2_rule"]
+
+[resource]
+script = ExtResource("1_entry")
+id = "wave_04_tail_cleanup"
+wave_name = "stress_tail_cleanup"
+start_time_min_seconds = 150.0
+start_time_max_seconds = 165.0
+end_time_min_seconds = 240.0
+end_time_max_seconds = 240.0
+allow_concurrent = true
+spawn_interval_seconds = 0.45
+max_alive_enemies = 120
+spawn_on_activate = true
+spawn_rules = Array[ExtResource("2_rule_script")]([ExtResource("2_rule")])
